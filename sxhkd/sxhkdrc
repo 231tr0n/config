@@ -1,0 +1,128 @@
+# open terminal
+ctrl + Return
+	gnome-terminal
+
+# run dmenu
+super + d
+	dmenu_run
+
+# lock screen
+ctrl + alt + l
+	slock
+
+# fullscreen screenshot and copy to clipboard
+ctrl + Print
+	maim -B | xclip -selection clipboard -t image/png
+
+# select area for screenshot and copy to clipboard
+ctrl + shift + Print
+ maim -s | xclip -selection clipboard -t image/png
+
+# fullscreen screenshot and save
+Print
+	maim -B ~/Pictures/$(date +%s).png
+
+# select area for screenshot and save
+shift + Print
+	maim -s ~/Pictures/$(date +%s).png
+
+# open rofi menu
+super + m
+	rofi -show drun -show-icons
+
+# reload sxhkd config
+super + shift + c
+	pkill -USR1 -x sxhkd
+
+# launch firefox
+super + shift + w
+	firefox
+
+# launch ranger
+super + shift + e
+	gnome-terminal -e ranger
+
+# launch nemo
+super + e
+	nemo
+
+# quit window manager
+super + shift + Escape
+	killall -q xfce4-notifyd; killall -q polybar; killall -q nm-applet; killall -q mintupdate; killall -q volumeicon; killall -q blueman-applet; killall -q picom; bspc quit
+
+# restart window manager
+super + shift + r
+	bspc wm -r
+
+# quit a window
+super + q
+	bspc node -c
+
+# switch between tiled and floating windows
+super + {t,@space}
+	bspc node -t {tiled,floating}
+
+# fullscreen window
+super + f
+	bspc node -t ~fullscreen
+
+# focus the node in the given direction or move
+super + {_,shift + }{h,j,k,l}
+	bspc node -{f,s} {west,south,north,east}
+
+# select nodes types
+super + {p,b,comma,period}
+	bspc node -f @{parent,brother,first,second}
+
+# preselect position
+super + ctrl + {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+# expanding window size
+super + alt + {h,j,k,l}
+	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+# contracting window size
+super + alt + shift + {h,j,k,l}
+	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
+
+# move floating window
+alt + shift + {h,j,k,l}
+	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+# Move between desktops or move windows between desktops
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
+
+# quit preview
+super + shift + q
+	bspc node -p cancel
+
+# swap the current node and the biggest window
+super + s
+	bspc node -s biggest.window
+
+# send the newest marked node to the newest preselected node
+super + y
+	bspc node newest.marked.local -n newest.!automatic.local
+
+# increase, decrease and mute volume
+# XF86Audio{Mute,RaiseVolume,LowerVolume}
+# 	amixer -q -D pulse sset Master {toggle,5%+,5%-}
+# Commented it so that volumeicon applet can get control of these keys
+
+# Increase and decrease brightness
+XF86MonBrightness{Up,Down}
+	brightnessctl set {10%+,10%-}
+
+# Move node to the selected area
+super + shift + m
+	bspc node -n last.!automatic
+
+# Rotate windows
+super + shift + {d,a}
+	bspc node @/ -C {forward,backward}
+
+# preselection ratio
+super + ctrl + {1-9}
+	bspc node -o 0.{1-9}

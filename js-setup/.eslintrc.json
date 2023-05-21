@@ -1,0 +1,89 @@
+{
+	"env": {
+		"browser": true,
+		"commonjs": true,
+		"es2021": true,
+		"node": true
+	},
+	"globals": {
+	},
+	"extends": [
+		"airbnb-base"
+	],
+	"parserOptions": {
+		"ecmaVersion": "latest"
+	},
+	"rules": {
+		"indent": [
+			"error",
+			"tab"
+		],
+		"no-console": [
+			"off"
+		],
+		"no-tabs": [
+			"off"
+		],
+		"space-unary-ops": [
+			"off"
+		],
+		"no-plusplus": [
+			"off"
+		],
+		"camelcase": [
+			"off"
+		],
+		"comma-dangle": [
+			"error",
+			"never"
+		],
+		"eqeqeq": [
+			"off"
+		],
+		"max-len": [
+			"off"
+		],
+		"no-underscore-dangle": [
+			"off"
+		],
+		"func-names": [
+			"off"
+		],
+		"new-cap": [
+			"off"
+		],
+		"no-unused-vars": [
+			"warn"
+		],
+		"radix": [
+			"off"
+		],
+		"no-restricted-syntax": [
+			"off"
+		],
+		"no-loss-of-precision": [
+			"warn"
+		],
+		"guard-for-in": [
+			"off"
+		],
+		"prefer-destructuring": [
+			"off"
+		],
+		"no-await-in-loop": [
+			"off"
+		],
+		"no-restricted-globals": [
+			"off"
+		],
+		"no-alert": [
+			"off"
+		],
+		"no-continue": [
+			"off"
+		],
+		"no-lonely-if": [
+			"off"
+		]
+	}
+}
