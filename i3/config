@@ -218,7 +218,7 @@ exec --no-startup-id nm-applet
 exec --no-startup-id blueman-applet
 exec --no-startup-id picom
 client.urgent #ffaf00 #ffaf00 #ffaf00 #ffaf00 #ffaf00
-client.focused #b2b2b2 #b2b2b2 #b2b2b2 #b2b2b2 #b2b2b2
+client.focused #FFA500 #FFA500 #FFA500 #FFA500 #FFA500
 client.unfocused #000000 #000000 #000000 #000000 #000000
 client.focused_inactive #b2b2b2 #b2b2b2 #b2b2b2 #b2b2b2
 # hide_edge_borders smart
