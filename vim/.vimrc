@@ -269,10 +269,10 @@ au BufEnter *.fish set filetype=sh
 " sets sh filetype for fish files
 au BufEnter *.txt set wrap
 " sets wrap for text files.
-au VimEnter * filetype off
-au VimEnter * filetype plugin off
-au VimEnter * filetype indent off
-au VimEnter * filetype plugin indent off
+au VimEnter * filetype on
+au VimEnter * filetype plugin on
+au VimEnter * filetype indent on
+au VimEnter * filetype plugin indent on
 " filetype plugins and indent off
 
 " options
@@ -565,7 +565,7 @@ if has('nvim')
   " [ - [\n\t|\n]
 
   " auto commands
-  au FileType python quit
+  " au FileType python quit
   " makes us not use nvim for python files
   au VimEnter * call FileBrowserToggle() | call feedkeys("\<C-w>l")
   " open filebrowser by default
