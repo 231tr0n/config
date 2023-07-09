@@ -270,6 +270,8 @@ au BufEnter *.ejs set filetype=html
 au BufEnter *.fish set filetype=sh
 " sets sh filetype for fish files
 au BufEnter *.txt set wrap
+let g:python_recommended_style=0
+" Disables Python style for indentation guides
 " sets wrap for text files.
 au VimEnter * filetype on
 au VimEnter * filetype plugin on
@@ -351,8 +353,6 @@ set listchars=eol:¬,tab:\|\-,trail:~,extends:>,precedes:<
 " set symbols for indents, and end of line characters.
 set textwidth=0
 " sets width of text to infinity
-let g:python_recommended_style=0
-" Disables Python style for indentation guides
 let g:netrw_banner=0
 let g:netrw_liststyle=0
 let g:netrw_browse_split=4
