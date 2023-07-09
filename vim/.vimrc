@@ -1,3 +1,5 @@
+set encoding=utf-8
+scriptencoding utf-8
 " Keep in mind that Meta key combinations dont work in gnome terminal and so all mappings should be with Meta key combinations
 " functions
 function SynGroup()
