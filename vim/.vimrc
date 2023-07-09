@@ -484,11 +484,13 @@ highlight ReplaceMode        ctermfg=0    ctermbg=167  cterm=bold
 " custom highlight group group
 highlight AllBraces          ctermfg=172  ctermbg=NONE cterm=NONE
 " highlight AllExtraChars      ctermfg=214  ctermbg=NONE cterm=NONE
+highlight link javaScript Normal
+highlight link javaScriptBraces AllBraces
 
 " custom regex for highlighting
-au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hicurlybraces matchgroup=AllBraces start=/{/ end=/}/ contains=TOP
-au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hiparenthesis matchgroup=AllBraces start=/(/ end=/)/ contains=TOP
-au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hisquarebraces matchgroup=AllBraces start=/\[/ end=/\]/ contains=TOP
+au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hicurlybraces matchgroup=AllBraces start=/{/ end=/}/ contains=ALL
+au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hiparenthesis matchgroup=AllBraces start=/(/ end=/)/ contains=ALL
+au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hisquarebraces matchgroup=AllBraces start=/\[/ end=/\]/ contains=ALL
 " highlight curlybraces, parenthesis and squarebraces
 " syntax match Constant /0123456789/
 " 2match AllExtraChars /[.~,?/\|:;!@#$%^&*\-+=]/
