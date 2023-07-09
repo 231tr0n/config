@@ -469,10 +469,10 @@ highlight Todo               ctermfg=0    ctermbg=100  cterm=NONE
 highlight Warning            ctermfg=0    ctermbg=100  cterm=NONE
 " statusline highlighting
 highlight User1              ctermfg=0    ctermbg=25   cterm=bold
-highlight User2              ctermfg=0    ctermbg=8    cterm=NONE
-highlight User3              ctermfg=0    ctermbg=245  cterm=bold
+highlight User2              ctermfg=0    ctermbg=245  cterm=NONE
+highlight User3              ctermfg=0    ctermbg=240  cterm=bold
 highlight User4              ctermfg=8    ctermbg=234  cterm=NONE
-highlight User5              ctermfg=0    ctermbg=8    cterm=NONE
+highlight User5              ctermfg=0    ctermbg=245  cterm=NONE
 highlight User6              ctermfg=0    ctermbg=247  cterm=bold
 highlight NormalMode         ctermfg=0    ctermbg=25   cterm=bold
 highlight DefaultMode        ctermfg=0    ctermbg=25   cterm=bold
@@ -632,7 +632,7 @@ if has("win32") || has("win64") || has("win16")
   highlight Normal             ctermfg=249  ctermbg=235  cterm=NONE
   highlight CursorLineNR       ctermfg=0    ctermbg=8    cterm=NONE
   highlight User1              ctermfg=0    ctermbg=25   cterm=NONE
-  highlight User3              ctermfg=0    ctermbg=245  cterm=NONE
+  highlight User3              ctermfg=0    ctermbg=240  cterm=NONE
   highlight User6              ctermfg=0    ctermbg=247  cterm=NONE
   highlight NormalMode         ctermfg=0    ctermbg=25   cterm=NONE
   highlight DefaultMode        ctermfg=0    ctermbg=25   cterm=NONE
