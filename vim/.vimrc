@@ -247,6 +247,7 @@ au FileType netrw setl statusline=#
 au FileType netrw setl nolist
 au FileType netrw vertical resize 25
 au FileType netrw setl signcolumn=no
+au BufEnter *.svelte set filetype=html
 " removes list and statusline for netrw buffers
 au BufWritePre * call <SID>StripTrailingWhitespaces()
 " strips trailing whitespaces
