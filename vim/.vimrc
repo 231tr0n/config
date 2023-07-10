@@ -501,39 +501,13 @@ if has('nvim')
   " options
   set updatetime=300
   " updates swap file in 300ms
-  set signcolumn=yes
-  " opens signcolumn by default
   set guicursor=n-v-c:block
   set guicursor+=i:ver100
   set guicursor+=r:ver100
   " sets cursor to a beam in insertmode and block in other modes. Works only for gnome-terminal
 
-  " Plugin settings
-  let g:ale_set_highlights = 0
-  let g:ale_fix_on_save = 1
-  let g:ale_completion_enabled = 1
-  let g:ale_completion_autoimport = 1
-  set omnifunc=ale#completion#OmniFunc
-  let g:ale_list_window_size = 5
-  let g:ale_sign_error = '>>'
-  let g:ale_sign_warning = '--'
-  " let g:ale_lint_on_text_changed = 'never'
-  let g:ale_lint_on_enter = 1
-  let g:ale_lint_on_save = 1
-  let g:ale_sign_column_always = 1
-  let g:ale_disable_lsp = 1
-  let g:ale_virtualtext_cursor = 0
-
-  " Plugin highlight groups
-  highlight ALEError           ctermfg=0    ctermbg=167  cterm=NONE
-  highlight ALEWarning         ctermfg=0    ctermbg=106  cterm=NONE
-  highlight ALEInfo            ctermfg=0    ctermbg=68   cterm=NONE
-  highlight ALEStyleError      ctermfg=0    ctermbg=169  cterm=NONE
-  highlight ALEStyleWarning    ctermfg=0    ctermbg=100  cterm=NONE
-
   " Plugins
   call plug#begin()
-    Plug 'dense-analysis/ale'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
     Plug 'tpope/vim-fugitive'
@@ -542,15 +516,6 @@ if has('nvim')
   filetype indent off
   " This is called becaused vim-plug turns on filetype indent.
 
-  " Plugin functions
-  function LinterStatus() abort
-    let l:counts = ale#statusline#Count(bufnr(''))
-    let l:all_errors = l:counts.error + l:counts.style_error
-    let l:all_non_errors = l:counts.total - l:all_errors
-    return l:counts.total == 0 ? 'OK' : printf('%dW:%dE', all_non_errors, all_errors)
-  endfunction
-  " counts the errors and warnings
-
   " Plugin key mappings
   nnoremap <silent> <M-f> :Files<CR>
   nnoremap <silent> <M-r> :Rg<CR>
@@ -558,10 +523,7 @@ if has('nvim')
   nnoremap <silent> <M-c> :Commits<CR>
   " fzf.vim key mappings
   nnoremap <silent> <M-x> :pclose<CR>
-  nnoremap <silent> <M-d> :ALEDetail<CR>
-  nnoremap <silent> <C-j> :ALENext<CR>
-  nnoremap <silent> <C-k> :ALEPrevious<CR>
-  " ale key mappings
+  " closing panel in neovim
 
   " Standard key mappings
   inoremap <silent> :<CR> :<CR><Tab>
@@ -589,8 +551,7 @@ if has('nvim')
   else
     set statusline+=%4*\ vim\ %t\ %=%*
   endif
-  set statusline+=%4*%{FugitiveStatusline()}\ %*
-  set statusline+=%3*\ %{LinterStatus()}\ %*
+  set statusline+=%3*%{FugitiveStatusline()}\ %*
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 else
