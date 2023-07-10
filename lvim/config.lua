@@ -11,9 +11,11 @@ an executable
 -- general
 vim.opt.undofile = false
 vim.opt.expandtab = true
+vim.opt.swapfile = true
 lvim.log.level = "warn"
 lvim.format_on_save.enabled = true
 lvim.colorscheme = "lunar"
+lvim.builtin.treesitter.autotag.enable = true
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = false
 
@@ -84,10 +86,37 @@ lvim.builtin.treesitter.ensure_installed = {
   "rust",
   "java",
   "yaml",
+  "go",
+  "svelte",
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enable = true
+
+lvim.plugins = {
+  {
+    "windwp/nvim-ts-autotag",
+    config = function()
+      require("nvim-ts-autotag").setup()
+    end,
+  },
+  {
+    'wfxr/minimap.vim',
+    build = "cargo install --locked code-minimap",
+    -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
+    config = function()
+      vim.cmd("let g:minimap_width = 10")
+      vim.cmd("let g:minimap_auto_start = 1")
+      vim.cmd("let g:minimap_auto_start_win_enter = 1")
+    end,
+  },
+  {
+    "tpope/vim-surround",
+    config = function()
+      vim.o.timeoutlen = 500
+    end
+  },
+}
 
 -- generic LSP settings
 
