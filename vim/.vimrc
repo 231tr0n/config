@@ -273,10 +273,10 @@ au BufEnter *.txt set wrap
 let g:python_recommended_style=0
 " Disables Python style for indentation guides
 " sets wrap for text files.
-au VimEnter * filetype on
-au VimEnter * filetype plugin on
-au VimEnter * filetype indent on
-au VimEnter * filetype plugin indent on
+filetype on
+filetype plugin on
+filetype indent off
+" filetype plugin indent off
 " filetype plugins and indent off
 
 " options
@@ -539,6 +539,9 @@ if has('nvim')
     Plug 'tpope/vim-fugitive'
   call plug#end()
 
+  filetype indent off
+  " This is called becaused vim-plug turns on filetype indent.
+
   " Plugin functions
   function LinterStatus() abort
     let l:counts = ale#statusline#Count(bufnr(''))
@@ -561,11 +564,13 @@ if has('nvim')
   " ale key mappings
 
   " Standard key mappings
-  inoremap <silent> {<CR> {<CR>}<Esc>O
+  inoremap <silent> :<CR> :<CR><Tab>
+  " :\n - :\n\t
+  inoremap <silent> {<CR> {<CR>}<Esc>O<Tab>
   " { - {\n\t|\n}
-  inoremap <silent> (<CR> (<CR>)<Esc>O
+  inoremap <silent> (<CR> (<CR>)<Esc>O<Tab>
   " ( - (\n\t|\n)
-  inoremap <silent> [<CR> [<CR>]<Esc>O
+  inoremap <silent> [<CR> [<CR>]<Esc>O<Tab>
   " [ - [\n\t|\n]
 
   " auto commands
