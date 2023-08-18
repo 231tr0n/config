@@ -35,7 +35,7 @@ ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 
 hwclock --systohc
 
-echo 'en_IN UTF-8' >> /etc/locale.gen
+echo 'en_IN.UTF-8 UTF-8' >> /etc/locale.gen
 
 echo 'LANG=en_IN.UTF-8' >> /etc/locale.conf
 

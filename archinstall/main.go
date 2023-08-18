@@ -24,6 +24,10 @@ var (
 	country           *string
 	mountPoint        *string
 	parallelDownloads *int
+	hostname          *string
+	username          *string
+	zone              *string
+	subZone           *string
 )
 
 func init() {
@@ -40,6 +44,10 @@ func init() {
 	country = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
 	repoCount = flag.Int("repo-count", 5, "Number of repos to be added to the mirrorlist of pacman.")
 	parallelDownloads = flag.Int("parallel-downloads", 5, "Number of downloads pacman can do at a time.")
+	hostname = flag.String("hostname", "xeltron", "Set the hostname of the system.")
+	username = flag.String("username", "zeltron", "Set the username of the system.")
+	zone = flag.String("zone", "Asia", "Set the zone for system time.")
+	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
@@ -83,43 +91,60 @@ func Mount(source string, destination string) error {
 	return RunCommand("mount", "--mkdir", source, destination)
 }
 
-func FormatAndMountRoot(partition string) error {
-	if err := RunCommand("mkfs.ext4", partition); err != nil {
-		return err
-	}
-	if err := Mount(partition, filepath.Join(*mountPoint)); err != nil {
-		return err
-	}
-	return nil
-}
-
-func FormatAndSetSwap(partition string) error {
-	if err := RunCommand("mkswap", partition); err != nil {
-		return err
-	}
-	if err := RunCommand("swapon", partition); err != nil {
+func Pacstrap(packages ...string) error {
+	args := append([]string{"-K", *mountPoint}, packages...)
+	if err := RunCommand("pacstrap", args...); err != nil {
 		return err
 	}
 	return nil
 }
 
-func FormatAndMountHome(partition string) error {
-	if err := RunCommand("mkfs.ext4", partition); err != nil {
-		return err
-	}
-	if err := Mount(partition, filepath.Join(*mountPoint, "home")); err != nil {
-		return err
-	}
-	return nil
-}
-
-func FormatAndMountEsp(partition string) error {
-	if *formatEsp {
-		if err := RunCommand("mkfs.fat", "-F", "32", partition); err != nil {
+func SystemctlServiceEnable(services ...string) error {
+	for _, j := range services {
+		if err := ChrootRunCommand("systemctl", "enable", j); err != nil {
 			return err
 		}
 	}
-	if err := Mount(partition, filepath.Join(*mountPoint, "boot", "efi")); err != nil {
+	return nil
+}
+
+func FormatAndMountRoot() error {
+	if err := RunCommand("mkfs.ext4", *root); err != nil {
+		return err
+	}
+	if err := Mount(*root, *mountPoint); err != nil {
+		return err
+	}
+	return nil
+}
+
+func FormatAndSetSwap() error {
+	if err := RunCommand("mkswap", *swap); err != nil {
+		return err
+	}
+	if err := RunCommand("swapon", *swap); err != nil {
+		return err
+	}
+	return nil
+}
+
+func FormatAndMountHome() error {
+	if err := RunCommand("mkfs.ext4", *home); err != nil {
+		return err
+	}
+	if err := Mount(*home, filepath.Join(*mountPoint, "home")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func FormatAndMountEsp() error {
+	if *formatEsp {
+		if err := RunCommand("mkfs.fat", "-F", "32", *esp); err != nil {
+			return err
+		}
+	}
+	if err := Mount(*esp, filepath.Join(*mountPoint, "boot", "efi")); err != nil {
 		return err
 	}
 	return nil
@@ -150,9 +175,80 @@ func PacmanConfigSetup() error {
 	return nil
 }
 
-func Pacstrap(packages ...string) error {
-	args := append([]string{"-K", *mountPoint}, packages...)
-	if err := RunCommand("pacstrap", args...); err != nil {
+func GenFSTab() error {
+	if err := RunCommand("genfstab", "-U", *mountPoint, filepath.Join(*mountPoint, "etc", "fstab")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SynchronizeTimeZone() error {
+	if err := ChrootRunCommand("ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime")); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("hwclock", "--systohc"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GenLocale() error {
+	if err := ChrootRunCommand("bash", "-c", "echo 'en_IN.UTF-8 UTF-8' >> /etc/locale.gen"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo 'LANG=en_IN.UTF-8' >> /etc/locale.conf"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("locale-gen"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetHostName() error {
+	if err := ChrootRunCommand("bash", "-c", "echo "+*hostname+" >> /etc/hostname"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetRootPasswd() error {
+	if err := ChrootRunCommand("passwd"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateUser() error {
+	if err := ChrootRunCommand("useradd", "-m", *username); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("passwd", *username); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
+		return err
+	}
+	return nil
+}
+
+func InstallBootLoader() error {
+	if err := ChrootPacmanInstall("efibootmgr", "grub"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub"); err != nil {
+		return err
+	}
+	if err := ChrootPacmanInstall("os-prober"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
 		return err
 	}
 	return nil
@@ -162,21 +258,21 @@ func FormatAndMountSystem() error {
 	if *root == "" {
 		return ErrRootNotSet
 	}
-	if err := FormatAndMountRoot(*root); err != nil {
+	if err := FormatAndMountRoot(); err != nil {
 		return err
 	}
 	if *home != "" {
-		if err := FormatAndMountHome(*home); err != nil {
+		if err := FormatAndMountHome(); err != nil {
 			return err
 		}
 	}
 	if *swap != "" {
-		if err := FormatAndSetSwap(*swap); err != nil {
+		if err := FormatAndSetSwap(); err != nil {
 			return err
 		}
 	}
 	if *esp != "" {
-		if err := FormatAndMountEsp(*esp); err != nil {
+		if err := FormatAndMountEsp(); err != nil {
 			return err
 		}
 	}
