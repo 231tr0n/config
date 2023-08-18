@@ -25,7 +25,7 @@ echo 'ParallelDownloads = 5' >> /etc/pacman.conf
 echo '[multilib]' >> /etc/pacman.conf
 echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 
-pacstrap -K /mnt base base-devel linux linux-lts linux-headers linux-lts-headers linux-firmware intel-ucode sudo vim git neofetch networkmanager dhcpcd pipewire blueman wayland hyprland
+pacstrap -K /mnt base base-devel linux linux-lts linux-headers linux-lts-headers linux-firmware intel-ucode sudo vim git neofetch networkmanager dhcpcd pipewire blueman wayland hyprland xdg-desktop-portal-wlr
 
 genfstab -U /mnt /mnt/etc/fstab
 

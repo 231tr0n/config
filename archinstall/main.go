@@ -28,6 +28,7 @@ var (
 	username          *string
 	zone              *string
 	subZone           *string
+	amd               *bool
 )
 
 func init() {
@@ -48,6 +49,7 @@ func init() {
 	username = flag.String("username", "zeltron", "Set the username of the system.")
 	zone = flag.String("zone", "Asia", "Set the zone for system time.")
 	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
+	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips instead of intel.")
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
@@ -89,6 +91,10 @@ func ChrootPacmanInstall(packages ...string) error {
 
 func Mount(source string, destination string) error {
 	return RunCommand("mount", "--mkdir", source, destination)
+}
+
+func Unmount(source string) error {
+	return RunCommand("umount", "-R", source)
 }
 
 func Pacstrap(packages ...string) error {
@@ -160,7 +166,7 @@ func PacmanConfigSetup() error {
 	if err := RunCommand("reflector", "--latest", string(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", "/etc/pacman.d/mirrorlist"); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = 5' >> /etc/pacman.conf"); err != nil {
+	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+string(*parallelDownloads)+"' >> /etc/pacman.conf"); err != nil {
 		return err
 	}
 	if err := RunCommand("bash", "-c", "echo >> /etc/pacman.conf"); err != nil {
@@ -245,8 +251,14 @@ func InstallBootLoader() error {
 	if err := ChrootPacmanInstall("os-prober"); err != nil {
 		return err
 	}
-	if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
-		return err
+	if *formatEsp {
+		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck", "--removable"); err != nil {
+			return err
+		}
+	} else {
+		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
+			return err
+		}
 	}
 	if err := ChrootRunCommand("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
 		return err
@@ -283,6 +295,13 @@ func SetBiggerFont() error {
 	return RunCommand("setfont", "ter-132b")
 }
 
+func InstallMicroCode() error {
+	if *amd {
+		return ChrootPacmanInstall("amd-ucode")
+	}
+	return ChrootPacmanInstall("intel-ucode")
+}
+
 func main() {
 	// Logger setup
 	file, err := os.OpenFile("goarchinstall.log", os.O_WRONLY|os.O_CREATE, os.ModePerm)
@@ -301,6 +320,36 @@ func main() {
 		fatalLog(err)
 	}
 	if err := PacmanConfigSetup(); err != nil {
+		fatalLog(err)
+	}
+	if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pipewire", "blueman", "bluez-utils", "wayland", "xdg-desktop-portal", "pacman-contrib", "polkit-gnome", "kitty", "fish"); err != nil {
+		fatalLog(err)
+	}
+	if err := GenFSTab(); err != nil {
+		fatalLog(err)
+	}
+	if err := SynchronizeTimeZone(); err != nil {
+		fatalLog(err)
+	}
+	if err := GenLocale(); err != nil {
+		fatalLog(err)
+	}
+	if err := SetHostName(); err != nil {
+		fatalLog(err)
+	}
+	if err := CreateUser(); err != nil {
+		fatalLog(err)
+	}
+	if err := InstallMicroCode(); err != nil {
+		fatalLog(err)
+	}
+	if err := InstallBootLoader(); err != nil {
+		fatalLog(err)
+	}
+	if err := SystemctlServiceEnable("dhcpcd", "NetworkManager"); err != nil {
+		fatalLog(err)
+	}
+	if err := Unmount(*mountPoint); err != nil {
 		fatalLog(err)
 	}
 }
