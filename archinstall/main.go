@@ -5,7 +5,6 @@ import (
 	"flag"
 	"io"
 	"log"
-	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,8 +42,9 @@ var (
 
 	// Internal variables
 	// packages  []string       = []string{"base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"}
+	// services  []string       = []string{"dhcpcd", "NetworkManager"}
 	packages  []string       = []string{"base", "base-devel", "linux", "linux-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager"}
-	services  []string       = []string{"dhcpcd", "NetworkManager"}
+	services  []string       = []string{"NetworkManager"}
 	installer []func() error = []func() error{
 		setBiggerFont,
 		formatAndMountSystem,
@@ -105,7 +105,7 @@ func runCommand(name string, args ...string) error {
 	for i, j := range args {
 		tempArgs[i] = j
 	}
-	slog.Info(name, tempArgs...)
+	log.Println(append([]any{name}, tempArgs...)...)
 
 	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	defer file.Close()
@@ -386,7 +386,7 @@ func main() {
 	// Installer code
 	for _, j := range installer {
 		if err := j(); err != nil {
-			slog.Error(err.Error())
+			log.Fatalln(err)
 			os.Exit(1)
 		}
 	}
