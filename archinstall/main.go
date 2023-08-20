@@ -160,22 +160,22 @@ func PacmanConfigSetup() error {
 	if err := PacmanInstall("reflector"); err != nil {
 		return err
 	}
-	if err := RunCommand("mv", "/etc/pacman.d/mirrorlist", "/etc/pacman.d/mirrorlist.bak"); err != nil {
+	if err := RunCommand("mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak")); err != nil {
 		return err
 	}
-	if err := RunCommand("reflector", "--latest", string(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", "/etc/pacman.d/mirrorlist"); err != nil {
+	if err := RunCommand("reflector", "--latest", string(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+string(*parallelDownloads)+"' >> /etc/pacman.conf"); err != nil {
+	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+string(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo >> /etc/pacman.conf"); err != nil {
+	if err := RunCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo '[multilib]' >> /etc/pacman.conf"); err != nil {
+	if err := RunCommand("bash", "-c", "echo '[multilib]' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf"); err != nil {
+	if err := RunCommand("bash", "-c", "echo 'Include = "+filepath.Join("/etc", "pacman.d", "mirrorlist")+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
 	return nil
@@ -183,84 +183,6 @@ func PacmanConfigSetup() error {
 
 func GenFSTab() error {
 	if err := RunCommand("genfstab", "-U", *mountPoint, filepath.Join(*mountPoint, "etc", "fstab")); err != nil {
-		return err
-	}
-	return nil
-}
-
-func SynchronizeTimeZone() error {
-	if err := ChrootRunCommand("ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime")); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("hwclock", "--systohc"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GenLocale() error {
-	if err := ChrootRunCommand("bash", "-c", "echo 'en_IN.UTF-8 UTF-8' >> /etc/locale.gen"); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("bash", "-c", "echo 'LANG=en_IN.UTF-8' >> /etc/locale.conf"); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("locale-gen"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func SetHostName() error {
-	if err := ChrootRunCommand("bash", "-c", "echo "+*hostname+" >> /etc/hostname"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func SetRootPasswd() error {
-	if err := ChrootRunCommand("passwd"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func CreateUser() error {
-	if err := ChrootRunCommand("useradd", "-m", *username); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("passwd", *username); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
-		return err
-	}
-	return nil
-}
-
-func InstallBootLoader() error {
-	if err := ChrootPacmanInstall("efibootmgr", "grub"); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("bash", "-c", "echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub"); err != nil {
-		return err
-	}
-	if err := ChrootPacmanInstall("os-prober"); err != nil {
-		return err
-	}
-	if *formatEsp {
-		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck", "--removable"); err != nil {
-			return err
-		}
-	} else {
-		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
-			return err
-		}
-	}
-	if err := ChrootRunCommand("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
 		return err
 	}
 	return nil
@@ -293,6 +215,84 @@ func FormatAndMountSystem() error {
 
 func SetBiggerFont() error {
 	return RunCommand("setfont", "ter-132b")
+}
+
+func SynchronizeTimeZone() error {
+	if err := ChrootRunCommand("ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime")); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("hwclock", "--systohc"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GenLocale() error {
+	if err := ChrootRunCommand("bash", "-c", "echo 'en_IN.UTF-8 UTF-8' >> "+filepath.Join("/etc", "locale.gen")); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo 'LANG=en_IN.UTF-8' >> "+filepath.Join("/etc", "locale.conf")); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("locale-gen"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetHostName() error {
+	if err := ChrootRunCommand("bash", "-c", "echo "+*hostname+" >> "+filepath.Join("/etc", "hostname")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetRootPasswd() error {
+	if err := ChrootRunCommand("passwd"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateUser() error {
+	if err := ChrootRunCommand("useradd", "-m", *username); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("passwd", *username); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
+		return err
+	}
+	return nil
+}
+
+func InstallBootLoader() error {
+	if err := ChrootPacmanInstall("efibootmgr", "grub"); err != nil {
+		return err
+	}
+	if err := ChrootRunCommand("bash", "-c", "echo 'GRUB_DISABLE_OS_PROBER=false' >> "+filepath.Join("/etc", "default", "grub")); err != nil {
+		return err
+	}
+	if err := ChrootPacmanInstall("os-prober"); err != nil {
+		return err
+	}
+	if *formatEsp {
+		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck", "--removable"); err != nil {
+			return err
+		}
+	} else {
+		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
+			return err
+		}
+	}
+	if err := ChrootRunCommand("grub-mkconfig", "-o", filepath.Join("/boot", "grub", "grub.cfg")); err != nil {
+		return err
+	}
+	return nil
 }
 
 func InstallMicroCode() error {
