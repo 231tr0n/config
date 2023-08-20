@@ -248,7 +248,7 @@ func formatAndMountSystem() error {
 	if *root == "" {
 		return errRootNotSet
 	}
-	if *esp != "" {
+	if *esp == "" {
 		return errEspNotSet
 	}
 	if err := formatAndMountRoot(); err != nil {
