@@ -30,6 +30,7 @@ var (
 	zone              *string
 	subZone           *string
 	amd               *bool
+	intel             *bool
 )
 
 func init() {
@@ -51,7 +52,8 @@ func init() {
 	username = flag.String("username", "zeltron", "Set the username of the system.")
 	zone = flag.String("zone", "Asia", "Set the zone for system time.")
 	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
-	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips instead of intel.")
+	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
+	intel = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
@@ -301,7 +303,10 @@ func InstallMicroCode() error {
 	if *amd {
 		return ChrootPacmanInstall("amd-ucode")
 	}
-	return ChrootPacmanInstall("intel-ucode")
+	if *intel {
+		return ChrootPacmanInstall("intel-ucode")
+	}
+	return nil
 }
 
 func main() {
