@@ -10,12 +10,17 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
-const ()
+const (
+	logFile = "goarchinstall.log"
+)
 
 var (
-	ErrRootNotSet     error = errors.New("main: root partition not set")
+	// Cli arguments variables
+	errRootNotSet     error = errors.New("main: root partition not set")
+	errEspNotSet      error = errors.New("main: esp partition not set")
 	root              *string
 	home              *string
 	swap              *string
@@ -31,19 +36,41 @@ var (
 	subZone           *string
 	amd               *bool
 	intel             *bool
+
+	// Internal variables
+	packages  []string       = []string{"base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"}
+	services  []string       = []string{"dhcpcd", "NetworkManager"}
+	installer []func() error = []func() error{
+		setBiggerFont,
+		formatAndMountSystem,
+		pacmanConfigSetup,
+		pacstrap,
+		genFSTab,
+		synchronizeTimeZone,
+		genLocale,
+		setHostName,
+		setRootPasswd,
+		createUser,
+		installMicroCode,
+		installBootLoader,
+		systemctlServiceEnable,
+		installAURHepler,
+		unmountSystem,
+	}
 )
 
 func init() {
 	// Logger Setup
 	log.SetFlags(0)
+	log.SetOutput(os.Stdout)
 	log.SetPrefix("[\033[91mLOG\033[0m] ")
 
-	// Arguments parsing setup
+	// Cli arguments parsing setup
 	mountPoint = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
 	root = flag.String("root", "", "Set the root partition.")
 	home = flag.String("home", "", "Set the home partition.")
 	swap = flag.String("swap", "", "Set the swap partition.")
-	esp = flag.String("esp", "", "Set the esp partition. Do not use this incase you are installing archlinux in a vm.")
+	esp = flag.String("esp", "", "Set the esp partition.")
 	formatEsp = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
 	country = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
 	repoCount = flag.Int("repo-count", 5, "Number of repos to be added to the mirrorlist of pacman.")
@@ -58,19 +85,45 @@ func init() {
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
 	}
-	// flag.CommandLine.SetOutput(os.Stdout)
+	flag.CommandLine.SetOutput(os.Stdout)
+
+	// Remove any log file present
+	if err := os.RemoveAll(logFile); err != nil {
+		log.Fatalln(err)
+	}
 }
 
-func fatalLog(err error) {
-	slog.Error(err.Error())
-	os.Exit(1)
-}
+func runCommand(name string, args ...string) error {
+	tempArgs := make([]any, len(args))
+	for i, j := range args {
+		tempArgs[i] = j
+	}
+	slog.Info(name, tempArgs...)
 
-func RunCommand(name string, args ...string) error {
-	slog.Info(name, args)
+	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	defer file.Close()
+	if err != nil {
+		log.Fatalln("Cannot create log file: ", err)
+	}
+	stdoutMW := io.MultiWriter(os.Stdout, file)
+	stderrMW := io.MultiWriter(os.Stderr, file)
+
+	_, err = file.WriteString("\n----------------------------\n")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_, err = file.WriteString(name + " " + strings.Join(args, " "))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_, err = file.WriteString("\n----------------------------\n")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdoutMW
+	cmd.Stderr = stderrMW
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		return err
@@ -78,291 +131,249 @@ func RunCommand(name string, args ...string) error {
 	return nil
 }
 
-func ChrootRunCommand(name string, args ...string) error {
+func chrootRunCommand(name string, args ...string) error {
 	newArgs := append([]string{*mountPoint, name}, args...)
-	return RunCommand("arch-chroot", newArgs...)
+	return runCommand("arch-chroot", newArgs...)
 }
 
-func PacmanInstall(packages ...string) error {
+func pacmanInstall(packages ...string) error {
 	args := append([]string{"-Sy", "--needed", "--noconfirm"}, packages...)
-	return RunCommand("pacman", args...)
+	return runCommand("pacman", args...)
 }
 
-func ChrootPacmanInstall(packages ...string) error {
+func chrootPacmanInstall(packages ...string) error {
 	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
-	return ChrootRunCommand("pacman", args...)
+	return chrootRunCommand("pacman", args...)
 }
 
-func Mount(source string, destination string) error {
-	return RunCommand("mount", "--mkdir", source, destination)
+func mount(source string, destination string) error {
+	return runCommand("mount", "--mkdir", source, destination)
 }
 
-func Unmount(source string) error {
-	return RunCommand("umount", "-R", source)
+func unmountSystem() error {
+	return runCommand("umount", "-R", *mountPoint)
 }
 
-func Pacstrap(packages ...string) error {
+func pacstrap() error {
 	args := append([]string{"-K", *mountPoint}, packages...)
-	if err := RunCommand("pacstrap", args...); err != nil {
+	if err := runCommand("pacstrap", args...); err != nil {
 		return err
 	}
 	return nil
 }
 
-func SystemctlServiceEnable(services ...string) error {
-	for _, j := range services {
-		if err := ChrootRunCommand("systemctl", "enable", j); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func FormatAndMountRoot() error {
-	if err := RunCommand("mkfs.ext4", *root); err != nil {
-		return err
-	}
-	if err := Mount(*root, *mountPoint); err != nil {
+func systemctlServiceEnable() error {
+	args := append([]string{"enable"}, services...)
+	if err := chrootRunCommand("systemctl", args...); err != nil {
 		return err
 	}
 	return nil
 }
 
-func FormatAndSetSwap() error {
-	if err := RunCommand("mkswap", *swap); err != nil {
+func formatAndMountRoot() error {
+	if err := runCommand("mkfs.ext4", *root); err != nil {
 		return err
 	}
-	if err := RunCommand("swapon", *swap); err != nil {
-		return err
-	}
-	return nil
-}
-
-func FormatAndMountHome() error {
-	if err := RunCommand("mkfs.ext4", *home); err != nil {
-		return err
-	}
-	if err := Mount(*home, filepath.Join(*mountPoint, "home")); err != nil {
+	if err := mount(*root, *mountPoint); err != nil {
 		return err
 	}
 	return nil
 }
 
-func FormatAndMountEsp() error {
+func formatAndSetSwap() error {
+	if err := runCommand("mkswap", *swap); err != nil {
+		return err
+	}
+	if err := runCommand("swapon", *swap); err != nil {
+		return err
+	}
+	return nil
+}
+
+func formatAndMountHome() error {
+	if err := runCommand("mkfs.ext4", *home); err != nil {
+		return err
+	}
+	if err := mount(*home, filepath.Join(*mountPoint, "home")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func formatAndMountEsp() error {
 	if *formatEsp {
-		if err := RunCommand("mkfs.fat", "-F", "32", *esp); err != nil {
+		if err := runCommand("mkfs.fat", "-F", "32", *esp); err != nil {
 			return err
 		}
 	}
-	if err := Mount(*esp, filepath.Join(*mountPoint, "boot", "efi")); err != nil {
+	if err := mount(*esp, filepath.Join(*mountPoint, "boot", "efi")); err != nil {
 		return err
 	}
 	return nil
 }
 
-func PacmanConfigSetup() error {
-	if err := PacmanInstall("reflector"); err != nil {
+func pacmanConfigSetup() error {
+	if err := pacmanInstall("reflector"); err != nil {
 		return err
 	}
-	if err := RunCommand("mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak")); err != nil {
+	if err := runCommand("mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak")); err != nil {
 		return err
 	}
-	if err := RunCommand("reflector", "--latest", strconv.Itoa(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
+	if err := runCommand("reflector", "--latest", strconv.Itoa(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("bash", "-c", "echo 'ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo '[multilib]' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("bash", "-c", "echo '[multilib]' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'Include = "+filepath.Join("/etc", "pacman.d", "mirrorlist")+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GenFSTab() error {
-	if err := RunCommand("genfstab", "-U", *mountPoint, filepath.Join(*mountPoint, "etc", "fstab")); err != nil {
+	if err := runCommand("bash", "-c", "echo 'Include = "+filepath.Join("/etc", "pacman.d", "mirrorlist")+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
 	return nil
 }
 
-func FormatAndMountSystem() error {
+func genFSTab() error {
+	if err := runCommand("genfstab", "-U", *mountPoint, filepath.Join(*mountPoint, "etc", "fstab")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func formatAndMountSystem() error {
 	if *root == "" {
-		return ErrRootNotSet
+		return errRootNotSet
 	}
-	if err := FormatAndMountRoot(); err != nil {
+	if *esp != "" {
+		return errEspNotSet
+	}
+	if err := formatAndMountRoot(); err != nil {
+		return err
+	}
+	if err := formatAndMountEsp(); err != nil {
 		return err
 	}
 	if *home != "" {
-		if err := FormatAndMountHome(); err != nil {
+		if err := formatAndMountHome(); err != nil {
 			return err
 		}
 	}
 	if *swap != "" {
-		if err := FormatAndSetSwap(); err != nil {
-			return err
-		}
-	}
-	if *esp != "" {
-		if err := FormatAndMountEsp(); err != nil {
+		if err := formatAndSetSwap(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func SetBiggerFont() error {
-	return RunCommand("setfont", "ter-132b")
+func setBiggerFont() error {
+	return runCommand("setfont", "ter-132b")
 }
 
-func SynchronizeTimeZone() error {
-	if err := ChrootRunCommand("ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime")); err != nil {
+func synchronizeTimeZone() error {
+	if err := chrootRunCommand("ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime")); err != nil {
 		return err
 	}
-	if err := ChrootRunCommand("hwclock", "--systohc"); err != nil {
+	if err := chrootRunCommand("hwclock", "--systohc"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GenLocale() error {
-	if err := ChrootRunCommand("bash", "-c", "echo 'en_IN.UTF-8 UTF-8' >> "+filepath.Join("/etc", "locale.gen")); err != nil {
+func genLocale() error {
+	if err := chrootRunCommand("bash", "-c", "echo 'en_IN.UTF-8 UTF-8' >> "+filepath.Join("/etc", "locale.gen")); err != nil {
 		return err
 	}
-	if err := ChrootRunCommand("bash", "-c", "echo 'LANG=en_IN.UTF-8' >> "+filepath.Join("/etc", "locale.conf")); err != nil {
+	if err := chrootRunCommand("bash", "-c", "echo 'LANG=en_IN.UTF-8' >> "+filepath.Join("/etc", "locale.conf")); err != nil {
 		return err
 	}
-	if err := ChrootRunCommand("locale-gen"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func SetHostName() error {
-	if err := ChrootRunCommand("bash", "-c", "echo "+*hostname+" >> "+filepath.Join("/etc", "hostname")); err != nil {
+	if err := chrootRunCommand("locale-gen"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func SetRootPasswd() error {
-	if err := ChrootRunCommand("passwd"); err != nil {
+func setHostName() error {
+	if err := chrootRunCommand("bash", "-c", "echo "+*hostname+" >> "+filepath.Join("/etc", "hostname")); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateUser() error {
-	if err := ChrootRunCommand("useradd", "-m", *username); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("passwd", *username); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
-		return err
-	}
-	if err := ChrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
+func setRootPasswd() error {
+	if err := chrootRunCommand("passwd"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func InstallBootLoader() error {
-	if err := ChrootPacmanInstall("efibootmgr", "grub"); err != nil {
+func createUser() error {
+	if err := chrootRunCommand("useradd", "-m", *username); err != nil {
 		return err
 	}
-	if err := ChrootRunCommand("bash", "-c", "echo 'GRUB_DISABLE_OS_PROBER=false' >> "+filepath.Join("/etc", "default", "grub")); err != nil {
+	if err := chrootRunCommand("passwd", *username); err != nil {
 		return err
 	}
-	if err := ChrootPacmanInstall("os-prober"); err != nil {
+	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
+		return err
+	}
+	return nil
+}
+
+func installBootLoader() error {
+	if err := chrootPacmanInstall("efibootmgr", "grub"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("bash", "-c", "echo 'GRUB_DISABLE_OS_PROBER=false' >> "+filepath.Join("/etc", "default", "grub")); err != nil {
+		return err
+	}
+	if err := chrootPacmanInstall("os-prober"); err != nil {
 		return err
 	}
 	if *formatEsp {
-		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck", "--removable"); err != nil {
+		if err := chrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck", "--removable"); err != nil {
 			return err
 		}
 	} else {
-		if err := ChrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
+		if err := chrootRunCommand("grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck"); err != nil {
 			return err
 		}
 	}
-	if err := ChrootRunCommand("grub-mkconfig", "-o", filepath.Join("/boot", "grub", "grub.cfg")); err != nil {
+	if err := chrootRunCommand("grub-mkconfig", "-o", filepath.Join("/boot", "grub", "grub.cfg")); err != nil {
 		return err
 	}
 	return nil
 }
 
-func InstallMicroCode() error {
+func installMicroCode() error {
 	if *amd {
-		return ChrootPacmanInstall("amd-ucode")
+		return chrootPacmanInstall("amd-ucode")
 	}
 	if *intel {
-		return ChrootPacmanInstall("intel-ucode")
+		return chrootPacmanInstall("intel-ucode")
+	}
+	return nil
+}
+
+func installAURHepler() error {
+	if err := chrootRunCommand("bash", "-c", "git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin"); err != nil {
+		return err
 	}
 	return nil
 }
 
 func main() {
-	// Logger setup
-	file, err := os.OpenFile("goarchinstall.log", os.O_WRONLY|os.O_CREATE, os.ModePerm)
-	defer file.Close()
-	if err != nil {
-		log.Fatalln("Cannot create log file:", err)
-	}
-	multiWriter := io.MultiWriter(os.Stdout, file)
-	log.SetOutput(multiWriter)
-
 	// Installer code
-	if err := SetBiggerFont(); err != nil {
-		fatalLog(err)
-	}
-	if err := FormatAndMountSystem(); err != nil {
-		fatalLog(err)
-	}
-	if err := PacmanConfigSetup(); err != nil {
-		fatalLog(err)
-	}
-	if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"); err != nil {
-		fatalLog(err)
-	}
-	// if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pipewire", "blueman", "bluez-utils", "wayland", "xdg-desktop-portal", "pacman-contrib", "polkit-gnome", "kitty", "fish"); err != nil {
-	// 	fatalLog(err)
-	// }
-	if err := GenFSTab(); err != nil {
-		fatalLog(err)
-	}
-	if err := SynchronizeTimeZone(); err != nil {
-		fatalLog(err)
-	}
-	if err := GenLocale(); err != nil {
-		fatalLog(err)
-	}
-	if err := SetHostName(); err != nil {
-		fatalLog(err)
-	}
-	if err := SetRootPasswd(); err != nil {
-		fatalLog(err)
-	}
-	if err := CreateUser(); err != nil {
-		fatalLog(err)
-	}
-	if err := InstallMicroCode(); err != nil {
-		fatalLog(err)
-	}
-	if err := InstallBootLoader(); err != nil {
-		fatalLog(err)
-	}
-	if err := SystemctlServiceEnable("dhcpcd", "NetworkManager"); err != nil {
-		fatalLog(err)
-	}
-	if err := Unmount(*mountPoint); err != nil {
-		fatalLog(err)
+	for _, j := range installer {
+		if err := j(); err != nil {
+			slog.Error(err.Error())
+		}
 	}
 }
