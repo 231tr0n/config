@@ -342,6 +342,9 @@ func main() {
 	if err := SetHostName(); err != nil {
 		fatalLog(err)
 	}
+	if err := SetRootPasswd(); err != nil {
+		fatalLog(err)
+	}
 	if err := CreateUser(); err != nil {
 		fatalLog(err)
 	}
