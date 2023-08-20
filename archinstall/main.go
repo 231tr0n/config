@@ -36,6 +36,8 @@ var (
 	subZone           *string
 	amd               *bool
 	intel             *bool
+	rootPwd           *string
+	userPwd           *string
 
 	// Internal variables
 	packages  []string       = []string{"base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"}
@@ -81,6 +83,8 @@ func init() {
 	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
 	intel = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
+	userPwd = flag.String("user-pwd", "", "Set user password.")
+	rootPwd = flag.String("root-pwd", "", "Set root password.")
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
@@ -305,7 +309,7 @@ func setHostName() error {
 }
 
 func setRootPasswd() error {
-	if err := chrootRunCommand("passwd"); err != nil {
+	if err := chrootRunCommand("bash", "-c", "echo -e \""+*rootPwd+"\\n"+*rootPwd+"\" | passwd"); err != nil {
 		return err
 	}
 	return nil
@@ -315,7 +319,7 @@ func createUser() error {
 	if err := chrootRunCommand("useradd", "-m", *username); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("passwd", *username); err != nil {
+	if err := chrootRunCommand("bash", "-c", "echo -e \""+*userPwd+"\\n"+*userPwd+"\" | passwd "+*username); err != nil {
 		return err
 	}
 	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
