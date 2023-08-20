@@ -322,9 +322,12 @@ func main() {
 	if err := PacmanConfigSetup(); err != nil {
 		fatalLog(err)
 	}
-	if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pipewire", "blueman", "bluez-utils", "wayland", "xdg-desktop-portal", "pacman-contrib", "polkit-gnome", "kitty", "fish"); err != nil {
+	if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"); err != nil {
 		fatalLog(err)
 	}
+	// if err := Pacstrap("base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pipewire", "blueman", "bluez-utils", "wayland", "xdg-desktop-portal", "pacman-contrib", "polkit-gnome", "kitty", "fish"); err != nil {
+	// 	fatalLog(err)
+	// }
 	if err := GenFSTab(); err != nil {
 		fatalLog(err)
 	}
