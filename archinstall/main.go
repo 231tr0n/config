@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 )
 
 const ()
@@ -164,10 +165,10 @@ func PacmanConfigSetup() error {
 	if err := RunCommand("mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak")); err != nil {
 		return err
 	}
-	if err := RunCommand("reflector", "--latest", string(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
+	if err := RunCommand("reflector", "--latest", strconv.Itoa(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
 		return err
 	}
-	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+string(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := RunCommand("bash", "-c", "echo 'ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
 	if err := RunCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
