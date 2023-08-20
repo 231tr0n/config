@@ -34,9 +34,10 @@ var (
 func init() {
 	// Logger Setup
 	log.SetFlags(0)
-	log.SetPrefix("[\033[91mLOG\033[0m]")
+	log.SetPrefix("[\033[91mLOG\033[0m] ")
 
 	// Arguments parsing setup
+	mountPoint = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
 	root = flag.String("root", "", "Set the root partition.")
 	home = flag.String("home", "", "Set the home partition.")
 	swap = flag.String("swap", "", "Set the swap partition.")
