@@ -81,12 +81,12 @@ func ChrootRunCommand(name string, args ...string) error {
 }
 
 func PacmanInstall(packages ...string) error {
-	args := append([]string{"-S", "--needed", "--noconfirm"}, packages...)
+	args := append([]string{"-Sy", "--needed", "--noconfirm"}, packages...)
 	return RunCommand("pacman", args...)
 }
 
 func ChrootPacmanInstall(packages ...string) error {
-	args := append([]string{"-S", "--needed", "--noconfirm"}, packages...)
+	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
 	return ChrootRunCommand("pacman", args...)
 }
 
