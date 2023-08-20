@@ -21,6 +21,8 @@ var (
 	// Cli arguments variables
 	errRootNotSet     error = errors.New("main: root partition not set")
 	errEspNotSet      error = errors.New("main: esp partition not set")
+	errRootPwdNotSet  error = errors.New("main: root passwd not set")
+	errUserPwdNotSet  error = errors.New("main: user passwd not set")
 	root              *string
 	home              *string
 	swap              *string
@@ -69,10 +71,10 @@ func init() {
 
 	// Cli arguments parsing setup
 	mountPoint = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
-	root = flag.String("root", "", "Set the root partition.")
+	root = flag.String("root", "", "Set the root partition. (Required)")
 	home = flag.String("home", "", "Set the home partition.")
 	swap = flag.String("swap", "", "Set the swap partition.")
-	esp = flag.String("esp", "", "Set the esp partition.")
+	esp = flag.String("esp", "", "Set the esp partition. (Required)")
 	formatEsp = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
 	country = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
 	repoCount = flag.Int("repo-count", 5, "Number of repos to be added to the mirrorlist of pacman.")
@@ -83,8 +85,8 @@ func init() {
 	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
 	intel = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
-	userPwd = flag.String("user-pwd", "", "Set user password.")
-	rootPwd = flag.String("root-pwd", "", "Set root password.")
+	userPwd = flag.String("user-pwd", "", "Set user password. (Required)")
+	rootPwd = flag.String("root-pwd", "", "Set root password. (Required)")
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
@@ -309,6 +311,9 @@ func setHostName() error {
 }
 
 func setRootPasswd() error {
+	if *rootPwd == "" {
+		return errRootPwdNotSet
+	}
 	if err := chrootRunCommand("bash", "-c", "echo -e \""+*rootPwd+"\\n"+*rootPwd+"\" | passwd"); err != nil {
 		return err
 	}
@@ -316,6 +321,9 @@ func setRootPasswd() error {
 }
 
 func createUser() error {
+	if *userPwd == "" {
+		return errUserPwdNotSet
+	}
 	if err := chrootRunCommand("useradd", "-m", *username); err != nil {
 		return err
 	}
@@ -367,7 +375,7 @@ func installMicroCode() error {
 }
 
 func installAURHepler() error {
-	if err := chrootRunCommand("bash", "-c", "git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin"); err != nil {
+	if err := chrootRunCommand("bash", "-c", "su zeltron -c 'git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin'"); err != nil {
 		return err
 	}
 	return nil
