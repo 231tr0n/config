@@ -222,7 +222,7 @@ func pacmanConfigSetup() error {
 	if err := runCommand("reflector", "--latest", strconv.Itoa(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist")); err != nil {
 		return err
 	}
-	if err := runCommand("bash", "-c", "echo 'ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("bash", "-c", "sed -i 's/#ParallelDownloads = 5/ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"/g' "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
 	if err := runCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
@@ -374,6 +374,7 @@ func main() {
 	for _, j := range installer {
 		if err := j(); err != nil {
 			slog.Error(err.Error())
+			os.Exit(1)
 		}
 	}
 }
