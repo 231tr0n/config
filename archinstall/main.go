@@ -72,10 +72,10 @@ func init() {
 
 	// Cli arguments parsing setup
 	mountPoint = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
-	root = flag.String("root", "", "Set the root partition. (Required)")
+	root = flag.String("root", "", "Set the root partition. (required)")
 	home = flag.String("home", "", "Set the home partition.")
 	swap = flag.String("swap", "", "Set the swap partition.")
-	esp = flag.String("esp", "", "Set the esp partition. (Required)")
+	esp = flag.String("esp", "", "Set the esp partition. (required)")
 	formatEsp = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
 	country = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
 	repoCount = flag.Int("repo-count", 5, "Number of repos to be added to the mirrorlist of pacman.")
@@ -86,8 +86,9 @@ func init() {
 	subZone = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	amd = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
 	intel = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
-	userPwd = flag.String("user-pwd", "", "Set user password. (Required)")
-	rootPwd = flag.String("root-pwd", "", "Set root password. (Required)")
+	userPwd = flag.String("user-pwd", "", "Set user password. (required)")
+	rootPwd = flag.String("root-pwd", "", "Set root password. (required)")
+
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
 		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
