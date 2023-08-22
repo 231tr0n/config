@@ -379,7 +379,7 @@ func installMicroCode() error {
 }
 
 func installAURHepler() error {
-	if err := chrootRunCommand("bash", "-c", "su -s "+*username+" -c 'cd ~ && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin'"); err != nil {
+	if err := chrootRunCommand("bash", "-c", "su -s /bin/bash "+*username+" -c 'cd ~ && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin'"); err != nil {
 		return err
 	}
 	return nil
