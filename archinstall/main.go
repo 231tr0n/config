@@ -106,7 +106,9 @@ func runCommand(name string, args ...string) error {
 	for i, j := range args {
 		tempArgs[i] = j
 	}
+	log.Println("----------------------------")
 	log.Println(append([]any{name}, tempArgs...)...)
+	log.Println("----------------------------")
 
 	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	defer file.Close()
