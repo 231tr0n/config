@@ -41,10 +41,8 @@ var (
 	userPwd           *string
 
 	// Internal variables
-	// packages  []string       = []string{"base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish"}
-	// services  []string       = []string{"dhcpcd", "NetworkManager"}
-	packages  []string       = []string{"base", "base-devel", "linux", "linux-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager"}
-	services  []string       = []string{"NetworkManager"}
+	packages  []string       = []string{"base", "base-devel", "linux", "linux-lts", "linux-headers", "linux-lts-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish", "terminus-font"}
+	services  []string       = []string{"NetworkManager", "dhcpcd"}
 	installer []func() error = []func() error{
 		setBiggerFont,
 		formatAndMountSystem,
