@@ -100,6 +100,20 @@ func init() {
 	if err := os.RemoveAll(logFile); err != nil {
 		log.Fatalln(err)
 	}
+
+	// Log and exit if any required arguments are missing
+	if *root == "" {
+		log.Fatalln(errRootNotSet)
+	}
+	if *esp == "" {
+		log.Fatalln(errEspNotSet)
+	}
+	if *userPwd == "" {
+		log.Fatalln(errUserPwdNotSet)
+	}
+	if *rootPwd == "" {
+		log.Fatalln(errRootPwdNotSet)
+	}
 }
 
 func runCommand(name string, args ...string) error {
@@ -390,7 +404,7 @@ func installMicroCode() error {
 }
 
 func installAURHepler() error {
-	if err := chrootRunCommand("useradd", "temp"); err != nil {
+	if err := chrootRunCommand("useradd", "-m", "temp"); err != nil {
 		return err
 	}
 	if err := chrootRunCommand("usermod", "-aG", "sudo", "temp"); err != nil {
