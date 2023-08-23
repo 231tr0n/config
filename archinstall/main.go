@@ -326,10 +326,13 @@ func setRootPasswd() error {
 }
 
 func configureUserGroups() error {
-	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+	if err := chrootRunCommand("groupadd", "sudo"); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("bash", "-c", "echo '%sudo ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+	if err := chrootRunCommand("bash", "-c", "echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
 		return err
 	}
 	return nil
@@ -345,7 +348,7 @@ func createUser() error {
 	if err := chrootRunCommand("bash", "-c", "echo -e \""+*userPwd+"\\n"+*userPwd+"\" | passwd "+*username); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("usermod", "-aG", "sudo", *username); err != nil {
+	if err := chrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
 		return err
 	}
 	return nil
@@ -390,7 +393,7 @@ func installAURHepler() error {
 	if err := chrootRunCommand("useradd", "temp"); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("usermod", "-aG", "wheel", "temp"); err != nil {
+	if err := chrootRunCommand("usermod", "-aG", "sudo", "temp"); err != nil {
 		return err
 	}
 	if err := chrootRunCommand("su", "temp", "-s", "/bin/bash", "-c", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin"); err != nil {
