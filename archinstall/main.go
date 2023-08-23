@@ -54,12 +54,13 @@ var (
 		synchronizeTimeZone,
 		genLocale,
 		setHostName,
-		createUser,
-		installAURHepler,
 		setRootPasswd,
+		configureUserGroups,
+		createUser,
 		installMicroCode,
 		installBootLoader,
 		systemctlServiceEnable,
+		installAURHepler,
 		unmountSystem,
 	}
 )
@@ -324,6 +325,16 @@ func setRootPasswd() error {
 	return nil
 }
 
+func configureUserGroups() error {
+	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("bash", "-c", "echo '%sudo ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func createUser() error {
 	if *userPwd == "" {
 		return errUserPwdNotSet
@@ -334,10 +345,7 @@ func createUser() error {
 	if err := chrootRunCommand("bash", "-c", "echo -e \""+*userPwd+"\\n"+*userPwd+"\" | passwd "+*username); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("bash", "-c", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)"); err != nil {
-		return err
-	}
-	if err := chrootRunCommand("usermod", "-aG", "wheel", *username); err != nil {
+	if err := chrootRunCommand("usermod", "-aG", "sudo", *username); err != nil {
 		return err
 	}
 	return nil
@@ -379,7 +387,16 @@ func installMicroCode() error {
 }
 
 func installAURHepler() error {
-	if err := chrootRunCommand("bash", "-c", "echo -e 'cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si && cd .. && rm -rf yay-bin'"); err != nil {
+	if err := chrootRunCommand("useradd", "temp"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("usermod", "-aG", "wheel", "temp"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("su", "temp", "-s", "/bin/bash", "-c", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("userdel", "-r", "temp"); err != nil {
 		return err
 	}
 	return nil
