@@ -64,7 +64,7 @@ var (
 		"thunderbird", "wl-clipboard", "wl-mirror",
 		"wlroots", "xdg-desktop-portal", "xdg-desktop-portal-wlr",
 		"xdg-user-dirs", "xdg-user-dirs-gtk", "zathura",
-		"acpi", "pipewire", "pipewire-pulse",
+		"acpi", "pipewire", "pipewire-pulse", "grim", "slurp",
 	}
 	services     = []string{"NetworkManager", "dhcpcd", "systemd-timesyncd", "ly"}
 	userServices = []string{"pipewire", "pipewire-pulse", "wireplumber"}
