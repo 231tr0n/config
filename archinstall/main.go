@@ -18,10 +18,10 @@ const (
 
 var (
 	// Cli arguments variables
-	errRootNotSet     error = errors.New("main: root partition not set")
-	errEspNotSet      error = errors.New("main: esp partition not set")
-	errRootPwdNotSet  error = errors.New("main: root passwd not set")
-	errUserPwdNotSet  error = errors.New("main: user passwd not set")
+	errRootNotSet     = errors.New("main: root partition not set")
+	errEspNotSet      = errors.New("main: esp partition not set")
+	errRootPwdNotSet  = errors.New("main: root passwd not set")
+	errUserPwdNotSet  = errors.New("main: user passwd not set")
 	root              *string
 	home              *string
 	swap              *string
@@ -41,9 +41,38 @@ var (
 	userPwd           *string
 
 	// Internal variables
-	packages  []string       = []string{"base", "base-devel", "linux", "linux-headers", "linux-firmware", "sudo", "vim", "git", "networkmanager", "dhcpcd", "pacman-contrib", "fish", "terminus-font"}
-	services  []string       = []string{"NetworkManager", "dhcpcd", "systemd-timesyncd"}
-	installer []func() error = []func() error{
+	pacmanPackages = []string{"base", "base-devel", "linux", "linux-headers",
+		"linux-firmware", "linux-lts", "sudo", "vim",
+		"git", "networkmanager", "dhcpcd",
+		"pacman-contrib", "fish", "terminus-font",
+		"pipewire-audio", "wireplumber", "jack2",
+		"sway", "bemenu-wayland", "blueman",
+		"brightnessctl", "chromium", "firefox",
+		"conky", "wget", "curl", "discord",
+		"telegram-desktop", "pcmanfm", "ffmpeg",
+		"yt-dlp", "python", "python-pipx",
+		"nodejs", "npm", "fileroller",
+		"font-manager", "xreader", "gcolor3",
+		"gnome-calculator", "gnome-calendar",
+		"libreoffice", "go", "gnome-disk-utility",
+		"bpytop", "lxappearance", "helvum", "htop",
+		"imagemagick", "imv", "kontrast", "copyq",
+		"ly", "mako", "man-db", "mpv",
+		"haruna", "neovim", "network-manager-applet",
+		"networkmanager-openvpn", "okular", "openvpn",
+		"pacman-contrib", "pavucontrol", "polkit-gnome",
+		"thunderbird", "wl-clipboard", "wl-mirror",
+		"wlroots", "xdg-desktop-portal", "xdg-desktop-portal-wlr",
+		"xdg-user-dirs", "xdg-user-dirs-gtk", "zathura",
+		"acpi", "pipewire", "pipewire-pulse",
+	}
+	services     = []string{"NetworkManager", "dhcpcd", "systemd-timesyncd", "ly"}
+	userServices = []string{"pipewire", "pipewire-pulse", "wireplumber"}
+	aurPackages  = []string{"themix-full-git", "pix", "ocs-url",
+		"hyprpicker", "swaysettings-git", "wlogout",
+		"whatsapp-for-linux-bin", "brave-bin",
+	}
+	installer = []func() error{
 		setBiggerFont,
 		formatAndMountSystem,
 		pacmanConfigSetup,
@@ -57,8 +86,10 @@ var (
 		createUser,
 		installMicroCode,
 		installBootLoader,
+		installAurHepler,
+		aurPkgInstall,
 		systemctlServiceEnable,
-		installAURHepler,
+		systemctlUserServiceEnable,
 		unmountSystem,
 	}
 )
@@ -169,6 +200,11 @@ func chrootPacmanInstall(packages ...string) error {
 	return chrootRunCommand("pacman", args...)
 }
 
+func chrootAurInstall(packages ...string) error {
+	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
+	return chrootRunCommand("yay", args...)
+}
+
 func mount(source string, destination string) error {
 	return runCommand("mount", "--mkdir", source, destination)
 }
@@ -178,7 +214,7 @@ func unmountSystem() error {
 }
 
 func pacstrap() error {
-	args := append([]string{"-K", *mountPoint}, packages...)
+	args := append([]string{"-K", *mountPoint}, pacmanPackages...)
 	if err := runCommand("pacstrap", args...); err != nil {
 		return err
 	}
@@ -187,6 +223,14 @@ func pacstrap() error {
 
 func systemctlServiceEnable() error {
 	args := append([]string{"enable"}, services...)
+	if err := chrootRunCommand("systemctl", args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func systemctlUserServiceEnable() error {
+	args := append([]string{"--user", "enable"}, userServices...)
 	if err := chrootRunCommand("systemctl", args...); err != nil {
 		return err
 	}
@@ -401,7 +445,7 @@ func installMicroCode() error {
 	return nil
 }
 
-func installAURHepler() error {
+func installAurHepler() error {
 	if err := chrootRunCommand("useradd", "-m", "temp"); err != nil {
 		return err
 	}
@@ -412,6 +456,13 @@ func installAURHepler() error {
 		return err
 	}
 	if err := chrootRunCommand("userdel", "-r", "temp"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func aurPkgInstall() error {
+	if err := chrootAurInstall(aurPackages...); err != nil {
 		return err
 	}
 	return nil
