@@ -1,0 +1,17 @@
+linters:
+  enable-all: true
+  disable:
+    - varnamelen
+    - funlen
+    - cyclop
+    - gocyclo
+    - paralleltest
+    - gochecknoglobals
+    - wsl
+    - goerr113
+    - gocognit
+    - dupl
+    - depguard
+
+issues:
+  fix: true

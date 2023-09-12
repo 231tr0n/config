@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	// Cli arguments variables
+	// Cli arguments variables.
 	errRootNotSet     = errors.New("main: root partition not set")
 	errEspNotSet      = errors.New("main: esp partition not set")
 	errRootPwdNotSet  = errors.New("main: root passwd not set")
@@ -44,7 +44,7 @@ var (
 	npmPkgs           *bool
 	desktop           *bool
 
-	// Internal variables
+	// Internal variables.
 	basePackages = []string{
 		"base",
 		"base-devel",
@@ -397,7 +397,7 @@ func chrootAurInstall(packages ...string) error {
 	return chrootRunCommand("yay", args...)
 }
 
-func mount(source string, destination string) error {
+func mount(source, destination string) error {
 	return runCommand("mount", "--mkdir", source, destination)
 }
 
@@ -839,7 +839,6 @@ func main() {
 	for _, j := range installer {
 		if err := j(); err != nil {
 			log.Fatalln(err)
-			os.Exit(1)
 		}
 	}
 }
