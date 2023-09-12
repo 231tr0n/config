@@ -107,7 +107,6 @@ var (
 		"gnome-nettool":      nil,
 		"gnome-notes":        nil,
 		"gnome-photos":       nil,
-		"go":                 nil,
 		"grim":               nil,
 		"gthumb":             nil,
 		"gufw":               nil,
@@ -137,8 +136,6 @@ var (
 		"neovim":                 nil,
 		"network-manager-applet": nil,
 		"networkmanager-openvpn": nil,
-		"nodejs":                 nil,
-		"npm":                    nil,
 		"obsidian":               nil,
 		"okular":                 nil,
 		"openssh":                nil,
@@ -162,8 +159,6 @@ var (
 		},
 		"podman":           nil,
 		"polkit-gnome":     nil,
-		"python":           nil,
-		"python-pipx":      nil,
 		"slurp":            nil,
 		"subversion":       nil,
 		"sway":             nil,
@@ -387,14 +382,6 @@ func chrootPacmanInstall(packages ...string) error {
 	}
 	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
 	return chrootRunCommand("pacman", args...)
-}
-
-func chrootAurInstall(packages ...string) error {
-	if len(packages) == 0 {
-		return nil
-	}
-	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
-	return chrootRunCommand("yay", args...)
 }
 
 func mount(source, destination string) error {
@@ -672,17 +659,15 @@ func aurPkgInstall() error {
 		return nil
 	}
 	i := 0
-	ks := make([]string, len(aurPackages))
 	fs := make([]func() error, len(aurPackages))
 	for k, f := range aurPackages {
-		ks[i] = k
+		if err := chrootRunCommand("su", *username, "-s", "/bin/bash", "-c", "yay -Syu --needed --noconfirm "+k); err != nil {
+			return err
+		}
 		if f != nil {
 			fs[i] = f
 		}
 		i++
-	}
-	if err := chrootAurInstall(ks...); err != nil {
-		return err
 	}
 	for _, val := range fs {
 		if val == nil {
@@ -706,17 +691,15 @@ func goPkgInstall() error {
 		return nil
 	}
 	i := 0
-	ks := make([]string, len(goPackages))
 	fs := make([]func() error, len(goPackages))
 	for k, f := range goPackages {
-		ks[i] = k
+		if err := chrootRunCommand("go", "install", "-v", k); err != nil {
+			return err
+		}
 		if f != nil {
 			fs[i] = f
 		}
 		i++
-	}
-	if err := chrootAurInstall(ks...); err != nil {
-		return err
 	}
 	for _, val := range fs {
 		if val == nil {
@@ -733,24 +716,22 @@ func pipPkgInstall() error {
 	if !*pipPkgs {
 		return nil
 	}
-	if err := chrootPacmanInstall("python", "python-pip"); err != nil {
+	if err := chrootPacmanInstall("python", "python-pip", "python-pipx"); err != nil {
 		return err
 	}
 	if len(pipPackages) == 0 {
 		return nil
 	}
 	i := 0
-	ks := make([]string, len(pipPackages))
 	fs := make([]func() error, len(pipPackages))
 	for k, f := range pipPackages {
-		ks[i] = k
+		if err := chrootRunCommand("pipx", "install", k); err != nil {
+			return err
+		}
 		if f != nil {
 			fs[i] = f
 		}
 		i++
-	}
-	if err := chrootAurInstall(ks...); err != nil {
-		return err
 	}
 	for _, val := range fs {
 		if val == nil {
@@ -774,17 +755,15 @@ func npmPkgInstall() error {
 		return nil
 	}
 	i := 0
-	ks := make([]string, len(npmPackages))
 	fs := make([]func() error, len(npmPackages))
 	for k, f := range npmPackages {
-		ks[i] = k
+		if err := chrootRunCommand("npm", "install", "-g", k); err != nil {
+			return err
+		}
 		if f != nil {
 			fs[i] = f
 		}
 		i++
-	}
-	if err := chrootAurInstall(ks...); err != nil {
-		return err
 	}
 	for _, val := range fs {
 		if val == nil {
@@ -811,7 +790,7 @@ func desktopInstall() error {
 		}
 		i++
 	}
-	if err := chrootAurInstall(ks...); err != nil {
+	if err := chrootPacmanInstall(ks...); err != nil {
 		return err
 	}
 	for _, val := range fs {
