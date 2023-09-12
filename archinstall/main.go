@@ -548,9 +548,9 @@ func synchronizeTimeZone() error {
 	if err := chrootRunCommand("hwclock", "--systohc"); err != nil {
 		return err
 	}
-	if err := chrootRunCommand("timedatectl", "set-ntp", "true"); err != nil {
-		return err
-	}
+	// if err := chrootRunCommand("timedatectl", "set-ntp", "true"); err != nil {
+	// 	return err
+	// }
 	if err := systemctlServiceEnable("systemd-timesyncd"); err != nil {
 		return err
 	}
