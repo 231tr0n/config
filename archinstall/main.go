@@ -39,111 +39,216 @@ var (
 	intel             *bool
 	rootPwd           *string
 	userPwd           *string
+	goPkgs            *bool
+	pipPkgs           *bool
+	npmPkgs           *bool
+	desktop           *bool
 
 	// Internal variables
-	pacmanPackages = []string{
+	basePackages = []string{
 		"base",
 		"base-devel",
-		"linux",
-		"linux-headers",
-		"linux-firmware",
-		"linux-lts",
-		"sudo",
-		"vim",
+		"dhcpcd",
 		"git",
+		"linux",
+		"linux-firmware",
+		"linux-headers",
 		"networkmanager",
-		"dhcpcd",
 		"pacman-contrib",
-		"fish",
+		"sudo",
 		"terminus-font",
-		"pipewire-audio",
-		"wireplumber",
-		"jack2",
-		"sway",
-		"bemenu-wayland",
-		"blueman",
-		"brightnessctl",
-		"chromium",
-		"firefox",
-		"conky",
-		"wget",
-		"curl",
-		"discord",
-		"telegram-desktop",
-		"pcmanfm",
-		"ffmpeg",
-		"yt-dlp",
-		"python",
-		"python-pipx",
-		"nodejs",
-		"npm",
-		"fileroller",
-		"font-manager",
-		"xreader",
-		"gcolor3",
-		"gnome-calculator",
-		"gnome-calendar",
-		"libreoffice",
-		"go",
-		"gnome-disk-utility",
-		"bpytop",
-		"lxappearance",
-		"helvum",
-		"htop",
-		"imagemagick",
-		"imv",
-		"kontrast",
-		"copyq",
-		"ly",
-		"mako",
-		"man-db",
-		"mpv",
-		"haruna",
-		"neovim",
-		"network-manager-applet",
-		"networkmanager-openvpn",
-		"okular",
-		"openvpn",
-		"pacman-contrib",
-		"pavucontrol",
-		"polkit-gnome",
-		"thunderbird",
-		"wl-clipboard",
-		"wl-mirror",
-		"wlroots",
-		"xdg-desktop-portal",
-		"xdg-desktop-portal-wlr",
-		"xdg-user-dirs",
-		"xdg-user-dirs-gtk",
-		"zathura",
-		"acpi",
-		"pipewire",
-		"pipewire-pulse",
-		"grim",
-		"slurp",
+		"vim",
 	}
-	services = []string{
-		"NetworkManager",
+	baseServices = []string{
 		"dhcpcd",
+		"NetworkManager",
 		"systemd-timesyncd",
-		"ly",
 	}
-	userServices = []string{
-		"pipewire",
-		"pipewire-pulse",
-		"wireplumber",
+	desktopPackages = map[string]func() error{
+		"acpi":           nil,
+		"bat":            nil,
+		"bemenu-wayland": nil,
+		"blueman":        nil,
+		"bpytop":         nil,
+		"brightnessctl": func() error {
+			if err := chrootRunCommand("su", *username, "-s", "/bin/bash", "-c", "echo -e \""+*userPwd+"\" | sudo chmod +s $(which brightnessctl)"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"calibre":            nil,
+		"chromium":           nil,
+		"clamav":             nil,
+		"clamtk":             nil,
+		"cmus":               nil,
+		"code":               nil,
+		"conky":              nil,
+		"copyq":              nil,
+		"curl":               nil,
+		"discord":            nil,
+		"docker":             nil,
+		"dosfstools":         nil,
+		"drawing":            nil,
+		"emacs":              nil,
+		"ffmpeg":             nil,
+		"file-roller":        nil,
+		"firefox":            nil,
+		"fish":               nil,
+		"font-manager":       nil,
+		"foot":               nil,
+		"gcc":                nil,
+		"gcolor3":            nil,
+		"glfw-wayland":       nil,
+		"gnome-calculator":   nil,
+		"gnome-calendar":     nil,
+		"gnome-console":      nil,
+		"gnome-disk-utility": nil,
+		"gnome-multi-writer": nil,
+		"gnome-nettool":      nil,
+		"gnome-notes":        nil,
+		"gnome-photos":       nil,
+		"go":                 nil,
+		"grim":               nil,
+		"gthumb":             nil,
+		"gufw":               nil,
+		"haruna":             nil,
+		"helvum":             nil,
+		"htop":               nil,
+		"imagemagick":        nil,
+		"imv":                nil,
+		"jack2":              nil,
+		"jdk-openjdk":        nil,
+		"kontrast":           nil,
+		"lf":                 nil,
+		"libreoffice":        nil,
+		"linux-lts":          nil,
+		"lxappearance":       nil,
+		"ly": func() error {
+			if err := systemctlServiceEnable("ly"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"mako":                   nil,
+		"man-db":                 nil,
+		"meld":                   nil,
+		"mpv":                    nil,
+		"neofetch":               nil,
+		"neovim":                 nil,
+		"network-manager-applet": nil,
+		"networkmanager-openvpn": nil,
+		"nodejs":                 nil,
+		"npm":                    nil,
+		"obsidian":               nil,
+		"okular":                 nil,
+		"openssh":                nil,
+		"openvpn":                nil,
+		"pacman-contrib":         nil,
+		"parted":                 nil,
+		"pavucontrol":            nil,
+		"pcmanfm":                nil,
+		"pipewire": func() error {
+			if err := systemctlUserServiceEnable("pipewire"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"pipewire-audio": nil,
+		"pipewire-pulse": func() error {
+			if err := systemctlUserServiceEnable("pipewire-pulse"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"podman":           nil,
+		"polkit-gnome":     nil,
+		"python":           nil,
+		"python-pipx":      nil,
+		"slurp":            nil,
+		"subversion":       nil,
+		"sway":             nil,
+		"telegram-desktop": nil,
+		"thunderbird":      nil,
+		"tlp": func() error {
+			if err := systemctlServiceEnable("tlp"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"tmux":    nil,
+		"ufw":     nil,
+		"wayland": nil,
+		"wget":    nil,
+		"wireplumber": func() error {
+			if err := systemctlUserServiceEnable("wireplumber"); err != nil {
+				return err
+			}
+			return nil
+		},
+		"wl-clipboard":           nil,
+		"wl-mirror":              nil,
+		"wlroots":                nil,
+		"woff2":                  nil,
+		"xdg-desktop-portal":     nil,
+		"xdg-desktop-portal-wlr": nil,
+		"xdg-user-dirs":          nil,
+		"xdg-user-dirs-gtk":      nil,
+		"xreader":                nil,
+		"yt-dlp":                 nil,
+		"zathura":                nil,
 	}
-	aurPackages = []string{
-		"themix-full-git",
-		"pix",
-		"ocs-url",
-		"hyprpicker",
-		"swaysettings-git",
-		"wlogout",
-		"whatsapp-for-linux-bin",
-		"brave-bin",
+	goPackages = map[string]func() error{
+		"github.com/davidrjenni/reftools/cmd/fillstruct@latest":          nil,
+		"github.com/fatih/gomodifytags@latest":                           nil,
+		"github.com/go-delve/delve/cmd/dlv@latest":                       nil,
+		"github.com/go-task/task/v3/cmd/task@latest":                     nil,
+		"github.com/golang/mock/mockgen@latest":                          nil,
+		"github.com/golangci/golangci-lint/cmd/golangci-lint@latest":     nil,
+		"github.com/google/gops@latest":                                  nil,
+		"github.com/goreleaser/goreleaser@latest":                        nil,
+		"github.com/josharian/impl@latest":                               nil,
+		"github.com/jstemmer/gotags@latest":                              nil,
+		"github.com/kisielk/errcheck@latest":                             nil,
+		"github.com/klauspost/asmfmt/cmd/asmfmt@latest":                  nil,
+		"github.com/nao1215/gup@latest":                                  nil,
+		"github.com/rogpeppe/godef@latest":                               nil,
+		"github.com/rverton/webanalyze/cmd/webanalyze@latest":            nil,
+		"github.com/segmentio/golines@latest":                            nil,
+		"github.com/tsenart/vegeta@latest":                               nil,
+		"golang.org/x/pkgsite/cmd/pkgsite@latest":                        nil,
+		"golang.org/x/tools/cmd/godoc@latest":                            nil,
+		"golang.org/x/tools/cmd/goimports@latest":                        nil,
+		"golang.org/x/tools/cmd/gorename@latest":                         nil,
+		"golang.org/x/tools/cmd/guru@latest":                             nil,
+		"golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest": nil,
+		"golang.org/x/tools/gopls@latest":                                nil,
+		"istio.io/tools/cmd/license-lint@latest":                         nil,
+		"mvdan.cc/gofumpt@latest":                                        nil,
 	}
-	installer = []func() error{
+	npmPackages = map[string]func() error{
+		"forever":           nil,
+		"localtunnel":       nil,
+		"nodemon":           nil,
+		"npm-check-updates": nil,
+	}
+	pipPackages = map[string]func() error{
+		"wpm": nil,
+	}
+	aurPackages = map[string]func() error{
+		"brave-bin":              nil,
+		"drawio-desktop-bin":     nil,
+		"google-chrome":          nil,
+		"hyprpicker":             nil,
+		"ocs-url":                nil,
+		"stacer-bin":             nil,
+		"swaysettings-git":       nil,
+		"themix-full-git":        nil,
+		"webapp-manager":         nil,
+		"whatsapp-for-linux-bin": nil,
+		"wlogout":                nil,
+	}
+	configPath = map[string]string{}
+	installer  = []func() error{
 		setBiggerFont,
 		formatAndMountSystem,
 		pacmanConfigSetup,
@@ -155,12 +260,16 @@ var (
 		setRootPasswd,
 		configureUserGroups,
 		createUser,
+		baseServicesEnable,
+		copyPacmanConfigToInstall,
 		installMicroCode,
 		installBootLoader,
 		installAurHepler,
+		goPkgInstall,
+		pipPkgInstall,
+		npmPkgInstall,
+		desktopInstall,
 		aurPkgInstall,
-		systemctlServiceEnable,
-		systemctlUserServiceEnable,
 		unmountSystem,
 	}
 )
@@ -179,7 +288,7 @@ func init() {
 	esp = flag.String("esp", "", "Set the esp partition. (required)")
 	formatEsp = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
 	country = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
-	repoCount = flag.Int("repo-count", 5, "Number of repos to be added to the mirrorlist of pacman.")
+	repoCount = flag.Int("repo-count", 10, "Number of repos to be added to the mirrorlist of pacman.")
 	parallelDownloads = flag.Int("parallel-downloads", 5, "Number of downloads pacman can do at a time.")
 	hostname = flag.String("hostname", "xeltron", "Set the hostname of the system.")
 	username = flag.String("username", "zeltron", "Set the username of the system.")
@@ -189,6 +298,10 @@ func init() {
 	intel = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
 	userPwd = flag.String("user-pwd", "", "Set user password. (required)")
 	rootPwd = flag.String("root-pwd", "", "Set root password. (required)")
+	goPkgs = flag.Bool("go-pkgs", false, "Install required go packages.")
+	pipPkgs = flag.Bool("pip-pkgs", false, "Install required pip packages.")
+	npmPkgs = flag.Bool("npm-pkgs", false, "Install required npm packages.")
+	desktop = flag.Bool("desktop", false, "Install desktop environment.")
 
 	flag.Parse()
 	if parsed := flag.Parsed(); !parsed {
@@ -249,7 +362,6 @@ func runCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = stdoutMW
 	cmd.Stderr = stderrMW
-	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		return err
 	}
@@ -262,16 +374,25 @@ func chrootRunCommand(name string, args ...string) error {
 }
 
 func pacmanInstall(packages ...string) error {
+	if len(packages) == 0 {
+		return nil
+	}
 	args := append([]string{"-Sy", "--needed", "--noconfirm"}, packages...)
 	return runCommand("pacman", args...)
 }
 
 func chrootPacmanInstall(packages ...string) error {
+	if len(packages) == 0 {
+		return nil
+	}
 	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
 	return chrootRunCommand("pacman", args...)
 }
 
 func chrootAurInstall(packages ...string) error {
+	if len(packages) == 0 {
+		return nil
+	}
 	args := append([]string{"-Syu", "--needed", "--noconfirm"}, packages...)
 	return chrootRunCommand("yay", args...)
 }
@@ -285,14 +406,21 @@ func unmountSystem() error {
 }
 
 func pacstrap() error {
-	args := append([]string{"-K", *mountPoint}, pacmanPackages...)
+	args := append([]string{"-K", *mountPoint}, basePackages...)
 	if err := runCommand("pacstrap", args...); err != nil {
 		return err
 	}
 	return nil
 }
 
-func systemctlServiceEnable() error {
+func baseServicesEnable() error {
+	if err := systemctlServiceEnable(baseServices...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func systemctlServiceEnable(services ...string) error {
 	args := append([]string{"enable"}, services...)
 	if err := chrootRunCommand("systemctl", args...); err != nil {
 		return err
@@ -300,8 +428,8 @@ func systemctlServiceEnable() error {
 	return nil
 }
 
-func systemctlUserServiceEnable() error {
-	args := append([]string{"--user", "enable"}, userServices...)
+func systemctlUserServiceEnable(services ...string) error {
+	args := append([]string{"--user", "enable"}, services...)
 	if err := chrootRunCommand("systemctl", args...); err != nil {
 		return err
 	}
@@ -351,9 +479,6 @@ func formatAndMountEsp() error {
 }
 
 func pacmanConfigSetup() error {
-	if err := pacmanInstall("reflector"); err != nil {
-		return err
-	}
 	if err := runCommand("mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak")); err != nil {
 		return err
 	}
@@ -363,13 +488,17 @@ func pacmanConfigSetup() error {
 	if err := runCommand("bash", "-c", "sed -i 's/#ParallelDownloads = 5/ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"/g' "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := runCommand("bash", "-c", "echo >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("bash", "-c", "sed -i \"/\\[multilib\\]/,/Include/\"'s/^# //' "+filepath.Join("/etc", "pacman.conf")); err != nil {
 		return err
 	}
-	if err := runCommand("bash", "-c", "echo '[multilib]' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	return nil
+}
+
+func copyPacmanConfigToInstall() error {
+	if err := runCommand("mv", filepath.Join(*mountPoint, "etc", "pacman.conf"), filepath.Join(*mountPoint, "etc", "pacman.conf.bak")); err != nil {
 		return err
 	}
-	if err := runCommand("bash", "-c", "echo 'Include = "+filepath.Join("/etc", "pacman.d", "mirrorlist")+"' >> "+filepath.Join("/etc", "pacman.conf")); err != nil {
+	if err := runCommand("cp", filepath.Join("/etc", "pacman.conf"), filepath.Join(*mountPoint, "etc", "pacman.conf")); err != nil {
 		return err
 	}
 	return nil
@@ -417,6 +546,12 @@ func synchronizeTimeZone() error {
 		return err
 	}
 	if err := chrootRunCommand("hwclock", "--systohc"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("timedatectl", "set-ntp", "true"); err != nil {
+		return err
+	}
+	if err := systemctlServiceEnable("systemd-timesyncd"); err != nil {
 		return err
 	}
 	return nil
@@ -533,8 +668,168 @@ func installAurHepler() error {
 }
 
 func aurPkgInstall() error {
-	if err := chrootAurInstall(aurPackages...); err != nil {
+	if !*desktop || len(aurPackages) == 0 {
+		return nil
+	}
+	i := 0
+	ks := make([]string, len(aurPackages))
+	fs := make([]func() error, len(aurPackages))
+	for k, f := range aurPackages {
+		ks[i] = k
+		if f != nil {
+			fs[i] = f
+		}
+		i++
+	}
+	if err := chrootAurInstall(ks...); err != nil {
 		return err
+	}
+	for _, val := range fs {
+		if val == nil {
+			break
+		}
+		if err := val(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func goPkgInstall() error {
+	if !*goPkgs {
+		return nil
+	}
+	if err := chrootPacmanInstall("go"); err != nil {
+		return err
+	}
+	if len(goPackages) == 0 {
+		return nil
+	}
+	i := 0
+	ks := make([]string, len(goPackages))
+	fs := make([]func() error, len(goPackages))
+	for k, f := range goPackages {
+		ks[i] = k
+		if f != nil {
+			fs[i] = f
+		}
+		i++
+	}
+	if err := chrootAurInstall(ks...); err != nil {
+		return err
+	}
+	for _, val := range fs {
+		if val == nil {
+			break
+		}
+		if err := val(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func pipPkgInstall() error {
+	if !*pipPkgs {
+		return nil
+	}
+	if err := chrootPacmanInstall("python", "python-pip"); err != nil {
+		return err
+	}
+	if len(pipPackages) == 0 {
+		return nil
+	}
+	i := 0
+	ks := make([]string, len(pipPackages))
+	fs := make([]func() error, len(pipPackages))
+	for k, f := range pipPackages {
+		ks[i] = k
+		if f != nil {
+			fs[i] = f
+		}
+		i++
+	}
+	if err := chrootAurInstall(ks...); err != nil {
+		return err
+	}
+	for _, val := range fs {
+		if val == nil {
+			break
+		}
+		if err := val(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func npmPkgInstall() error {
+	if !*npmPkgs {
+		return nil
+	}
+	if err := chrootPacmanInstall("nodejs", "npm"); err != nil {
+		return err
+	}
+	if len(npmPackages) == 0 {
+		return nil
+	}
+	i := 0
+	ks := make([]string, len(npmPackages))
+	fs := make([]func() error, len(npmPackages))
+	for k, f := range npmPackages {
+		ks[i] = k
+		if f != nil {
+			fs[i] = f
+		}
+		i++
+	}
+	if err := chrootAurInstall(ks...); err != nil {
+		return err
+	}
+	for _, val := range fs {
+		if val == nil {
+			break
+		}
+		if err := val(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func desktopInstall() error {
+	if !*desktop || len(desktopPackages) == 0 {
+		return nil
+	}
+	i := 0
+	ks := make([]string, len(desktopPackages))
+	fs := make([]func() error, len(desktopPackages))
+	for k, f := range desktopPackages {
+		ks[i] = k
+		if f != nil {
+			fs[i] = f
+		}
+		i++
+	}
+	if err := chrootAurInstall(ks...); err != nil {
+		return err
+	}
+	for _, val := range fs {
+		if val == nil {
+			break
+		}
+		if err := val(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CopyConfig() error {
+	for key, val := range configPath {
+		if err := chrootRunCommand("cp", key, val); err != nil {
+			return err
+		}
 	}
 	return nil
 }
