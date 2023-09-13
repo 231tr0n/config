@@ -243,6 +243,7 @@ var (
 		"arc-gtk-theme",
 		"arc-icon-theme",
 		"grub-theme-vimix",
+		"capitaine-cursors",
 	}
 )
 
