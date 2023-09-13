@@ -237,8 +237,13 @@ var (
 
 // Config install.
 var (
-	configHooks = [][]string{}
-	configPaths = map[string]string{}
+	configHooks    = [][]string{}
+	configPaths    = map[string]string{}
+	configPackages = []string{
+		"arc-gtk-theme",
+		"arc-icon-theme",
+		"grub-theme-vimix",
+	}
 )
 
 // Log file name.
@@ -462,13 +467,14 @@ func init() {
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
 		}
-	}
-	// Config setup.
-	for key, val := range configPaths {
-		appendInstaller("chrootRunCommand", "cp", key, val)
-	}
-	for _, val := range configHooks {
-		appendInstaller(val...)
+		// Config setup.
+		for key, val := range configPaths {
+			appendInstaller("chrootRunCommand", "cp", key, val)
+		}
+		appendInstaller(append([]string{"chrootPacmanInstall"}, configPackages...)...)
+		for _, val := range configHooks {
+			appendInstaller(val...)
+		}
 	}
 	// Unmount system.
 	if *unmountFS {
