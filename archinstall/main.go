@@ -280,6 +280,7 @@ var (
 	start             = flag.Int("start", 0, "Command from which the installer should start executing.")
 	subZone           = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	swap              = flag.String("swap", "", "Set the swap partition.")
+	unmountFS         = flag.Bool("unmount-fs", false, "Use this flag to unmount the filesystem automatically after installation.")
 	userPwd           = flag.String("user-pwd", "", "Set user password. (required)")
 	username          = flag.String("username", "zeltron", "Set the username of the system.")
 	zone              = flag.String("zone", "Asia", "Set the zone for system time.")
@@ -472,7 +473,9 @@ func init() {
 		appendInstaller(val...)
 	}
 	// Unmount system.
-	appendInstaller("unmount", *mountPoint)
+	if *unmountFS {
+		appendInstaller("unmount", *mountPoint)
+	}
 }
 
 func appendInstaller(cmds ...string) {
