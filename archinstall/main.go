@@ -60,6 +60,7 @@ var (
 		"cmus",
 		"code",
 		"conky",
+		"connman",
 		"copyq",
 		"curl",
 		"discord",
