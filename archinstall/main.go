@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 )
 
 // Base install.
@@ -286,6 +288,11 @@ var (
 // Installer variable.
 var (
 	installer = [][]string{}
+)
+
+// Tabwriter config.
+var (
+	tabw = tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.DiscardEmptyColumns)
 )
 
 func init() {
@@ -565,14 +572,20 @@ func systemctlUserServiceEnable(services ...string) error {
 func main() {
 	// Installer code
 	if *list {
-		log.Println("----------------------------")
-		log.Println("Index", "\t", "Command")
-		log.Println("----------------------------")
+		fmt.Fprintln(tabw, "Index\tMode\tCommand")
+		fmt.Fprintln(tabw, "-----\t----\t-------")
 		for i, j := range installer[*start:] {
-			log.Println(strconv.Itoa(i+*start), "\t", strings.Join(j, " "))
+			if len(j) < 2 {
+				log.Fatalln(errInstallerArgs)
+			}
+			fmt.Fprintln(tabw, strconv.Itoa(i+*start)+"\t"+j[0]+"\t"+strings.Join(j[1:], " "))
 		}
+		tabw.Flush()
 	} else {
 		for _, j := range installer[*start:] {
+			if len(j) < 2 {
+				log.Fatalln(errInstallerArgs)
+			}
 			switch j[0] {
 			case "runCommand":
 				if len(j[1:]) < 2 {
