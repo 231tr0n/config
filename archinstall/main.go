@@ -46,6 +46,19 @@ var (
 		{"systemctlServiceEnable", "tlp"},
 		{"systemctlServiceEnable", "ly"},
 	}
+	aurPackages = []string{
+		"brave-bin",
+		"drawio-desktop-bin",
+		"google-chrome",
+		"hyprpicker",
+		"ocs-url",
+		"stacer-bin",
+		"swaysettings-git",
+		"themix-full-git",
+		"webapp-manager",
+		"whatsapp-for-linux-bin",
+		"wlogout",
+	}
 	desktopPackages = []string{
 		"acpi",
 		"bat",
@@ -215,24 +228,6 @@ var (
 var (
 	cargoHooks    = [][]string{}
 	cargoPackages = []string{}
-)
-
-// Aur install.
-var (
-	aurHooks    = [][]string{}
-	aurPackages = []string{
-		"brave-bin",
-		"drawio-desktop-bin",
-		"google-chrome",
-		"hyprpicker",
-		"ocs-url",
-		"stacer-bin",
-		"swaysettings-git",
-		"themix-full-git",
-		"webapp-manager",
-		"whatsapp-for-linux-bin",
-		"wlogout",
-	}
 )
 
 // Config install.
@@ -462,9 +457,6 @@ func init() {
 	// Aur packages install.
 	if *desktop {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
-		for _, val := range aurHooks {
-			appendInstaller(val...)
-		}
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
