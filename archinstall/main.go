@@ -54,7 +54,7 @@ var (
 		"ocs-url",
 		"stacer-bin",
 		"swaysettings-git",
-		"themix-full-git",
+		// "themix-full-git",
 		"webapp-manager",
 		"whatsapp-for-linux-bin",
 		"wlogout",
