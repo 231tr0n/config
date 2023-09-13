@@ -403,10 +403,7 @@ func init() {
 	}
 	appendInstaller("chrootRunCommand", "grub-mkconfig", "-o", filepath.Join("/boot", "grub", "grub.cfg"))
 	// Install Aurhelper.
-	appendInstaller("chrootRunCommand", "useradd", "-m", "temp")
-	appendInstaller("chrootRunCommand", "usermod", "-aG", "sudo", "temp")
-	appendInstaller("chrootRunCommand", "su", "temp", "-s", "/bin/bash", "-c", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin")
-	appendInstaller("chrootRunCommand", "userdel", "-r", "temp")
+	appendInstaller("chrootTempBashRunCommand", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin")
 	// Go packages install.
 	if *goPkgs {
 		appendInstaller("chrootPacmanInstall", "go")
@@ -457,7 +454,7 @@ func init() {
 	}
 	// Aur packages install.
 	if *desktop {
-		appendInstaller("chrootUserBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
+		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		for _, val := range aurHooks {
 			appendInstaller(val...)
 		}
@@ -533,6 +530,20 @@ func chrootRunCommand(name string, args ...string) error {
 
 func chrootUserBashRunCommand(cmd string) error {
 	return chrootRunCommand("su", *username, "-s", "/bin/bash", "-c", cmd)
+}
+
+func chrootTempBashRunCommand(cmd string) error {
+	if err := chrootRunCommand("useradd", "-m", "temp"); err != nil {
+		return err
+	}
+	if err := chrootRunCommand("usermod", "-aG", "sudo", "temp"); err != nil {
+		return err
+	}
+	err := chrootRunCommand("su", "temp", "-s", "/bin/bash", "-c", cmd)
+	if err := chrootRunCommand("userdel", "-r", "temp"); err != nil {
+		return err
+	}
+	return err
 }
 
 func chrootBashRunCommand(cmd string) error {
@@ -652,6 +663,13 @@ func main() {
 					log.Fatalln(errInstallerArgs)
 				}
 				if err := chrootUserBashRunCommand(j[1]); err != nil {
+					log.Fatalln(errInstall)
+				}
+			case "chrootTempBashRunCommand":
+				if len(j[1:]) != 1 {
+					log.Fatalln(errInstallerArgs)
+				}
+				if err := chrootTempBashRunCommand(j[1]); err != nil {
 					log.Fatalln(errInstall)
 				}
 			case "systemctlServiceEnable":
