@@ -38,7 +38,15 @@ var (
 
 // Desktop install.
 var (
-	desktopHooks = [][]string{
+	// Install grub theme
+	// Install plymouth theme
+	// Install gtk theme
+	// Install cursor theme
+	// Install icons theme
+	// Install lunarvim
+	// Change shell using chsh
+	desktopConfigPaths = map[string]string{}
+	desktopHooks       = [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
 		{"systemctlUserServiceEnable", "pipewire"},
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
@@ -61,12 +69,17 @@ var (
 	}
 	desktopPackages = []string{
 		"acpi",
+		"arc-gtk-theme",
+		"arc-icon-theme",
+		"bat",
 		"bat",
 		"bemenu-wayland",
 		"blueman",
 		"bpytop",
+		"breeze-plymouth",
 		"brightnessctl",
 		"calibre",
+		"capitaine-cursors",
 		"chromium",
 		"clamav",
 		"clamtk",
@@ -81,6 +94,7 @@ var (
 		"dosfstools",
 		"drawing",
 		"emacs",
+		"fd",
 		"ffmpeg",
 		"file-roller",
 		"firefox",
@@ -99,6 +113,7 @@ var (
 		"gnome-notes",
 		"gnome-photos",
 		"grim",
+		"grub-theme-vimix",
 		"gthumb",
 		"gufw",
 		"haruna",
@@ -108,6 +123,7 @@ var (
 		"imv",
 		"jack2",
 		"jdk-openjdk",
+		"jq",
 		"kontrast",
 		"lf",
 		"libreoffice",
@@ -135,6 +151,8 @@ var (
 		"pipewire-pulse",
 		"podman",
 		"polkit-gnome",
+		"python-pynvim",
+		"ripgrep",
 		"slurp",
 		"subversion",
 		"sway",
@@ -213,6 +231,7 @@ var (
 		"localtunnel",
 		"nodemon",
 		"npm-check-updates",
+		"tree-sitter-cli",
 	}
 )
 
@@ -228,19 +247,6 @@ var (
 var (
 	cargoHooks    = [][]string{}
 	cargoPackages = []string{}
-)
-
-// Config install.
-var (
-	configHooks    = [][]string{}
-	configPaths    = map[string]string{}
-	configPackages = []string{
-		"arc-gtk-theme",
-		"arc-icon-theme",
-		"grub-theme-vimix",
-		"capitaine-cursors",
-		"breeze-plymouth",
-	}
 )
 
 // Log file name.
@@ -462,12 +468,8 @@ func init() {
 			appendInstaller(val...)
 		}
 		// Config setup.
-		for key, val := range configPaths {
+		for key, val := range desktopConfigPaths {
 			appendInstaller("chrootRunCommand", "cp", key, val)
-		}
-		appendInstaller(append([]string{"chrootPacmanInstall"}, configPackages...)...)
-		for _, val := range configHooks {
-			appendInstaller(val...)
 		}
 	}
 	// Unmount system.
