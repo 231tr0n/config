@@ -244,6 +244,7 @@ var (
 		"arc-icon-theme",
 		"grub-theme-vimix",
 		"capitaine-cursors",
+		"breeze-plymouth",
 	}
 )
 
