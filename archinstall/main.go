@@ -403,7 +403,7 @@ func init() {
 	// Install Aurhelper.
 	appendInstaller("chrootRunCommand", "useradd", "-m", "temp")
 	appendInstaller("chrootRunCommand", "usermod", "-aG", "sudo", "temp")
-	appendInstaller("chrootUserBashRunCommand", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin")
+	appendInstaller("chrootRunCommand", "su", "temp", "-s", "/bin/bash", "-c", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin")
 	appendInstaller("chrootRunCommand", "userdel", "-r", "temp")
 	// Go packages install.
 	if *goPkgs {
@@ -588,7 +588,7 @@ func main() {
 			}
 			switch j[0] {
 			case "runCommand":
-				if len(j[1:]) < 2 {
+				if len(j[1:]) < 1 {
 					log.Fatalln(errInstallerArgs)
 				}
 				if err := runCommand(j[1], j[2:]...); err != nil {
@@ -623,7 +623,7 @@ func main() {
 					log.Fatalln(errInstall)
 				}
 			case "chrootRunCommand":
-				if len(j[1:]) < 2 {
+				if len(j[1:]) < 1 {
 					log.Fatalln(errInstallerArgs)
 				}
 				if err := chrootRunCommand(j[1], j[2:]...); err != nil {
