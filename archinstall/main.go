@@ -38,15 +38,16 @@ var (
 
 // Desktop install.
 var (
-	// Install grub theme
-	// Install plymouth theme
-	// Install gtk theme
-	// Install cursor theme
-	// Install icons theme
+	desktopConfigPaths = map[string]string{}
+	// Install grub theme vimix
+	// Install plymouth theme spinfinity
+	// Install gtk theme Arc-Dark
+	// Install cursor theme capitaine-cursors
+	// Install icons theme Arc
 	// Install lunarvim
 	// Change shell using chsh
-	desktopConfigPaths = map[string]string{}
-	desktopHooks       = [][]string{
+	// Compile swaybar input go file.
+	desktopHooks = [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
 		{"systemctlUserServiceEnable", "pipewire"},
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
@@ -72,11 +73,9 @@ var (
 		"arc-gtk-theme",
 		"arc-icon-theme",
 		"bat",
-		"bat",
 		"bemenu-wayland",
 		"blueman",
 		"bpytop",
-		"breeze-plymouth",
 		"brightnessctl",
 		"calibre",
 		"capitaine-cursors",
@@ -142,6 +141,7 @@ var (
 		"okular",
 		"openssh",
 		"openvpn",
+		"otf-hermit-nerd",
 		"pacman-contrib",
 		"parted",
 		"pavucontrol",
