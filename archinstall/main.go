@@ -53,7 +53,7 @@ var (
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
 		{"systemctlUserServiceEnable", "wireplumber"},
 		{"systemctlServiceEnable", "tlp"},
-		{"systemctlServiceEnable", "ly"},
+		{"systemctlServiceEnable", "gdm"},
 	}
 	aurPackages = []string{
 		"brave-bin",
@@ -102,6 +102,7 @@ var (
 		"foot",
 		"gcc",
 		"gcolor3",
+		"gdm",
 		"glfw-wayland",
 		"gnome-calculator",
 		"gnome-calendar",
@@ -150,9 +151,11 @@ var (
 		"pipewire-audio",
 		"pipewire-pulse",
 		"podman",
+		"polkit",
 		"polkit-gnome",
 		"python-pynvim",
 		"ripgrep",
+		"seatd",
 		"slurp",
 		"subversion",
 		"sway",
