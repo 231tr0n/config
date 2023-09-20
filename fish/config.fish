@@ -9,9 +9,12 @@ if status is-interactive
 	function findfile
 		find . -name $argv[1] -type f,d
 	end
-# 	function nvim
-# 		/usr/bin/nvim -u ~/.vimrc $argv
-# 	end
+	# function nvim
+	# 	/usr/bin/nvim -u ~/.vimrc $argv
+	# end
+	function vim
+		/usr/bin/nvim $argv
+	end
 	function findword
 		grep $argv[1] -rnwH . --exclude-dir=node_modules --exclude-dir=.git --exclude=package-lock.json
 	end
@@ -36,10 +39,7 @@ if status is-interactive
 		rmdir -p $argv;
 	end
 	function cf
-		xclip -selection clipboard < $argv;
-	end
-	function ct
-		xclip -selection clipboard
+		wl-copy < $argv;
 	end
 	function cr
 		cp -r $argv;
@@ -53,6 +53,7 @@ end
 set -x GOPATH $HOME/go
 set -x PATH $PATH $GOPATH/bin
 set -x PATH $PATH $HOME/.local/bin
+set -x PATH $PATH $HOME/.cargo/bin
 
 # if status is-interactive
 # and not set -q TMUX

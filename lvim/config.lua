@@ -106,6 +106,12 @@ lvim.plugins = {
       vim.o.timeoutlen = 500
     end
   },
+  {
+    "nordtheme/vim",
+  },
+  {
+    'Tsuzat/NeoSolarized.nvim',
+  }
 }
 
 -- generic LSP settings

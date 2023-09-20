@@ -1,0 +1,66 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hi!
+  EXECUTABLE_NAME: archinstall
+
+tasks:
+  fmt:
+    cmds:
+      - go fmt ./...
+      - gofumpt -e -l -w -extra .
+
+  lint:
+    cmds:
+      - staticcheck -checks all ./...
+      - golangci-lint run --sort-results
+
+  coverprofile:
+    cmds:
+      - go test -cover -coverprofile=coverage/cover.out ./...
+
+  showcoverage:
+    cmds:
+      - go tool cover -html coverage/cover.out
+
+  docs:
+    cmds:
+      - go run golang.org/x/pkgsite/cmd/pkgsite@latest
+
+  build:
+    cmds:
+      - go generate ./...
+      - GOOS=linux GOARCH=amd64 go build -o bin/{{.EXECUTABLE_NAME}} .
+
+  buildrun:
+    cmds:
+      - ./bin/{{.EXECUTABLE_NAME}} {{.CLI_ARGS}}
+
+  run:
+    cmds:
+      - go generate ./...
+      - go run . {{.CLI_ARGS}}
+
+  test:
+    cmds:
+      - go test ./...
+
+  clean:
+    cmds:
+      - rm -rf bin/*
+
+  upgrade:
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  installdeps:
+    cmds:
+      - go mod tidy
+
+  default:
+    silent: true
+    cmds:
+      - echo "{{.GREETING}}, no task is provided to execute."

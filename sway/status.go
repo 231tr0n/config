@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -22,16 +25,26 @@ var (
 	lastCpuTotalTime = 0
 )
 
+var (
+	ErrLog = errors.New("main: Cannot write to log file.")
+)
+
 func init() {
+	file, err := os.OpenFile(filepath.Join(os.Getenv("HOME"), ".config", "sway", "status.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(ErrLog)
+
+	}
+
 	log.SetFlags(0)
-	log.SetOutput(os.Stdout)
+	log.SetOutput(file)
 	log.SetPrefix("[\033[91mLOG\033[0m] ")
 
 	version, err := json.Marshal(version{
 		Version: 1,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	fmt.Println(string(version))
@@ -134,7 +147,7 @@ func spacer() part {
 func cmd(args ...string) string {
 	output, err := exec.Command(args[0], args[1:]...).Output()
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	return string(output)
 }
@@ -143,7 +156,7 @@ func bash(args ...string) string {
 	args = append([]string{"-c"}, args...)
 	output, err := exec.Command("bash", args...).Output()
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	return string(output)
 }
@@ -165,7 +178,7 @@ func sinkVolume() string {
 	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"), "\n")[0])[1]
 	f, err := strconv.ParseFloat(temp, 64)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	return strconv.Itoa(int(f*100)) + "%"
 }
@@ -174,7 +187,7 @@ func sourceVolume() string {
 	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"), "\n")[0])[1]
 	f, err := strconv.ParseFloat(temp, 64)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	return strconv.Itoa(int(f*100)) + "%"
 }
@@ -185,7 +198,7 @@ func network() (string, string) {
 
 	data, err := os.ReadFile("/proc/net/dev")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
@@ -195,13 +208,13 @@ func network() (string, string) {
 		fields := strings.Fields(val)
 		tempRx, err := strconv.Atoi(fields[1])
 		if err != nil {
-			log.Fatalln(err)
+			panic(err)
 		}
 		rx += tempRx
 
 		tempTx, err := strconv.Atoi(fields[9])
 		if err != nil {
-			log.Fatalln(err)
+			panic(err)
 		}
 		tx += tempTx
 	}
@@ -238,12 +251,12 @@ func battery() (string, bool) {
 	}
 	data, err := os.ReadFile("/sys/class/power_supply/" + batDir + "/capacity")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	status, err := os.ReadFile("/sys/class/power_supply/" + batDir + "/status")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	if strings.Contains(strings.TrimSpace(string(status)), "Charging") {
@@ -255,21 +268,21 @@ func battery() (string, bool) {
 func cpu() string {
 	data, err := os.ReadFile("/proc/stat")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	fields := strings.Fields(strings.Split(strings.TrimSpace(string(data)), "\n")[0])
 
 	idleTime, err := strconv.Atoi(fields[4])
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	totalTime := 0
 	for _, val := range fields[1:] {
 		temp, err := strconv.Atoi(val)
 		if err != nil {
-			log.Fatalln(err)
+			panic(err)
 		}
 
 		totalTime += temp
@@ -289,19 +302,19 @@ func cpu() string {
 func ram() string {
 	data, err := os.ReadFile("/proc/meminfo")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(data)), "\n")[0:2]
 
 	memTotal, err := strconv.Atoi(strings.Fields(lines[0])[1])
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	memFree, err := strconv.Atoi(strings.Fields(lines[1])[1])
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	usage := (float64(memTotal-memFree) / float64(memTotal)) * 100.0
@@ -310,9 +323,15 @@ func ram() string {
 }
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			log.Println("stacktrace from panic: \n" + string(debug.Stack()))
+		}
+	}()
+
 	for {
 		rx, tx := network()
-		capacity, status := battery()
 
 		builder := []part{
 			identifier("NETWORK"),
@@ -344,6 +363,7 @@ func main() {
 			spacer(),
 		}
 
+		capacity, status := battery()
 		if capacity != "" {
 			stat := "󰁹"
 			if status {
@@ -360,7 +380,7 @@ func main() {
 		time.Sleep(tick * time.Second)
 		builded, err := json.MarshalIndent(builder, "", "  ")
 		if err != nil {
-			log.Fatalln(err)
+			panic(err)
 		}
 
 		fmt.Println(string(builded) + ",")

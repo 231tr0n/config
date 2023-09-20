@@ -377,10 +377,14 @@ highlight CursorIM           ctermfg=0    ctermbg=10   cterm=NONE
 highlight CursorColumn       ctermfg=NONE ctermbg=234  cterm=NONE
 highlight CursorLine         ctermfg=NONE ctermbg=234  cterm=NONE
 highlight Directory          ctermfg=67   ctermbg=NONE cterm=NONE
-highlight DiffAdd            ctermfg=NONE ctermbg=24   cterm=NONE
-highlight DiffChange         ctermfg=181  ctermbg=239  cterm=NONE
-highlight DiffDelete         ctermfg=162  ctermbg=53   cterm=NONE
-highlight DiffText           ctermfg=NONE ctermbg=102  cterm=NONE
+" highlight DiffAdd            ctermfg=NONE ctermbg=24   cterm=NONE
+" highlight DiffChange         ctermfg=181  ctermbg=239  cterm=NONE
+" highlight DiffDelete         ctermfg=162  ctermbg=53   cterm=NONE
+" highlight DiffText           ctermfg=NONE ctermbg=102  cterm=NONE
+highlight DiffAdd            ctermfg=2    ctermbg=17   cterm=bold   
+highlight DiffDelete         ctermfg=9    ctermbg=17   cterm=bold   
+highlight DiffChange         ctermfg=12   ctermbg=17   cterm=bold   
+highlight DiffText           ctermfg=10   ctermbg=88   cterm=bold   
 " highlight EndOfBuffer
 highlight ErrorMsg           ctermfg=0    ctermbg=167  cterm=NONE
 " highlight VertSplit          ctermfg=235  ctermbg=238  cterm=NONE
@@ -506,22 +510,9 @@ if has('nvim')
   set guicursor+=r:ver100
   " sets cursor to a beam in insertmode and block in other modes. Works only for gnome-terminal
 
-  " Plugins
-  call plug#begin()
-    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-    Plug 'junegunn/fzf.vim'
-    Plug 'tpope/vim-fugitive'
-  call plug#end()
-
   filetype indent off
   " This is called becaused vim-plug turns on filetype indent.
 
-  " Plugin key mappings
-  nnoremap <silent> <M-f> :Files<CR>
-  nnoremap <silent> <M-r> :Rg<CR>
-  nnoremap <silent> <M-b> :BCommits<CR>
-  nnoremap <silent> <M-c> :Commits<CR>
-  " fzf.vim key mappings
   nnoremap <silent> <M-x> :pclose<CR>
   " closing panel in neovim
 
@@ -538,22 +529,8 @@ if has('nvim')
   " auto commands
   " au FileType python quit
   " makes us not use nvim for python files
-  au VimEnter * call FileBrowserToggle() | call feedkeys("\<C-w>l")
+  " au VimEnter * call FileBrowserToggle() | call feedkeys("\<C-w>l")
   " open filebrowser by default
-
-  " statusline
-  set statusline=%{%StatuslineModeReturner()%}
-  set statusline+=%2*\ %Y\ %*
-  set statusline+=%3*[%{CheckActiveWindow()}]%r%m%*
-  set statusline+=%<
-  if has('nvim')
-    set statusline+=%4*\ nvim\ %t\ %=%*
-  else
-    set statusline+=%4*\ vim\ %t\ %=%*
-  endif
-  set statusline+=%3*%{FugitiveStatusline()}\ %*
-  set statusline+=%5*\ %p%%\ %*
-  set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 else
   " options
   set guicursor=n-v-c:block
@@ -577,20 +554,20 @@ else
   " ( - (\n\t|\n)
   inoremap <silent> [<CR> [<CR>]<Esc>O<Tab>
   " [ - [\n\t|\n]
-
-  " statusline
-  set statusline=%{%StatuslineModeReturner()%}
-  set statusline+=%2*\ %Y\ %*
-  set statusline+=%3*[%{CheckActiveWindow()}]%r%m%*
-  set statusline+=%<
-  if has('nvim')
-    set statusline+=%4*\ nvim\ %t\ %=%*
-  else
-    set statusline+=%4*\ vim\ %t\ %=%*
-  endif
-  set statusline+=%5*\ %p%%\ %*
-  set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 endif
+
+" statusline
+set statusline=%{%StatuslineModeReturner()%}
+set statusline+=%2*\ %Y\ %*
+set statusline+=%3*[%{CheckActiveWindow()}]%r%m%*
+set statusline+=%<
+if has('nvim')
+	set statusline+=%4*\ nvim\ %t\ %=%*
+else
+	set statusline+=%4*\ vim\ %t\ %=%*
+endif
+set statusline+=%5*\ %p%%\ %*
+set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 
 " windows config
 if has("win32") || has("win64") || has("win16")

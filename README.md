@@ -1,10 +1,3 @@
-# config
-All the config here is basically for linuxmint since I use that distro and install bspwm.
+# Config
 
-Also commands for mounting to be added to .profile
-```bash
-if ! cat /proc/mounts | grep -q /dev/sda4
-then
-	gio mount -d /dev/sda4
-fi
-```
+This is a collection of my configurations for various programs and also has an archinstaller to install the base system and bootstrap the config into the system.
