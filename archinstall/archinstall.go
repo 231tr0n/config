@@ -169,6 +169,7 @@ var (
 		"polkit",
 		"polkit-gnome",
 		"python-pynvim",
+		"python-sphinx",
 		"ripgrep",
 		"seatd",
 		"slurp",
