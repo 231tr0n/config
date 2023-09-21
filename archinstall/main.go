@@ -38,7 +38,20 @@ var (
 
 // Desktop install.
 var (
-	desktopConfigPaths = map[string]string{}
+	desktopConfigPaths = map[string]string{
+		filepath.Join("desktop-pics", "background.png"):             filepath.Join("/home", *username, "Pictures", "background.png"),
+		filepath.Join("desktop-pics", "lock.png"):                   filepath.Join("/home", *username, "Pictures", "lock.png"),
+		filepath.Join("fish", "config.fish"):                        filepath.Join("/home", *username, ".config", "fish", "config.fish"),
+		filepath.Join("fish", "fish_variables"):                     filepath.Join("/home", *username, ".config", "fish", "fish_variables"),
+		filepath.Join("fish", "functions", "fish_mode_prompt.fish"): filepath.Join("/home", *username, ".config", "fish", "functions", "fish_mode_prompt.fish"),
+		filepath.Join("fish", "functions", "fish_prompt.fish"):      filepath.Join("/home", *username, ".config", "fish", "functions", "fish_prompt.fish"),
+		filepath.Join("foot", "foot.ini"):                           filepath.Join("/home", *username, ".config", "foot", "foot.ini"),
+		filepath.Join("lvim", "config.lua"):                         filepath.Join("/home", *username, ".config", "lvim", "config.lua"),
+		filepath.Join("mako", "config"):                             filepath.Join("/home", *username, ".config", "mako", "config"),
+		filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".config", "nvim", "init.vim"),
+		filepath.Join("sway", "config"):                             filepath.Join("/home", *username, ".config", "sway", "config"),
+		filepath.Join("sway", "status.go"):                          filepath.Join("/home", *username, ".config", "sway", "status.go"),
+	}
 	// Install grub theme vimix
 	// Install plymouth theme spinfinity
 	// Install gtk theme Arc-Dark
@@ -54,6 +67,7 @@ var (
 		{"systemctlUserServiceEnable", "wireplumber"},
 		{"systemctlServiceEnable", "tlp"},
 		{"systemctlServiceEnable", "gdm"},
+		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 	}
 	aurPackages = []string{
 		"brave-bin",
@@ -112,6 +126,7 @@ var (
 		"gnome-nettool",
 		"gnome-notes",
 		"gnome-photos",
+		"go",
 		"grim",
 		"grub-theme-vimix",
 		"gthumb",
@@ -254,7 +269,8 @@ var (
 
 // Log file name.
 const (
-	logFile = "goarchinstall.log"
+	logFile   = "goarchinstall.log"
+	configUrl = "https://raw.githubusercontent.com/231tr0n/config/main"
 )
 
 // Errors.
@@ -467,12 +483,13 @@ func init() {
 	if *desktop {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
-		for _, val := range desktopHooks {
-			appendInstaller(val...)
-		}
 		// Config setup.
 		for key, val := range desktopConfigPaths {
-			appendInstaller("chrootRunCommand", "cp", key, val)
+			appendInstaller("chrootUserBashRunCommand", "mkdir "+filepath.Dir(val))
+			appendInstaller("chrootUserBashRunCommand", "curl "+filepath.Join(configUrl, key)+" -o "+val)
+		}
+		for _, val := range desktopHooks {
+			appendInstaller(val...)
 		}
 	}
 	// Unmount system.
