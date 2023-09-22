@@ -61,14 +61,13 @@ var (
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
 		{"systemctlUserServiceEnable", "wireplumber"},
 		{"systemctlServiceEnable", "tlp"},
-		{"systemctlServiceEnable", "gdm"},
+		{"systemctlServiceEnable", "ly"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 	}
 	aurPackages = []string{
 		"brave-bin",
 		"drawio-desktop-bin",
 		"google-chrome",
-		"gdm-settings",
 		"hyprpicker",
 		"ocs-url",
 		"stacer-bin",
@@ -112,7 +111,6 @@ var (
 		"foot",
 		"gcc",
 		"gcolor3",
-		"gdm",
 		"glfw-wayland",
 		"gnome-calculator",
 		"gnome-calendar",
