@@ -204,7 +204,7 @@ bindsym $mod+Shift+w exec firefox
 bindsym $mod+Shift+d exec hyprpicker | tr -d '\n' | wl-copy
 bindsym $mod+d exec makoctl menu bemenu -H 40 -B 2 --hp 20 --fn HurmitNerdFontMono 10 --bdr '#FFFFFF' --ch 30 --center -W 0.5
 bindsym $mod+Shift+q exec wlogout
-bindsym Mod1+e exec pcmanfm
+bindsym Mod1+e exec nemo
 bindsym Control+Mod1+l exec swaylock -e -l -f -i ~/Pictures/lock.png -s center
 for_window [class=".*"] border pixel 2
 bindsym $mod+m exec bemenu-run -H 40 -B 2 --hp 20 --fn HurmitNerdFontMono 10 --bdr '#FFFFFF' --ch 30 --center -W 0.5
