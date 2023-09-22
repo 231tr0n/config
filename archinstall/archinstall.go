@@ -54,12 +54,7 @@ var (
 	}
 	// Install grub theme vimix
 	// Install plymouth theme spinfinity
-	// Install gtk theme Arc-Dark
-	// Install cursor theme capitaine-cursors
-	// Install icons theme Arc
 	// Install lunarvim
-	// Change shell using chsh
-	// Compile swaybar input go file.
 	desktopHooks = [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
 		{"systemctlUserServiceEnable", "pipewire"},
@@ -73,6 +68,7 @@ var (
 		"brave-bin",
 		"drawio-desktop-bin",
 		"google-chrome",
+		"gdm-settings",
 		"hyprpicker",
 		"ocs-url",
 		"stacer-bin",
@@ -492,6 +488,7 @@ func init() {
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
 		}
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
 	}
 	// Unmount system.
 	if *unmountFS {
