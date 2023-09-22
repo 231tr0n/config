@@ -54,7 +54,6 @@ var (
 	}
 	// Install grub theme vimix
 	// Install plymouth theme spinfinity
-	// Install lunarvim
 	desktopHooks = [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
 		{"systemctlUserServiceEnable", "pipewire"},
@@ -63,6 +62,7 @@ var (
 		{"systemctlServiceEnable", "tlp"},
 		{"systemctlServiceEnable", "ly"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
+		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo /usr/share/lunarvim/init-lvim.sh"},
 	}
 	aurPackages = []string{
 		"brave-bin",
@@ -479,13 +479,14 @@ func init() {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
 		// Config setup.
+		for _, val := range desktopHooks {
+			appendInstaller(val...)
+		}
 		for key, val := range desktopConfigPaths {
 			appendInstaller("chrootUserBashRunCommand", "mkdir "+filepath.Dir(val))
 			appendInstaller("chrootUserBashRunCommand", "curl "+filepath.Join(configUrl, key)+" -o "+val)
 		}
-		for _, val := range desktopHooks {
-			appendInstaller(val...)
-		}
+		// Set default shell to fish
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
 	}
 	// Unmount system.
@@ -595,8 +596,7 @@ func systemctlServiceEnable(services ...string) error {
 }
 
 func systemctlUserServiceEnable(services ...string) error {
-	args := append([]string{"--user", "enable"}, services...)
-	if err := chrootRunCommand("systemctl", args...); err != nil {
+	if err := chrootRunCommand("su", *username, "-s", "/bin/bash", "-c", "systemctl --user enable "+strings.Join(services, " ")); err != nil {
 		return err
 	}
 	return nil
