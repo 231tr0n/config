@@ -77,6 +77,10 @@ var (
 		"whatsapp-for-linux-bin",
 		"wlogout",
 	}
+	vmPackages = []string{
+		"virtualbox-guest-iso",
+		"virtualbox-guest-utils",
+	}
 	desktopPackages = []string{
 		"acpi",
 		"arc-gtk-theme",
@@ -115,6 +119,7 @@ var (
 		"gnome-calculator",
 		"gnome-calendar",
 		"gnome-console",
+		"gnome-desktop",
 		"gnome-disk-utility",
 		"gnome-multi-writer",
 		"gnome-nettool",
@@ -306,6 +311,7 @@ var (
 	unmountFS         = flag.Bool("unmount-fs", false, "Use this flag to unmount the filesystem automatically after installation.")
 	userPwd           = flag.String("user-pwd", "", "Set user password. (required)")
 	username          = flag.String("username", "zeltron", "Set the username of the system.")
+	vm                = flag.Bool("vm", false, "Use this flag if you are installing in a vm.")
 	zone              = flag.String("zone", "Asia", "Set the zone for system time.")
 )
 
@@ -488,6 +494,10 @@ func init() {
 		}
 		// Set default shell to fish
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
+	}
+	if *vm {
+		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
+		appendInstaller("systemctlServiceEnable", "vboxservice")
 	}
 	// Unmount system.
 	if *unmountFS {
