@@ -155,7 +155,7 @@ var (
 		"pacman-contrib",
 		"parted",
 		"pavucontrol",
-		"pcmanfm",
+		"nemo",
 		"pipewire",
 		"pipewire-audio",
 		"pipewire-pulse",
