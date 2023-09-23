@@ -253,13 +253,13 @@ func batteryNotifier(capacity int) {
 	bmu.Lock()
 	defer bmu.Unlock()
 
-	if capacity < batteryLowerLimit {
+	if capacity <= batteryLowerLimit {
 		if !batteryNotified {
 			cmd("swaynag", "-t", "error", "-m", "Battery Low")
 			batteryNotified = true
 		}
 		return
-	} else if capacity > batteryUpperLimit {
+	} else if capacity >= batteryUpperLimit {
 		if !batteryNotified {
 			cmd("swaynag", "-t", "warning", "-m", "Battery High")
 			batteryNotified = true
