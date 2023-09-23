@@ -19,21 +19,27 @@ const (
 )
 
 var (
-	lastRx           = 1
-	lastTx           = 1
-	lastCpuIdleTime  = 0
-	lastCpuTotalTime = 0
+	lastRx            = 1
+	lastTx            = 1
+	lastCpuIdleTime   = 0
+	lastCpuTotalTime  = 0
+	batteryNotified   = false
+	batteryUpperLimit = 90
+	batteryLowerLimit = 15
 )
 
 var (
-	ErrLog = errors.New("main: Cannot write to log file.")
+	ErrLog          = errors.New("main: Cannot write to log file.")
+	ErrBatteryLimit = errors.New("main: Upper limit of battery lower than or equal to lower limit.")
 )
 
 func init() {
+	if batteryUpperLimit <= batteryLowerLimit {
+		panic(ErrBatteryLimit)
+	}
 	file, err := os.OpenFile(filepath.Join(os.Getenv("HOME"), ".config", "sway", "status.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(ErrLog)
-
 	}
 
 	log.SetFlags(0)
@@ -241,6 +247,29 @@ func network() (string, string) {
 	return strconv.Itoa(download) + notations[rxNotationIndex], strconv.Itoa(upload) + notations[txNotationIndex]
 }
 
+func batteryNotifier(capacity string) {
+	stats, err := strconv.Atoi(capacity[:len(capacity)-1])
+	if err != nil {
+		panic(err)
+	}
+
+	if stats < batteryLowerLimit {
+		if !batteryNotified {
+			cmd("swaynag", "-t", "error", "-m", "Battery Low")
+			batteryNotified = true
+		}
+		return
+	} else if stats > batteryUpperLimit {
+		if !batteryNotified {
+			cmd("swaynag", "-t", "warning", "-m", "Battery High")
+			batteryNotified = true
+		}
+		return
+	} else {
+		batteryNotified = false
+	}
+}
+
 func battery() (string, bool) {
 	batDir := "BAT0"
 	if _, err := os.Stat("/sys/class/power_supply/" + batDir); err != nil {
@@ -376,6 +405,7 @@ func main() {
 				spacer(),
 			}...)
 		}
+		go batteryNotifier(capacity)
 
 		time.Sleep(tick * time.Second)
 		builded, err := json.MarshalIndent(builder, "", "  ")
