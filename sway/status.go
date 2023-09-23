@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -26,6 +27,7 @@ var (
 	batteryNotified   = false
 	batteryUpperLimit = 90
 	batteryLowerLimit = 15
+	bmu               = &sync.Mutex{}
 )
 
 var (
@@ -247,19 +249,17 @@ func network() (string, string) {
 	return strconv.Itoa(download) + notations[rxNotationIndex], strconv.Itoa(upload) + notations[txNotationIndex]
 }
 
-func batteryNotifier(capacity string) {
-	stats, err := strconv.Atoi(capacity[:len(capacity)-1])
-	if err != nil {
-		panic(err)
-	}
+func batteryNotifier(capacity int) {
+	bmu.Lock()
+	defer bmu.Unlock()
 
-	if stats < batteryLowerLimit {
+	if capacity < batteryLowerLimit {
 		if !batteryNotified {
 			cmd("swaynag", "-t", "error", "-m", "Battery Low")
 			batteryNotified = true
 		}
 		return
-	} else if stats > batteryUpperLimit {
+	} else if capacity > batteryUpperLimit {
 		if !batteryNotified {
 			cmd("swaynag", "-t", "warning", "-m", "Battery High")
 			batteryNotified = true
@@ -287,6 +287,12 @@ func battery() (string, bool) {
 	if err != nil {
 		panic(err)
 	}
+
+	capacity, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		panic(err)
+	}
+	go batteryNotifier(capacity)
 
 	if strings.Contains(strings.TrimSpace(string(status)), "Charging") {
 		return strings.TrimSpace(string(data)) + "%", true
@@ -405,7 +411,6 @@ func main() {
 				spacer(),
 			}...)
 		}
-		go batteryNotifier(capacity)
 
 		time.Sleep(tick * time.Second)
 		builded, err := json.MarshalIndent(builder, "", "  ")
