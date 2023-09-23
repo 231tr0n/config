@@ -568,11 +568,13 @@ func chrootTempBashRunCommand(cmd string) error {
 	if err := chrootRunCommand("usermod", "-aG", "sudo", "temp"); err != nil {
 		return err
 	}
-	err := chrootRunCommand("su", "temp", "-s", "/bin/bash", "-c", cmd)
+	if err := chrootRunCommand("su", "temp", "-s", "/bin/bash", "-c", cmd); err != nil {
+		return err
+	}
 	if err := chrootRunCommand("userdel", "-r", "temp"); err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 func chrootBashRunCommand(cmd string) error {
