@@ -60,7 +60,8 @@ var (
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
 		{"systemctlUserServiceEnable", "wireplumber"},
 		{"systemctlServiceEnable", "tlp"},
-		{"systemctlServiceEnable", "ly"},
+		// {"systemctlServiceEnable", "ly"},
+		{"systemctlServiceEnable", "gdm"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo /usr/share/lunarvim/init-lvim.sh"},
 	}
@@ -115,6 +116,7 @@ var (
 		"foot",
 		"gcc",
 		"gcolor3",
+		"gdm",
 		"glfw-wayland",
 		"gnome-calculator",
 		"gnome-calendar",
