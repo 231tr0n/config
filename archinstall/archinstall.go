@@ -137,6 +137,9 @@ func init() {
 		"webapp-manager",
 		"whatsapp-for-linux-bin",
 		"wlogout",
+		"gdm-settings",
+		"cloudflare-warp-bin",
+		"pix",
 	}
 	vmPackages := []string{
 		"virtualbox-guest-iso",
