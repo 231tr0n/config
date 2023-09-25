@@ -377,10 +377,6 @@ highlight CursorIM           ctermfg=0    ctermbg=10   cterm=NONE
 highlight CursorColumn       ctermfg=NONE ctermbg=234  cterm=NONE
 highlight CursorLine         ctermfg=NONE ctermbg=234  cterm=NONE
 highlight Directory          ctermfg=67   ctermbg=NONE cterm=NONE
-" highlight DiffAdd            ctermfg=NONE ctermbg=24   cterm=NONE
-" highlight DiffChange         ctermfg=181  ctermbg=239  cterm=NONE
-" highlight DiffDelete         ctermfg=162  ctermbg=53   cterm=NONE
-" highlight DiffText           ctermfg=NONE ctermbg=102  cterm=NONE
 highlight DiffAdd            ctermfg=2    ctermbg=17   cterm=bold   
 highlight DiffDelete         ctermfg=9    ctermbg=17   cterm=bold   
 highlight DiffChange         ctermfg=12   ctermbg=17   cterm=bold   
