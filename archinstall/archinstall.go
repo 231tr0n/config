@@ -439,7 +439,7 @@ func init() {
 			appendInstaller(val...)
 		}
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
-		appendInstaller("chrootUserBashRunCommand", "echo -e \"\n\n\" | ssh-keygen -t rsa")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \"\\n\\n\" | ssh-keygen -t rsa")
 	}
 	if *vm {
 		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
