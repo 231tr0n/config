@@ -15,13 +15,11 @@ import (
 	"text/tabwriter"
 )
 
-// Log file name.
 const (
 	logFile   = "goarchinstall.log"
 	configUrl = "https://raw.githubusercontent.com/231tr0n/config/main"
 )
 
-// Errors.
 var (
 	errEspNotSet     = errors.New("main: esp partition not set")
 	errInstall       = errors.New("main: installation error")
@@ -32,7 +30,6 @@ var (
 	errUserPwdNotSet = errors.New("main: user passwd not set")
 )
 
-// Cli arguments variables.
 var (
 	amd               = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
 	cargoPkgs         = flag.Bool("cargo-pkgs", false, "Install required cargo packages.")
@@ -64,10 +61,8 @@ var (
 )
 
 var (
-	// Installer variable.
 	installer = [][]string{}
-	// Tabwriter config.
-	tabw = tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.DiscardEmptyColumns)
+	tabw      = tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.DiscardEmptyColumns)
 )
 
 func init() {
@@ -88,7 +83,6 @@ func init() {
 		log.Fatalln(err)
 	}
 
-	// Base install.
 	baseHooks := [][]string{
 		{"systemctlServiceEnable", "dhcpcd"},
 		{"systemctlServiceEnable", "NetworkManager"},
@@ -107,8 +101,6 @@ func init() {
 		"terminus-font",
 		"vim",
 	}
-
-	// Desktop install.
 	desktopConfigPaths := map[string]string{
 		filepath.Join("desktop-pics", "background.png"):             filepath.Join("/home", *username, "Pictures", "background.png"),
 		filepath.Join("desktop-pics", "lock.png"):                   filepath.Join("/home", *username, "Pictures", "lock.png"),
@@ -149,6 +141,9 @@ func init() {
 	vmPackages := []string{
 		"virtualbox-guest-iso",
 		"virtualbox-guest-utils",
+	}
+	vmHooks := [][]string{
+		{"systemctlServiceEnable", "vboxservice"},
 	}
 	desktopPackages := []string{
 		"acpi",
@@ -265,8 +260,6 @@ func init() {
 		"yt-dlp",
 		"zathura",
 	}
-
-	// Go install.
 	goHooks := [][]string{}
 	goPackages := []string{
 		"github.com/davidrjenni/reftools/cmd/fillstruct@latest",
@@ -296,8 +289,6 @@ func init() {
 		"istio.io/tools/cmd/license-lint@latest",
 		"mvdan.cc/gofumpt@latest",
 	}
-
-	// Gcc packages install.
 	gccHooks := [][]string{}
 	gccPackages := []string{
 		"clang",
@@ -306,8 +297,6 @@ func init() {
 		"raylib",
 		"valgrind",
 	}
-
-	// Node install.
 	npmHooks := [][]string{}
 	npmPackages := []string{
 		"forever",
@@ -316,27 +305,20 @@ func init() {
 		"npm-check-updates",
 		"tree-sitter-cli",
 	}
-
-	// Python install.
 	pipHooks := [][]string{}
 	pipPackages := []string{
 		"wpm",
 	}
-
-	// Rust install.
 	cargoHooks := [][]string{}
 	cargoPackages := []string{}
 
 	// Installer building.
-	// Set bigger font.
 	appendInstaller("runCommand", "setfont", "ter-132b")
-	// Format and mount root.
 	if *root == "" {
 		log.Fatalln(errRootNotSet)
 	}
 	appendInstaller("runCommand", "mkfs.ext4", *root)
 	appendInstaller("mount", *root, *mountPoint)
-	// Format and mount esp.
 	if *esp == "" {
 		log.Fatalln(errEspNotSet)
 	}
@@ -344,67 +326,51 @@ func init() {
 		appendInstaller("runCommand", "mkfs.fat", "-F", "32", *esp)
 	}
 	appendInstaller("mount", *esp, filepath.Join(*mountPoint, "boot", "efi"))
-	// Format and mount home.
 	if *home != "" {
 		appendInstaller("runCommand", "mkfs.ext4", *home)
 		appendInstaller("mount", *home, filepath.Join(*mountPoint, "home"))
 	}
-	// Format and set swap.
 	if *swap != "" {
 		appendInstaller("runCommand", "mkswap", *swap)
 		appendInstaller("runCommand", "swapon", *swap)
 	}
-	// Setup pacman config.
 	appendInstaller("runCommand", "mv", filepath.Join("/etc", "pacman.d", "mirrorlist"), filepath.Join("/etc", "pacman.d", "mirrorlist.bak"))
 	appendInstaller("runCommand", "reflector", "--fastest", strconv.Itoa(*repoCount), "--country", *country, "--protocol", "https", "--sort", "rate", "--save", filepath.Join("/etc", "pacman.d", "mirrorlist"))
 	appendInstaller("runBashCommand", "sed -i 's/#ParallelDownloads = 5/ParallelDownloads = "+strconv.Itoa(*parallelDownloads)+"/g' "+filepath.Join("/etc", "pacman.conf"))
 	appendInstaller("runBashCommand", "sed -i \"/\\[multilib\\]/,/Include/\"'s/^# //' "+filepath.Join("/etc", "pacman.conf"))
-	// Pacstrap setup.
 	appendInstaller(append([]string{"runCommand", "pacstrap", "-K", *mountPoint}, basePackages...)...)
-	// Gen FS table.
 	appendInstaller("runCommand", "genfstab", "-U", *mountPoint, filepath.Join(*mountPoint, "etc", "fstab"))
-	// Synchronize time zone.
 	appendInstaller("chrootRunCommand", "ln", "-sf", filepath.Join("/usr", "share", "zoneinfo", *zone, *subZone), filepath.Join("/etc", "localtime"))
 	appendInstaller("chrootRunCommand", "hwclock", "--systohc")
-	// appendInstaller("chrootRunCommand", "timedatectl", "set-ntp", "true")
 	appendInstaller("systemctlServiceEnable", "systemd-timesyncd")
-	// Generate locale.
 	appendInstaller("chrootBashRunCommand", "echo 'en_IN.UTF-8 UTF-8' >> "+filepath.Join("/etc", "locale.gen"))
 	appendInstaller("chrootBashRunCommand", "echo 'LANG=en_IN.UTF-8' >> "+filepath.Join("/etc", "locale.conf"))
 	appendInstaller("chrootRunCommand", "locale-gen")
-	// Set hostname.
 	appendInstaller("chrootBashRunCommand", "echo "+*hostname+" >> "+filepath.Join("/etc", "hostname"))
-	// Set Root passwd.
 	if *rootPwd == "" {
 		log.Fatalln(errRootPwdNotSet)
 	}
 	appendInstaller("chrootBashRunCommand", "echo -e \""+*rootPwd+"\\n"+*rootPwd+"\" | passwd")
-	// Configure user groups.
 	appendInstaller("chrootRunCommand", "groupadd", "sudo")
 	appendInstaller("chrootBashRunCommand", "echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)")
 	appendInstaller("chrootBashRunCommand", "echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)")
-	// Create user.
 	if *userPwd == "" {
 		log.Fatalln(errUserPwdNotSet)
 	}
 	appendInstaller("chrootRunCommand", "useradd", "-m", *username)
 	appendInstaller("chrootBashRunCommand", "echo -e \""+*userPwd+"\\n"+*userPwd+"\" | passwd "+*username)
 	appendInstaller("chrootRunCommand", "usermod", "-aG", "wheel", *username)
-	// Run base hooks.
 	for _, val := range baseHooks {
 		appendInstaller(val...)
 	}
-	// Copy pacman config to install.
 	appendInstaller("runCommand", "mv", filepath.Join(*mountPoint, "etc", "pacman.conf"), filepath.Join(*mountPoint, "etc", "pacman.conf.bak"))
 	appendInstaller("runCommand", "cp", filepath.Join("/etc", "pacman.conf"), filepath.Join(*mountPoint, "etc", "pacman.conf"))
-	// Install microcode.
 	if *amd {
 		appendInstaller("chrootPacmanInstall", "amd-ucode")
 	}
 	if *intel {
 		appendInstaller("chrootPacmanInstall", "intel-ucode")
 	}
-	// Install bootloader.
 	appendInstaller("chrootPacmanInstall", "efibootmgr", "grub")
 	appendInstaller("chrootBashRunCommand", "echo 'GRUB_DISABLE_OS_PROBER=false' >> "+filepath.Join("/etc", "default", "grub"))
 	appendInstaller("chrootPacmanInstall", "os-prober")
@@ -414,9 +380,7 @@ func init() {
 		appendInstaller("chrootRunCommand", "grub-install", "--target=x86_64-efi", "--bootloader-id=GRUB", "--recheck")
 	}
 	appendInstaller("chrootRunCommand", "grub-mkconfig", "-o", filepath.Join("/boot", "grub", "grub.cfg"))
-	// Install Aurhelper.
 	appendInstaller("chrootTempBashRunCommand", "cd ~ && rm -rf yay-bin && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin")
-	// Go packages install.
 	if *goPkgs {
 		appendInstaller("chrootPacmanInstall", "go")
 		for _, val := range goPackages {
@@ -426,7 +390,6 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
-	// Python packages install.
 	if *pipPkgs {
 		appendInstaller("chrootPacmanInstall", "python", "python-pip", "python-pipx")
 		for _, val := range pipPackages {
@@ -436,7 +399,6 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
-	// Nodejs packages install.
 	if *npmPkgs {
 		appendInstaller("chrootPacmanInstall", "nodejs", "npm")
 		for _, val := range npmPackages {
@@ -446,7 +408,6 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
-	// Rust packages install.
 	if *cargoPkgs {
 		appendInstaller("chrootPacmanInstall", "rust", "cargo")
 		for _, val := range cargoPackages {
@@ -456,7 +417,6 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
-	// C packages install.
 	if *gccPkgs {
 		appendInstaller("chrootPacmanInstall", "gcc")
 		appendInstaller(append([]string{"chrootPacmanInstall"}, gccPackages...)...)
@@ -464,11 +424,9 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
-	// Aur packages install.
 	if *desktop {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
-		// Config setup.
 		for key, val := range desktopConfigPaths {
 			appendInstaller("chrootUserBashRunCommand", "mkdir "+filepath.Dir(val))
 			uri, err := url.JoinPath(configUrl, key)
@@ -480,14 +438,15 @@ func init() {
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
 		}
-		// Set default shell to fish
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \"\n\n\" | ssh-keygen -t rsa")
 	}
 	if *vm {
 		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
-		appendInstaller("systemctlServiceEnable", "vboxservice")
+		for _, val := range vmHooks {
+			appendInstaller(val...)
+		}
 	}
-	// Unmount system.
 	if *unmountFS {
 		appendInstaller("unmount", *mountPoint)
 	}
