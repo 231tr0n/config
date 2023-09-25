@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,13 +15,85 @@ import (
 	"text/tabwriter"
 )
 
-// Base install.
+// Log file name.
+const (
+	logFile   = "goarchinstall.log"
+	configUrl = "https://raw.githubusercontent.com/231tr0n/config/main"
+)
+
+// Errors.
 var (
-	baseHooks = [][]string{
+	errEspNotSet     = errors.New("main: esp partition not set")
+	errInstall       = errors.New("main: installation error")
+	errInstaller     = errors.New("main: installer has unknown command")
+	errInstallerArgs = errors.New("main: installer has incorrect number of arguments.")
+	errRootNotSet    = errors.New("main: root partition not set")
+	errRootPwdNotSet = errors.New("main: root passwd not set")
+	errUserPwdNotSet = errors.New("main: user passwd not set")
+)
+
+// Cli arguments variables.
+var (
+	amd               = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
+	cargoPkgs         = flag.Bool("cargo-pkgs", false, "Install required cargo packages.")
+	country           = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
+	desktop           = flag.Bool("desktop", false, "Install desktop environment.")
+	esp               = flag.String("esp", "", "Set the esp partition. (required)")
+	formatEsp         = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
+	gccPkgs           = flag.Bool("gcc-pkgs", false, "Install required gcc packages.")
+	goPkgs            = flag.Bool("go-pkgs", false, "Install required go packages.")
+	home              = flag.String("home", "", "Set the home partition.")
+	hostname          = flag.String("hostname", "xeltron", "Set the hostname of the system.")
+	intel             = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
+	list              = flag.Bool("list", false, "Use this flag to list all the commands which will be run.")
+	mountPoint        = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
+	npmPkgs           = flag.Bool("npm-pkgs", false, "Install required npm packages.")
+	parallelDownloads = flag.Int("parallel-downloads", 5, "Number of downloads pacman can do at a time.")
+	pipPkgs           = flag.Bool("pip-pkgs", false, "Install required pip packages.")
+	repoCount         = flag.Int("repo-count", 10, "Number of repos to be added to the mirrorlist of pacman.")
+	root              = flag.String("root", "", "Set the root partition. (required)")
+	rootPwd           = flag.String("root-pwd", "", "Set root password. (required)")
+	start             = flag.Int("start", 0, "Command from which the installer should start executing.")
+	subZone           = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
+	swap              = flag.String("swap", "", "Set the swap partition.")
+	unmountFS         = flag.Bool("unmount-fs", false, "Use this flag to unmount the filesystem automatically after installation.")
+	userPwd           = flag.String("user-pwd", "", "Set user password. (required)")
+	username          = flag.String("username", "zeltron", "Set the username of the system.")
+	vm                = flag.Bool("vm", false, "Use this flag if you are installing in a vm.")
+	zone              = flag.String("zone", "Asia", "Set the zone for system time.")
+)
+
+var (
+	// Installer variable.
+	installer = [][]string{}
+	// Tabwriter config.
+	tabw = tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.DiscardEmptyColumns)
+)
+
+func init() {
+	// Logger Setup.
+	log.SetFlags(0)
+	log.SetOutput(os.Stdout)
+	log.SetPrefix("[\033[91mLOG\033[0m] ")
+
+	// Flag parsing setup.
+	flag.Parse()
+	if parsed := flag.Parsed(); !parsed {
+		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
+	}
+	flag.CommandLine.SetOutput(os.Stdout)
+
+	// Remove any log file present.
+	if err := os.RemoveAll(logFile); err != nil {
+		log.Fatalln(err)
+	}
+
+	// Base install.
+	baseHooks := [][]string{
 		{"systemctlServiceEnable", "dhcpcd"},
 		{"systemctlServiceEnable", "NetworkManager"},
 	}
-	basePackages = []string{
+	basePackages := []string{
 		"base",
 		"base-devel",
 		"dhcpcd",
@@ -34,11 +107,9 @@ var (
 		"terminus-font",
 		"vim",
 	}
-)
 
-// Desktop install.
-var (
-	desktopConfigPaths = map[string]string{
+	// Desktop install.
+	desktopConfigPaths := map[string]string{
 		filepath.Join("desktop-pics", "background.png"):             filepath.Join("/home", *username, "Pictures", "background.png"),
 		filepath.Join("desktop-pics", "lock.png"):                   filepath.Join("/home", *username, "Pictures", "lock.png"),
 		filepath.Join("fish", "config.fish"):                        filepath.Join("/home", *username, ".config", "fish", "config.fish"),
@@ -52,9 +123,7 @@ var (
 		filepath.Join("sway", "config"):                             filepath.Join("/home", *username, ".config", "sway", "config"),
 		filepath.Join("sway", "status.go"):                          filepath.Join("/home", *username, ".config", "sway", "status.go"),
 	}
-	// Install grub theme vimix
-	// Install plymouth theme spinfinity
-	desktopHooks = [][]string{
+	desktopHooks := [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
 		{"systemctlUserServiceEnable", "pipewire"},
 		{"systemctlUserServiceEnable", "pipewire-pulse"},
@@ -65,7 +134,7 @@ var (
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo /usr/share/lunarvim/init-lvim.sh"},
 	}
-	aurPackages = []string{
+	aurPackages := []string{
 		"brave-bin",
 		"drawio-desktop-bin",
 		"google-chrome",
@@ -73,16 +142,15 @@ var (
 		"ocs-url",
 		"stacer-bin",
 		"swaysettings-git",
-		// "themix-full-git",
 		"webapp-manager",
 		"whatsapp-for-linux-bin",
 		"wlogout",
 	}
-	vmPackages = []string{
+	vmPackages := []string{
 		"virtualbox-guest-iso",
 		"virtualbox-guest-utils",
 	}
-	desktopPackages = []string{
+	desktopPackages := []string{
 		"acpi",
 		"arc-gtk-theme",
 		"arc-icon-theme",
@@ -197,12 +265,10 @@ var (
 		"yt-dlp",
 		"zathura",
 	}
-)
 
-// Go install.
-var (
-	goHooks    = [][]string{}
-	goPackages = []string{
+	// Go install.
+	goHooks := [][]string{}
+	goPackages := []string{
 		"github.com/davidrjenni/reftools/cmd/fillstruct@latest",
 		"github.com/fatih/gomodifytags@latest",
 		"github.com/go-delve/delve/cmd/dlv@latest",
@@ -230,121 +296,36 @@ var (
 		"istio.io/tools/cmd/license-lint@latest",
 		"mvdan.cc/gofumpt@latest",
 	}
-)
 
-// Gcc packages install.
-var (
-	gccHooks    = [][]string{}
-	gccPackages = []string{
+	// Gcc packages install.
+	gccHooks := [][]string{}
+	gccPackages := []string{
 		"clang",
 		"gdb",
 		"glfw-wayland",
 		"raylib",
 		"valgrind",
 	}
-)
 
-// Node install.
-var (
-	npmHooks    = [][]string{}
-	npmPackages = []string{
+	// Node install.
+	npmHooks := [][]string{}
+	npmPackages := []string{
 		"forever",
 		"localtunnel",
 		"nodemon",
 		"npm-check-updates",
 		"tree-sitter-cli",
 	}
-)
 
-// Python install.
-var (
-	pipHooks    = [][]string{}
-	pipPackages = []string{
+	// Python install.
+	pipHooks := [][]string{}
+	pipPackages := []string{
 		"wpm",
 	}
-)
 
-// Rust install.
-var (
-	cargoHooks    = [][]string{}
-	cargoPackages = []string{}
-)
-
-// Log file name.
-const (
-	logFile   = "goarchinstall.log"
-	configUrl = "https://raw.githubusercontent.com/231tr0n/config/main"
-)
-
-// Errors.
-var (
-	errEspNotSet     = errors.New("main: esp partition not set")
-	errInstall       = errors.New("main: installation error")
-	errInstaller     = errors.New("main: installer has unknown command")
-	errInstallerArgs = errors.New("main: installer has incorrect number of arguments.")
-	errRootNotSet    = errors.New("main: root partition not set")
-	errRootPwdNotSet = errors.New("main: root passwd not set")
-	errUserPwdNotSet = errors.New("main: user passwd not set")
-)
-
-// Cli arguments variables.
-var (
-	amd               = flag.Bool("amd", false, "Use this flag to install micro-code for amd chips.")
-	cargoPkgs         = flag.Bool("cargo-pkgs", false, "Install required cargo packages.")
-	country           = flag.String("country", "India", "Sets the country whose repos are added to the mirrorlist of pacman.")
-	desktop           = flag.Bool("desktop", false, "Install desktop environment.")
-	esp               = flag.String("esp", "", "Set the esp partition. (required)")
-	formatEsp         = flag.Bool("format-esp", false, "Format the esp partition. Do this if you have created a new esp partition. Do not use it when you are using the windows esp partition for dual booting.")
-	gccPkgs           = flag.Bool("gcc-pkgs", false, "Install required gcc packages.")
-	goPkgs            = flag.Bool("go-pkgs", false, "Install required go packages.")
-	home              = flag.String("home", "", "Set the home partition.")
-	hostname          = flag.String("hostname", "xeltron", "Set the hostname of the system.")
-	intel             = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
-	list              = flag.Bool("list", false, "Use this flag to list all the commands which will be run.")
-	mountPoint        = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
-	npmPkgs           = flag.Bool("npm-pkgs", false, "Install required npm packages.")
-	parallelDownloads = flag.Int("parallel-downloads", 5, "Number of downloads pacman can do at a time.")
-	pipPkgs           = flag.Bool("pip-pkgs", false, "Install required pip packages.")
-	repoCount         = flag.Int("repo-count", 10, "Number of repos to be added to the mirrorlist of pacman.")
-	root              = flag.String("root", "", "Set the root partition. (required)")
-	rootPwd           = flag.String("root-pwd", "", "Set root password. (required)")
-	start             = flag.Int("start", 0, "Command from which the installer should start executing.")
-	subZone           = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
-	swap              = flag.String("swap", "", "Set the swap partition.")
-	unmountFS         = flag.Bool("unmount-fs", false, "Use this flag to unmount the filesystem automatically after installation.")
-	userPwd           = flag.String("user-pwd", "", "Set user password. (required)")
-	username          = flag.String("username", "zeltron", "Set the username of the system.")
-	vm                = flag.Bool("vm", false, "Use this flag if you are installing in a vm.")
-	zone              = flag.String("zone", "Asia", "Set the zone for system time.")
-)
-
-// Installer variable.
-var (
-	installer = [][]string{}
-)
-
-// Tabwriter config.
-var (
-	tabw = tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.DiscardEmptyColumns)
-)
-
-func init() {
-	// Logger Setup.
-	log.SetFlags(0)
-	log.SetOutput(os.Stdout)
-	log.SetPrefix("[\033[91mLOG\033[0m] ")
-
-	// Flag parsing setup.
-	flag.Parse()
-	if parsed := flag.Parsed(); !parsed {
-		log.Fatalln(errors.New("Flags not parsed. Wrong flags given."))
-	}
-	flag.CommandLine.SetOutput(os.Stdout)
-
-	// Remove any log file present.
-	if err := os.RemoveAll(logFile); err != nil {
-		log.Fatalln(err)
-	}
+	// Rust install.
+	cargoHooks := [][]string{}
+	cargoPackages := []string{}
 
 	// Installer building.
 	// Set bigger font.
@@ -488,12 +469,16 @@ func init() {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
 		// Config setup.
-		for _, val := range desktopHooks {
-			appendInstaller(val...)
-		}
 		for key, val := range desktopConfigPaths {
 			appendInstaller("chrootUserBashRunCommand", "mkdir "+filepath.Dir(val))
-			appendInstaller("chrootUserBashRunCommand", "curl "+filepath.Join(configUrl, key)+" -o "+val)
+			uri, err := url.JoinPath(configUrl, key)
+			if err != nil {
+				log.Fatalln("Error parsing url:", err)
+			}
+			appendInstaller("chrootUserBashRunCommand", "curl "+uri+" -o "+val)
+		}
+		for _, val := range desktopHooks {
+			appendInstaller(val...)
 		}
 		// Set default shell to fish
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
