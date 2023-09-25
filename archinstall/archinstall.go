@@ -450,6 +450,7 @@ func init() {
 			appendInstaller(val...)
 		}
 	}
+	appendInstaller("chrootBashRunCommand", "echo -e \"blacklist pcspkr\\nblacklist snd_pcsp\" > "+filepath.Join("/etc", "modprobe.d", "nobeep.conf"))
 	if *unmountFS {
 		appendInstaller("unmount", *mountPoint)
 	}
