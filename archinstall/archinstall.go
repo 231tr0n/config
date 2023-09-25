@@ -118,6 +118,7 @@ var (
 		"gcolor3",
 		"gdm",
 		"glfw-wayland",
+		"gnome",
 		"gnome-calculator",
 		"gnome-calendar",
 		"gnome-console",
