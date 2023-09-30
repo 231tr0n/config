@@ -124,7 +124,6 @@ func init() {
 		// {"systemctlServiceEnable", "ly"},
 		{"systemctlServiceEnable", "gdm"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
-		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo /usr/share/lunarvim/init-lvim.sh"},
 	}
 	aurPackages := []string{
 		"brave-bin",
