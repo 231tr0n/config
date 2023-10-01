@@ -182,22 +182,30 @@ func brightness() string {
 	return temp[1 : len(temp)-1]
 }
 
-func sinkVolume() string {
-	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"), "\n")[0])[1]
-	f, err := strconv.ParseFloat(temp, 64)
+func sinkVolume() (string, bool) {
+	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"), "\n")[0])
+	percent := temp[1]
+	f, err := strconv.ParseFloat(percent, 64)
 	if err != nil {
 		panic(err)
 	}
-	return strconv.Itoa(int(f*100)) + "%"
+	if len(temp) == 2 {
+		return strconv.Itoa(int(f*100)) + "%", false
+	}
+	return strconv.Itoa(int(f*100)) + "%", true
 }
 
-func sourceVolume() string {
-	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"), "\n")[0])[1]
-	f, err := strconv.ParseFloat(temp, 64)
+func sourceVolume() (string, bool) {
+	temp := strings.Fields(strings.Split(cmd("wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"), "\n")[0])
+	percent := temp[1]
+	f, err := strconv.ParseFloat(percent, 64)
 	if err != nil {
 		panic(err)
 	}
-	return strconv.Itoa(int(f*100)) + "%"
+	if len(temp) == 2 {
+		return strconv.Itoa(int(f*100)) + "%", false
+	}
+	return strconv.Itoa(int(f*100)) + "%", true
 }
 
 func network() (string, string) {
@@ -381,12 +389,6 @@ func main() {
 			identifier("RAM"),
 			value(ram()),
 			spacer(),
-			identifier("AUDIO"),
-			middleValue("󰕾"),
-			middleValue(sinkVolume()),
-			middleValue("󰍬"),
-			value(sourceVolume()),
-			spacer(),
 			identifier("BRIGHTNESS"),
 			value(brightness()),
 			spacer(),
@@ -411,6 +413,25 @@ func main() {
 				spacer(),
 			}...)
 		}
+
+		sink, sinkMuted := sinkVolume()
+		source, sourceMuted := sourceVolume()
+		sinkIcon := "󰕾"
+		sourceIcon := ""
+		if sinkMuted {
+			sinkIcon = "󰖁"
+		}
+		if sourceMuted {
+			sourceIcon = ""
+		}
+		builder = append(builder, []part{
+			identifier("AUDIO"),
+			middleValue(sinkIcon),
+			middleValue(sink),
+			middleValue(sourceIcon),
+			value(source),
+			spacer(),
+		}...)
 
 		time.Sleep(tick * time.Second)
 		builded, err := json.MarshalIndent(builder, "", "  ")
