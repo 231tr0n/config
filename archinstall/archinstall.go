@@ -127,18 +127,20 @@ func init() {
 	}
 	aurPackages := []string{
 		"brave-bin",
+		"cloudflare-warp-bin",
 		"drawio-desktop-bin",
+		"gdm-settings",
 		"google-chrome",
 		"hyprpicker",
+		"neovim-remote",
 		"ocs-url",
+		"pix",
+		"podman-desktop",
 		"stacer-bin",
 		"swaysettings-git",
 		"webapp-manager",
 		"whatsapp-for-linux-bin",
 		"wlogout",
-		"gdm-settings",
-		"cloudflare-warp-bin",
-		"pix",
 	}
 	vmPackages := []string{
 		"virtualbox-guest-iso",
