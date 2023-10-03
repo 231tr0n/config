@@ -377,10 +377,10 @@ highlight CursorIM           ctermfg=0    ctermbg=10   cterm=NONE
 highlight CursorColumn       ctermfg=NONE ctermbg=234  cterm=NONE
 highlight CursorLine         ctermfg=NONE ctermbg=234  cterm=NONE
 highlight Directory          ctermfg=67   ctermbg=NONE cterm=NONE
-highlight DiffAdd            ctermfg=2    ctermbg=17   cterm=bold   
-highlight DiffDelete         ctermfg=9    ctermbg=17   cterm=bold   
-highlight DiffChange         ctermfg=12   ctermbg=17   cterm=bold   
-highlight DiffText           ctermfg=10   ctermbg=88   cterm=bold   
+highlight DiffAdd            ctermfg=2    ctermbg=17   cterm=NONE
+highlight DiffDelete         ctermfg=9    ctermbg=17   cterm=NONE
+highlight DiffChange         ctermfg=12   ctermbg=17   cterm=NONE
+highlight DiffText           ctermfg=10   ctermbg=88   cterm=NONE
 " highlight EndOfBuffer
 highlight ErrorMsg           ctermfg=0    ctermbg=167  cterm=NONE
 " highlight VertSplit          ctermfg=235  ctermbg=238  cterm=NONE
@@ -393,7 +393,7 @@ highlight IncSearch          ctermfg=0    ctermbg=28   cterm=NONE
 highlight LineNr             ctermfg=8    ctermbg=234  cterm=NONE
 " highlight LineNrAbove
 " highlight LineNrBelow
-highlight CursorLineNR       ctermfg=0    ctermbg=8    cterm=bold
+highlight CursorLineNR       ctermfg=0    ctermbg=8    cterm=NONE
 " highlight CursorLineSign
 " highlight CursorLineFold
 highlight MatchParen         ctermfg=0    ctermbg=130  cterm=NONE
@@ -468,19 +468,19 @@ highlight Error              ctermfg=0    ctermbg=167  cterm=NONE
 highlight Todo               ctermfg=0    ctermbg=100  cterm=NONE
 highlight Warning            ctermfg=0    ctermbg=100  cterm=NONE
 " statusline highlighting
-highlight User1              ctermfg=0    ctermbg=25   cterm=bold
+highlight User1              ctermfg=0    ctermbg=25   cterm=NONE
 highlight User2              ctermfg=0    ctermbg=245  cterm=NONE
-highlight User3              ctermfg=0    ctermbg=240  cterm=bold
+highlight User3              ctermfg=0    ctermbg=240  cterm=NONE
 highlight User4              ctermfg=8    ctermbg=234  cterm=NONE
 highlight User5              ctermfg=0    ctermbg=245  cterm=NONE
-highlight User6              ctermfg=0    ctermbg=247  cterm=bold
-highlight NormalMode         ctermfg=0    ctermbg=25   cterm=bold
-highlight DefaultMode        ctermfg=0    ctermbg=25   cterm=bold
-highlight InsertMode         ctermfg=0    ctermbg=106  cterm=bold
-highlight VisualMode         ctermfg=0    ctermbg=169  cterm=bold
-highlight CommandMode        ctermfg=0    ctermbg=130  cterm=bold
-highlight SelectMode         ctermfg=0    ctermbg=28   cterm=bold
-highlight ReplaceMode        ctermfg=0    ctermbg=167  cterm=bold
+highlight User6              ctermfg=0    ctermbg=247  cterm=NONE
+highlight NormalMode         ctermfg=0    ctermbg=25   cterm=NONE
+highlight DefaultMode        ctermfg=0    ctermbg=25   cterm=NONE
+highlight InsertMode         ctermfg=0    ctermbg=106  cterm=NONE
+highlight VisualMode         ctermfg=0    ctermbg=169  cterm=NONE
+highlight CommandMode        ctermfg=0    ctermbg=130  cterm=NONE
+highlight SelectMode         ctermfg=0    ctermbg=28   cterm=NONE
+highlight ReplaceMode        ctermfg=0    ctermbg=167  cterm=NONE
 " custom highlight group group
 highlight AllBraces          ctermfg=172  ctermbg=NONE cterm=NONE
 " highlight AllExtraChars      ctermfg=214  ctermbg=NONE cterm=NONE
@@ -567,20 +567,6 @@ set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 
 " windows config
 if has("win32") || has("win64") || has("win16")
-  " colorscheme
-  highlight Normal             ctermfg=249  ctermbg=235  cterm=NONE
-  highlight CursorLineNR       ctermfg=0    ctermbg=8    cterm=NONE
-  highlight User1              ctermfg=0    ctermbg=25   cterm=NONE
-  highlight User3              ctermfg=0    ctermbg=240  cterm=NONE
-  highlight User6              ctermfg=0    ctermbg=247  cterm=NONE
-  highlight NormalMode         ctermfg=0    ctermbg=25   cterm=NONE
-  highlight DefaultMode        ctermfg=0    ctermbg=25   cterm=NONE
-  highlight InsertMode         ctermfg=0    ctermbg=106  cterm=NONE
-  highlight VisualMode         ctermfg=0    ctermbg=169  cterm=NONE
-  highlight CommandMode        ctermfg=0    ctermbg=130  cterm=NONE
-  highlight SelectMode         ctermfg=0    ctermbg=28   cterm=NONE
-  highlight ReplaceMode        ctermfg=0    ctermbg=167  cterm=NONE
-
   " key mappings
   nnoremap <silent> <F8> "+p
   inoremap <silent> <F8> <Esc>"+pa
