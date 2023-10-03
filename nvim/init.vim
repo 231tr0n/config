@@ -190,6 +190,8 @@ inoremap <silent> <F2> <Esc>:call FileBrowserToggle()<CR>a
 " toggles file browser
 nnoremap <silent> <F10> :call SynGroup()<CR>
 inoremap <silent> <F10> <Esc>:call SynGroup()<CR>a
+" make background nontransparent.
+nnoremap <silent> <F11> :highlight Normal ctermbg=235<CR>
 " prints the highlight group of the character under the cursor
 " Filetype maps
 au FileType html,xml,xsl inoremap <silent> <C-_> <Esc>A<Enter></<C-x><C-o><Esc>O<Tab>
