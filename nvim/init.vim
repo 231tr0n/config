@@ -288,6 +288,18 @@ filetype indent off
 " filetype plugins and indent off
 
 " options
+" set spell
+" enables spell
+set gp=git\ grep\ -n
+" search commands
+" set ignorecase
+" ignorecase when searching
+" set smartcase
+" sets smartcase
+set wildignore=*.exe,*.dll,*.pdb
+" ignores extensions when autocompletiting
+packadd! matchit
+" config for plugin files
 set backspace=2
 " makes backspace normal
 set conceallevel=2
@@ -512,6 +524,8 @@ if has('nvim')
   " options
   set updatetime=300
   " updates swap file in 300ms
+  set signcolumn=yes
+  " open sign column by default
   set guicursor=n-v-c:block
   set guicursor+=i:ver100
   set guicursor+=r:ver100
@@ -532,6 +546,29 @@ if has('nvim')
   " ( - (\n\t|\n)
   inoremap <silent> [<CR> [<CR>]<Esc>O<Tab>
   " [ - [\n\t|\n]
+  " Plugins
+  call plug#begin()
+    Plug 'prabirshrestha/vim-lsp'
+    Plug 'mattn/vim-lsp-settings'
+    Plug 'prabirshrestha/asyncomplete.vim'
+    Plug 'prabirshrestha/asyncomplete-lsp.vim'
+  call plug#end()
+  filetype indent off
+
+  function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    nmap <buffer> <M-i> <plug>(lsp-definition)
+    nmap <buffer> <M-d> <plug>(lsp-declaration)
+    nmap <buffer> <M-r> <plug>(lsp-references)
+    nmap <buffer> <M-l> <plug>(lsp-document-diagnostics)
+    nmap <buffer> <M-r> <plug>(lsp-rename)
+    nmap <buffer> <M-h> <plug>(lsp-hover)
+  endfunction
+
+  augroup lsp_install
+    au!
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+  augroup END
 
   " auto commands
   " au FileType python quit
@@ -569,9 +606,9 @@ set statusline+=%2*\ %Y\ %*
 set statusline+=%3*[%{CheckActiveWindow()}]%r%m%*
 set statusline+=%<
 if has('nvim')
-	set statusline+=%4*\ nvim\ %t\ %=%*
+  set statusline+=%4*\ nvim\ %t\ %=%*
 else
-	set statusline+=%4*\ vim\ %t\ %=%*
+  set statusline+=%4*\ vim\ %t\ %=%*
 endif
 set statusline+=%5*\ %p%%\ %*
 set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
