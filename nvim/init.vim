@@ -546,15 +546,32 @@ if has('nvim')
   " ( - (\n\t|\n)
   inoremap <silent> [<CR> [<CR>]<Esc>O<Tab>
   " [ - [\n\t|\n]
+
+  " Plugin config
+  " let g:ale_lint_on_text_changed = 'never'
+  " let g:ale_lint_on_insert_leave = 0
+  " let g:ale_lint_on_enter = 0
+  " let g:ale_lint_on_save = 1
+  " let g:ale_disable_lsp = 1
+  " let g:ale_sign_column_always = 1
+  " let g:ale_sign_error = '>>'
+  " let g:ale_sign_warning = '--'
+  " let g:ale_virtualtext_cursor = 'disabled'
+  " let g:ale_warn_about_trailing_whitespace = 0
+  " let g:ale_completion_autoimport = 1
+  " let g:ale_linters_explicit = 0
+
   " Plugins
   call plug#begin()
     Plug 'prabirshrestha/vim-lsp'
     Plug 'mattn/vim-lsp-settings'
     Plug 'prabirshrestha/asyncomplete.vim'
     Plug 'prabirshrestha/asyncomplete-lsp.vim'
+    " Plug 'dense-analysis/ale'
   call plug#end()
   filetype indent off
 
+  " Plugin post config
   function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
     nmap <buffer> <M-i> <plug>(lsp-definition)
@@ -563,12 +580,17 @@ if has('nvim')
     nmap <buffer> <M-l> <plug>(lsp-document-diagnostics)
     nmap <buffer> <M-r> <plug>(lsp-rename)
     nmap <buffer> <M-h> <plug>(lsp-hover)
+    let g:lsp_format_sync_timeout = 1000
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
   endfunction
 
   augroup lsp_install
     au!
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
   augroup END
+
+  " nmap <silent> <M-k> <Plug>(ale_previous_wrap)
+  " nmap <silent> <M-j> <Plug>(ale_next_wrap)
 
   " auto commands
   " au FileType python quit
