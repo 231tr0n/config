@@ -227,21 +227,27 @@ au FileType html,xml,xsl inoremap <silent> <%<Space><Space>%> <%<Space><Space>%>
 au BufEnter *.js,*.ejs,*.html imap <silent> =<CR> =><Space>{<CR>
 " = - <Space>=><Space>{\n\t|\n}
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+au FileType sh vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
 au BufEnter *.vim,.vimrc vnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+au FileType sh nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
 au BufEnter *.vim,.vimrc nnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
+au FileType sh inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F3> <Esc>:norm<Space>^i//<Space><CR>i
 au BufEnter *.vim,.vimrc inoremap <silent> <F3> <Esc>:norm<Space>^i"<Space><Space><CR>i
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
 au BufEnter *.vim,.vimrc vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
 au BufEnter *.vim,.vimrc nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
+au FileType sh inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
 au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F4> <Esc>:norm<Space>^xxx<Space><CR>i
 au BufEnter *.vim,.vimrc inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
 " Used to put comments in a file.
@@ -490,6 +496,9 @@ highlight link javaScript Normal
 highlight link javaScriptBraces AllBraces
 
 " custom regex for highlighting
+au CursorMovedI,FileType sh syntax region hicurlybraces matchgroup=AllBraces start=/{/ end=/}/ contains=TOP
+au CursorMovedI,FileType sh syntax region hiparenthesis matchgroup=AllBraces start=/(/ end=/)/ contains=TOP
+au CursorMovedI,FileType sh syntax region hisquarebraces matchgroup=AllBraces start=/\[/ end=/\]/ contains=TOP
 au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hicurlybraces matchgroup=AllBraces start=/{/ end=/}/ contains=TOP
 au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hiparenthesis matchgroup=AllBraces start=/(/ end=/)/ contains=TOP
 au CursorMovedI,BufEnter *.go,*.js,*.py,*.java,*.c,*.cpp,*.fish,*.bash,*.html,*.rs,*.rb syntax region hisquarebraces matchgroup=AllBraces start=/\[/ end=/\]/ contains=TOP
