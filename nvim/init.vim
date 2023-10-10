@@ -548,34 +548,13 @@ if has('nvim')
   " [ - [\n\t|\n]
 
   " Plugin config
-  let g:ale_lint_on_text_changed = 'never'
-  let g:ale_lint_on_insert_leave = 0
-  let g:ale_lint_on_enter = 0
-  let g:ale_lint_on_save = 1
-  " let g:ale_disable_lsp = 1
-  let g:ale_sign_column_always = 1
-  let g:ale_sign_error = '>>'
-  let g:ale_sign_warning = '--'
-  let g:ale_virtualtext_cursor = 'disabled'
-  let g:ale_warn_about_trailing_whitespace = 0
-  let g:ale_completion_autoimport = 1
-  let g:ale_linters_explicit = 0
-
-  " Plugin highlight groups
-  highlight ALEError           ctermfg=0    ctermbg=167  cterm=NONE
-  highlight ALEWarning         ctermfg=0    ctermbg=106  cterm=NONE
-  highlight ALEInfo            ctermfg=0    ctermbg=68   cterm=NONE
-  highlight ALEStyleError      ctermfg=0    ctermbg=169  cterm=NONE
-  highlight ALEStyleWarning    ctermfg=0    ctermbg=100  cterm=NONE
 
   " Plugins
   call plug#begin()
-    Plug 'dense-analysis/ale'
     Plug 'prabirshrestha/vim-lsp'
     Plug 'mattn/vim-lsp-settings'
     Plug 'prabirshrestha/asyncomplete.vim'
     Plug 'prabirshrestha/asyncomplete-lsp.vim'
-    Plug 'rhysd/vim-lsp-ale'
     Plug 'junegunn/fzf'
     Plug 'junegunn/fzf.vim'
     Plug 'tpope/vim-fugitive'
@@ -583,13 +562,6 @@ if has('nvim')
   filetype indent off
 
   " Plugin post config
-  function LinterStatus() abort
-    let l:counts = ale#statusline#Count(bufnr(''))
-    let l:all_errors = l:counts.error + l:counts.style_error
-    let l:all_non_errors = l:counts.total - l:all_errors
-    return l:counts.total == 0 ? 'OK' : printf('%dW:%dE', all_non_errors, all_errors)
-  endfunction
-
   function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
     nmap <buffer> <M-i> <plug>(lsp-definition)
@@ -607,9 +579,6 @@ if has('nvim')
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
   augroup END
 
-  nmap <silent> <M-k> <Plug>(ale_previous_wrap)
-  nmap <silent> <M-j> <Plug>(ale_next_wrap)
-
   " auto commands
   " au FileType python quit
   " makes us not use nvim for python files
@@ -626,8 +595,7 @@ if has('nvim')
   else
     set statusline+=%4*\ vim\ %t\ %=%*
   endif
-  set statusline+=%4*%{FugitiveStatusline()}\ %*
-  set statusline+=%3*\ %{LinterStatus()}\ %*
+  set statusline+=%3*%{FugitiveStatusline()}\ %*
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 else
