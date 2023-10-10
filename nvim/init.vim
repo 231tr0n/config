@@ -330,7 +330,7 @@ set number
 " sets numberline for the text editor
 set laststatus=2
 " sets statusline
-" set cursorcolumn
+set cursorcolumn
 " highlights the vertical line in which the cursor is
 set cursorline
 " highlights the horizontal line in which the cursor is
@@ -561,6 +561,13 @@ if has('nvim')
   let g:ale_completion_autoimport = 1
   let g:ale_linters_explicit = 0
 
+  " Plugin highlight groups
+  highlight ALEError           ctermfg=0    ctermbg=167  cterm=NONE
+  highlight ALEWarning         ctermfg=0    ctermbg=106  cterm=NONE
+  highlight ALEInfo            ctermfg=0    ctermbg=68   cterm=NONE
+  highlight ALEStyleError      ctermfg=0    ctermbg=169  cterm=NONE
+  highlight ALEStyleWarning    ctermfg=0    ctermbg=100  cterm=NONE
+
   " Plugins
   call plug#begin()
     Plug 'dense-analysis/ale'
@@ -619,6 +626,7 @@ if has('nvim')
   else
     set statusline+=%4*\ vim\ %t\ %=%*
   endif
+  set statusline+=%4*%{FugitiveStatusline()}\ %*
   set statusline+=%3*\ %{LinterStatus()}\ %*
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
