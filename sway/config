@@ -198,8 +198,8 @@ bar {
 
 # custom config
 gaps inner 10
-bindsym $mod+Return exec foot
-bindsym $mod+Shift+t exec foot
+bindsym $mod+Return exec kitty
+bindsym $mod+Shift+t exec kitty
 bindsym $mod+Shift+w exec firefox
 bindsym $mod+Shift+d exec hyprpicker | tr -d '\n' | wl-copy
 bindsym $mod+d exec makoctl menu bemenu -H 40 -B 2 --hp 20 --fn HurmitNerdFontMono 10 --bdr '#FFFFFF' --ch 30 --center -W 0.5
