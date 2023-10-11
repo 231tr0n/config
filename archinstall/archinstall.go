@@ -50,6 +50,7 @@ var (
 	repoCount         = flag.Int("repo-count", 10, "Number of repos to be added to the mirrorlist of pacman.")
 	root              = flag.String("root", "", "Set the root partition. (required)")
 	rootPwd           = flag.String("root-pwd", "", "Set root password. (required)")
+	sshPwd            = flag.String("ssh-pwd", "", "Set ssh password.")
 	start             = flag.Int("start", 0, "Command from which the installer should start executing.")
 	subZone           = flag.String("sub-zone", "Kolkata", "Set the sub-zone for system time.")
 	swap              = flag.String("swap", "", "Set the swap partition.")
@@ -434,7 +435,7 @@ func init() {
 		appendInstaller("chrootTempBashRunCommand", "yay -Syu --needed --noconfirm "+strings.Join(aurPackages, " "))
 		appendInstaller(append([]string{"chrootPacmanInstall"}, desktopPackages...)...)
 		for key, val := range desktopConfigPaths {
-			appendInstaller("chrootUserBashRunCommand", "mkdir "+filepath.Dir(val))
+			appendInstaller("chrootUserBashRunCommand", "mkdir -p "+filepath.Dir(val))
 			uri, err := url.JoinPath(configUrl, key)
 			if err != nil {
 				log.Fatalln("Error parsing url:", err)
@@ -444,8 +445,8 @@ func init() {
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
 		}
-		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
-		appendInstaller("chrootUserBashRunCommand", "echo -e \"\\n\\n\" | ssh-keygen -t rsa")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\\n\" | chsh -s /bin/fish")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+sshPwd+"\\n"+sshPwd+"\\n\" | ssh-keygen -t rsa")
 	}
 	if *vm {
 		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
