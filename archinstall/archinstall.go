@@ -446,7 +446,7 @@ func init() {
 			appendInstaller(val...)
 		}
 		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\\n\" | chsh -s /bin/fish")
-		appendInstaller("chrootUserBashRunCommand", "echo -e \""+sshPwd+"\\n"+sshPwd+"\\n\" | ssh-keygen -t rsa")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*sshPwd+"\\n"+*sshPwd+"\\n\" | ssh-keygen -t rsa")
 	}
 	if *vm {
 		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
@@ -497,6 +497,7 @@ func runCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = stdoutMW
 	cmd.Stderr = stderrMW
+	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		return err
 	}
