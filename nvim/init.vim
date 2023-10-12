@@ -564,7 +564,7 @@ if has('nvim')
   " Plugin post config
   let g:lsp_diagnostics_enabled = 1
   let g:lsp_diagnostics_echo_cursor = 0
-  let g:lsp_diagnostics_float_cursor = 0
+  let g:lsp_diagnostics_float_cursor = 1
   let g:lsp_diagnostics_highlights_enabled = 0
   let g:lsp_diagnostics_highlights_insert_mode_enabled = 0
   let g:lsp_diagnostics_signs_enabled = 1
@@ -573,7 +573,7 @@ if has('nvim')
   let g:lsp_diagnostics_signs_warning = { 'text': '!!' }
   let g:lsp_diagnostics_signs_information = { 'text': '>>' }
   let g:lsp_diagnostics_signs_hint = { 'text': '--' }
-  let g:lsp_diagnostics_virtual_text_enabled = 1
+  let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_virtual_text_insert_mode_enabled = 0
   let g:lsp_diagnostics_virtual_text_prefix = ''
 
@@ -599,6 +599,17 @@ if has('nvim')
   " makes us not use nvim for python files
   " au VimEnter * call FileBrowserToggle() | call feedkeys("\<C-w>l")
   " open filebrowser by default
+  "
+  function! LinterStatus() abort
+    let l:warnings = lsp#get_buffer_diagnostics_counts()["warning"]
+    let l:errors = lsp#get_buffer_diagnostics_counts()["error"]
+
+    return printf(
+    \   '%dE-%dW',
+    \   errors,
+    \   warnings
+    \)
+  endfunction
 
   " statusline
   set statusline=%{%StatuslineModeReturner()%}
@@ -610,7 +621,8 @@ if has('nvim')
   else
     set statusline+=%4*\ vim\ %t\ %=%*
   endif
-  set statusline+=%3*%{FugitiveStatusline()}\ %*
+  set statusline+=%4*%{FugitiveStatusline()}\ %*
+  set statusline+=%3*%{LinterStatus()}\ %*
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 else
