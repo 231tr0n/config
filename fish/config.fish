@@ -55,7 +55,7 @@ set -x PATH $PATH $GOPATH/bin
 set -x PATH $PATH $HOME/.local/bin
 set -x PATH $PATH $HOME/.cargo/bin
 
-# if status is-interactive
-# and not set -q TMUX
-# 	exec tmux -2u
-# end
+if status is-interactive
+and not set -q TMUX
+	exec tmux -2u
+end

@@ -114,6 +114,7 @@ func init() {
 		filepath.Join("lvim", "config.lua"):                         filepath.Join("/home", *username, ".config", "lvim", "config.lua"),
 		filepath.Join("mako", "config"):                             filepath.Join("/home", *username, ".config", "mako", "config"),
 		filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".config", "nvim", "init.vim"),
+		filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".vimrc"),
 		filepath.Join("sway", "config"):                             filepath.Join("/home", *username, ".config", "sway", "config"),
 		filepath.Join("sway", "status.go"):                          filepath.Join("/home", *username, ".config", "sway", "status.go"),
 	}
