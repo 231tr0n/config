@@ -110,6 +110,7 @@ func init() {
 		filepath.Join("fish", "functions", "fish_mode_prompt.fish"): filepath.Join("/home", *username, ".config", "fish", "functions", "fish_mode_prompt.fish"),
 		filepath.Join("fish", "functions", "fish_prompt.fish"):      filepath.Join("/home", *username, ".config", "fish", "functions", "fish_prompt.fish"),
 		filepath.Join("kitty", "kitty.conf"):                        filepath.Join("/home", *username, ".config", "kitty", "kitty.conf"),
+		filepath.Join("foot", "foot.ini"):                           filepath.Join("/home", *username, ".config", "foot", "foot.ini"),
 		filepath.Join("tmux", "tmux.conf"):                          filepath.Join("/home", *username, ".config", "tmux", "tmux.conf"),
 		filepath.Join("lvim", "config.lua"):                         filepath.Join("/home", *username, ".config", "lvim", "config.lua"),
 		filepath.Join("mako", "config"):                             filepath.Join("/home", *username, ".config", "mako", "config"),
@@ -127,6 +128,7 @@ func init() {
 		// {"systemctlServiceEnable", "ly"},
 		{"systemctlServiceEnable", "gdm"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
+		{"chrootUserBashRunCommand", "curl -fLo \"${XDG_DATA_HOME:-$HOME/.local/share}\"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"},
 	}
 	aurPackages := []string{
 		"brave-bin",
