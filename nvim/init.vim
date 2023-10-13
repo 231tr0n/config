@@ -640,8 +640,8 @@ if has('nvim')
   else
     set statusline+=%4*\ vim\ %t\ %=%*
   endif
-  set statusline+=%4*%{FugitiveStatusline()}\ %*
-  set statusline+=%3*%{LinterStatus()}\ %*
+  set statusline+=%4*\ %{FugitiveStatusline()}\ %*
+  set statusline+=%3*\ %{LinterStatus()}\ %*
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 else
