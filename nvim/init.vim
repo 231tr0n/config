@@ -558,6 +558,11 @@ if has('nvim')
     Plug 'junegunn/fzf'
     Plug 'junegunn/fzf.vim'
     Plug 'tpope/vim-fugitive'
+    Plug 'SirVer/ultisnips'
+    Plug 'prabirshrestha/async.vim'
+    Plug 'thomasfaingnaert/vim-lsp-snippets'
+    Plug 'thomasfaingnaert/vim-lsp-ultisnips'
+    " Plug 'puremourning/vimspector'
   call plug#end()
   filetype indent off
 
@@ -576,18 +581,32 @@ if has('nvim')
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_virtual_text_insert_mode_enabled = 0
   let g:lsp_diagnostics_virtual_text_prefix = ''
+  let g:UltiSnipsExpandTrigger="<tab>"
+  let g:UltiSnipsJumpForwardTrigger="<tab>"
+  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
   function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
-    nmap <buffer> <M-i> <plug>(lsp-definition)
-    nmap <buffer> <M-d> <plug>(lsp-declaration)
-    nmap <buffer> <M-r> <plug>(lsp-references)
-    nmap <buffer> <M-l> <plug>(lsp-document-diagnostics)
-    nmap <buffer> <M-r> <plug>(lsp-rename)
-    nmap <buffer> <M-h> <plug>(lsp-hover)
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gs <plug>(lsp-document-symbol-search)
+    nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
+    nmap <buffer> gr <plug>(lsp-references)
+    nmap <buffer> gi <plug>(lsp-implementation)
+    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nmap <buffer> K <plug>(lsp-hover)
+    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
     let g:lsp_format_sync_timeout = 1000
     autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
   endfunction
+
+  inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+  inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+  imap <c-space> <Plug>(asyncomplete_force_refresh)
 
   augroup lsp_install
     au!
