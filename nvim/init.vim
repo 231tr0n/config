@@ -194,36 +194,6 @@ inoremap <silent> <F10> <Esc>:call SynGroup()<CR>a
 nnoremap <silent> <F11> :highlight Normal ctermbg=235<CR>
 " prints the highlight group of the character under the cursor
 " Filetype maps
-au FileType html,xml,xsl inoremap <silent> <C-_> <Esc>A<Enter></<C-x><C-o><Esc>O<Tab>
-" <html>| or <html|> - <html>\n\t|\n</html>
-au FileType html,xml,xsl inoremap <silent> <C-_><C-_> <Esc>F<f>a</<C-x><C-o><Esc>vit<Esc>i
-" <html|> - <html>|</html>
-au FileType html,xml,xsl inoremap <silent> <C-_><C-_><C-_> <Esc>F<f>a</<C-x><C-o>
-" <html|> - <html></html>|
-au FileType html,xml,xsl inoremap <silent> < <><Left>
-" < - <|>
-au FileType html,xml,xsl inoremap <silent> </ </><Left>
-" </ - </|>
-au FileType html,xml,xsl inoremap <silent> <% <%<Space><Space>%><Left><Left><Left>
-" <% - <% | %>
-au FileType html,xml,xsl inoremap <silent> <%= <%=<Space><Space>%><Left><Left><Left>
-" <%= - <%= | %>
-au FileType html,xml,xsl inoremap <silent> <> <>
-" <> - <>|
-au FileType html,xml,xsl inoremap <silent> </> </>
-" </> - </>|
-au FileType html,xml,xsl inoremap <silent> <%<Space> <%
-" <%\s - <%|
-au FileType html,xml,xsl inoremap <silent> <%=<Space> <%=
-" <%=\s - <%|
-au FileType html,xml,xsl inoremap <silent> <<Space> <
-" <\s - <|
-au FileType html,xml,xsl inoremap <silent> </<Space> </
-" </\s - </|
-au FileType html,xml,xsl inoremap <silent> <%=<Space><Space>%> <%=<Space><Space>%>
-" <%=  %> - <%=  %>|
-au FileType html,xml,xsl inoremap <silent> <%<Space><Space>%> <%<Space><Space>%>
-" <%  %> - <%  %>|
 au BufEnter *.js,*.ejs,*.html imap <silent> =<CR> =><Space>{<CR>
 " = - <Space>=><Space>{\n\t|\n}
 au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
@@ -562,6 +532,8 @@ if has('nvim')
     Plug 'prabirshrestha/async.vim'
     Plug 'thomasfaingnaert/vim-lsp-snippets'
     Plug 'thomasfaingnaert/vim-lsp-ultisnips'
+    Plug 'alvan/vim-closetag'
+    Plug 'tpope/vim-surround'
     " Plug 'puremourning/vimspector'
   call plug#end()
   filetype indent off
@@ -668,6 +640,37 @@ else
   inoremap <silent> [<CR> [<CR>]<Esc>O<Tab>
   " [ - [\n\t|\n]
 
+  au FileType html,xml,xsl inoremap <silent> <C-t> <Esc>A<Enter></<C-x><C-o><Esc>O<Tab>
+  " <html>| or <html|> - <html>\n\t|\n</html>
+  au FileType html,xml,xsl inoremap <silent> <C-t><C-t> <Esc>F<f>a</<C-x><C-o><Esc>vit<Esc>i
+  " <html|> - <html>|</html>
+  au FileType html,xml,xsl inoremap <silent> <C-t><C-t><C-t> <Esc>F<f>a</<C-x><C-o>
+  " <html|> - <html></html>|
+  au FileType html,xml,xsl inoremap <silent> < <><Left>
+  " < - <|>
+  au FileType html,xml,xsl inoremap <silent> </ </><Left>
+  " </ - </|>
+  au FileType html,xml,xsl inoremap <silent> <% <%<Space><Space>%><Left><Left><Left>
+  " <% - <% | %>
+  au FileType html,xml,xsl inoremap <silent> <%= <%=<Space><Space>%><Left><Left><Left>
+  " <%= - <%= | %>
+  au FileType html,xml,xsl inoremap <silent> <> <>
+  " <> - <>|
+  au FileType html,xml,xsl inoremap <silent> </> </>
+  " </> - </>|
+  au FileType html,xml,xsl inoremap <silent> <%<Space> <%
+  " <%\s - <%|
+  au FileType html,xml,xsl inoremap <silent> <%=<Space> <%=
+  " <%=\s - <%|
+  au FileType html,xml,xsl inoremap <silent> <<Space> <
+  " <\s - <|
+  au FileType html,xml,xsl inoremap <silent> </<Space> </
+  " </\s - </|
+  au FileType html,xml,xsl inoremap <silent> <%=<Space><Space>%> <%=<Space><Space>%>
+  " <%=  %> - <%=  %>|
+  au FileType html,xml,xsl inoremap <silent> <%<Space><Space>%> <%<Space><Space>%>
+  " <%  %> - <%  %>|
+
   " statusline
   set statusline=%{%StatuslineModeReturner()%}
   set statusline+=%2*\ %Y\ %*
@@ -681,7 +684,6 @@ else
   set statusline+=%5*\ %p%%\ %*
   set statusline+=%1*\ %l\*%c\:%L\*%{col('$')}\ %*
 endif
-
 
 " windows config
 if has("win32") || has("win64") || has("win16")
