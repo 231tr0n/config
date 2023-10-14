@@ -129,6 +129,7 @@ func init() {
 		{"systemctlServiceEnable", "gdm"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 		{"chrootUserBashRunCommand", "curl -fLo \"${XDG_DATA_HOME:-$HOME/.local/share}\"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"},
+		{"chrootUserBashRunCommand", "nvim +'PlugInstall --sync' +qa"},
 	}
 	aurPackages := []string{
 		"brave-bin",
