@@ -96,48 +96,6 @@ endfunction
 " check if the window is active
 
 " key mappings
-inoremap <silent> { {}<Left>
-" { - {|}
-inoremap <silent> ( ()<Left>
-" ( - (|)
-inoremap <silent> [ []<Left>
-" [ - [|]
-inoremap <silent> " ""<Left>
-" " - "|"
-inoremap <silent> ' ''<Left>
-" ' - '|'
-inoremap <silent> ` ``<Left>
-" ` - `|`
-inoremap <silent> {} {}
-" {} - {}|
-inoremap <silent> () ()
-" () - ()|
-inoremap <silent> [] []
-" [] - []|
-inoremap <silent> {<Tab> {}
-" {\t - {}|
-inoremap <silent> (<Tab> ()
-" (\t - ()|
-inoremap <silent> [<Tab> []
-" [\t - []|
-inoremap <silent> "" ""
-" "" - ""|
-inoremap <silent> '' ''
-" '' - ''|
-inoremap <silent> `` ``
-" `` - ``|
-inoremap <silent> {<Space> {
-" {\s - {|
-inoremap <silent> (<Space> (
-" (\s - (|
-inoremap <silent> [<Space> [
-" [\s - [|
-inoremap <silent> "<Space> "
-" "\s - "|
-inoremap <silent> '<Space> '
-" '\s - '|
-inoremap <silent> `<Space> `
-" `\s - `|
 nnoremap <silent> <Tab><Tab><Tab> :set noet\|retab!<CR>
 " \t\t\t - convert spaces to tabs
 nnoremap <silent> <Space><Space><Space> :set et\|retab<CR>
@@ -196,31 +154,6 @@ nnoremap <silent> <F11> :highlight Normal ctermbg=235<CR>
 " Filetype maps
 au BufEnter *.js,*.ejs,*.html imap <silent> =<CR> =><Space>{<CR>
 " = - <Space>=><Space>{\n\t|\n}
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
-au FileType sh vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
-au BufEnter *.vim,.vimrc vnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
-au FileType sh nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
-au BufEnter *.vim,.vimrc nnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
-au FileType sh inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F3> <Esc>:norm<Space>^i//<Space><CR>i
-au BufEnter *.vim,.vimrc inoremap <silent> <F3> <Esc>:norm<Space>^i"<Space><Space><CR>i
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
-au BufEnter *.vim,.vimrc vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
-au BufEnter *.vim,.vimrc nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
-au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
-au FileType sh inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
-au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F4> <Esc>:norm<Space>^xxx<Space><CR>i
-au BufEnter *.vim,.vimrc inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
-" Used to put comments in a file.
 
 " auto commands
 au FileType netrw setl statusline=#
@@ -518,6 +451,7 @@ if has('nvim')
   " [ - [\n\t|\n]
 
   " Plugin config
+  " let g:rainbow_active = 1
 
   " Plugins
   call plug#begin()
@@ -534,6 +468,11 @@ if has('nvim')
     Plug 'thomasfaingnaert/vim-lsp-ultisnips'
     Plug 'alvan/vim-closetag'
     Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-commentary'
+    Plug 'LunarWatcher/auto-pairs'
+    Plug 'LunarWatcher/auto-pairs'
+    Plug 'mileszs/ack.vim'
+    " Plug 'luochen1990/rainbow'
     " Plug 'puremourning/vimspector'
   call plug#end()
   filetype indent off
@@ -670,6 +609,75 @@ else
   " <%=  %> - <%=  %>|
   au FileType html,xml,xsl inoremap <silent> <%<Space><Space>%> <%<Space><Space>%>
   " <%  %> - <%  %>|
+
+  inoremap <silent> { {}<Left>
+  " { - {|}
+  inoremap <silent> ( ()<Left>
+  " ( - (|)
+  inoremap <silent> [ []<Left>
+  " [ - [|]
+  inoremap <silent> " ""<Left>
+  " " - "|"
+  inoremap <silent> ' ''<Left>
+  " ' - '|'
+  inoremap <silent> ` ``<Left>
+  " ` - `|`
+  inoremap <silent> {} {}
+  " {} - {}|
+  inoremap <silent> () ()
+  " () - ()|
+  inoremap <silent> [] []
+  " [] - []|
+  inoremap <silent> {<Tab> {}
+  " {\t - {}|
+  inoremap <silent> (<Tab> ()
+  " (\t - ()|
+  inoremap <silent> [<Tab> []
+  " [\t - []|
+  inoremap <silent> "" ""
+  " "" - ""|
+  inoremap <silent> '' ''
+  " '' - ''|
+  inoremap <silent> `` ``
+  " `` - ``|
+  inoremap <silent> {<Space> {
+  " {\s - {|
+  inoremap <silent> (<Space> (
+  " (\s - (|
+  inoremap <silent> [<Space> [
+  " [\s - [|
+  inoremap <silent> "<Space> "
+  " "\s - "|
+  inoremap <silent> '<Space> '
+  " '\s - '|
+  inoremap <silent> `<Space> `
+  " `\s - `|
+
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+  au FileType sh vnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
+  au BufEnter *.vim,.vimrc vnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+  au FileType sh nnoremap <silent> <F3> :norm<Space>^i#<Space><CR>
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F3> :norm<Space>^i//<Space><CR>
+  au BufEnter *.vim,.vimrc nnoremap <silent> <F3> :norm<Space>^i"<Space><Space><CR>
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
+  au FileType sh inoremap <silent> <F3> <Esc>:norm<Space>^i#<Space><CR>i
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F3> <Esc>:norm<Space>^i//<Space><CR>i
+  au BufEnter *.vim,.vimrc inoremap <silent> <F3> <Esc>:norm<Space>^i"<Space><Space><CR>i
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go vnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
+  au BufEnter *.vim,.vimrc vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au FileType sh vnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go nnoremap <silent> <F4> :norm<Space>^xxx<Space><CR>
+  au BufEnter *.vim,.vimrc nnoremap <silent> <F4> :norm<Space>^xx<Space><CR>
+  au BufEnter *.py,*.fish,*.sh,*.bash,*.ruby inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
+  au FileType sh inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
+  au BufEnter *.php,*.js,*.c,*.cpp,*.java,*.scala,*.go inoremap <silent> <F4> <Esc>:norm<Space>^xxx<Space><CR>i
+  au BufEnter *.vim,.vimrc inoremap <silent> <F4> <Esc>:norm<Space>^xx<Space><CR>i
+  " Used to put comments in a file.
 
   " statusline
   set statusline=%{%StatuslineModeReturner()%}
