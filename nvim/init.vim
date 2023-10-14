@@ -451,7 +451,7 @@ if has('nvim')
   " [ - [\n\t|\n]
 
   " Plugin config
-  " let g:rainbow_active = 1
+  let g:rainbow_active = 1
 
   " Plugins
   call plug#begin()
@@ -472,7 +472,7 @@ if has('nvim')
     Plug 'LunarWatcher/auto-pairs'
     Plug 'LunarWatcher/auto-pairs'
     Plug 'mileszs/ack.vim'
-    " Plug 'luochen1990/rainbow'
+    Plug 'luochen1990/rainbow'
     " Plug 'puremourning/vimspector'
   call plug#end()
   filetype indent off
