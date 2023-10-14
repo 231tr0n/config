@@ -47,6 +47,9 @@ if status is-interactive
 	function mvno
 		mv -n $argv;
 	end
+	function fzfopen
+		fd --type f --hidden --exclude .git | fzf-tmux -p --reverse | xargs nvim
+	end
 	fish_vi_key_bindings
 end
 
