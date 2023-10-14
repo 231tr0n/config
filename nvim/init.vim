@@ -567,10 +567,6 @@ else
   let &t_EI = "\<Esc>[2 q"
   " sets cursor to a beam in insertmode and block in other modes. Works only for gnome-terminal
 
-  " Plugins
-  " call plug#begin()
-  " call plug#end()
-
   " Standard key mappings
   inoremap <silent> :<CR> :<CR><Tab>
   " :\n - :\n\t
