@@ -191,6 +191,8 @@ filetype indent off
 " filetype plugins and indent off
 
 " options
+set showcmd
+" show keys which are typed in normal mode on bottom right corner of screen.
 " set spell
 " enables spell
 set path+=**
