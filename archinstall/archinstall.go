@@ -256,6 +256,7 @@ func init() {
 		"thunderbird",
 		"tlp",
 		"tmux",
+		"tree",
 		"ufw",
 		"wayland",
 		"wget",

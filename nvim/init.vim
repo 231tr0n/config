@@ -193,6 +193,8 @@ filetype indent off
 " options
 " set spell
 " enables spell
+set path+=**
+" enables recursive searching
 set gp=git\ grep\ -n
 " search commands
 " set ignorecase
