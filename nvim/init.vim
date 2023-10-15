@@ -474,7 +474,6 @@ if has('nvim')
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-commentary'
     Plug 'LunarWatcher/auto-pairs'
-    Plug 'LunarWatcher/auto-pairs'
     Plug 'mileszs/ack.vim'
     Plug 'luochen1990/rainbow'
     " Plug 'puremourning/vimspector'
