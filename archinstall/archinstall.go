@@ -187,6 +187,7 @@ func init() {
 		"fish",
 		"font-manager",
 		"foot",
+		"fzf",
 		"gcc",
 		"gcolor3",
 		"gdm",
