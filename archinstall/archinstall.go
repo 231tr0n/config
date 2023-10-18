@@ -130,6 +130,7 @@ func init() {
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
 		{"chrootUserBashRunCommand", "curl -fLo \"${XDG_DATA_HOME:-$HOME/.local/share}\"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"},
 		{"chrootUserBashRunCommand", "nvim +'PlugInstall --sync' +qa"},
+		{"chrootUserBashRunCommand", "git config --global core.pager \"diff-so-fancy | less --tabs=4 -RFX\""},
 	}
 	aurPackages := []string{
 		"brave-bin",
