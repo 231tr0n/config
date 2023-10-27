@@ -1,3 +1,4 @@
+-- Paq auto download and configure setup
 local function clone_paq()
   local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
   local is_installed = vim.fn.empty(vim.fn.glob(path)) == 0
@@ -20,6 +21,7 @@ local function bootstrap_paq(packages)
   paq.clean()
 end
 
+-- Paq plugin setup
 bootstrap_paq({
   "savq/paq-nvim",
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
@@ -38,27 +40,31 @@ bootstrap_paq({
   "tpope/vim-eunuch",
   "tpope/vim-classpath",
   "tpope/vim-speeddating",
-  "echasnovski/mini.pairs",
   "nvim-lua/plenary.nvim",
+  "echasnovski/mini.pairs",
   "folke/tokyonight.nvim",
-  "williamboman/mason.nvim",
-  "williamboman/mason-lspconfig.nvim",
   "neovim/nvim-lspconfig",
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
   "L3MON4D3/LuaSnip",
+  "saadparwaiz1/cmp_luasnip",
   "nvim-tree/nvim-web-devicons",
   "nvim-lualine/lualine.nvim",
   "lukas-reineke/indent-blankline.nvim",
   "junegunn/fzf.vim",
   "folke/trouble.nvim",
+  "folke/neodev.nvim",
+  "stevearc/conform.nvim",
   "mfussenegger/nvim-dap",
   "rcarriga/nvim-dap-ui",
   "jay-babu/mason-nvim-dap.nvim",
-  "theHamsta/nvim-dap-virtual-text",
+  "williamboman/mason-lspconfig.nvim",
+  "williamboman/mason.nvim",
 })
 
+-- Treesitter setup
 require("nvim-treesitter.configs").setup({
+  modules = {},
   ensure_installed = {
     "awk",
     "bash",
@@ -128,6 +134,9 @@ require("nvim-treesitter.configs").setup({
       local max_filesize = 1 * 1024 * 1024
       local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
       if ok and stats and stats.size > max_filesize then
+        if lang == "asm" or lang == "wasm" then
+          return false
+        end
         return true
       end
     end,
@@ -170,23 +179,95 @@ require("nvim-treesitter.configs").setup({
   },
 })
 
-require('mini.pairs').setup()
-require('ibl').setup()
-
+-- Lsp setup with mason
 local lspconfig = require('lspconfig')
-local lsp_defaults = lspconfig.util.default_config
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+local luasnip = require("luasnip")
+local cmp = require('cmp')
 
-lsp_defaults.capabilities = vim.tbl_deep_extend(
-  'force',
-  lsp_defaults.capabilities,
-  require('cmp_nvim_lsp').default_capabilities()
-)
+local has_words_before = function()
+  unpack = unpack or table.unpack
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
+cmp.setup({
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<CR>'] = cmp.mapping.confirm({
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    }),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-d>'] = cmp.mapping.scroll_docs(4),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      elseif has_words_before() then
+        cmp.complete()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+  }),
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+})
+
+local default_setup = function(server)
+  lspconfig[server].setup({
+    capabilities = capabilities,
+  })
+end
+
+require('mason').setup()
+require('mason-lspconfig').setup({
+  ensure_installed = {},
+  handlers = {
+    default_setup,
+    require('lspconfig').lua_ls.setup({
+      settings = {
+        Lua = {
+          runtime = {
+            version = 'LuaJIT'
+          },
+          diagnostics = {
+            globals = { 'vim' },
+          },
+          workspace = {
+            library = {
+              vim.env.VIMRUNTIME,
+            }
+          }
+        }
+      }
+    })
+  },
+})
 
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'LSP actions',
   callback = function(event)
     local opts = { buffer = event.buf }
-
     vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
     vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
     vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
@@ -197,51 +278,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
     vim.keymap.set({ 'n', 'x' }, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
     vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
-
     vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
     vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
     vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
   end
 })
 
-local default_setup = function(server)
-  lspconfig[server].setup({})
-end
-
-local dap = require('dap')
-require("dapui").setup()
-
-require('mason').setup()
-require('mason-lspconfig').setup({
-  ensure_installed = {},
-  handlers = { default_setup },
-})
-require("mason-nvim-dap").setup({
-  automatic_installation = true,
-})
-
-require("nvim-dap-virtual-text").setup()
-
-local cmp = require('cmp')
-cmp.setup({
-  sources = {
-    { name = 'nvim_lsp' },
-  },
-  mapping = cmp.mapping.preset.insert({
-    -- Enter key confirms completion item
-    ['<CR>'] = cmp.mapping.confirm({ select = false }),
-
-    -- Ctrl + space triggers completion menu
-    ['<C-Space>'] = cmp.mapping.complete(),
-  }),
-  snippet = {
-    expand = function(args)
-      require('luasnip').lsp_expand(args.body)
-    end,
-  },
-})
-
-require('lualine').setup {
+-- statusline setup
+require('lualine').setup({
   options = {
     icons_enabled = true,
     theme = 'auto',
@@ -280,7 +324,31 @@ require('lualine').setup {
   winbar = {},
   inactive_winbar = {},
   extensions = {}
-}
+})
+
+-- other plugin setups
+require('mini.pairs').setup()
+require('ibl').setup()
+require("neodev").setup()
+require("tokyonight").setup({
+  style = "moon",
+  light_style = "day",
+  transparent = true,
+  terminal_colors = true,
+  styles = {
+    comments = { italic = true },
+    keywords = { italic = true },
+    functions = {},
+    variables = {},
+    sidebars = "dark",
+    floats = "dark",
+  },
+  sidebars = { "qf", "help" },
+  day_brightness = 0.3,
+  hide_inactive_statusline = true,
+  dim_inactive = true,
+  lualine_bold = false,
+})
 
 -- options
 vim.opt.undofile = false
@@ -292,12 +360,11 @@ vim.opt.signcolumn = "yes"
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldenable = false
-vim.g.mapleader = " "
-vim.cmd("colorscheme tokyonight-storm")
-local pwd = vim.fn.system("git rev-parse --show-toplevel 2> /dev/null")
-vim.cmd("cd" .. pwd)
+vim.cmd("colorscheme tokyonight-moon")
+vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 
 -- keymaps
+vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>xx", function() require("trouble").toggle() end)
 vim.keymap.set("n", "<leader>xw", function() require("trouble").toggle("workspace_diagnostics") end)
 vim.keymap.set("n", "<leader>xd", function() require("trouble").toggle("document_diagnostics") end)
