@@ -30,11 +30,11 @@ bootstrap_paq({
 	"HiPhish/rainbow-delimiters.nvim",
 	"lukas-reineke/indent-blankline.nvim",
 	"RRethy/nvim-treesitter-endwise",
-	"echasnovski/mini.pairs",
 	"echasnovski/mini.indentscope",
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
+	"echasnovski/mini.pairs",
 	"tpope/vim-endwise",
 	"tpope/vim-ragtag",
 	"tpope/vim-fugitive",
@@ -423,87 +423,32 @@ require("conform").setup({
 
 -- dap setup
 local dap = require("dap")
-
-dap.adapters.go = function(callback, config)
-	local stdout = vim.loop.new_pipe(false)
-	local handle
-	local pid_or_err
-	local port = 38697
-	local opts = {
-		stdio = { nil, stdout },
-		args = { "dap", "-l", "127.0.0.1:" .. port },
-		detached = true,
-	}
-	handle, pid_or_err = vim.loop.spawn("dlv", opts, function(code)
-		stdout:close()
-		handle:close()
-		if code ~= 0 then
-			print("dlv exited with code", code)
-		end
-	end)
-	assert(handle, "Error running dlv: " .. tostring(pid_or_err))
-	stdout:read_start(function(err, chunk)
-		assert(not err, err)
-		if chunk then
-			vim.schedule(function()
-				require("dap.repl").append(chunk)
-			end)
-		end
-	end)
-	vim.defer_fn(function()
-		callback({ type = "server", host = "127.0.0.1", port = port })
-	end, 100)
+local dapui = require("dapui")
+require("dapui").setup()
+dap.listeners.after.event_initialized["dapui_config"] = function()
+	dapui.open()
 end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+	dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+	dapui.close()
+end
+require("nvim-dap-virtual-text").setup()
 
+dap.adapters.delve = {
+	type = "server",
+	host = "127.0.0.1",
+	port = "9091",
+}
 dap.configurations.go = {
 	{
-		type = "go",
+		type = "delve",
 		name = "Debug",
 		request = "launch",
 		program = "${file}",
 	},
-	{
-		type = "go",
-		name = "Debug test",
-		request = "launch",
-		mode = "test",
-		program = "${file}",
-	},
-	{
-		type = "go",
-		name = "Debug test (go.mod)",
-		request = "launch",
-		mode = "test",
-		program = "./${relativeFileDirname}",
-	},
 }
-
-dap.adapters.python = {
-	type = "executable",
-	command = "/usr/bin/python",
-	args = { "-m", "debugpy.adapter" },
-}
-
-dap.configurations.python = {
-	{
-		type = "python",
-		name = "Launch file",
-		request = "launch",
-		program = "${file}",
-		pythonPath = function()
-			local cwd = vim.fn.getcwd()
-			if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
-				return cwd .. "/venv/bin/python"
-			elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
-				return cwd .. "/.venv/bin/python"
-			else
-				return "/usr/bin/python"
-			end
-		end,
-	},
-}
-require("dapui").setup()
-require("nvim-dap-virtual-text").setup()
 
 -- options
 vim.g.loaded_netrw = 1
@@ -526,16 +471,15 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 2000000
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = "󰋼", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
 vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
-	sign define DiagnosticSignError text= linehl= texthl=DiagnosticSignError
-	sign define DiagnosticSignWarn text= linehl= texthl=DiagnosticSignWarn
-	sign define DiagnosticSignInfo text=󰋼 linehl= texthl=DiagnosticSignInfo
-	sign define DiagnosticSignHint text= linehl= texthl=DiagnosticSignHint
 	let g:python_recommended_style=0
-	filetype on
-	filetype plugin on
-	filetype indent off
 	colorscheme tokyonight-moon
 	set showcmd
 	set path+=**
@@ -642,7 +586,6 @@ vim.keymap.set("n", "<leader>pq", "<cmd>pclose<CR>")
 vim.keymap.set("n", "<leader>nh", "<cmd>nohl<CR>")
 vim.keymap.set("n", "<leader>wt", "<cmd>setl wrap!<CR>")
 vim.keymap.set("n", "<C-c>", '"+y"')
-vim.keymap.set("n", "<C-v>", '"+p"')
 vim.keymap.set("n", "<C-x>", '"+d"')
 
 -- autocommands
