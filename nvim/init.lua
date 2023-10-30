@@ -35,6 +35,7 @@ bootstrap_paq({
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
 	"echasnovski/mini.pairs",
+	"folke/which-key.nvim",
 	"tpope/vim-endwise",
 	"tpope/vim-ragtag",
 	"tpope/vim-fugitive",
@@ -57,6 +58,10 @@ bootstrap_paq({
 	"mfussenegger/nvim-dap",
 	"rcarriga/nvim-dap-ui",
 	"theHamsta/nvim-dap-virtual-text",
+	"leoluz/nvim-dap-go",
+	"mfussenegger/nvim-dap-python",
+	"mfussenegger/nvim-jdtls",
+	"mxsdev/nvim-dap-vscode-js",
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
@@ -281,14 +286,26 @@ lspconfig.pyright.setup({
 lspconfig.rust_analyzer.setup({
 	capabilities = capabilities,
 })
-lspconfig.jdtls.setup({
-	capabilities = capabilities,
-})
 lspconfig.tsserver.setup({
 	capabilities = capabilities,
 })
 lspconfig.svelte.setup({
 	capabilities = capabilities,
+})
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "java" },
+	callback = function()
+		local config = {
+			cmd = { "/usr/bin/jdtls" },
+			root_dir = vim.fs.dirname(vim.fs.find({ "gradlew", ".git", "mvnw" }, { upward = true })[1]),
+		}
+		config["init_options"] = {
+			bundles = {
+				vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
+			},
+		}
+		require("jdtls").start_or_attach(config)
+	end,
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -417,6 +434,8 @@ require("conform").setup({
 		javascript = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
+		xml = { "xmlformat" },
+		json = { "jq" },
 	},
 	lsp_fallback = true,
 })
@@ -436,19 +455,40 @@ dap.listeners.before.event_exited["dapui_config"] = function()
 end
 require("nvim-dap-virtual-text").setup()
 
-dap.adapters.delve = {
-	type = "server",
-	host = "127.0.0.1",
-	port = "9091",
-}
-dap.configurations.go = {
-	{
-		type = "delve",
-		name = "Debug",
-		request = "launch",
-		program = "${file}",
-	},
-}
+require("dap-go").setup()
+require("dap-python").setup("/usr/bin/python")
+require("jdtls.dap").setup_dap_main_class_configs()
+require("dap-vscode-js").setup({
+	adapters = { "pwa-node" },
+})
+for _, language in ipairs({ "typescript", "javascript" }) do
+	require("dap").configurations[language] = {
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Launch file",
+			program = "${file}",
+			cwd = "${workspaceFolder}",
+		},
+		{
+			type = "pwa-node",
+			request = "attach",
+			name = "Attach",
+			processId = require("dap.utils").pick_process,
+			cwd = "${workspaceFolder}",
+		},
+	}
+end
+
+-- helper setup
+require("which-key").setup()
+local wk = require("which-key")
+-- wk.register({
+-- 	["<leader>cnh"] = { "No highlight" },
+-- 	["<leader>ff"] = { "<cmd>Telescope find_files<cr>", "Find File" },
+-- 	["<leader>fr"] = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
+-- 	["<leader>fn"] = { "<cmd>enew<cr>", "New File" },
+-- })
 
 -- options
 vim.g.loaded_netrw = 1
@@ -471,12 +511,24 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 2000000
-vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
-vim.fn.sign_define("DapStopped", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "󰋼", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DebugPosition", linehl = "", numhl = "" })
+vim.fn.sign_define(
+	"DiagnosticSignError",
+	{ text = "", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
+)
+vim.fn.sign_define(
+	"DiagnosticSignWarn",
+	{ text = "", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
+)
+vim.fn.sign_define(
+	"DiagnosticSignInfo",
+	{ text = "󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
+)
+vim.fn.sign_define(
+	"DiagnosticSignHint",
+	{ text = "", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
+)
 vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
 	let g:python_recommended_style=0
@@ -495,6 +547,12 @@ vim.cmd([[
 	set foldmethod=indent
 	set noshowmode
 	highlight MatchParen guibg=#FFC777 guifg=#000000 gui=NONE
+	highlight Breakpoint guibg=NONE guifg=#FCA7EA gui=NONE
+	highlight DebugPosition guibg=NONE guifg=#C099FF gui=NONE
+	highlight LspDiagnosticErr guibg=NONE guifg=#FF757F gui=NONE
+	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
+	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
+	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
 ]])
 
 -- keymaps
@@ -582,9 +640,9 @@ vim.keymap.set("n", "<Space><Space><Space>", function()
 	vim.opt.expandtab = true
 	vim.cmd("retab")
 end)
-vim.keymap.set("n", "<leader>pq", "<cmd>pclose<CR>")
-vim.keymap.set("n", "<leader>nh", "<cmd>nohl<CR>")
-vim.keymap.set("n", "<leader>wt", "<cmd>setl wrap!<CR>")
+vim.keymap.set("n", "<leader>cpq", "<cmd>pclose<CR>")
+vim.keymap.set("n", "<leader>cnh", "<cmd>nohl<CR>")
+vim.keymap.set("n", "<leader>cwt", "<cmd>setl wrap!<CR>")
 vim.keymap.set("n", "<C-c>", '"+y"')
 vim.keymap.set("n", "<C-x>", '"+d"')
 
