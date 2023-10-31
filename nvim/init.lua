@@ -511,23 +511,23 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 2000000
-vim.fn.sign_define("DapBreakpoint", { text = " 󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
-vim.fn.sign_define("DapStopped", { text = " ", texthl = "DebugPosition", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DebugPosition", linehl = "", numhl = "" })
 vim.fn.sign_define(
 	"DiagnosticSignError",
-	{ text = " ", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
+	{ text = "", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignWarn",
-	{ text = " ", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
+	{ text = "", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignInfo",
-	{ text = " 󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
+	{ text = "󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignHint",
-	{ text = " ", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
+	{ text = "", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
 )
 vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
