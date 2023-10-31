@@ -16,8 +16,6 @@ local function bootstrap_paq(packages)
 		vim.notify("Installing plugins... If prompted, hit Enter to continue.")
 	end
 	paq(packages)
-	paq.install()
-	paq.clean()
 end
 
 -- Paq plugin setup
@@ -29,15 +27,15 @@ bootstrap_paq({
 	"nvim-lua/plenary.nvim",
 	"HiPhish/rainbow-delimiters.nvim",
 	"lukas-reineke/indent-blankline.nvim",
+	"windwp/nvim-autopairs",
+	"windwp/nvim-ts-autotag",
 	"RRethy/nvim-treesitter-endwise",
 	"echasnovski/mini.indentscope",
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
-	"echasnovski/mini.pairs",
 	"folke/which-key.nvim",
 	"tpope/vim-endwise",
-	"tpope/vim-ragtag",
 	"tpope/vim-fugitive",
 	"tpope/vim-characterize",
 	"tpope/vim-git",
@@ -174,12 +172,15 @@ require("nvim-treesitter.configs").setup({
 				goto_definition = "<leader>tgd",
 				list_definitions = "<leader>tld",
 				list_definitions_toc = "<leader>tldt",
-				goto_next_usage = "<leader>tgnu",
-				goto_previous_usage = "<leader>tgpu",
+				goto_next_usage = "<leader>tgn",
+				goto_previous_usage = "<leader>tgp",
 			},
 		},
 	},
 	endwise = {
+		enable = true,
+	},
+	autotag = {
 		enable = true,
 	},
 })
@@ -292,6 +293,9 @@ lspconfig.tsserver.setup({
 lspconfig.svelte.setup({
 	capabilities = capabilities,
 })
+lspconfig.clangd.setup({
+	capabilities = capabilities,
+})
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
@@ -312,25 +316,28 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "LSP actions",
 	callback = function(event)
 		local opts = { buffer = event.buf }
-		vim.keymap.set("n", "<leader>lK", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
+		vim.keymap.set("n", "<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
-		vim.keymap.set("n", "<leader>lgo", "<cmd>lua vim.lsp.buf.type_definition()<cr>", opts)
+		vim.keymap.set("n", "<leader>lgtd", "<cmd>lua vim.lsp.buf.type_definition()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgr", "<cmd>lua vim.lsp.buf.references()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgs", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
-		vim.keymap.set("n", "<leader>l<F2>", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
-		vim.keymap.set({ "n", "x" }, "<leader>l<F3>", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
-		vim.keymap.set("n", "<leader>l<F4>", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-		vim.keymap.set("n", "<leader>lgl", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-		vim.keymap.set("n", "<leader>l[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
-		vim.keymap.set("n", "<leader>l]d", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
+		vim.keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
+		vim.keymap.set({ "n", "x" }, "<leader>lf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
+		vim.keymap.set("n", "<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
+		vim.keymap.set("n", "<leader>lo", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
+		vim.keymap.set("n", "<leader>lgp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
+		vim.keymap.set("n", "<leader>lgn", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
 		vim.keymap.set("n", "<Leader>ldh", function()
 			vim.diagnostic.hide()
 		end)
 		vim.keymap.set("n", "<Leader>lds", function()
 			vim.diagnostic.show()
 		end)
+		if vim.bo.filetype == "java" then
+			require("jdtls.dap").setup_dap_main_class_configs()
+		end
 	end,
 })
 
@@ -380,19 +387,21 @@ require("lualine").setup({
 require("mini.comment").setup()
 require("mini.splitjoin").setup()
 require("mini.surround").setup()
-require("mini.pairs").setup()
+require("nvim-autopairs").setup()
+require("nvim-ts-autotag").setup()
 require("mini.indentscope").setup({
 	-- symbol = "|"
 })
 require("ibl").setup()
 require("colorizer").setup()
 require("nvim-tree").setup()
+require("which-key").setup()
 
 -- source code outline setup
 require("aerial").setup({
 	on_attach = function(bufnr)
-		vim.keymap.set("n", "<leader>o{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
-		vim.keymap.set("n", "<leader>o}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+		vim.keymap.set("n", "<leader>cp", "<cmd>AerialPrev<CR>", { buffer = bufnr })
+		vim.keymap.set("n", "<leader>cn", "<cmd>AerialNext<CR>", { buffer = bufnr })
 	end,
 })
 
@@ -457,7 +466,6 @@ require("nvim-dap-virtual-text").setup()
 
 require("dap-go").setup()
 require("dap-python").setup("/usr/bin/python")
-require("jdtls.dap").setup_dap_main_class_configs()
 require("dap-vscode-js").setup({
 	adapters = { "pwa-node" },
 })
@@ -479,16 +487,6 @@ for _, language in ipairs({ "typescript", "javascript" }) do
 		},
 	}
 end
-
--- helper setup
-require("which-key").setup()
-local wk = require("which-key")
--- wk.register({
--- 	["<leader>cnh"] = { "No highlight" },
--- 	["<leader>ff"] = { "<cmd>Telescope find_files<cr>", "Find File" },
--- 	["<leader>fr"] = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
--- 	["<leader>fn"] = { "<cmd>enew<cr>", "New File" },
--- })
 
 -- options
 vim.g.loaded_netrw = 1
@@ -557,94 +555,322 @@ vim.cmd([[
 
 -- keymaps
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>xx", function()
-	require("trouble").toggle()
-end)
-vim.keymap.set("n", "<leader>xw", function()
-	require("trouble").toggle("workspace_diagnostics")
-end)
-vim.keymap.set("n", "<leader>xd", function()
-	require("trouble").toggle("document_diagnostics")
-end)
-vim.keymap.set("n", "<leader>xq", function()
-	require("trouble").toggle("quickfix")
-end)
-vim.keymap.set("n", "<leader>xl", function()
-	require("trouble").toggle("loclist")
-end)
-vim.keymap.set("n", "gR", function()
-	require("trouble").toggle("lsp_references")
-end)
-vim.keymap.set("n", "<leader>et", function()
-	require("nvim-tree.api").tree.toggle()
-end)
-vim.keymap.set("n", "<leader>eo", function()
-	require("nvim-tree.api").tree.open()
-end)
-vim.keymap.set("n", "<leader>eC", function()
-	require("nvim-tree.api").tree.collapse_all(true)
-end)
-vim.keymap.set("n", "<leader>ec", function()
-	require("nvim-tree.api").tree.close()
-end)
-vim.keymap.set("n", "<leader>er", function()
-	require("nvim-tree.api").tree.refresh()
-end)
-vim.keymap.set("n", "<leader>ef", function()
-	require("nvim-tree.api").tree.find_file()
-end)
-vim.keymap.set("n", "<leader>ot", "<cmd>AerialToggle<CR>")
-vim.keymap.set("n", "<leader>dt", function()
-	require("dapui").toggle()
-end)
-vim.keymap.set("n", "<leader>drt", function()
-	require("dap").repl.toggle()
-end)
-vim.keymap.set("n", "<leader>dc", function()
-	require("dap").continue()
-end)
-vim.keymap.set("n", "<leader>dso", function()
-	require("dap").step_over()
-end)
-vim.keymap.set("n", "<leader>dsi", function()
-	require("dap").step_into()
-end)
-vim.keymap.set("n", "<leader>dso", function()
-	require("dap").step_out()
-end)
-vim.keymap.set("n", "<leader>db", function()
-	require("dap").toggle_breakpoint()
-end)
-vim.keymap.set("n", "<leader>drl", function()
-	require("dap").run_last()
-end)
-vim.keymap.set({ "n", "v" }, "<Leader>dh", function()
-	require("dap.ui.widgets").hover()
-end)
-vim.keymap.set({ "n", "v" }, "<Leader>dp", function()
-	require("dap.ui.widgets").preview()
-end)
-vim.keymap.set("n", "<Leader>df", function()
-	local widgets = require("dap.ui.widgets")
-	widgets.centered_float(widgets.frames)
-end)
-vim.keymap.set("n", "<Leader>ds", function()
-	local widgets = require("dap.ui.widgets")
-	widgets.centered_float(widgets.scopes)
-end)
-vim.keymap.set("n", "<Tab><Tab><Tab>", function()
-	vim.opt.expandtab = false
-	vim.cmd("retab!")
-end)
-vim.keymap.set("n", "<Space><Space><Space>", function()
-	vim.opt.expandtab = true
-	vim.cmd("retab")
-end)
-vim.keymap.set("n", "<leader>cpq", "<cmd>pclose<CR>")
-vim.keymap.set("n", "<leader>cnh", "<cmd>nohl<CR>")
-vim.keymap.set("n", "<leader>cwt", "<cmd>setl wrap!<CR>")
-vim.keymap.set("n", "<C-c>", '"+y"')
-vim.keymap.set("n", "<C-x>", '"+d"')
+local wk = require("which-key")
+
+wk.register({
+	["<leader>"] = {
+		x = {
+			name = "Trouble",
+			x = {
+				function()
+					require("trouble").toggle()
+				end,
+				"Toggle Diagnostics",
+			},
+			w = {
+				function()
+					require("trouble").toggle("workspace_diagnostics")
+				end,
+				"Toggle Workspace Diagnostics",
+			},
+			d = {
+				function()
+					require("trouble").toggle("document_diagnostics")
+				end,
+				"Toggle Document Diagnostics",
+			},
+			q = {
+				function()
+					require("trouble").toggle("quickfix")
+				end,
+				"Toggle Quickfix List",
+			},
+			l = {
+				function()
+					require("trouble").toggle("loclist")
+				end,
+				"Toggle Loclist",
+			},
+			r = {
+				function()
+					require("trouble").toggle("lsp_references")
+				end,
+				"Toggle Loclist",
+			},
+		},
+		e = {
+			name = "File Explorer",
+			t = {
+				function()
+					require("nvim-tree.api").tree.toggle()
+				end,
+				"Toggle File Explorer",
+			},
+			o = {
+				function()
+					require("nvim-tree.api").tree.open()
+				end,
+				"Open File Explorer",
+			},
+			C = {
+				function()
+					require("nvim-tree.api").tree.collapse_all(true)
+				end,
+				"Collapse whole tree",
+			},
+			c = {
+				function()
+					require("nvim-tree.api").tree.close()
+				end,
+				"Close File Explorer",
+			},
+			r = {
+				function()
+					require("nvim-tree.api").tree.refresh()
+				end,
+				"Refresh File Explorer",
+			},
+			f = {
+				function()
+					require("nvim-tree.api").tree.find_file()
+				end,
+				"File file in File Explorer",
+			},
+		},
+		c = {
+			name = "Code Outline",
+			t = {
+				"<cmd>AerialToggle<CR>",
+				"Toggle Code outline",
+			},
+			n = "Go to next definition in aerial",
+			p = "Go to previous definition in aerial",
+		},
+		d = {
+			name = "Debug",
+			t = {
+				function()
+					require("dapui").toggle()
+				end,
+				"Toggle debug UI",
+			},
+			rt = {
+				function()
+					require("dap").repl.toggle()
+				end,
+				"Toggle debug Repl",
+			},
+			c = {
+				function()
+					require("dap").continue()
+				end,
+				"Debug Continue",
+			},
+			so = {
+				function()
+					require("dap").step_over()
+				end,
+				"Debug Step over",
+			},
+			si = {
+				function()
+					require("dap").step_into()
+				end,
+				"Debug Step into",
+			},
+			sO = {
+				function()
+					require("dap").step_out()
+				end,
+				"Debug Step out",
+			},
+			b = {
+				function()
+					require("dap").toggle_breakpoint()
+				end,
+				"Debug Toggle breakpoint",
+			},
+			rl = {
+				function()
+					require("dap").run_last()
+				end,
+				"Debug Run last",
+			},
+			h = {
+				function()
+					require("dap.ui.widgets").hover()
+				end,
+				"Debug Ui Hover",
+			},
+			p = {
+				function()
+					require("dap.ui.widgets").preview()
+				end,
+				"Debug Ui Preview",
+			},
+			f = {
+				function()
+					local widgets = require("dap.ui.widgets")
+					widgets.centered_float(widgets.frames)
+				end,
+				"Debug Ui Frames",
+			},
+			s = {
+				function()
+					local widgets = require("dap.ui.widgets")
+					widgets.centered_float(widgets.scopes)
+				end,
+				"Debug Ui Scopes",
+			},
+		},
+		o = {
+			name = "Own Keymaps",
+			pq = {
+				"<cmd>pclose<CR>",
+				"Close panels",
+			},
+			nh = {
+				"<cmd>nohl<CR>",
+				"Disable search regex highlighting",
+			},
+			tw = {
+				"<cmd>setl wrap!<CR>",
+				"Toggle wrap",
+			},
+		},
+		t = {
+			name = "Treesitter",
+			is = "Init selection",
+			ni = "Node incremental selection",
+			si = "Scope incremental selection",
+			nd = "Node decremental selection",
+			r = "Smart rename",
+			gd = "Goto definition",
+			ld = "List definitions",
+			ldt = "List definitions toc",
+			gn = "Goto next usage",
+			gp = "Goto previous usage",
+		},
+		l = {
+			name = "Lsp",
+			h = "Hover",
+			gd = "Goto definition",
+			gD = "Goto declaraction",
+			gi = "Goto implementation",
+			gtd = "Goto type definition",
+			gr = "Goto references",
+			gs = "Signature help",
+			r = "Rename",
+			f = "Format",
+			c = "Code action",
+			o = "Open float",
+			gp = "Goto previous",
+			gn = "Goto next",
+			dh = "Diagnostics hide",
+			ds = "Diagnostics show",
+		},
+		f = {
+			name = "Find",
+			f = {
+				"<cmd>Files<CR>",
+				"Find files",
+			},
+			g = {
+				"<cmd>GFiles<CR>",
+				"Find git files",
+			},
+			G = {
+				"<cmd>GFiles?<CR>",
+				"Find git status files",
+			},
+			b = {
+				"<cmd>Buffers<CR>",
+				"Find buffers",
+			},
+			s = {
+				"<cmd>Rg<CR>",
+				"Find content in files",
+			},
+			S = {
+				"<cmd>RG<CR>",
+				"Find content in files with rg run everytime",
+			},
+			l = {
+				"<cmd>BLines<CR>",
+				"Find content in buffer lines",
+			},
+			L = {
+				"<cmd>Lines<CR>",
+				"Find content in buffer lines",
+			},
+			t = {
+				"<cmd>BTags<CR>",
+				"Find content in ctags for current buffer",
+			},
+			T = {
+				"<cmd>Tags<CR>",
+				"Find content in ctags",
+			},
+			m = {
+				"<cmd>Marks<CR>",
+				"Find marks",
+			},
+			j = {
+				"<cmd>Jumps<CR>",
+				"Find jumps",
+			},
+			w = {
+				"<cmd>Windows<CR>",
+				"Find windows",
+			},
+			h = {
+				"<cmd>History:<CR>",
+				"Find history of commands",
+			},
+			H = {
+				"<cmd>History/<CR>",
+				"Find history of search",
+			},
+			c = {
+				"<cmd>Commits<CR>",
+				"Find commits",
+			},
+			C = {
+				"<cmd>BCommits<CR>",
+				"Find buffer commits",
+			},
+		},
+	},
+	["<C-Space>"] = "Complete mapping",
+	["<C-u>"] = "Scroll mapping docs up",
+	["<C-d>"] = "Scroll mapping docs down",
+	["<C-e>"] = "Abort mapping",
+	["Tab"] = "Go down completitions",
+	["<S-Tab>"] = "Go up completitions",
+	["<Tab><Tab><Tab>"] = {
+		function()
+			vim.opt.expandtab = false
+			vim.cmd("retab!")
+		end,
+		"Convert tabs to spaces",
+	},
+	["<Space><Space><Space>"] = {
+		function()
+			vim.opt.expandtab = true
+			vim.cmd("retab")
+		end,
+		"Convert tabs to spaces",
+	},
+	["<C-c>"] = {
+		'"+y',
+		"Copy to clipboard",
+	},
+	["<C-x>"] = {
+		'"+d',
+		"Cut to clipboard",
+	},
+	["<C-S-v>"] = "Paste from clipboard",
+})
 
 -- autocommands
 vim.api.nvim_create_autocmd("BufWritePre", {
