@@ -43,6 +43,7 @@ var (
 	hostname          = flag.String("hostname", "xeltron", "Set the hostname of the system.")
 	intel             = flag.Bool("intel", false, "Use this flag to install micro-code for intel chips.")
 	list              = flag.Bool("list", false, "Use this flag to list all the commands which will be run.")
+	minimalDesktop    = flag.Bool("minimal-desktop", false, "Installs only gnome-desktop with foot terminal and enabled gdm.")
 	mountPoint        = flag.String("mount-point", "/mnt", "Build the arch filesystem by using this partition for mounting.")
 	npmPkgs           = flag.Bool("npm-pkgs", false, "Install required npm packages.")
 	parallelDownloads = flag.Int("parallel-downloads", 5, "Number of downloads pacman can do at a time.")
@@ -114,10 +115,11 @@ func init() {
 		filepath.Join("tmux", "tmux.conf"):                          filepath.Join("/home", *username, ".config", "tmux", "tmux.conf"),
 		filepath.Join("lvim", "config.lua"):                         filepath.Join("/home", *username, ".config", "lvim", "config.lua"),
 		filepath.Join("mako", "config"):                             filepath.Join("/home", *username, ".config", "mako", "config"),
-		filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".config", "nvim", "init.vim"),
 		filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".vimrc"),
+		filepath.Join("nvim", "init.lua"):                           filepath.Join("/home", *username, ".config", "nvim", "init.lua"),
 		filepath.Join("sway", "config"):                             filepath.Join("/home", *username, ".config", "sway", "config"),
 		filepath.Join("sway", "status.go"):                          filepath.Join("/home", *username, ".config", "sway", "status.go"),
+		// filepath.Join("nvim", "init.vim"):                           filepath.Join("/home", *username, ".config", "nvim", "init.vim"),
 	}
 	desktopHooks := [][]string{
 		{"chrootUserBashRunCommand", "echo -e \"" + *userPwd + "\" | sudo chmod +s $(which brightnessctl)"},
@@ -128,8 +130,6 @@ func init() {
 		// {"systemctlServiceEnable", "ly"},
 		{"systemctlServiceEnable", "gdm"},
 		{"chrootUserBashRunCommand", "cd " + filepath.Join("/home", *username, ".config", "sway") + " && go build status.go"},
-		{"chrootUserBashRunCommand", "curl -fLo \"${XDG_DATA_HOME:-$HOME/.local/share}\"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"},
-		{"chrootUserBashRunCommand", "nvim +'PlugInstall --sync' +qa"},
 		{"chrootUserBashRunCommand", "git config --global core.pager \"diff-so-fancy | less --tabs=4 -RFX\""},
 	}
 	aurPackages := []string{
@@ -477,8 +477,12 @@ func init() {
 		for _, val := range desktopHooks {
 			appendInstaller(val...)
 		}
-		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\\n\" | chsh -s /bin/fish")
-		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*sshPwd+"\\n"+*sshPwd+"\\n\" | ssh-keygen -t rsa")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*userPwd+"\" | chsh -s /bin/fish")
+		appendInstaller("chrootUserBashRunCommand", "echo -e \""+*sshPwd+"\\n"+*sshPwd+"\" | ssh-keygen -t rsa")
+	}
+	if *minimalDesktop {
+		appendInstaller("chrootPacmanInstall", "foot", "gnome", "gdm")
+		appendInstaller("systemctlServiceEnable", "gdm")
 	}
 	if *vm {
 		appendInstaller(append([]string{"chrootPacmanInstall"}, vmPackages...)...)
