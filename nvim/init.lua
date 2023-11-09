@@ -551,6 +551,8 @@ vim.cmd([[
 	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
 	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
 	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
+	vnoremap <C-c> "+y
+	vnoremap <C-x> "+d
 ]])
 
 -- keymaps
@@ -861,14 +863,8 @@ wk.register({
 		end,
 		"Convert tabs to spaces",
 	},
-	["<C-c>"] = {
-		'"+y',
-		"Copy to clipboard",
-	},
-	["<C-x>"] = {
-		'"+d',
-		"Cut to clipboard",
-	},
+	["<C-c>"] = "Copy to clipboard",
+	["<C-x>"] = "Cut to clipboard",
 	["<C-S-v>"] = "Paste from clipboard",
 })
 
