@@ -390,7 +390,7 @@ require("mini.surround").setup()
 require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
 require("mini.indentscope").setup({
-	-- symbol = "|"
+	symbol = "|",
 })
 require("ibl").setup()
 require("colorizer").setup()
