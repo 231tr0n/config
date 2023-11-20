@@ -553,6 +553,9 @@ vim.cmd([[
 	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
 	vnoremap <C-c> "+y
 	vnoremap <C-x> "+d
+	nnoremap <Space>lgb <C-t>
+	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
+	let $FZF_DEFAULT_COMMAND = 'fd --type f --color=always --exclude .git --exclude node_modules'
 ]])
 
 -- keymaps
@@ -757,6 +760,7 @@ wk.register({
 			name = "Lsp",
 			h = "Hover",
 			gd = "Goto definition",
+			gb = "Goto previous definition",
 			gD = "Goto declaraction",
 			gi = "Goto implementation",
 			gtd = "Goto type definition",
