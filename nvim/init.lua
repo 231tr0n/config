@@ -532,6 +532,8 @@ vim.cmd([[
 	let g:python_recommended_style=0
 	colorscheme tokyonight-moon
 	set showcmd
+	set ignorecase
+	set smartcase
 	set path+=**
 	set gp=git\ grep\ -n
 	set wildignore=*.exe,*.dll,*.pdb
@@ -555,7 +557,9 @@ vim.cmd([[
 	vnoremap <C-x> "+d
 	nnoremap <Space>lgb <C-t>
 	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
-	let $FZF_DEFAULT_COMMAND = 'fd --type f --color=always --exclude .git --exclude node_modules'
+	let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
+	command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview(), <bang>0)
+	command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview(), <bang>0)
 ]])
 
 -- keymaps
