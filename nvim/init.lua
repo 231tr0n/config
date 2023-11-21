@@ -34,6 +34,8 @@ bootstrap_paq({
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
+	"echasnovski/mini.jump",
+	"echasnovski/mini.jump2d",
 	"folke/which-key.nvim",
 	"tpope/vim-endwise",
 	"tpope/vim-fugitive",
@@ -396,6 +398,8 @@ require("ibl").setup()
 require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
+require("mini.jump").setup()
+require("mini.jump2d").setup()
 
 -- source code outline setup
 require("aerial").setup({
@@ -558,8 +562,9 @@ vim.cmd([[
 	nnoremap <Space>lgb <C-t>
 	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
 	let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
-	command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview(), <bang>0)
-	command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview(), <bang>0)
+	command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+	command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+	command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
 ]])
 
 -- keymaps
