@@ -34,7 +34,6 @@ bootstrap_paq({
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
-	"echasnovski/mini.jump",
 	"echasnovski/mini.jump2d",
 	"folke/which-key.nvim",
 	"tpope/vim-endwise",
@@ -398,7 +397,6 @@ require("ibl").setup()
 require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
-require("mini.jump").setup()
 require("mini.jump2d").setup()
 
 -- source code outline setup
