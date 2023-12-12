@@ -438,6 +438,7 @@ require("lint").linters_by_ft = {
 	javascript = { "eslint" },
 	lua = { "luacheck" },
 	python = { "pylint" },
+	c = { "clangtidy" },
 }
 
 -- formatting setup
@@ -450,6 +451,7 @@ require("conform").setup({
 		go = { "gofumpt" },
 		xml = { "xmlformat" },
 		json = { "jq" },
+		c = { "clang_format" },
 	},
 	lsp_fallback = true,
 })
