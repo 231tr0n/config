@@ -1,3 +1,40 @@
+-- Custom commands and functions
+local te_buf = nil
+local te_win_id = nil
+
+local v = vim
+local fun = v.fn
+local cmd = v.api.nvim_command
+local gotoid = fun.win_gotoid
+local getid = fun.win_getid
+
+local function openTerminal()
+	if fun.bufexists(te_buf) ~= 1 then
+		cmd("au TermOpen * setlocal nonumber norelativenumber signcolumn=no")
+		cmd("sp | winc J | res 10 | te")
+		te_win_id = getid()
+		te_buf = fun.bufnr("%")
+	elseif gotoid(te_win_id) ~= 1 then
+		cmd("sb " .. te_buf .. "| winc J | res 10")
+		te_win_id = getid()
+	end
+	cmd("startinsert")
+end
+
+local function hideTerminal()
+	if gotoid(te_win_id) == 1 then
+		cmd("hide")
+	end
+end
+
+local function ToggleTerminal()
+	if gotoid(te_win_id) == 1 then
+		hideTerminal()
+	else
+		openTerminal()
+	end
+end
+
 -- Paq auto download and configure setup
 local function clone_paq()
 	local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
@@ -64,6 +101,7 @@ bootstrap_paq({
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
+	"nomnivore/ollama.nvim",
 })
 
 -- Treesitter setup
@@ -229,7 +267,7 @@ cmp.setup({
 			behavior = cmp.ConfirmBehavior.Replace,
 			select = true,
 		}),
-		["<C-Space>"] = cmp.mapping.complete(),
+		["<C-x><C-p>"] = cmp.mapping.complete(),
 		["<C-u>"] = cmp.mapping.scroll_docs(-4),
 		["<C-d>"] = cmp.mapping.scroll_docs(4),
 		["<C-e>"] = cmp.mapping.abort(),
@@ -495,6 +533,27 @@ for _, language in ipairs({ "typescript", "javascript" }) do
 	}
 end
 
+-- ai setup
+require("ollama").setup({
+	model = "codellama",
+	url = "http://127.0.0.1:11434",
+	-- serve = {
+	-- 	on_start = false,
+	-- 	command = "ollama",
+	-- 	args = { "serve" },
+	-- 	stop_command = "pkill",
+	-- 	stop_args = { "-SIGTERM", "ollama" },
+	-- },
+	prompts = {
+		Sample_Prompt = {
+			prompt = "This is a sample prompt that receives $input and $sel(ection), among others.",
+			input_label = "> ",
+			model = "codellama",
+			action = "display",
+		},
+	},
+})
+
 -- options
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -515,7 +574,7 @@ vim.opt.hlsearch = true
 vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
-vim.opt.maxmempattern = 2000000
+vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "", texthl = "DebugPosition", linehl = "", numhl = "" })
 vim.fn.sign_define(
@@ -537,7 +596,7 @@ vim.fn.sign_define(
 vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
 	let g:python_recommended_style=0
-	colorscheme tokyonight-moon
+	colorscheme tokyonight-night
 	set showcmd
 	set ignorecase
 	set smartcase
@@ -652,6 +711,17 @@ wk.register({
 					require("nvim-tree.api").tree.find_file()
 				end,
 				"File file in File Explorer",
+			},
+		},
+		a = {
+			name = "Ollama",
+			p = {
+				":<c-u>lua require('ollama').prompt()<cr>",
+				"Prompt model",
+			},
+			g = {
+				":<c-u>lua require('ollama').prompt('Generate_Code')<cr>",
+				"Generate code from model",
 			},
 		},
 		c = {
@@ -859,7 +929,14 @@ wk.register({
 			},
 		},
 	},
-	["<C-Space>"] = "Complete mapping",
+	["<C-Space>"] = {
+		function()
+			ToggleTerminal()
+		end,
+		"Toggle terminal",
+	},
+	["<C-\\><C-n>"] = "Exit terminal mode",
+	["<C-x><C-p>"] = "Complete mapping",
 	["<C-u>"] = "Scroll mapping docs up",
 	["<C-d>"] = "Scroll mapping docs down",
 	["<C-e>"] = "Abort mapping",
