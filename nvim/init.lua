@@ -62,6 +62,7 @@ bootstrap_paq({
 	"nvim-treesitter/nvim-treesitter-context",
 	"nvim-treesitter/nvim-treesitter-refactor",
 	"nvim-lua/plenary.nvim",
+	"MunifTanjim/nui.nvim",
 	"HiPhish/rainbow-delimiters.nvim",
 	"lukas-reineke/indent-blankline.nvim",
 	"windwp/nvim-autopairs",
@@ -102,6 +103,7 @@ bootstrap_paq({
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
 	"nomnivore/ollama.nvim",
+	"m4xshen/hardtime.nvim",
 })
 
 -- Treesitter setup
@@ -439,6 +441,7 @@ require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
 require("mini.jump2d").setup()
+require("hardtime").setup()
 
 -- source code outline setup
 require("aerial").setup({
