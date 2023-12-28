@@ -103,7 +103,6 @@ bootstrap_paq({
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
 	"nomnivore/ollama.nvim",
-	"m4xshen/hardtime.nvim",
 })
 
 -- Treesitter setup
@@ -441,7 +440,6 @@ require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
 require("mini.jump2d").setup()
-require("hardtime").setup()
 
 -- source code outline setup
 require("aerial").setup({
