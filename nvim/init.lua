@@ -901,7 +901,7 @@ wk.register({
 			},
 			L = {
 				"<cmd>Lines<CR>",
-				"Find content in buffer lines",
+				"Find content in all buffer lines",
 			},
 			t = {
 				"<cmd>BTags<CR>",
