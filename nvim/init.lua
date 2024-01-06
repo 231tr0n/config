@@ -321,6 +321,9 @@ lspconfig.lua_ls.setup({
 lspconfig.bashls.setup({
 	capabilities = capabilities,
 })
+lspconfig.eslint.setup({
+	capabilities = capabilities,
+})
 lspconfig.gopls.setup({
 	capabilities = capabilities,
 })
@@ -380,6 +383,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end)
 		if vim.bo.filetype == "java" then
 			require("jdtls.dap").setup_dap_main_class_configs()
+		end
+		if vim.bo.filetype == "javascript" or vim.bo.filetype == "typescript" then
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				buffer = event.buf,
+				command = "EslintFixAll",
+			})
 		end
 	end,
 })
@@ -474,7 +483,6 @@ require("tokyonight").setup({
 require("lint").linters_by_ft = {
 	java = { "checkstyle" },
 	go = { "golangcilint" },
-	javascript = { "eslint" },
 	lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
