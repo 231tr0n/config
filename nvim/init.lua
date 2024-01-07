@@ -491,6 +491,8 @@ require("lint").linters_by_ft = {
 	lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
+	javascript = { "eslint" },
+	typescript = { "eslint" },
 }
 
 -- formatting setup
@@ -498,8 +500,6 @@ require("conform").setup({
 	formatters_by_ft = {
 		lua = { "stylua" },
 		python = { "black" },
-		javascript = { "prettier" },
-		typescript = { "prettier" },
 		svelte = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
