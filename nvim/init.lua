@@ -499,8 +499,8 @@ require("conform").setup({
 	formatters_by_ft = {
 		lua = { "stylua" },
 		python = { "black" },
-		javascript = { "prettier" },
-		typescript = { "prettier" },
+		-- javascript = { "prettier" },
+		-- typescript = { "prettier" },
 		svelte = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
