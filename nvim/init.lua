@@ -318,6 +318,12 @@ lspconfig.lua_ls.setup({
 		},
 	},
 })
+lspconfig.html.setup({
+	capabilities = capabilities,
+})
+lspconfig.cssls.setup({
+	capabilities = capabilities,
+})
 lspconfig.bashls.setup({
 	capabilities = capabilities,
 })
@@ -494,10 +500,14 @@ require("conform").setup({
 		lua = { "stylua" },
 		python = { "black" },
 		javascript = { "prettier" },
+		typescript = { "prettier" },
+		svelte = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
 		xml = { "xmlformat" },
 		json = { "jq" },
+		css = { "prettier" },
+		html = { "prettier" },
 		c = { "clang_format" },
 	},
 	lsp_fallback = true,
