@@ -73,8 +73,9 @@ bootstrap_paq({
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
 	"echasnovski/mini.jump2d",
+	"folke/flash.nvim",
 	"folke/which-key.nvim",
-	"tpope/vim-endwise",
+	"tpope/vim-repeat",
 	"tpope/vim-fugitive",
 	"tpope/vim-characterize",
 	"tpope/vim-git",
@@ -457,8 +458,11 @@ require("ibl").setup()
 require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
-require("mini.jump2d").setup()
 require("todo-comments").setup()
+
+-- Navigating setup
+require("mini.jump2d").setup()
+require("flash").setup()
 
 -- Ui setup
 require("dressing").setup()
