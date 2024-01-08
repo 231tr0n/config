@@ -542,7 +542,7 @@ require("conform").setup({
 	lsp_fallback = true,
 })
 vim.api.nvim_create_user_command("Format", function(args)
-	require("conform").format({ lsp_fallback = true })
+	require("conform").format()
 end, { range = true })
 
 -- dap setup
@@ -1083,7 +1083,7 @@ wk.register({
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*",
 	callback = function(args)
-		require("conform").format({ bufnr = args.buf, lsp_fallback = true })
+		require("conform").format({ bufnr = args.buf })
 	end,
 })
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
