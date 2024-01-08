@@ -521,6 +521,7 @@ require("lint").linters_by_ft = {
 	c = { "clangtidy" },
 	javascript = { "eslint" },
 	typescript = { "eslint" },
+	sh = { "shellcheck" },
 }
 
 -- formatting setup
@@ -536,19 +537,21 @@ require("conform").setup({
 		css = { "prettier" },
 		html = { "prettier" },
 		c = { "clang_format" },
+		sh = { "shfmt" },
 	},
 	lsp_fallback = true,
 })
 vim.api.nvim_create_user_command("Format", function(args)
-	local range = nil
-	if args.count ~= -1 then
-		local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
-		range = {
-			start = { args.line1, 0 },
-			["end"] = { args.line2, end_line:len() },
-		}
-	end
-	require("conform").format({ async = true, lsp_fallback = true, range = range })
+	-- local range = nil
+	-- if args.count ~= -1 then
+	-- 	local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+	-- 	range = {
+	-- 		start = { args.line1, 0 },
+	-- 		["end"] = { args.line2, end_line:len() },
+	-- 	}
+	-- end
+	-- require("conform").format({ async = true, lsp_fallback = true, range = range })
+	require("conform").format({ async = true, lsp_fallback = true })
 end, { range = true })
 
 -- dap setup
@@ -1089,7 +1092,7 @@ wk.register({
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*",
 	callback = function(args)
-		require("conform").format({ bufnr = args.buf })
+		require("conform").format({ bufnr = args.buf, lsp_fallback = true })
 	end,
 })
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
