@@ -103,6 +103,10 @@ bootstrap_paq({
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
 	"nomnivore/ollama.nvim",
+	"stevearc/dressing.nvim",
+	"rcarriga/nvim-notify",
+	"folke/noice.nvim",
+	"folke/todo-comments.nvim",
 })
 
 -- Treesitter setup
@@ -454,6 +458,26 @@ require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
 require("mini.jump2d").setup()
+require("todo-comments").setup()
+
+-- Ui setup
+require("dressing").setup()
+require("noice").setup({
+	lsp = {
+		override = {
+			["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+			["vim.lsp.util.stylize_markdown"] = true,
+			["cmp.entry.get_documentation"] = true,
+		},
+	},
+	presets = {
+		bottom_search = true,
+		command_palette = true,
+		long_message_to_split = true,
+		inc_rename = false,
+		lsp_doc_border = false,
+	},
+})
 
 -- source code outline setup
 require("aerial").setup({
@@ -567,11 +591,11 @@ require("ollama").setup({
 	model = "codellama",
 	url = "http://127.0.0.1:11434",
 	-- serve = {
-	-- 	on_start = false,
-	-- 	command = "ollama",
-	-- 	args = { "serve" },
-	-- 	stop_command = "pkill",
-	-- 	stop_args = { "-SIGTERM", "ollama" },
+	--	on_start = false,
+	--	command = "ollama",
+	--	args = { "serve" },
+	--	stop_command = "pkill",
+	--	stop_args = { "-SIGTERM", "ollama" },
 	-- },
 	prompts = {
 		Sample_Prompt = {
@@ -701,6 +725,27 @@ wk.register({
 					require("trouble").toggle("lsp_references")
 				end,
 				"Toggle Loclist",
+			},
+			t = {
+				name = "Todo Comments",
+				t = {
+					"<cmd>TodoTrouble<CR>",
+					"Toggles todolist",
+				},
+				l = {
+					"<cmd>TodoLocList<CR>",
+					"Toggles Loclist",
+				},
+				q = {
+					"<cmd>TodoQuickFix<CR>",
+					"Toggles Quickfix list",
+				},
+				n = {
+					require("todo-comments").jump_next(),
+				},
+				p = {
+					require("todo-comments").jump_prev(),
+				},
 			},
 		},
 		e = {
