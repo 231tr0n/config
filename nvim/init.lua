@@ -690,7 +690,7 @@ vim.opt.list = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.wildmenu = true
-vim.o.wildmode = "longest:full,list"
+vim.o.wildmode = "longest:full,list:full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
