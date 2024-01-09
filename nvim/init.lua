@@ -97,7 +97,22 @@ bootstrap_paq({
 	"rcarriga/nvim-dap-ui",
 	"theHamsta/nvim-dap-virtual-text",
 	"leoluz/nvim-dap-go",
-	"mfussenegger/nvim-dap-python",
+	{
+		"mfussenegger/nvim-dap-python",
+		build = function()
+			local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start"
+			vim.fn.system({
+				"bash",
+				"-c",
+				"cd "
+					.. path
+					.. " && rm -rf debugpy && python -m venv debugpy && "
+					.. path
+					.. "/debugpy/bin/python -m pip install debugpy",
+			})
+			return true
+		end,
+	},
 	"mfussenegger/nvim-jdtls",
 	{
 		"microsoft/vscode-js-debug",
@@ -108,7 +123,7 @@ bootstrap_paq({
 				"-c",
 				"cd " .. path .. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
 			})
-      return true
+			return true
 		end,
 	},
 	"mxsdev/nvim-dap-vscode-js",
@@ -581,7 +596,7 @@ end
 require("nvim-dap-virtual-text").setup()
 
 require("dap-go").setup()
-require("dap-python").setup("/usr/bin/python")
+require("dap-python").setup(vim.fn.stdpath("data") .. "/site/pack/paqs/start/debugpy/bin/python")
 require("dap-vscode-js").setup({
 	debugger_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/vscode-js-debug",
 	adapters = { "pwa-node" },
@@ -690,7 +705,7 @@ vim.opt.list = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.wildmenu = true
-vim.o.wildmode = "longest:full,list:full"
+vim.o.wildmode = "list:full"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
