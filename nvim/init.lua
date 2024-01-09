@@ -102,12 +102,13 @@ bootstrap_paq({
 	{
 		"microsoft/vscode-js-debug",
 		build = function()
-			local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
+			local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/vscode-js-debug"
 			vim.fn.system({
 				"bash",
 				"-c",
-				"cd " .. path .. "rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
+				"cd " .. path .. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
 			})
+      return true
 		end,
 	},
 	"mxsdev/nvim-dap-vscode-js",
@@ -689,7 +690,7 @@ vim.opt.list = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.wildmenu = true
-vim.o.wildmode = "longest:full,full"
+vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
