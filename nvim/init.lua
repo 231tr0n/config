@@ -548,6 +548,7 @@ require("lint").linters_by_ft = {
 	c = { "clangtidy" },
 	javascript = { "eslint" },
 	typescript = { "eslint" },
+	svelte = { "eslint" },
 	sh = { "shellcheck" },
 }
 
