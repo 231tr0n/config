@@ -595,7 +595,6 @@ dap.listeners.before.event_exited["dapui_config"] = function()
 	dapui.close()
 end
 require("nvim-dap-virtual-text").setup()
-
 require("dap-go").setup()
 require("dap-python").setup(vim.fn.stdpath("data") .. "/site/pack/paqs/start/debugpy/bin/python")
 require("dap-vscode-js").setup({
