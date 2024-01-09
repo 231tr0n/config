@@ -101,7 +101,14 @@ bootstrap_paq({
 	"mfussenegger/nvim-jdtls",
 	{
 		"microsoft/vscode-js-debug",
-		build = "rm -rf dist out && npm install && npm run package && mv dist out",
+		build = function()
+			local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
+			vim.fn.system({
+				"bash",
+				"-c",
+				"cd " .. path .. "rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
+			})
+		end,
 	},
 	"mxsdev/nvim-dap-vscode-js",
 	"mfussenegger/nvim-lint",
@@ -575,7 +582,7 @@ require("nvim-dap-virtual-text").setup()
 require("dap-go").setup()
 require("dap-python").setup("/usr/bin/python")
 require("dap-vscode-js").setup({
-	debugger_path = "(runtimedir)/site/pack/paqs/start/vscode-js-debug",
+	debugger_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/vscode-js-debug",
 	adapters = { "pwa-node" },
 })
 for _, language in ipairs({ "typescript", "javascript" }) do
