@@ -99,6 +99,10 @@ bootstrap_paq({
 	"leoluz/nvim-dap-go",
 	"mfussenegger/nvim-dap-python",
 	"mfussenegger/nvim-jdtls",
+	{
+		"microsoft/vscode-js-debug",
+		build = "rm -rf dist out && npm install && npm run package && mv dist out",
+	},
 	"mxsdev/nvim-dap-vscode-js",
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
@@ -539,28 +543,7 @@ require("conform").setup({
 		c = { "clang_format" },
 		sh = { "shfmt" },
 	},
-	format_on_save = function(bufnr)
-		if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
-			return
-		end
-		return { lsp_fallback = true }
-	end,
-})
-vim.api.nvim_create_user_command("FormatDisable", function(args)
-	if args.bang then
-		vim.b.disable_autoformat = true
-	else
-		vim.g.disable_autoformat = true
-	end
-end, {
-	desc = "Disable autoformat-on-save",
-	bang = true,
-})
-vim.api.nvim_create_user_command("FormatEnable", function()
-	vim.b.disable_autoformat = false
-	vim.g.disable_autoformat = false
-end, {
-	desc = "Re-enable autoformat-on-save",
+	lsp_fallback = true,
 })
 vim.api.nvim_create_user_command("Format", function(args)
 	local range = nil
@@ -571,7 +554,7 @@ vim.api.nvim_create_user_command("Format", function(args)
 			["end"] = { args.line2, end_line:len() },
 		}
 	end
-	require("conform").format({ range = range })
+	require("conform").format({ async = true, range = range })
 end, { range = true })
 
 -- dap setup
@@ -592,6 +575,7 @@ require("nvim-dap-virtual-text").setup()
 require("dap-go").setup()
 require("dap-python").setup("/usr/bin/python")
 require("dap-vscode-js").setup({
+	debugger_path = "(runtimedir)/site/pack/paqs/start/vscode-js-debug",
 	adapters = { "pwa-node" },
 })
 for _, language in ipairs({ "typescript", "javascript" }) do
@@ -1112,7 +1096,7 @@ wk.register({
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*",
 	callback = function(args)
-		require("conform").format({ bufnr = args.buf })
+		require("conform").format({ bufnr = args.buf, async = true })
 	end,
 })
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
