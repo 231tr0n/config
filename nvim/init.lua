@@ -86,13 +86,17 @@ bootstrap_paq({
 	"folke/tokyonight.nvim",
 	"neovim/nvim-lspconfig",
 	"hrsh7th/nvim-cmp",
+	"hrsh7th/cmp-path",
+	"hrsh7th/cmp-buffer",
+	"hrsh7th/cmp-nvim-lua",
+	"hrsh7th/cmp-calc",
 	"hrsh7th/cmp-nvim-lsp",
 	"L3MON4D3/LuaSnip",
 	"saadparwaiz1/cmp_luasnip",
+	"rafamadriz/friendly-snippets",
 	"nvim-tree/nvim-web-devicons",
 	"nvim-lualine/lualine.nvim",
 	"folke/flash.nvim",
-	"folke/twilight.nvim",
 	"folke/trouble.nvim",
 	"mfussenegger/nvim-dap",
 	"rcarriga/nvim-dap-ui",
@@ -136,6 +140,7 @@ bootstrap_paq({
 	"rcarriga/nvim-notify",
 	"folke/noice.nvim",
 	"folke/todo-comments.nvim",
+	"folke/neodev.nvim",
 })
 
 -- Treesitter setup
@@ -292,8 +297,12 @@ end
 
 cmp.setup({
 	sources = {
+		{ name = "buffer" },
+		{ name = "path" },
 		{ name = "nvim_lsp" },
 		{ name = "luasnip" },
+		{ name = "nvim_lua" },
+		{ name = "calc" },
 	},
 	mapping = cmp.mapping.preset.insert({
 		["<CR>"] = cmp.mapping.confirm({
@@ -332,20 +341,13 @@ cmp.setup({
 	},
 })
 
+require("neodev").setup()
 lspconfig.lua_ls.setup({
 	capabilities = capabilities,
 	settings = {
 		Lua = {
-			runtime = {
-				version = "LuaJIT",
-			},
-			diagnostics = {
-				globals = { "vim" },
-			},
-			workspace = {
-				library = {
-					vim.env.VIMRUNTIME,
-				},
+			completion = {
+				callSnippet = "Replace",
 			},
 		},
 	},
@@ -493,6 +495,7 @@ require("mini.jump2d").setup()
 require("flash").setup()
 
 -- Ui setup
+require("nvim-web-devicons").setup()
 require("dressing").setup()
 require("noice").setup({
 	lsp = {
