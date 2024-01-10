@@ -73,7 +73,6 @@ bootstrap_paq({
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
 	"echasnovski/mini.jump2d",
-	"folke/flash.nvim",
 	"folke/which-key.nvim",
 	"tpope/vim-repeat",
 	"tpope/vim-fugitive",
@@ -92,6 +91,8 @@ bootstrap_paq({
 	"saadparwaiz1/cmp_luasnip",
 	"nvim-tree/nvim-web-devicons",
 	"nvim-lualine/lualine.nvim",
+	"folke/flash.nvim",
+	"folke/twilight.nvim",
 	"folke/trouble.nvim",
 	"mfussenegger/nvim-dap",
 	"rcarriga/nvim-dap-ui",
@@ -100,7 +101,7 @@ bootstrap_paq({
 	{
 		"mfussenegger/nvim-dap-python",
 		build = function()
-			local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start"
+			local path = vim.fn.stdpath("data") .. "/site/pack/paqs"
 			vim.fn.system({
 				"bash",
 				"-c",
@@ -230,7 +231,7 @@ require("nvim-treesitter.configs").setup({
 			enable = true,
 			clear_on_cursor_move = true,
 		},
-		highlight_current_scope = { enable = false },
+		highlight_current_scope = { enable = true },
 		smart_rename = {
 			enable = true,
 			keymaps = {
@@ -596,7 +597,7 @@ dap.listeners.before.event_exited["dapui_config"] = function()
 end
 require("nvim-dap-virtual-text").setup()
 require("dap-go").setup()
-require("dap-python").setup(vim.fn.stdpath("data") .. "/site/pack/paqs/start/debugpy/bin/python")
+require("dap-python").setup(vim.fn.stdpath("data") .. "/site/pack/paqs/debugpy/bin/python")
 require("dap-vscode-js").setup({
 	debugger_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/vscode-js-debug",
 	adapters = { "pwa-node" },
@@ -705,7 +706,7 @@ vim.opt.list = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.wildmenu = true
-vim.o.wildmode = "list:full"
+vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
@@ -734,6 +735,7 @@ vim.cmd([[
 	set ignorecase
 	set smartcase
 	set path+=**
+	set updatetime=500
 	set gp=git\ grep\ -n
 	set wildignore=*.exe,*.dll,*.pdb
 	set backspace=2
