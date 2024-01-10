@@ -516,10 +516,14 @@ require("noice").setup({
 
 -- source code outline setup
 require("aerial").setup({
+	backends = { "lsp", "treesitter", "markdown", "man" },
 	on_attach = function(bufnr)
 		vim.keymap.set("n", "<leader>cp", "<cmd>AerialPrev<CR>", { buffer = bufnr })
 		vim.keymap.set("n", "<leader>cn", "<cmd>AerialNext<CR>", { buffer = bufnr })
 	end,
+	layout = {
+		filter_kind = false,
+	},
 })
 
 -- colorscheme setup
@@ -1041,6 +1045,10 @@ wk.register({
 			S = {
 				"<cmd>RG<CR>",
 				"Find content in files with rg run everytime",
+			},
+			o = {
+				"<cmd>call aerial#fzf()<CR>",
+				"Toggle fzf with aerial",
 			},
 			l = {
 				"<cmd>BLines<CR>",
