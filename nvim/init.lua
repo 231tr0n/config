@@ -81,6 +81,10 @@ bootstrap_paq({
 	"tpope/vim-eunuch",
 	"tpope/vim-speeddating",
 	"nvim-tree/nvim-tree.lua",
+	{
+		"junegunn/fzf",
+		build = ":call fzf#install()",
+	},
 	"junegunn/fzf.vim",
 	"NvChad/nvim-colorizer.lua",
 	"folke/tokyonight.nvim",
@@ -496,7 +500,11 @@ require("flash").setup()
 
 -- Ui setup
 require("nvim-web-devicons").setup()
-require("dressing").setup()
+require("dressing").setup({
+	select = {
+		backend = { "nui", "builtin" },
+	},
+})
 require("noice").setup({
 	lsp = {
 		override = {
