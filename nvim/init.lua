@@ -387,6 +387,12 @@ lspconfig.svelte.setup({
 lspconfig.clangd.setup({
 	capabilities = capabilities,
 })
+lspconfig.yamlls.setup({
+	capabilities = capabilities,
+})
+lspconfig.jsonls.setup({
+	capabilities = capabilities,
+})
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
