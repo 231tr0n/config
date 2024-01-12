@@ -145,6 +145,7 @@ bootstrap_paq({
 	"folke/noice.nvim",
 	"folke/todo-comments.nvim",
 	"folke/neodev.nvim",
+	"jbyuki/one-small-step-for-vimkind",
 })
 
 -- Treesitter setup
@@ -557,6 +558,8 @@ require("tokyonight").setup({
 
 -- linter setup
 require("lint").linters_by_ft = {
+	json = { "jsonlint" },
+	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
 	lua = { "luacheck" },
@@ -576,7 +579,8 @@ require("conform").setup({
 		svelte = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
-		xml = { "xmlformat" },
+		xml = { "xmllint" },
+		yaml = { "yamlfix" },
 		json = { "jq" },
 		css = { "prettier" },
 		html = { "prettier" },
@@ -681,6 +685,36 @@ dap.configurations.c = {
 		processId = require("dap.utils").pick_process,
 	},
 }
+dap.configurations.lua = {
+	{
+		type = "nlua",
+		request = "attach",
+		name = "Attach to running Neovim instance",
+	},
+}
+dap.adapters.nlua = function(callback, config)
+	callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
+end
+dap.adapters.codelldb = {
+	type = "server",
+	port = "${port}",
+	executable = {
+		command = "/usr/sbin/codelldb",
+		args = { "--port", "${port}" },
+	},
+}
+dap.configurations.rust = {
+	{
+		name = "Launch file",
+		type = "codelldb",
+		request = "launch",
+		program = function()
+			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+		end,
+		cwd = "${workspaceFolder}",
+		stopOnEntry = false,
+	},
+}
 
 -- ai setup
 require("ollama").setup({
@@ -742,7 +776,7 @@ vim.fn.sign_define(
 	"DiagnosticSignHint",
 	{ text = "", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
 )
-vim.cmd("cd" .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
+vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
 	let g:python_recommended_style=0
 	colorscheme tokyonight-night
@@ -906,6 +940,12 @@ wk.register({
 		},
 		d = {
 			name = "Debug",
+			n = {
+				function()
+					require("osv").launch()
+				end,
+				"Start neovim lua remote debugger",
+			},
 			t = {
 				function()
 					require("dapui").toggle()
