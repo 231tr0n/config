@@ -10,7 +10,7 @@ cd ~
 sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 sudo reflector --country India --sort rate --fastest 5 --latest 5 --protocol https --save /etc/pacman.d/mirrorlist
 sudo pacman -Syu --needed git base-devel && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin
-yay -Syu --needed --noconfirm git curl wget neofetch openssl openssh man \
+yay -Syu --needed --noconfirm git curl wget neofetch openssl openssh man htop \
   vim neovim fzf tmux fish ripgrep fd git-delta bat \
   python python-pip python-pipx nodejs typescript npm go rust cargo maven jdk17-openjdk jdk-openjdk gcc cmake meson luajit luarocks clang make \
   delve gdb codelldb-bin java-debug \
