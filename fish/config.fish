@@ -12,9 +12,9 @@ if status is-interactive
 	# function nvim
 	# 	/usr/bin/nvim -u ~/.vimrc $argv
 	# end
-	function vim
-		/usr/bin/nvim $argv
-	end
+	# function vim
+	# 	/usr/bin/nvim $argv
+	# end
 	function findword
 		grep $argv[1] -rnwH . --exclude-dir=node_modules --exclude-dir=.git --exclude=package-lock.json
 	end
