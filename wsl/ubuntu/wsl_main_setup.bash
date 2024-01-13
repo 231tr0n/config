@@ -43,6 +43,7 @@ sudo npm install -g npm@latest
 sudo npm install -g typescript@latest
 cd ~/scripts
 ./go-install.bash
+export PATH=$PATH:/usr/local/go/bin
 cd ~
 
 sudo apt install clangd
