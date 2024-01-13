@@ -13,7 +13,7 @@ sudo pacman -Syu --needed git base-devel && git clone https://aur.archlinux.org/
 yay -Syu --needed --noconfirm git curl wget neofetch openssl openssh man htop \
   vim neovim fzf tmux fish ripgrep fd git-delta bat \
   python python-pip python-pipx nodejs typescript npm go rust cargo maven jdk17-openjdk jdk-openjdk gcc cmake meson luajit luarocks clang make \
-  delve gdb codelldb-bin java-debug \
+  delve gdb java-debug \
   gopls lua-language-server rust-analyzer jdtls pyright typescript-language-server vscode-langservers-extracted bash-language-server lemminx yaml-language-server \
   gofumpt prettier stylua python-black google-java-format shfmt jq libxml2 yamlfmt \
   golangci-lint-bin python-pylint luacheck shellcheck checkstyle yamllint nodejs-jsonlint

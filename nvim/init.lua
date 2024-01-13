@@ -393,6 +393,9 @@ lspconfig.yamlls.setup({
 lspconfig.jsonls.setup({
 	capabilities = capabilities,
 })
+lspconfig.lemminx.setup({
+	capabilities = capabilities,
+})
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
@@ -701,18 +704,10 @@ dap.configurations.lua = {
 dap.adapters.nlua = function(callback, config)
 	callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 end
-dap.adapters.codelldb = {
-	type = "server",
-	port = "${port}",
-	executable = {
-		command = "/usr/sbin/codelldb",
-		args = { "--port", "${port}" },
-	},
-}
 dap.configurations.rust = {
 	{
 		name = "Launch file",
-		type = "codelldb",
+		type = "gdb",
 		request = "launch",
 		program = function()
 			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
