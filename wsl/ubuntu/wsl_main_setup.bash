@@ -33,6 +33,7 @@ chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+export PATH=$PATH:$HOME/.cargo/bin
 curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt update -y && sudo apt upgrade -y
@@ -45,7 +46,6 @@ cd ~/scripts
 ./go-install.bash
 export PATH=$PATH:/usr/local/go/bin
 cd ~
-export PATH=$PATH:$HOME/.cargo/bin
 
 sudo apt install -y clangd
 pip install pyright
