@@ -24,11 +24,13 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/go/go-install.bash -o ~/scripts/go-install.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/lua-lsp.bash -o ~/scripts/lua-lsp.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
 chmod +x ~/scripts/go-install.bash
 chmod +x ~/scripts/lua-lsp.bash
+chmod +x ~/scripts/xml-lsp.bash
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
@@ -52,6 +54,7 @@ sudo npm install -g bash-language-server@latest
 cd ~/scripts
 ./java-lsp.bash
 ./lua-lsp.bash
+./xml-lsp.bash
 cd ~
 
 sudo apt install gdb lldb
