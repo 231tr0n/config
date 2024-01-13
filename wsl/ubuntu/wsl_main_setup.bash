@@ -19,7 +19,12 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/fish_variables -
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o ~/.config/fish/functions/fish_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
+
+chmod +x ~/scripts/java-debug.bash
+chmod +x ~/scripts/java-lsp.bash
 
 echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
 echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
+echo -e "\e[32mRun the scripts under ~/scripts folder if required to setup java lsp and debug\e[0m"
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
