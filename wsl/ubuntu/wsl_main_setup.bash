@@ -3,7 +3,7 @@
 cd ~
 
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
-sudo apt install git curl wget neofetch openssl ssh man-db htop jq
+sudo apt install git curl wget neofetch openssl ssh man-db htop jq vim tmux
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -35,7 +35,7 @@ curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
 sudo apt-add-repository ppa:fish-shell/release-3
 sudo apt update && sudo apt upgrade
 
-sudo apt install python-is-python3 python3-pip nodejs vim tmux clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
+sudo apt install python-is-python3 python3-pip nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
 sudo npm install -g typescript
