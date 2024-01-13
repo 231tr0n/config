@@ -2,8 +2,8 @@
 
 cd ~
 
-sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
-sudo apt install git curl wget neofetch openssl ssh man-db htop jq vim tmux
+sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y --purge
+sudo apt install -y git curl wget neofetch openssl ssh man-db htop jq vim tmux
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -32,12 +32,12 @@ chmod +x ~/scripts/go-install.bash
 chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
 
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
-sudo apt-add-repository ppa:fish-shell/release-3
-sudo apt update && sudo apt upgrade
+sudo apt-add-repository -y ppa:fish-shell/release-3
+sudo apt update -y && sudo apt upgrade -y
 
-sudo apt install python-is-python3 python3-pip nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
+sudo apt install -y python-is-python3 python3-pip nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
 sudo npm install -g typescript@latest
@@ -45,8 +45,9 @@ cd ~/scripts
 ./go-install.bash
 export PATH=$PATH:/usr/local/go/bin
 cd ~
+export PATH=$PATH:$HOME/.cargo/bin
 
-sudo apt install clangd
+sudo apt install -y clangd
 pip install pyright
 go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
@@ -58,19 +59,19 @@ cd ~/scripts
 ./xml-lsp.bash
 cd ~
 
-sudo apt install gdb lldb
+sudo apt install -y gdb lldb
 go install -v github.com/go-delve/delve/cmd/dlv@latest
 cd ~/scripts
 ./java-debug.bash
 cd ~
 
-sudo apt install clang-tidy shellcheck checkstyle checkstyle-doc
+sudo apt install -y clang-tidy shellcheck checkstyle checkstyle-doc
 sudo luarocks install luacheck
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ~/.local/bin
 pip install pylint yamllint
 sudo npm install -g jsonlint@latest
 
-sudo apt install clang-format jq libxml2-utils
+sudo apt install -y clang-format jq libxml2-utils
 pip install black
 sudo npm install -g google-java-format@latest
 sudo npm install -g prettier@latest
@@ -88,7 +89,7 @@ cargo install git-delta ripgrep fd-find bob-nvim bat
 bob use latest
 
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
+~/.fzf/install --all
 
 echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
 echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
