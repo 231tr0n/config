@@ -56,6 +56,7 @@ go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
 sudo npm install -g bash-language-server@latest
+sudo npm install -g typescript-language-server@latest
 cd ~/scripts
 ./java-lsp.bash
 ./lua-lsp.bash
@@ -73,6 +74,7 @@ sudo luarocks install luacheck
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ~/.local/bin
 pip install pylint yamllint
 sudo npm install -g jsonlint@latest
+sudo npm install -g eslint@latest
 
 sudo apt install -y clang-format jq libxml2-utils
 pip install black
