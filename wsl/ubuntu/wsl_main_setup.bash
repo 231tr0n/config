@@ -39,6 +39,7 @@ export PATH=$PATH:$HOME/.cargo/bin
 curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt update -y && sudo apt upgrade -y
+sudo apt install -y fish
 
 sudo apt install -y python-is-python3 python3-pip nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
