@@ -27,6 +27,7 @@ sudo install -D wrapper /usr/bin/lua-language-server
 sudo install -Dt /usr/lib/lua-language-server/bin bin/lua-language-server
 sudo install -m644 -t /usr/lib/lua-language-server/bin bin/main.lua
 sudo install -m644 -t /usr/lib/lua-language-server {debugger,main}.lua
+sudo rsync -r --exclude=.git locale meta script /usr/lib/lua-language-server
 
 cd ..
 rm -rf lua-lsp
