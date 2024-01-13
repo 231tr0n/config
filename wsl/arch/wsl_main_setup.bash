@@ -14,7 +14,7 @@ yay -Syu --needed --noconfirm git curl wget neofetch openssl openssh man htop \
   vim neovim fzf tmux fish ripgrep fd git-delta bat \
   python python-pip python-pipx nodejs typescript npm go rust cargo maven jdk17-openjdk jdk-openjdk gcc cmake meson luajit luarocks clang make \
   delve gdb codelldb-bin java-debug \
-  gopls lua-language-server rust-analyzer jdtls pyright typescript-language-server vscode-langservers-extracted bash-language-server xml-language-server-git yaml-language-server \
+  gopls lua-language-server rust-analyzer jdtls pyright typescript-language-server vscode-langservers-extracted bash-language-server lemminx yaml-language-server \
   gofumpt prettier stylua python-black google-java-format shfmt jq libxml2 yamlfmt \
   golangci-lint-bin python-pylint luacheck shellcheck checkstyle yamllint nodejs-jsonlint
 
@@ -34,10 +34,8 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/fish_variables -
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o ~/.config/fish/functions/fish_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
-curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
 
 chmod +x ~/scripts/java-debug.bash
-chmod +x ~/scripts/java-lsp.bash
 
 echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
 echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
