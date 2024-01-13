@@ -26,5 +26,5 @@ chmod +x ~/scripts/java-lsp.bash
 
 echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
 echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
-echo -e "\e[32mRun the scripts under ~/scripts folder if required to setup java lsp and debug\e[0m"
+echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
