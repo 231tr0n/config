@@ -1,7 +1,9 @@
 #!/bin/bash
 
+cd ~
+
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
-sudo apt install git curl wget neofetch openssl ssh man-db htop \
+sudo apt install git curl wget neofetch openssl ssh man-db htop
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -20,9 +22,22 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_p
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/go/go-install.bash -o ~/scripts/go-install.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
+chmod +x ~/scripts/go-install.bash
+
+cd ~/scripts
+./java-debug.bash
+./java-lsp.bash
+./go-install.bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
+cd ~
+
+sudo apt install python-is-python3 python3-pip pipx nodejs
+
 
 echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
 echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"

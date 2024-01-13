@@ -57,6 +57,7 @@ set -x GOPATH $HOME/go
 set -x PATH $PATH $GOPATH/bin
 set -x PATH $PATH $HOME/.local/bin
 set -x PATH $PATH $HOME/.cargo/bin
+set -x PATH $PATH /usr/local/go/bin
 
 if status is-interactive
 and not set -q TMUX
