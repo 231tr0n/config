@@ -38,12 +38,13 @@ sudo apt update && sudo apt upgrade
 sudo apt install python-is-python3 python3-pip nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk luajit luarocks
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
-sudo npm install -g typescript
+sudo npm install -g typescript@latest
 cd ~/scripts
 ./go-install.bash
 cd ~
 
 sudo apt install clangd
+pip install pyright
 go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
