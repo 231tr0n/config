@@ -150,6 +150,7 @@ bootstrap_paq({
 	"s1n7ax/nvim-window-picker",
 	"folke/neodev.nvim",
 	"jbyuki/one-small-step-for-vimkind",
+	"danymat/neogen",
 })
 
 -- Treesitter setup
@@ -428,16 +429,15 @@ lspconfig.lemminx.setup({
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
-		local config = {
+		require("jdtls").start_or_attach({
 			cmd = { "/usr/bin/jdtls" },
-			root_dir = vim.fs.dirname(vim.fs.find({ "gradlew", ".git", "mvnw" }, { upward = true })[1]),
-		}
-		config["init_options"] = {
-			bundles = {
-				vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
+			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+			init_options = {
+				bundles = {
+					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
+				},
 			},
-		}
-		require("jdtls").start_or_attach(config)
+		})
 	end,
 })
 
@@ -475,6 +475,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end
 	end,
 })
+
+-- doc generation setup
+require("neogen").setup()
+require("neogen").setup({ snippet_engine = "luasnip" })
 
 -- statusline setup
 require("lualine").setup({
@@ -706,44 +710,44 @@ dap.adapters.lldb = {
 	name = "lldb",
 }
 -- dap.configurations.c = {
--- 	{
--- 		name = "Run executable (GDB)",
--- 		type = "gdb",
--- 		request = "launch",
--- 		program = function()
--- 			local path = vim.fn.input({
--- 				prompt = "Path to executable: ",
--- 				default = vim.fn.getcwd() .. "/",
--- 				completion = "file",
--- 			})
--- 			return (path and path ~= "") and path or dap.ABORT
--- 		end,
--- 	},
--- 	{
--- 		name = "Run executable with arguments (GDB)",
--- 		type = "gdb",
--- 		request = "launch",
--- 		program = function()
--- 			local path = vim.fn.input({
--- 				prompt = "Path to executable: ",
--- 				default = vim.fn.getcwd() .. "/",
--- 				completion = "file",
--- 			})
--- 			return (path and path ~= "") and path or dap.ABORT
--- 		end,
--- 		args = function()
--- 			local args_str = vim.fn.input({
--- 				prompt = "Arguments: ",
--- 			})
--- 			return vim.split(args_str, " +")
--- 		end,
--- 	},
--- 	{
--- 		name = "Attach to process (GDB)",
--- 		type = "gdb",
--- 		request = "attach",
--- 		processId = require("dap.utils").pick_process,
--- 	},
+--	{
+--		name = "Run executable (GDB)",
+--		type = "gdb",
+--		request = "launch",
+--		program = function()
+--			local path = vim.fn.input({
+--				prompt = "Path to executable: ",
+--				default = vim.fn.getcwd() .. "/",
+--				completion = "file",
+--			})
+--			return (path and path ~= "") and path or dap.ABORT
+--		end,
+--	},
+--	{
+--		name = "Run executable with arguments (GDB)",
+--		type = "gdb",
+--		request = "launch",
+--		program = function()
+--			local path = vim.fn.input({
+--				prompt = "Path to executable: ",
+--				default = vim.fn.getcwd() .. "/",
+--				completion = "file",
+--			})
+--			return (path and path ~= "") and path or dap.ABORT
+--		end,
+--		args = function()
+--			local args_str = vim.fn.input({
+--				prompt = "Arguments: ",
+--			})
+--			return vim.split(args_str, " +")
+--		end,
+--	},
+--	{
+--		name = "Attach to process (GDB)",
+--		type = "gdb",
+--		request = "attach",
+--		processId = require("dap.utils").pick_process,
+--	},
 -- }
 dap.configurations.rust = {
 	{
@@ -1241,6 +1245,39 @@ wk.register({
 				"Find buffer commits",
 			},
 		},
+		g = {
+			name = "Generate",
+			g = {
+				function()
+					require("neogen").generate()
+				end,
+				"Generate annotations",
+			},
+			f = {
+				function()
+					require("neogen").generate({ type = "func" })
+				end,
+				"Generate annotations for function",
+			},
+			c = {
+				function()
+					require("neogen").generate({ type = "class" })
+				end,
+				"Generate annotations for class",
+			},
+			t = {
+				function()
+					require("neogen").generate({ type = "type" })
+				end,
+				"Generate annotations for type",
+			},
+			b = {
+				function()
+					require("neogen").generate({ type = "file" })
+				end,
+				"Generate annotations for  file",
+			},
+		},
 	},
 	["<C-Space>"] = {
 		function()
@@ -1278,7 +1315,7 @@ wk.register({
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*",
 	callback = function(args)
-		require("conform").format({ bufnr = args.buf, async = true })
+		require("conform").format({ bufnr = args.buf })
 	end,
 })
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
