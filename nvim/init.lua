@@ -381,8 +381,17 @@ lspconfig.lua_ls.setup({
 	capabilities = capabilities,
 	settings = {
 		Lua = {
+			runtime = {
+				version = "LuaJIT",
+			},
 			completion = {
 				callSnippet = "Replace",
+			},
+			workspace = {
+				checkThirdParty = false,
+				library = {
+					vim.env.VIMRUNTIME,
+				},
 			},
 		},
 	},
@@ -610,7 +619,7 @@ require("lint").linters_by_ft = {
 	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
-	lua = { "luacheck" },
+	-- lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
 	javascript = { "eslint" },
@@ -649,6 +658,9 @@ vim.api.nvim_create_user_command("Format", function(args)
 	end
 	require("conform").format({ async = true, range = range })
 end, { range = true })
+vim.keymap.set({ "n", "v" }, "<F2>", function()
+	vim.cmd("Format")
+end)
 
 -- dap setup
 local dap = require("dap")
@@ -1309,6 +1321,7 @@ wk.register({
 	["<C-c>"] = "Copy to clipboard",
 	["<C-x>"] = "Cut to clipboard",
 	["<C-S-v>"] = "Paste from clipboard",
+	["<F2>"] = "Format file/range",
 })
 
 -- autocommands
