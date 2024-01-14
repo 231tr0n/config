@@ -666,52 +666,6 @@ for _, language in ipairs({ "typescript", "javascript" }) do
 		},
 	}
 end
-dap.adapters.gdb = {
-	id = "gdb",
-	type = "executable",
-	command = "gdb",
-	args = { "--quiet", "--interpreter=dap" },
-}
-dap.configurations.c = {
-	{
-		name = "Run executable (GDB)",
-		type = "gdb",
-		request = "launch",
-		program = function()
-			local path = vim.fn.input({
-				prompt = "Path to executable: ",
-				default = vim.fn.getcwd() .. "/",
-				completion = "file",
-			})
-			return (path and path ~= "") and path or dap.ABORT
-		end,
-	},
-	{
-		name = "Run executable with arguments (GDB)",
-		type = "gdb",
-		request = "launch",
-		program = function()
-			local path = vim.fn.input({
-				prompt = "Path to executable: ",
-				default = vim.fn.getcwd() .. "/",
-				completion = "file",
-			})
-			return (path and path ~= "") and path or dap.ABORT
-		end,
-		args = function()
-			local args_str = vim.fn.input({
-				prompt = "Arguments: ",
-			})
-			return vim.split(args_str, " +")
-		end,
-	},
-	{
-		name = "Attach to process (GDB)",
-		type = "gdb",
-		request = "attach",
-		processId = require("dap.utils").pick_process,
-	},
-}
 dap.configurations.lua = {
 	{
 		type = "nlua",
@@ -722,10 +676,94 @@ dap.configurations.lua = {
 dap.adapters.nlua = function(callback, config)
 	callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 end
+dap.adapters.lldb = {
+	type = "executable",
+	command = vim.fn.glob("/usr/bin/lldb-vscode") or vim.fn.glob("/usr/bin/lldb-vscode-14"),
+	name = "lldb",
+}
+-- dap.configurations.c = {
+-- 	{
+-- 		name = "Run executable (GDB)",
+-- 		type = "gdb",
+-- 		request = "launch",
+-- 		program = function()
+-- 			local path = vim.fn.input({
+-- 				prompt = "Path to executable: ",
+-- 				default = vim.fn.getcwd() .. "/",
+-- 				completion = "file",
+-- 			})
+-- 			return (path and path ~= "") and path or dap.ABORT
+-- 		end,
+-- 	},
+-- 	{
+-- 		name = "Run executable with arguments (GDB)",
+-- 		type = "gdb",
+-- 		request = "launch",
+-- 		program = function()
+-- 			local path = vim.fn.input({
+-- 				prompt = "Path to executable: ",
+-- 				default = vim.fn.getcwd() .. "/",
+-- 				completion = "file",
+-- 			})
+-- 			return (path and path ~= "") and path or dap.ABORT
+-- 		end,
+-- 		args = function()
+-- 			local args_str = vim.fn.input({
+-- 				prompt = "Arguments: ",
+-- 			})
+-- 			return vim.split(args_str, " +")
+-- 		end,
+-- 	},
+-- 	{
+-- 		name = "Attach to process (GDB)",
+-- 		type = "gdb",
+-- 		request = "attach",
+-- 		processId = require("dap.utils").pick_process,
+-- 	},
+-- }
 dap.configurations.rust = {
 	{
 		name = "Launch file",
-		type = "gdb",
+		type = "lldb",
+		request = "launch",
+		program = function()
+			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+		end,
+		cwd = "${workspaceFolder}",
+		stopOnEntry = false,
+		initCommands = function()
+			local rustc_sysroot = vim.fn.trim(vim.fn.system("rustc --print sysroot"))
+			local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
+			local commands_file = rustc_sysroot .. "/lib/rustlib/etc/lldb_commands"
+			local commands = {}
+			local file = io.open(commands_file, "r")
+			if file then
+				for line in file:lines() do
+					table.insert(commands, line)
+				end
+				file:close()
+			end
+			table.insert(commands, 1, script_import)
+			return commands
+		end,
+	},
+}
+dap.configurations.cpp = {
+	{
+		name = "Launch file",
+		type = "lldb",
+		request = "launch",
+		program = function()
+			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+		end,
+		cwd = "${workspaceFolder}",
+		stopOnEntry = false,
+	},
+}
+dap.configurations.c = {
+	{
+		name = "Launch file",
+		type = "lldb",
 		request = "launch",
 		program = function()
 			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
