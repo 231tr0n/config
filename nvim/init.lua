@@ -676,9 +676,15 @@ dap.configurations.lua = {
 dap.adapters.nlua = function(callback, config)
 	callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 end
+local function lldb_command()
+	if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
+		return "/usr/bin/lldb-vscode-14"
+	end
+	return "/usr/bin/lldb-vscode"
+end
 dap.adapters.lldb = {
 	type = "executable",
-	command = vim.fn.glob("/usr/bin/lldb-vscode") or vim.fn.glob("/usr/bin/lldb-vscode-14"),
+	command = lldb_command(),
 	name = "lldb",
 }
 -- dap.configurations.c = {
