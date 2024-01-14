@@ -144,7 +144,10 @@ bootstrap_paq({
 	"stevearc/dressing.nvim",
 	"rcarriga/nvim-notify",
 	"folke/noice.nvim",
+	"onsails/lspkind.nvim",
+	"echasnovski/mini.starter",
 	"folke/todo-comments.nvim",
+	"s1n7ax/nvim-window-picker",
 	"folke/neodev.nvim",
 	"jbyuki/one-small-step-for-vimkind",
 })
@@ -301,7 +304,16 @@ local has_words_before = function()
 	return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
 
+local lspkind = require("lspkind")
 cmp.setup({
+	formatting = {
+		format = lspkind.cmp_format({
+			mode = "symbol",
+			maxwidth = 50,
+			ellipsis_char = "...",
+			show_labelDetails = true,
+		}),
+	},
 	sources = {
 		{ name = "buffer" },
 		{ name = "path" },
@@ -346,7 +358,7 @@ cmp.setup({
 		end,
 	},
 })
-cmp.setup.cmdline("/", {
+cmp.setup.cmdline({ "/", "?" }, {
 	mapping = cmp.mapping.preset.cmdline(),
 	completion = { autocomplete = false },
 	sources = {
@@ -515,6 +527,7 @@ require("nvim-ts-autotag").setup()
 require("mini.indentscope").setup({
 	symbol = "|",
 })
+require("mini.starter").setup()
 require("ibl").setup()
 require("colorizer").setup()
 require("nvim-tree").setup()
@@ -548,6 +561,9 @@ require("noice").setup({
 		lsp_doc_border = false,
 	},
 })
+require("window-picker").setup({
+	hint = "floating-big-letter",
+})
 
 -- source code outline setup
 require("aerial").setup({
@@ -556,6 +572,7 @@ require("aerial").setup({
 		vim.keymap.set("n", "<leader>cp", "<cmd>AerialPrev<CR>", { buffer = bufnr })
 		vim.keymap.set("n", "<leader>cn", "<cmd>AerialNext<CR>", { buffer = bufnr })
 	end,
+	show_guides = true,
 	layout = {
 		filter_kind = false,
 	},
@@ -1130,6 +1147,23 @@ wk.register({
 			gn = "Goto next",
 			dh = "Diagnostics hide",
 			ds = "Diagnostics show",
+		},
+		w = {
+			name = "Window",
+			p = {
+				function()
+					local picked_window_id = require("window-picker").pick_window()
+					gotoid(picked_window_id)
+				end,
+				"Navigate to the selected window",
+			},
+			x = {
+				function()
+					local picked_window_id = require("window-picker").pick_window()
+					vim.api.nvim_win_close(picked_window_id, false)
+				end,
+				"Close the selected window",
+			},
 		},
 		f = {
 			name = "Find",
