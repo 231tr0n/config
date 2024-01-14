@@ -612,6 +612,7 @@ require("conform").setup({
 		html = { "prettier" },
 		c = { "clang_format" },
 		sh = { "shfmt" },
+		rust = { "rustfmt" },
 	},
 	lsp_fallback = true,
 })
