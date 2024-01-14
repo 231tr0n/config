@@ -542,7 +542,8 @@ require("flash").setup()
 require("nvim-web-devicons").setup()
 require("dressing").setup({
 	select = {
-		backend = { "nui", "builtin" },
+		backend = { "fzf", "nui", "builtin" },
+		trim_prompt = false,
 	},
 })
 require("noice").setup({
