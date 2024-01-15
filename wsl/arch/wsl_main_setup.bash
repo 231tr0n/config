@@ -11,12 +11,12 @@ sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 sudo reflector --country India --sort rate --fastest 5 --latest 5 --protocol https --save /etc/pacman.d/mirrorlist
 sudo pacman -Syu --needed --noconfirm git base-devel && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -sic --noconfirm && cd .. && rm -rf yay-bin
 yay -Syu --needed --noconfirm git curl wget neofetch openssl openssh man htop \
-  vim neovim fzf tmux fish ripgrep fd git-delta bat \
-  python python-pip python-pipx nodejs typescript npm go rust cargo maven jdk17-openjdk jdk-openjdk gcc cmake meson luajit luarocks clang make \
-  delve gdb java-debug lldb \
-  gopls lua-language-server rust-analyzer jdtls pyright typescript-language-server vscode-langservers-extracted bash-language-server lemminx yaml-language-server \
-  gofumpt prettier stylua python-black google-java-format shfmt jq libxml2 yamlfmt \
-  golangci-lint-bin python-pylint luacheck shellcheck checkstyle yamllint nodejs-jsonlint
+	vim neovim fzf tmux fish ripgrep fd git-delta bat \
+	python python-pip python-pipx nodejs typescript npm go rust cargo maven jdk17-openjdk jdk-openjdk gcc cmake meson luajit luarocks clang make \
+	delve gdb java-debug lldb \
+	gopls lua-language-server rust-analyzer jdtls pyright typescript-language-server vscode-langservers-extracted bash-language-server lemminx yaml-language-server \
+	gofumpt prettier stylua python-black google-java-format shfmt jq libxml2 yamlfmt \
+	golangci-lint-bin python-pylint luacheck shellcheck checkstyle yamllint nodejs-jsonlint
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -37,7 +37,8 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/
 
 chmod +x ~/scripts/java-debug.bash
 
-echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
-echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
-echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
+chsh -s /usr/bin/fish
+ssh-keygen -t rsa
+
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
+echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"

@@ -96,7 +96,8 @@ bob use latest
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --all
 
-echo -e "\e[32mRun the command 'chsh' and set fish shell\e[0m"
-echo -e "\e[32mRun the command 'ssh-keygen -t rsa' and generate key-pair for ssh and scp\e[0m"
-echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
+chsh -s /usr/bin/fish
+ssh-keygen -t rsa
+
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
+echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
