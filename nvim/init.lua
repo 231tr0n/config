@@ -151,7 +151,6 @@ bootstrap_paq({
 	"folke/neodev.nvim",
 	"jbyuki/one-small-step-for-vimkind",
 	"danymat/neogen",
-	"nvim-neotest/neotest",
 })
 
 -- Treesitter setup
