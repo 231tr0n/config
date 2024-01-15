@@ -444,6 +444,7 @@ vim.api.nvim_create_autocmd("FileType", {
 			init_options = {
 				bundles = {
 					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
+					vim.split(vim.fn.glob("/path/to/microsoft/vscode-java-test/server/*.jar", 1), "\n"),
 				},
 			},
 		})
@@ -1164,6 +1165,57 @@ wk.register({
 			gn = "Goto next",
 			dh = "Diagnostics hide",
 			ds = "Diagnostics show",
+			j = {
+				name = "Java",
+				o = {
+					function()
+						require("jdtls").organize_imports()
+					end,
+					"Organize java imports",
+				},
+				v = {
+					function()
+						require("jdtls").extract_variable()
+					end,
+					"Extract variable",
+				},
+				V = {
+					function()
+						require("jdtls").extract_variable(true)
+					end,
+					"Extract variable in visual",
+				},
+				c = {
+					function()
+						require("jdtls").extract_constant()
+					end,
+					"Extract constant",
+				},
+				C = {
+					function()
+						require("jdtls").extract_constant(true)
+					end,
+					"Extract constant in visual",
+				},
+				m = {
+					function()
+						require("jdtls").extract_method(true)
+					end,
+					"Extract method",
+				},
+				tc = {
+					function()
+						require("jdtls").test_class()
+					end,
+					"Test nearest class",
+				},
+				tm = {
+					function()
+						require("jdtls").test_nearest_method()
+					end,
+					"Test nearest method",
+				},
+			},
 		},
 		w = {
 			name = "Window",
