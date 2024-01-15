@@ -105,7 +105,7 @@ bootstrap_paq({
 	"folke/trouble.nvim",
 	"mfussenegger/nvim-dap",
 	"rcarriga/nvim-dap-ui",
-	"theHamsta/nvim-dap-virtual-text",
+	-- "theHamsta/nvim-dap-virtual-text",
 	"leoluz/nvim-dap-go",
 	{
 		"mfussenegger/nvim-dap-python",
@@ -151,6 +151,7 @@ bootstrap_paq({
 	"folke/neodev.nvim",
 	"jbyuki/one-small-step-for-vimkind",
 	"danymat/neogen",
+	"nvim-neotest/neotest",
 })
 
 -- Treesitter setup
@@ -465,15 +466,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
 		vim.keymap.set({ "n", "x" }, "<leader>lf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
 		vim.keymap.set("n", "<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-		vim.keymap.set("n", "<leader>lo", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-		vim.keymap.set("n", "<leader>lgp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
-		vim.keymap.set("n", "<leader>lgn", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
-		vim.keymap.set("n", "<Leader>ldh", function()
-			vim.diagnostic.hide()
-		end)
-		vim.keymap.set("n", "<Leader>lds", function()
-			vim.diagnostic.show()
-		end)
+		vim.keymap.set("n", "<leader>ldt", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
+		vim.keymap.set("n", "<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
+		vim.keymap.set("n", "<leader>ldn", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
+		vim.keymap.set("n", "<leader>ldh", "<cmd>lua vim.diagnostic.hide()<cr>", opts)
+		vim.keymap.set("n", "<leader>lds", "<cmd>lua vim.diagnostic.show()<cr>", opts)
+		vim.diagnostic.config({
+			virtual_text = false,
+		})
+		vim.cmd([[
+			nnoremap <Space>lgb <C-t>
+		]])
 		if vim.bo.filetype == "java" then
 			require("jdtls.dap").setup_dap_main_class_configs()
 		end
@@ -620,7 +623,7 @@ require("lint").linters_by_ft = {
 	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
-	-- lua = { "luacheck" },
+	lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
 	javascript = { "eslint" },
@@ -676,7 +679,7 @@ end
 dap.listeners.before.event_exited["dapui_config"] = function()
 	dapui.close()
 end
-require("nvim-dap-virtual-text").setup()
+-- require("nvim-dap-virtual-text").setup()
 require("dap-go").setup()
 require("dap-python").setup(vim.fn.stdpath("data") .. "/site/pack/paqs/debugpy/bin/python")
 require("dap-vscode-js").setup({
@@ -848,7 +851,7 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldenable = false
 vim.opt.cursorline = true
-vim.opt.cursorcolumn = true
+vim.opt.cursorcolumn = false
 vim.opt.list = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
@@ -894,16 +897,18 @@ vim.cmd([[
 	set nofoldenable
 	set foldmethod=indent
 	set noshowmode
-	highlight MatchParen guibg=#FFC777 guifg=#000000 gui=NONE
+	highlight MatchParen guibg=#FF9E64 guifg=#000000 gui=NONE
 	highlight Breakpoint guibg=NONE guifg=#FCA7EA gui=NONE
 	highlight DebugPosition guibg=NONE guifg=#C099FF gui=NONE
 	highlight LspDiagnosticErr guibg=NONE guifg=#FF757F gui=NONE
 	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
 	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
 	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
+	highlight TSCurrentScope guibg=#212121 guifg=NONE gui=NONE
+	highlight TSDefinition guibg=#3B4261 guifg=NONE gui=NONE
+	highlight TSDefinitionUsage guibg=#3B4261 guifg=NONE gui=NONE
 	vnoremap <C-c> "+y
 	vnoremap <C-x> "+d
-	nnoremap <Space>lgb <C-t>
 	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
 	let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
 	command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
@@ -921,9 +926,9 @@ wk.register({
 			name = "Trouble",
 			x = {
 				function()
-					require("trouble").toggle()
+					require("trouble").toggle("document_diagnostics")
 				end,
-				"Toggle Diagnostics",
+				"Toggle Document Diagnostics",
 			},
 			w = {
 				function()
@@ -933,9 +938,9 @@ wk.register({
 			},
 			d = {
 				function()
-					require("trouble").toggle("document_diagnostics")
+					require("trouble").toggle()
 				end,
-				"Toggle Document Diagnostics",
+				"Toggle Diagnostics",
 			},
 			q = {
 				function()
@@ -1160,9 +1165,9 @@ wk.register({
 			r = "Rename",
 			f = "Format",
 			c = "Code action",
-			o = "Open float",
-			gp = "Goto previous",
-			gn = "Goto next",
+			dp = "Goto previous",
+			dn = "Goto next",
+			dt = "Line diagnostics toggle",
 			dh = "Diagnostics hide",
 			ds = "Diagnostics show",
 			j = {
