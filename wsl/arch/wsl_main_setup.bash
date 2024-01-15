@@ -34,8 +34,14 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/fish_variables -
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o ~/.config/fish/functions/fish_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-test.bash -o ~/scripts/java-test.bash
 
 chmod +x ~/scripts/java-debug.bash
+chmod +x ~/scripts/java-test.bash
+
+cd ~/scripts
+./java-test.bash
+cd ..
 
 chsh -s /usr/bin/fish
 ssh-keygen -t rsa

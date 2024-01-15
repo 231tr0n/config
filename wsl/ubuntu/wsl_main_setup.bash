@@ -24,12 +24,14 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_p
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-test.bash -o ~/scripts/java-test.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/go/go-install.bash -o ~/scripts/go-install.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/lua-lsp.bash -o ~/scripts/lua-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
+chmod +x ~/scripts/java-test.bash
 chmod +x ~/scripts/go-install.bash
 chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
@@ -67,6 +69,7 @@ sudo apt install -y gdb lldb
 go install -v github.com/go-delve/delve/cmd/dlv@latest
 cd ~/scripts
 ./java-debug.bash
+./java-test.bash
 cd ~
 
 sudo apt install -y clang-tidy shellcheck checkstyle checkstyle-doc
