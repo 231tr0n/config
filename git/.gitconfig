@@ -6,7 +6,7 @@
 
 [delta]
 	features = decorations
-	line-numbers = true
+	line-numbers = false
 	side-by-side = false
 	navigate = true
 

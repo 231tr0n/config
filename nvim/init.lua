@@ -59,15 +59,18 @@ end
 bootstrap_paq({
 	"savq/paq-nvim",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-	"nvim-treesitter/nvim-treesitter-context",
 	"nvim-treesitter/nvim-treesitter-refactor",
 	"nvim-lua/plenary.nvim",
 	"MunifTanjim/nui.nvim",
 	"HiPhish/rainbow-delimiters.nvim",
 	"lukas-reineke/indent-blankline.nvim",
-	"windwp/nvim-autopairs",
 	"windwp/nvim-ts-autotag",
+	-- tpope/vim-ragtag
 	"RRethy/nvim-treesitter-endwise",
+	-- tpope/vim-endwise
+	"windwp/nvim-autopairs",
+	-- "echasnovski/mini.pairs",
+	"RRethy/vim-illuminate",
 	"echasnovski/mini.indentscope",
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
@@ -151,6 +154,9 @@ bootstrap_paq({
 	"s1n7ax/nvim-window-picker",
 	"folke/neodev.nvim",
 	"danymat/neogen",
+	"SmiteshP/nvim-navic",
+	"SmiteshP/nvim-navbuddy",
+	"stevearc/qf_helper.nvim",
 })
 
 -- Treesitter setup
@@ -232,42 +238,15 @@ require("nvim-treesitter.configs").setup({
 		end,
 		additional_vim_regex_highlighting = true,
 	},
-	incremental_selection = {
-		enable = true,
-		keymaps = {
-			init_selection = "<leader>tis",
-			node_incremental = "<leader>tni",
-			scope_incremental = "<leader>tsi",
-			node_decremental = "<leader>tnd",
-		},
-	},
 	refactor = {
-		highlight_definitions = {
-			enable = true,
-			clear_on_cursor_move = true,
-		},
-		highlight_current_scope = { enable = true },
 		smart_rename = {
 			enable = true,
 			keymaps = {
 				smart_rename = "<leader>tr",
 			},
 		},
-		navigation = {
-			enable = true,
-			keymaps = {
-				goto_definition = "<leader>tgd",
-				list_definitions = "<leader>tld",
-				list_definitions_toc = "<leader>tldt",
-				goto_next_usage = "<leader>tgn",
-				goto_previous_usage = "<leader>tgp",
-			},
-		},
 	},
 	endwise = {
-		enable = true,
-	},
-	autotag = {
 		enable = true,
 	},
 })
@@ -295,6 +274,28 @@ vim.g.rainbow_delimiters = {
 
 -- Lsp setup
 local lspconfig = require("lspconfig")
+local navic = require("nvim-navic")
+local navbuddy = require("nvim-navbuddy")
+navic.setup({
+	lsp = {
+		auto_attach = true,
+	},
+	highlight = true,
+	click = true,
+})
+navbuddy.setup({
+	lsp = {
+		auto_attach = true,
+	},
+})
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+require("illuminate").configure({
+	providers = {
+		"lsp",
+		"regex",
+	},
+	delay = 500,
+})
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local luasnip = require("luasnip")
 local cmp = require("cmp")
@@ -438,16 +439,24 @@ lspconfig.lemminx.setup({
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
-		require("jdtls").start_or_attach({
+		local config = {
 			cmd = { "/usr/bin/jdtls" },
 			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-			init_options = {
-				bundles = {
-					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
-					vim.split(vim.fn.glob("/path/to/microsoft/vscode-java-test/server/*.jar", 1), "\n"),
+			settings = {
+				java = {
+					signatureHelp = { enabled = true },
+					contentProvider = { preferred = "fernflower" },
 				},
 			},
-		})
+		}
+		local bundles = {
+			vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
+		}
+		vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", 1), "\n"))
+		config["init_options"] = {
+			bundles = bundles,
+		}
+		require("jdtls").start_or_attach(config)
 	end,
 })
 
@@ -455,6 +464,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "LSP actions",
 	callback = function(event)
 		local opts = { buffer = event.buf }
+		-- local bufnr = event.buf
+		-- local client = vim.lsp.get_client_by_id(event.data.client_id)
 		vim.keymap.set("n", "<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
 		vim.keymap.set("n", "<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
@@ -471,7 +482,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>ldh", "<cmd>lua vim.diagnostic.hide()<cr>", opts)
 		vim.keymap.set("n", "<leader>lds", "<cmd>lua vim.diagnostic.show()<cr>", opts)
 		vim.diagnostic.config({
-			virtual_text = false,
+			virtual_text = true,
 		})
 		vim.cmd([[
 			nnoremap <Space>lgb <C-t>
@@ -487,6 +498,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end
 	end,
 })
+require("qf_helper").setup()
 
 -- doc generation setup
 require("neogen").setup()
@@ -540,11 +552,17 @@ require("mini.splitjoin").setup()
 require("mini.surround").setup()
 require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
+-- require("mini.pairs").setup()
 require("mini.indentscope").setup({
 	symbol = "|",
 })
 require("mini.starter").setup()
-require("ibl").setup()
+require("ibl").setup({
+	scope = {
+		show_start = false,
+		show_end = false,
+	},
+})
 require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
@@ -584,7 +602,7 @@ require("window-picker").setup({
 
 -- source code outline setup
 require("aerial").setup({
-	backends = { "lsp", "treesitter", "markdown", "man" },
+	backends = { "lsp", "markdown", "man" },
 	on_attach = function(bufnr)
 		vim.keymap.set("n", "<leader>cp", "<cmd>AerialPrev<CR>", { buffer = bufnr })
 		vim.keymap.set("n", "<leader>cn", "<cmd>AerialNext<CR>", { buffer = bufnr })
@@ -662,6 +680,10 @@ vim.api.nvim_create_user_command("Format", function(args)
 	require("conform").format({ async = true, range = range })
 end, { range = true })
 vim.keymap.set({ "n", "v" }, "<F2>", function()
+	if vim.bo.filetype == "javascript" or vim.bo.filetype == "typescript" then
+		vim.cmd("EslintFixAll")
+		return
+	end
 	vim.cmd("Format")
 end)
 
@@ -714,35 +736,35 @@ dap.adapters.nlua = function(callback, config)
 	callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 end
 -- dap.adapters.nlua = function(callback, config)
--- 	local adapter = {
--- 		type = "server",
--- 		host = config.host or "127.0.0.1",
--- 		port = config.port or 8086,
--- 	}
--- 	if config.start_neovim then
--- 		local dap_run = dap.run
--- 		dap.run = function(c)
--- 			adapter.port = c.port
--- 			adapter.host = c.host
--- 		end
--- 		require("osv").run_this()
--- 		dap.run = dap_run
--- 	end
--- 	callback(adapter)
+--	local adapter = {
+--		type = "server",
+--		host = config.host or "127.0.0.1",
+--		port = config.port or 8086,
+--	}
+--	if config.start_neovim then
+--		local dap_run = dap.run
+--		dap.run = function(c)
+--			adapter.port = c.port
+--			adapter.host = c.host
+--		end
+--		require("osv").run_this()
+--		dap.run = dap_run
+--	end
+--	callback(adapter)
 -- end
 -- dap.configurations.lua = {
--- 	{
--- 		type = "nlua",
--- 		request = "attach",
--- 		name = "Run this file",
--- 		start_neovim = {},
--- 	},
--- 	{
--- 		type = "nlua",
--- 		request = "attach",
--- 		name = "Attach to running Neovim instance (port = 8086)",
--- 		port = 8086,
--- 	},
+--	{
+--		type = "nlua",
+--		request = "attach",
+--		name = "Run this file",
+--		start_neovim = {},
+--	},
+--	{
+--		type = "nlua",
+--		request = "attach",
+--		name = "Attach to running Neovim instance (port = 8086)",
+--		port = 8086,
+--	},
 -- }
 local function lldb_command()
 	if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
@@ -889,8 +911,13 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
-vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "Breakpoint", linehl = "", numhl = "" })
-vim.fn.sign_define("DapStopped", { text = "", texthl = "DebugPosition", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define(
+	"DapBreakpointCondition",
+	{ text = "●", texthl = "DapBreakpointCondition", linehl = "", numhl = "" }
+)
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DapLogPoint", linehl = "", numhl = "" })
 vim.fn.sign_define(
 	"DiagnosticSignError",
 	{ text = "", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
@@ -934,9 +961,6 @@ vim.cmd([[
 	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
 	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
 	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
-	highlight TSCurrentScope guibg=#212121 guifg=NONE gui=NONE
-	highlight TSDefinition guibg=#3B4261 guifg=NONE gui=NONE
-	highlight TSDefinitionUsage guibg=#3B4261 guifg=NONE gui=NONE
 	vnoremap <C-c> "+y
 	vnoremap <C-x> "+d
 	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
@@ -950,6 +974,7 @@ vim.cmd([[
 vim.g.mapleader = " "
 local wk = require("which-key")
 
+Diagnostic_virtual_text = true
 wk.register({
 	["<leader>"] = {
 		x = {
@@ -1070,6 +1095,12 @@ wk.register({
 			},
 			n = "Go to next definition in aerial",
 			p = "Go to previous definition in aerial",
+			o = {
+				function()
+					require("nvim-navbuddy").open()
+				end,
+				"Open navigation for code",
+			},
 		},
 		d = {
 			name = "Debug",
@@ -1171,16 +1202,7 @@ wk.register({
 		},
 		t = {
 			name = "Treesitter",
-			is = "Init selection",
-			ni = "Node incremental selection",
-			si = "Scope incremental selection",
-			nd = "Node decremental selection",
 			r = "Smart rename",
-			gd = "Goto definition",
-			ld = "List definitions",
-			ldt = "List definitions toc",
-			gn = "Goto next usage",
-			gp = "Goto previous usage",
 		},
 		l = {
 			name = "Lsp",
@@ -1200,6 +1222,41 @@ wk.register({
 			dt = "Line diagnostics toggle",
 			dh = "Diagnostics hide",
 			ds = "Diagnostics show",
+			dvt = {
+				function()
+					if Diagnostic_virtual_text then
+						vim.diagnostic.config({
+							virtual_text = true,
+						})
+						Diagnostic_virtual_text = false
+					else
+						vim.diagnostic.config({
+							virtual_text = false,
+						})
+						Diagnostic_virtual_text = true
+					end
+				end,
+				"Virtual text toggle",
+			},
+			q = {
+				name = "Quickfix, Loclist",
+				n = {
+					"<cmd>QNext<CR>",
+					"Next quickfix or loc list entry",
+				},
+				p = {
+					"<cmd>QPrev<CR>",
+					"Previous quickfix or loc list entry",
+				},
+				t = {
+					"<cmd>OFToggle!<CR>",
+					"Toggle quickfix list",
+				},
+				l = {
+					"<cmd>LLToggle!<CR>",
+					"Toggle loclist",
+				},
+			},
 			j = {
 				name = "Java",
 				o = {
