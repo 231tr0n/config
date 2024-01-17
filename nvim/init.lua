@@ -1106,9 +1106,15 @@ wk.register({
 			name = "Debug",
 			n = {
 				function()
-					require("osv").launch()
+					require("osv").launch({ port = 8086 })
 				end,
 				"Start neovim lua remote debugger",
+			},
+			nt = {
+				function()
+					require("osv").run_this()
+				end,
+				"Run present file with dap",
 			},
 			t = {
 				function()
