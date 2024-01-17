@@ -43,6 +43,7 @@ cd ~/scripts
 ./java-test.bash
 cd ..
 
+git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
 ssh-keygen -t rsa
 
