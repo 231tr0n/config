@@ -104,7 +104,8 @@ bootstrap_paq({
 	"rafamadriz/friendly-snippets",
 	"nvim-tree/nvim-web-devicons",
 	"nvim-lualine/lualine.nvim",
-	"folke/flash.nvim",
+	-- "folke/flash.nvim",
+	"echasnovski/mini.jump",
 	"folke/trouble.nvim",
 	"mfussenegger/nvim-dap",
 	"jbyuki/one-small-step-for-vimkind",
@@ -570,7 +571,8 @@ require("todo-comments").setup()
 
 -- Navigating setup
 require("mini.jump2d").setup()
-require("flash").setup()
+-- require("flash").setup()
+require("mini.jump").setup()
 
 -- Ui setup
 require("nvim-web-devicons").setup()
