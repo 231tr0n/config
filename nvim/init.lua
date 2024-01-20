@@ -163,6 +163,7 @@ bootstrap_paq({
 -- Treesitter setup
 require("nvim-treesitter.configs").setup({
 	modules = {},
+	indent = true,
 	ensure_installed = {
 		"awk",
 		"bash",
@@ -300,6 +301,8 @@ require("illuminate").configure({
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local luasnip = require("luasnip")
 local cmp = require("cmp")
+local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 
 local has_words_before = function()
 	unpack = unpack or table.unpack
