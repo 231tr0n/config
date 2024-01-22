@@ -53,6 +53,7 @@ local function bootstrap_paq(packages)
 		vim.notify("Installing plugins... If prompted, hit Enter to continue.")
 	end
 	paq(packages)
+	paq.install()
 end
 
 -- Paq plugin setup
@@ -664,7 +665,7 @@ require("conform").setup({
 		go = { "gofumpt" },
 		xml = { "xmllint" },
 		yaml = { "yamlfix" },
-		json = { "prettier" },
+		json = { "jq", "prettier" },
 		css = { "prettier" },
 		html = { "prettier" },
 		c = { "clang_format" },
