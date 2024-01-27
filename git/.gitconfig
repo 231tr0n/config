@@ -1,12 +1,13 @@
 [core]
 	pager = delta
+	editor = nvim
 
 [interactive]
 	diffFilter = delta --color-only --features=interactive
 
 [delta]
 	features = decorations
-	line-numbers = false
+	line-numbers = true
 	side-by-side = false
 	navigate = true
 
@@ -28,3 +29,5 @@
 [user]
 	email = zeltronsrikar@gmail.com
 	name = 231tr0n
+[init]
+	defaultBranch = main
