@@ -298,6 +298,7 @@ vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
 require("illuminate").configure({
 	providers = {
 		"lsp",
+		"treesitter",
 		"regex",
 	},
 	delay = 500,
