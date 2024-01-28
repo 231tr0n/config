@@ -159,9 +159,7 @@ bootstrap_paq({
 	"SmiteshP/nvim-navic",
 	"SmiteshP/nvim-navbuddy",
 	"stevearc/qf_helper.nvim",
-	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
-	"kevinhwang91/nvim-ufo",
 })
 
 -- Treesitter setup
@@ -628,19 +626,9 @@ require("aerial").setup({
 })
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 vim.o.foldcolumn = "1"
-vim.o.foldlevel = 99
-vim.o.foldlevelstart = 99
-vim.o.foldenable = true
-vim.keymap.set("n", "zR", require("ufo").openAllFolds)
-vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
-vim.keymap.set("n", "zr", require("ufo").openFoldsExceptKinds, { noremap = false, silent = true, desc = "Open folds" })
-vim.keymap.set("n", "zm", require("ufo").closeFoldsWith, { noremap = false, silent = true, desc = "Close folds" })
-vim.keymap.set("n", "zk", function()
-	local winid = require("ufo").peekFoldedLinesUnderCursor()
-	if not winid then
-		vim.lsp.buf.hover()
-	end
-end, { noremap = false, silent = true, desc = "Peek folded lines under cursor" })
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.o.foldenable = false
 require("statuscol").setup({
 	relculright = true,
 	segments = {
@@ -649,11 +637,7 @@ require("statuscol").setup({
 		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
 	},
 })
-require("ufo").setup({
-	open_fold_hl_timeout = 150,
-})
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
-	group = auGroups,
 	callback = function()
 		vim.cmd([[
 			norm zx
@@ -950,8 +934,6 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.number = true
 vim.opt.signcolumn = "yes"
--- vim.opt.foldmethod = "expr"
--- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = false
 vim.opt.list = true
@@ -961,28 +943,28 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
-vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = " 󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
 vim.fn.sign_define(
 	"DapBreakpointCondition",
-	{ text = "●", texthl = "DapBreakpointCondition", linehl = "", numhl = "" }
+	{ text = " ●", texthl = "DapBreakpointCondition", linehl = "", numhl = "" }
 )
-vim.fn.sign_define("DapStopped", { text = "", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DapLogPoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = " ", texthl = "DapStopped", linehl = "", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = " ◆", texthl = "DapLogPoint", linehl = "", numhl = "" })
 vim.fn.sign_define(
 	"DiagnosticSignError",
-	{ text = "", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
+	{ text = " ", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignWarn",
-	{ text = "", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
+	{ text = " ", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignInfo",
-	{ text = "󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
+	{ text = " 󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignHint",
-	{ text = "", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
+	{ text = " ", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
 )
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
