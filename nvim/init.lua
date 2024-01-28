@@ -159,6 +159,9 @@ bootstrap_paq({
 	"SmiteshP/nvim-navic",
 	"SmiteshP/nvim-navbuddy",
 	"stevearc/qf_helper.nvim",
+	"kevinhwang91/promise-async",
+	"luukvbaal/statuscol.nvim",
+	"kevinhwang91/nvim-ufo",
 })
 
 -- Treesitter setup
@@ -300,6 +303,10 @@ require("illuminate").configure({
 	delay = 500,
 })
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
+capabilities.textDocument.foldingRange = {
+	dynamicRegistration = false,
+	lineFoldingOnly = true,
+}
 local luasnip = require("luasnip")
 local cmp = require("cmp")
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
@@ -606,7 +613,7 @@ require("window-picker").setup({
 	hint = "floating-big-letter",
 })
 
--- source code outline setup
+-- source code outline and folds setup
 require("aerial").setup({
 	backends = { "lsp", "markdown", "man" },
 	on_attach = function(bufnr)
@@ -617,6 +624,41 @@ require("aerial").setup({
 	layout = {
 		filter_kind = false,
 	},
+})
+vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+vim.o.foldcolumn = "1"
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+vim.keymap.set("n", "zr", require("ufo").openFoldsExceptKinds, { noremap = false, silent = true, desc = "Open folds" })
+vim.keymap.set("n", "zm", require("ufo").closeFoldsWith, { noremap = false, silent = true, desc = "Close folds" })
+vim.keymap.set("n", "zk", function()
+	local winid = require("ufo").peekFoldedLinesUnderCursor()
+	if not winid then
+		vim.lsp.buf.hover()
+	end
+end, { noremap = false, silent = true, desc = "Peek folded lines under cursor" })
+require("statuscol").setup({
+	relculright = true,
+	segments = {
+		{ text = { require("statuscol.builtin").foldfunc }, click = "v:lua.ScFa" },
+		{ text = { "%s" }, click = "v:lua.ScSa" },
+		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
+	},
+})
+require("ufo").setup({
+	open_fold_hl_timeout = 150,
+})
+vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+	group = auGroups,
+	callback = function()
+		vim.cmd([[
+			norm zx
+			norm zR
+		]])
+	end,
 })
 
 -- colorscheme setup
@@ -907,9 +949,8 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.number = true
 vim.opt.signcolumn = "yes"
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-vim.opt.foldenable = false
+-- vim.opt.foldmethod = "expr"
+-- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = false
 vim.opt.list = true
