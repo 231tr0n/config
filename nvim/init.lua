@@ -159,7 +159,9 @@ bootstrap_paq({
 	"SmiteshP/nvim-navic",
 	"SmiteshP/nvim-navbuddy",
 	"stevearc/qf_helper.nvim",
+	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
+	"kevinhwang91/nvim-ufo",
 })
 
 -- Treesitter setup
@@ -626,9 +628,11 @@ require("aerial").setup({
 })
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 vim.o.foldcolumn = "1"
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-vim.o.foldenable = false
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+-- vim.opt.foldmethod = "expr"
+-- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 require("statuscol").setup({
 	relculright = true,
 	segments = {
@@ -637,12 +641,27 @@ require("statuscol").setup({
 		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
 	},
 })
+vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+vim.keymap.set("n", "zr", require("ufo").openFoldsExceptKinds, { noremap = false, silent = true, desc = "Open folds" })
+vim.keymap.set("n", "zm", require("ufo").closeFoldsWith, { noremap = false, silent = true, desc = "Close folds" })
+vim.keymap.set("n", "zk", function()
+	local winid = require("ufo").peekFoldedLinesUnderCursor()
+	if not winid then
+		vim.lsp.buf.hover()
+	end
+end, { noremap = false, silent = true, desc = "Peek folded lines under cursor" })
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
 	callback = function()
 		vim.cmd([[
 			norm zx
 			norm zR
 		]])
+	end,
+})
+require("ufo").setup({
+	provider_selector = function(bufnr, filetype, buftype)
+		return { "lsp", "treesitter", "indent" }
 	end,
 })
 
