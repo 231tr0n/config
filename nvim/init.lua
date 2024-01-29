@@ -690,6 +690,7 @@ require("conform").setup({
 		svelte = { "prettier" },
 		java = { "google-java-format" },
 		go = { "gofumpt" },
+		tex = { "latexindent" },
 		xml = { "xmllint" },
 		yaml = { "yamlfix" },
 		json = { "jq", "prettier" },
