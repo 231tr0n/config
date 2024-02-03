@@ -162,6 +162,22 @@ bootstrap_paq({
 	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
 	"kevinhwang91/nvim-ufo",
+	"LunarVim/bigfile.nvim",
+})
+
+-- Disable plugins for big files.
+require("bigfile").setup({
+	filesize = 2,
+	features = {
+		"indent_blankline",
+		"illuminate",
+		"lsp",
+		"treesitter",
+		"syntax",
+		"matchparen",
+		"vimopts",
+		"filetype",
+	},
 })
 
 -- Treesitter setup
@@ -233,7 +249,7 @@ require("nvim-treesitter.configs").setup({
 	highlight = {
 		enable = true,
 		disable = function(lang, buf)
-			local max_filesize = 1 * 1024 * 1024
+			local max_filesize = 2 * 1024 * 1024
 			local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
 			if ok and stats and stats.size > max_filesize then
 				if lang == "asm" or lang == "wasm" then
@@ -963,28 +979,28 @@ vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
 vim.opt.maxmempattern = 20000
-vim.fn.sign_define("DapBreakpoint", { text = " 󰙧", texthl = "DapBreakpoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "" })
 vim.fn.sign_define(
 	"DapBreakpointCondition",
-	{ text = " ●", texthl = "DapBreakpointCondition", linehl = "", numhl = "" }
+	{ text = "", texthl = "DapBreakpointCondition", linehl = "DapBreakpointCondition", numhl = "" }
 )
-vim.fn.sign_define("DapStopped", { text = " ", texthl = "DapStopped", linehl = "", numhl = "" })
-vim.fn.sign_define("DapLogPoint", { text = " ◆", texthl = "DapLogPoint", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "" })
 vim.fn.sign_define(
 	"DiagnosticSignError",
-	{ text = " ", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
+	{ text = "", texthl = "LspDiagnosticErr", linehl = "", numhl = "LspDiagnosticErr" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignWarn",
-	{ text = " ", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
+	{ text = "", texthl = "LspDiagnosticWarn", linehl = "", numhl = "LspDiagnosticWarn" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignInfo",
-	{ text = " 󰋼", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
+	{ text = "", texthl = "LspDiagnosticInfo", linehl = "", numhl = "LspDiagnosticInfo" }
 )
 vim.fn.sign_define(
 	"DiagnosticSignHint",
-	{ text = " ", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
+	{ text = "", texthl = "LspDiagnosticHint", linehl = "", numhl = "LspDiagnosticHint" }
 )
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
@@ -1007,8 +1023,10 @@ vim.cmd([[
 	set foldmethod=indent
 	set noshowmode
 	highlight MatchParen guibg=#FF9E64 guifg=#000000 gui=NONE
-	highlight Breakpoint guibg=NONE guifg=#FCA7EA gui=NONE
-	highlight DebugPosition guibg=NONE guifg=#C099FF gui=NONE
+	highlight DapBreakpoint guifg=#000000 guibg=#C099FF gui=NONE
+	highlight DapBreakpointCondition guifg=#000000 guibg=#AA5162 gui=NONE
+	highlight DapStopped guifg=#000000 guibg=#FCA7EA gui=NONE
+	highlight DapLogPoint guifg=#000000 guibg=#76C3F2 gui=NONE
 	highlight LspDiagnosticErr guibg=NONE guifg=#FF757F gui=NONE
 	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
 	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
