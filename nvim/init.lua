@@ -59,6 +59,7 @@ end
 -- Paq plugin setup
 bootstrap_paq({
 	"savq/paq-nvim",
+	"LunarVim/bigfile.nvim",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
 	"nvim-treesitter/nvim-treesitter-refactor",
 	"nvim-lua/plenary.nvim",
@@ -162,7 +163,6 @@ bootstrap_paq({
 	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
 	"kevinhwang91/nvim-ufo",
-	"LunarVim/bigfile.nvim",
 })
 
 -- Disable plugins for big files.
