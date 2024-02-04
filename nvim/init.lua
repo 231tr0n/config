@@ -490,8 +490,46 @@ vim.api.nvim_create_autocmd("FileType", {
 			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
 			settings = {
 				java = {
+					references = {
+						includeDecompiledSources = true,
+					},
+					eclipse = {
+						downloadSources = true,
+					},
+					maven = {
+						downloadSources = true,
+					},
+					format = {
+						enabled = false,
+						-- settings = {
+						-- 	url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
+						-- 	profile = "GoogleStyle",
+						-- },
+					},
 					signatureHelp = { enabled = true },
 					contentProvider = { preferred = "fernflower" },
+					codeGeneration = {
+						toString = {
+							template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+						},
+						useBlocks = true,
+					},
+					configuration = {
+						-- runtimes = {
+						-- 	{
+						-- 		name = "java-11-openjdk",
+						-- 		path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+						-- 	},
+						-- 	{
+						-- 		name = "java-17-openjdk",
+						-- 		path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+						-- 	},
+						-- 	{
+						-- 		name = "java-21-openjdk",
+						-- 		path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+						-- 	},
+						-- },
+					},
 				},
 			},
 		}
@@ -499,8 +537,11 @@ vim.api.nvim_create_autocmd("FileType", {
 			vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", 1),
 		}
 		vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", 1), "\n"))
+		local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+		extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
 		config["init_options"] = {
 			bundles = bundles,
+			extendedClientCapabilities = extendedClientCapabilities,
 		}
 		require("jdtls").start_or_attach(config)
 	end,
