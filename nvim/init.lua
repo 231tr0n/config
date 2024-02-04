@@ -201,6 +201,7 @@ require("nvim-treesitter.configs").setup({
 	modules = {},
 	indent = true,
 	ensure_installed = {
+		"angular",
 		"awk",
 		"bash",
 		"c",
