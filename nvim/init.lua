@@ -166,8 +166,24 @@ bootstrap_paq({
 })
 
 -- Disable plugins for big files.
+vim.opt.maxmempattern = 20000
 require("bigfile").setup({
 	filesize = 2,
+	pattern = function(bufnr, filesize_mib)
+		local width = 0
+		local content = vim.fn.readblob(vim.api.nvim_buf_get_name(bufnr))
+		for line in content:gmatch("[^\r\n]+") do
+			if #line > width then
+				width = #line
+			end
+		end
+		if width > 10000 then
+			return true
+		end
+		if filesize_mib > 2 then
+			return true
+		end
+	end,
 	features = {
 		"indent_blankline",
 		"illuminate",
@@ -978,7 +994,6 @@ vim.opt.hlsearch = true
 vim.opt.wildmenu = true
 vim.o.wildmode = "longest:full,list"
 vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
-vim.opt.maxmempattern = 20000
 vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "" })
 vim.fn.sign_define(
 	"DapBreakpointCondition",
@@ -1023,16 +1038,44 @@ vim.cmd([[
 	set foldmethod=indent
 	set noshowmode
 	highlight MatchParen guibg=#FF9E64 guifg=#000000 gui=NONE
-	highlight DapBreakpoint guifg=#000000 guibg=#C099FF gui=NONE
+	highlight DapBreakpoint guifg=#7AA2F7 guibg=#3B4261 gui=NONE
 	highlight DapBreakpointCondition guifg=#000000 guibg=#AA5162 gui=NONE
-	highlight DapStopped guifg=#000000 guibg=#FCA7EA gui=NONE
+	highlight DapStopped guifg=#000000 guibg=#7AA2F7 gui=NONE
 	highlight DapLogPoint guifg=#000000 guibg=#76C3F2 gui=NONE
 	highlight LspDiagnosticErr guibg=NONE guifg=#FF757F gui=NONE
 	highlight LspDiagnosticHint guibg=NONE guifg=#4FD6BE gui=NONE
 	highlight LspDiagnosticWarn guibg=NONE guifg=#B2D380 gui=NONE
 	highlight LspDiagnosticInfo guibg=NONE guifg=#82AAFF gui=NONE
+	highlight NavicIconsFile guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsModule guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsNamespace guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsPackage guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsClass guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsMethod guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsProperty guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsField guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsConstructor guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsEnum guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsInterface guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsFunction guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsVariable guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsConstant guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsString guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsNumber guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsBoolean guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsArray guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsObject guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsKey guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsNull guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsEnumMember guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsStruct guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsEvent guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsOperator guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicIconsTypeParameter guifg=#FF9E64 guibg=#16161E gui=NONE
+	highlight NavicSeparator guifg=#4FD6BE guibg=#16161E gui=NONE
+	highlight NavicText guibg=#16161E gui=NONE
 	vnoremap <C-c> "+y
-	vnoremap <C-x> "+d
+	vnoremap <C-c><C-c> "+x
 	let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
 	let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
 	command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
@@ -1539,7 +1582,7 @@ wk.register({
 		"Convert tabs to spaces",
 	},
 	["<C-c>"] = "Copy to clipboard",
-	["<C-x>"] = "Cut to clipboard",
+	["<C-c><C-c>"] = "Cut to clipboard",
 	["<C-S-v>"] = "Paste from clipboard",
 	["<F2>"] = "Format file/range",
 })
