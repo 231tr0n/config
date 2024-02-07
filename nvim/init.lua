@@ -482,6 +482,9 @@ lspconfig.jsonls.setup({
 lspconfig.lemminx.setup({
 	capabilities = capabilities,
 })
+lspconfig.angularls.setup({
+	capabilities = capabilities,
+})
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
