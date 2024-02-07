@@ -59,6 +59,7 @@ sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
 sudo npm install -g bash-language-server@latest
 sudo npm install -g typescript-language-server@latest
+sudo npm install -g @angular/language-server@latest
 cd ~/scripts
 ./java-lsp.bash
 ./lua-lsp.bash
