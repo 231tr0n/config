@@ -163,6 +163,7 @@ bootstrap_paq({
 	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
 	"kevinhwang91/nvim-ufo",
+	"nvim-pack/nvim-spectre",
 })
 
 -- Disable plugins for big files.
@@ -493,44 +494,44 @@ vim.api.nvim_create_autocmd("FileType", {
 			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
 			settings = {
 				java = {
-					references = {
-						includeDecompiledSources = true,
-					},
-					eclipse = {
-						downloadSources = true,
-					},
-					maven = {
-						downloadSources = true,
-					},
+					-- references = {
+					-- 	includeDecompiledSources = true,
+					-- },
+					-- eclipse = {
+					-- 	downloadSources = true,
+					-- },
+					-- maven = {
+					-- 	downloadSources = true,
+					-- },
 					format = {
 						enabled = false,
 						-- settings = {
-						-- 	url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
-						-- 	profile = "GoogleStyle",
+						--	url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
+						--	profile = "GoogleStyle",
 						-- },
 					},
 					signatureHelp = { enabled = true },
 					contentProvider = { preferred = "fernflower" },
-					codeGeneration = {
-						toString = {
-							template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-						},
-						useBlocks = true,
-					},
+					-- codeGeneration = {
+					-- 	toString = {
+					-- 		template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+					-- 	},
+					-- 	useBlocks = true,
+					-- },
 					configuration = {
 						-- runtimes = {
-						-- 	{
-						-- 		name = "java-11-openjdk",
-						-- 		path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-						-- 	},
-						-- 	{
-						-- 		name = "java-17-openjdk",
-						-- 		path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-						-- 	},
-						-- 	{
-						-- 		name = "java-21-openjdk",
-						-- 		path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
-						-- 	},
+						--	{
+						--		name = "java-11-openjdk",
+						--		path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+						--	},
+						--	{
+						--		name = "java-17-openjdk",
+						--		path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+						--	},
+						--	{
+						--		name = "java-21-openjdk",
+						--		path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+						--	},
 						-- },
 					},
 				},
@@ -1492,6 +1493,12 @@ wk.register({
 		},
 		f = {
 			name = "Find",
+			r = {
+				function()
+					require("spectre").toggle()
+				end,
+				"Replace text in files",
+			},
 			f = {
 				"<cmd>Files<CR>",
 				"Find files",
