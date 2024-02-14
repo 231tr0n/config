@@ -147,7 +147,7 @@ bootstrap_paq({
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
-	"nomnivore/ollama.nvim",
+	"David-Kunz/gen.nvim",
 	"stevearc/dressing.nvim",
 	"rcarriga/nvim-notify",
 	"folke/noice.nvim",
@@ -494,15 +494,15 @@ vim.api.nvim_create_autocmd("FileType", {
 			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
 			settings = {
 				java = {
-					-- references = {
-					-- 	includeDecompiledSources = true,
-					-- },
-					-- eclipse = {
-					-- 	downloadSources = true,
-					-- },
-					-- maven = {
-					-- 	downloadSources = true,
-					-- },
+					references = {
+						includeDecompiledSources = true,
+					},
+					eclipse = {
+						downloadSources = true,
+					},
+					maven = {
+						downloadSources = true,
+					},
 					format = {
 						enabled = false,
 						-- settings = {
@@ -513,10 +513,10 @@ vim.api.nvim_create_autocmd("FileType", {
 					signatureHelp = { enabled = true },
 					contentProvider = { preferred = "fernflower" },
 					-- codeGeneration = {
-					-- 	toString = {
-					-- 		template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-					-- 	},
-					-- 	useBlocks = true,
+					--	toString = {
+					--		template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+					--	},
+					--	useBlocks = true,
 					-- },
 					configuration = {
 						-- runtimes = {
@@ -1003,24 +1003,15 @@ dap.configurations.c = {
 }
 
 -- ai setup
-require("ollama").setup({
+require("gen").setup({
 	model = "codellama",
-	url = "http://127.0.0.1:11434",
-	-- serve = {
-	--	on_start = false,
-	--	command = "ollama",
-	--	args = { "serve" },
-	--	stop_command = "pkill",
-	--	stop_args = { "-SIGTERM", "ollama" },
-	-- },
-	prompts = {
-		Sample_Prompt = {
-			prompt = "This is a sample prompt that receives $input and $sel(ection), among others.",
-			input_label = "> ",
-			model = "codellama",
-			action = "display",
-		},
-	},
+	display_mode = "float",
+	show_prompt = false,
+	show_model = true,
+	no_auto_close = false,
+	init = function(options) end,
+	command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
+	debug = false,
 })
 
 -- options
@@ -1238,12 +1229,14 @@ wk.register({
 		a = {
 			name = "Ollama",
 			p = {
-				":<c-u>lua require('ollama').prompt()<cr>",
+				"<cmd>Gen<cr>",
 				"Prompt model",
 			},
-			g = {
-				":<c-u>lua require('ollama').prompt('Generate_Code')<cr>",
-				"Generate code from model",
+			m = {
+				function()
+					require("gen").select_model()
+				end,
+				"Select model",
 			},
 		},
 		c = {
