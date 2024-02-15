@@ -1013,6 +1013,7 @@ require("gen").setup({
 	command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
 	debug = false,
 })
+vim.keymap.set({ "n", "v" }, "<leader>ap", ":Gen<CR>")
 
 -- options
 vim.g.loaded_netrw = 1
@@ -1228,10 +1229,7 @@ wk.register({
 		},
 		a = {
 			name = "Ollama",
-			p = {
-				"<cmd>Gen<cr>",
-				"Prompt model",
-			},
+			p = "Prompt model",
 			m = {
 				function()
 					require("gen").select_model()
