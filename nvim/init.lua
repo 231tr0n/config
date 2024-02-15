@@ -1013,7 +1013,7 @@ require("gen").setup({
 	command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
 	debug = false,
 })
-vim.keymap.set({ "n", "v" }, "<leader>ap", ":Gen<CR>")
+vim.keymap.set({ "n", "v" }, "<F3>", ":Gen<CR>")
 
 -- options
 vim.g.loaded_netrw = 1
@@ -1229,7 +1229,6 @@ wk.register({
 		},
 		a = {
 			name = "Ollama",
-			p = "Prompt model",
 			m = {
 				function()
 					require("gen").select_model()
@@ -1628,6 +1627,7 @@ wk.register({
 	["<C-c><C-c>"] = "Cut to clipboard",
 	["<C-S-v>"] = "Paste from clipboard",
 	["<F2>"] = "Format file/range",
+	["<F3>"] = "Prompt model",
 })
 
 -- autocommands
