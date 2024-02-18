@@ -767,6 +767,7 @@ require("tokyonight").setup({
 -- linter setup
 require("lint").linters_by_ft = {
 	json = { "jsonlint" },
+	jsonc = { "jsonlint" },
 	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
@@ -791,6 +792,7 @@ require("conform").setup({
 		xml = { "xmllint" },
 		yaml = { "yamlfix" },
 		json = { "jq", "prettier" },
+		jsonc = { "prettier" },
 		css = { "prettier" },
 		html = { "prettier" },
 		c = { "clang_format" },
