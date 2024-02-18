@@ -100,6 +100,8 @@ bob use latest
 
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --all
+go install github.com/nao1215/gup@latest
+go install -v github.com/jesseduffield/lazygit@latest
 
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
