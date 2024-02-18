@@ -592,7 +592,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 require("qf_helper").setup()
 
 -- doc generation setup
-require("neogen").setup()
 require("neogen").setup({ snippet_engine = "luasnip" })
 
 -- statusline setup
