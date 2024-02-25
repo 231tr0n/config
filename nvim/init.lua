@@ -659,7 +659,9 @@ require("ibl").setup({
 require("colorizer").setup()
 require("nvim-tree").setup()
 require("which-key").setup()
-require("todo-comments").setup()
+require("todo-comments").setup({
+	signs = false,
+})
 
 -- Navigating setup
 require("mini.jump2d").setup()
