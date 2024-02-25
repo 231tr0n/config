@@ -168,34 +168,37 @@ bootstrap_paq({
 
 -- Disable plugins for big files.
 vim.opt.maxmempattern = 20000
-require("bigfile").setup({
-	filesize = 2,
-	pattern = function(bufnr, filesize_mib)
-		local width = 0
-		local content = vim.fn.readblob(vim.api.nvim_buf_get_name(bufnr))
-		for line in content:gmatch("[^\r\n]+") do
-			if #line > width then
-				width = #line
-			end
-		end
-		if width > 10000 then
-			return true
-		end
-		if filesize_mib > 2 then
-			return true
-		end
-	end,
-	features = {
-		"indent_blankline",
-		"illuminate",
-		"lsp",
-		"treesitter",
-		"syntax",
-		"matchparen",
-		"vimopts",
-		"filetype",
-	},
-})
+-- require("bigfile").setup({
+-- 	filesize = 2,
+-- 	pattern = function(bufnr, filesize_mib)
+-- 		local width = 0
+-- 		local content = vim.fn.readblob(vim.api.nvim_buf_get_name(bufnr))
+-- 		for line in content:gmatch("[^\r\n]+") do
+-- 			if #line > width then
+-- 				width = #line
+-- 			end
+-- 		end
+-- 		local filetype = vim.filetype.match({ buf = bufnr })
+-- 		if filetype == "csv" or filetype == "json" or filetype == "xml" then
+-- 			if width > 10000 then
+-- 				return true
+-- 			end
+-- 			if filesize_mib > 2 then
+-- 				return true
+-- 			end
+-- 		end
+-- 	end,
+-- 	features = {
+-- 		"indent_blankline",
+-- 		"illuminate",
+-- 		"lsp",
+-- 		"treesitter",
+-- 		"syntax",
+-- 		"matchparen",
+-- 		"vimopts",
+-- 		"filetype",
+-- 	},
+-- })
 
 -- Treesitter setup
 require("nvim-treesitter.configs").setup({
