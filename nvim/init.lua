@@ -164,40 +164,41 @@ bootstrap_paq({
 	"luukvbaal/statuscol.nvim",
 	"kevinhwang91/nvim-ufo",
 	"nvim-pack/nvim-spectre",
+	"otavioschwanck/arrow.nvim",
 })
 
 -- Disable plugins for big files.
 vim.opt.maxmempattern = 20000
 -- require("bigfile").setup({
--- 	filesize = 2,
--- 	pattern = function(bufnr, filesize_mib)
--- 		local width = 0
--- 		local content = vim.fn.readblob(vim.api.nvim_buf_get_name(bufnr))
--- 		for line in content:gmatch("[^\r\n]+") do
--- 			if #line > width then
--- 				width = #line
--- 			end
--- 		end
--- 		local filetype = vim.filetype.match({ buf = bufnr })
--- 		if filetype == "csv" or filetype == "json" or filetype == "xml" then
--- 			if width > 10000 then
--- 				return true
--- 			end
--- 			if filesize_mib > 2 then
--- 				return true
--- 			end
--- 		end
--- 	end,
--- 	features = {
--- 		"indent_blankline",
--- 		"illuminate",
--- 		"lsp",
--- 		"treesitter",
--- 		"syntax",
--- 		"matchparen",
--- 		"vimopts",
--- 		"filetype",
--- 	},
+--	filesize = 2,
+--	pattern = function(bufnr, filesize_mib)
+--		local width = 0
+--		local content = vim.fn.readblob(vim.api.nvim_buf_get_name(bufnr))
+--		for line in content:gmatch("[^\r\n]+") do
+--			if #line > width then
+--				width = #line
+--			end
+--		end
+--		local filetype = vim.filetype.match({ buf = bufnr })
+--		if filetype == "csv" or filetype == "json" or filetype == "xml" then
+--			if width > 10000 then
+--				return true
+--			end
+--			if filesize_mib > 2 then
+--				return true
+--			end
+--		end
+--	end,
+--	features = {
+--		"indent_blankline",
+--		"illuminate",
+--		"lsp",
+--		"treesitter",
+--		"syntax",
+--		"matchparen",
+--		"vimopts",
+--		"filetype",
+--	},
 -- })
 
 -- Treesitter setup
@@ -290,6 +291,9 @@ require("nvim-treesitter.configs").setup({
 		},
 	},
 	endwise = {
+		enable = true,
+	},
+	autotag = {
 		enable = true,
 	},
 })
@@ -695,6 +699,10 @@ require("noice").setup({
 require("window-picker").setup({
 	hint = "floating-big-letter",
 })
+require("arrow").setup({
+	show_icons = true,
+	leader_key = ";",
+})
 
 -- source code outline and folds setup
 require("aerial").setup({
@@ -1063,6 +1071,8 @@ vim.fn.sign_define(
 )
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
+	filetype indent on
+	filetype plugin indent on
 	let g:python_recommended_style=0
 	colorscheme tokyonight-night
 	set showcmd
@@ -1634,6 +1644,7 @@ wk.register({
 	["<C-S-v>"] = "Paste from clipboard",
 	["<F2>"] = "Format file/range",
 	["<F3>"] = "Prompt model",
+	[";"] = "Edit arrow file",
 })
 
 -- autocommands
