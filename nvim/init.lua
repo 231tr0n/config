@@ -78,6 +78,8 @@ bootstrap_paq({
 	"echasnovski/mini.surround",
 	"echasnovski/mini.splitjoin",
 	"echasnovski/mini.jump2d",
+	"echasnovski/mini.move",
+	"echasnovski/mini.animate",
 	"folke/which-key.nvim",
 	-- "tpope/vim-repeat",
 	"tpope/vim-fugitive",
@@ -652,6 +654,22 @@ require("nvim-ts-autotag").setup()
 -- require("mini.pairs").setup()
 require("mini.indentscope").setup({
 	symbol = "|",
+})
+require("mini.animate").setup()
+require("mini.move").setup({
+	mappings = {
+		left = "<C-h>",
+		right = "<C-l>",
+		down = "<C-j>",
+		up = "<C-k>",
+		line_left = "<C-h>",
+		line_right = "<C-l>",
+		line_down = "<C-j>",
+		line_up = "<C-k>",
+	},
+	options = {
+		reindent_linewise = true,
+	},
 })
 require("mini.starter").setup()
 require("ibl").setup({
