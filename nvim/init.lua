@@ -301,7 +301,7 @@ require("nvim-treesitter.configs").setup({
 		smart_rename = {
 			enable = true,
 			keymaps = {
-				smart_rename = "<leader>tr",
+				smart_rename = "<leader>r",
 			},
 		},
 	},
@@ -818,7 +818,7 @@ require("lint").linters_by_ft = {
 	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
-	-- lua = { "luacheck" },
+	lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
 	javascript = { "eslint" },
@@ -1427,10 +1427,6 @@ wk.register({
 				"Toggle wrap",
 			},
 		},
-		t = {
-			name = "Treesitter",
-			r = "Smart rename",
-		},
 		l = {
 			name = "Lsp",
 			h = "Hover",
@@ -1667,39 +1663,40 @@ wk.register({
 				"Generate annotations for  file",
 			},
 		},
-	},
-	T = {
-		name = "Neotest",
 		t = {
-			function()
-				require("neotest").run.run()
-			end,
-			"Run nearest test",
+			name = "Neotest",
+			t = {
+				function()
+					require("neotest").run.run()
+				end,
+				"Run nearest test",
+			},
+			f = {
+				function()
+					require("neotest").run.run(vim.fn.expand("%"))
+				end,
+				"Run tests in current file",
+			},
+			d = {
+				function()
+					require("neotest").run.run({ strategy = "dap" })
+				end,
+				"Run tests with dap",
+			},
+			s = {
+				function()
+					require("neotest").run.stop()
+				end,
+				"Run tests with dap",
+			},
+			a = {
+				function()
+					require("neotest").run.attach()
+				end,
+				"Run tests with dap",
+			},
 		},
-		f = {
-			function()
-				require("neotest").run.run(vim.fn.expand("%"))
-			end,
-			"Run tests in current file",
-		},
-		d = {
-			function()
-				require("neotest").run.run({ strategy = "dap" })
-			end,
-			"Run tests with dap",
-		},
-		s = {
-			function()
-				require("neotest").run.stop()
-			end,
-			"Run tests with dap",
-		},
-		a = {
-			function()
-				require("neotest").run.attach()
-			end,
-			"Run tests with dap",
-		},
+		r = "Rename",
 	},
 	["<C-Space>"] = {
 		function()
