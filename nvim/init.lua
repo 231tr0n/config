@@ -1069,7 +1069,7 @@ require("neotest").setup({
 
 -- ai setup
 require("gen").setup({
-	model = "codellama",
+	model = "dolphin-mistral",
 	display_mode = "float",
 	show_prompt = false,
 	show_model = true,
