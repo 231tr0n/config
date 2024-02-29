@@ -76,7 +76,7 @@ bootstrap_paq({
 	"echasnovski/mini.indentscope",
 	"echasnovski/mini.comment",
 	"echasnovski/mini.surround",
-	"echasnovski/mini.splitjoin",
+	-- "echasnovski/mini.splitjoin",
 	"echasnovski/mini.jump2d",
 	"echasnovski/mini.move",
 	"echasnovski/mini.animate",
@@ -167,6 +167,19 @@ bootstrap_paq({
 	"kevinhwang91/nvim-ufo",
 	"nvim-pack/nvim-spectre",
 	"otavioschwanck/arrow.nvim",
+	"Wansmer/treesj",
+	"antoinemadec/FixCursorHold.nvim",
+	"nvim-neotest/neotest",
+	"nvim-neotest/neotest-python",
+	"nvim-neotest/neotest-go",
+	"nvim-neotest/neotest-jest",
+	"marilari88/neotest-vitest",
+	"thenbe/neotest-playwright",
+	"rouge8/neotest-rust",
+	"MarkEmmons/neotest-deno",
+	"lawrence-laz/neotest-zig",
+	"alfaix/neotest-gtest",
+	"rcasia/neotest-bash",
 })
 
 -- Disable plugins for big files.
@@ -320,6 +333,10 @@ vim.g.rainbow_delimiters = {
 		-- "RainbowDelimiterCyan",
 	},
 }
+
+require("treesj").setup({
+	max_join_length = 1000,
+})
 
 -- Lsp setup
 local lspconfig = require("lspconfig")
@@ -647,7 +664,7 @@ require("lualine").setup({
 
 -- other plugin setups
 require("mini.comment").setup()
-require("mini.splitjoin").setup()
+-- require("mini.splitjoin").setup()
 require("mini.surround").setup()
 require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
@@ -801,7 +818,7 @@ require("lint").linters_by_ft = {
 	yaml = { "yamllint" },
 	java = { "checkstyle" },
 	go = { "golangcilint" },
-	lua = { "luacheck" },
+	-- lua = { "luacheck" },
 	python = { "pylint" },
 	c = { "clangtidy" },
 	javascript = { "eslint" },
@@ -1033,6 +1050,22 @@ dap.configurations.c = {
 		stopOnEntry = false,
 	},
 }
+
+-- testing setup
+require("neotest").setup({
+	adapters = {
+		require("neotest-python"),
+		require("neotest-playwright"),
+		require("neotest-go"),
+		require("neotest-jest"),
+		require("neotest-vitest"),
+		require("neotest-rust"),
+		require("neotest-deno"),
+		require("neotest-zig"),
+		require("neotest-gtest"),
+		require("neotest-bash"),
+	},
+})
 
 -- ai setup
 require("gen").setup({
@@ -1628,6 +1661,39 @@ wk.register({
 				end,
 				"Generate annotations for  file",
 			},
+		},
+	},
+	n = {
+		name = "Neotest",
+		t = {
+			function()
+				require("neotest").run.run()
+			end,
+			"Run nearest test",
+		},
+		f = {
+			function()
+				require("neotest").run.run(vim.fn.expand("%"))
+			end,
+			"Run tests in current file",
+		},
+		d = {
+			function()
+				require("neotest").run.run({ strategy = "dap" })
+			end,
+			"Run tests with dap",
+		},
+		s = {
+			function()
+				require("neotest").run.stop()
+			end,
+			"Run tests with dap",
+		},
+		a = {
+			function()
+				require("neotest").run.attach()
+			end,
+			"Run tests with dap",
 		},
 	},
 	["<C-Space>"] = {
