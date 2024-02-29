@@ -9,6 +9,6 @@ sudo rm -rf /usr/share/java/jdtls
 sudo mkdir -p /usr/share/java/jdtls
 sudo cp -R config_* features plugins bin /usr/share/java/jdtls
 sudo mkdir -p /usr/bin
-sudo ln -s --relative /usr/share/java/jdtls/bin/jdtls /usr/bin/jdtls
 cd ..
 rm -rf java-lsp
+sudo ln -s --relative /usr/share/java/jdtls/bin/jdtls /usr/bin/jdtls
