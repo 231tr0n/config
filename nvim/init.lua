@@ -1122,6 +1122,11 @@ vim.fn.sign_define(
 )
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.cmd([[
+	tnoremap <Esc> <C-\><C-n>
+	tnoremap <C-w>h <C-\><C-n><C-w>h
+	tnoremap <C-w>j <C-\><C-n><C-w>j
+	tnoremap <C-w>k <C-\><C-n><C-w>k
+	tnoremap <C-w>l <C-\><C-n><C-w>l
 	filetype indent on
 	filetype plugin indent on
 	let g:python_recommended_style=0
@@ -1663,7 +1668,7 @@ wk.register({
 			},
 		},
 	},
-	n = {
+	T = {
 		name = "Neotest",
 		t = {
 			function()
