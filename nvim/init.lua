@@ -79,7 +79,7 @@ bootstrap_paq({
 	-- "echasnovski/mini.splitjoin",
 	"echasnovski/mini.jump2d",
 	"echasnovski/mini.move",
-	"echasnovski/mini.animate",
+	-- "echasnovski/mini.animate",
 	"folke/which-key.nvim",
 	-- "tpope/vim-repeat",
 	"tpope/vim-fugitive",
@@ -672,7 +672,7 @@ require("nvim-ts-autotag").setup()
 require("mini.indentscope").setup({
 	symbol = "|",
 })
-require("mini.animate").setup()
+-- require("mini.animate").setup()
 require("mini.move").setup({
 	mappings = {
 		left = "<C-h>",
