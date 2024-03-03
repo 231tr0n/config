@@ -1472,11 +1472,11 @@ wk.register({
 					"Previous quickfix or loc list entry",
 				},
 				t = {
-					"<cmd>OFToggle!<CR>",
+					"<cmd>OFToggle<CR>",
 					"Toggle quickfix list",
 				},
 				l = {
-					"<cmd>LLToggle!<CR>",
+					"<cmd>LLToggle<CR>",
 					"Toggle loclist",
 				},
 			},
