@@ -1471,16 +1471,8 @@ wk.register({
 			},
 			q = {
 				name = "Quickfix, Loclist",
-				n = {
-					"<cmd>QNext<CR>",
-					"Next quickfix or loc list entry",
-				},
-				p = {
-					"<cmd>QPrev<CR>",
-					"Previous quickfix or loc list entry",
-				},
 				t = {
-					"<cmd>OFToggle<CR>",
+					"<cmd>QFToggle<CR>",
 					"Toggle quickfix list",
 				},
 				l = {
