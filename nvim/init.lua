@@ -1070,12 +1070,20 @@ require("neotest").setup({
 -- ai setup
 require("gen").setup({
 	model = "dolphin-mistral",
+	host = "localhost",
+	port = "11434",
 	display_mode = "float",
-	show_prompt = false,
+	show_prompt = true,
 	show_model = true,
 	no_auto_close = false,
 	init = function(options) end,
-	command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
+	command = function(options)
+		return "curl --silent --no-buffer -X POST http://"
+			.. options.host
+			.. ":"
+			.. options.port
+			.. "/api/chat -d $body"
+	end,
 	debug = false,
 })
 vim.keymap.set({ "n", "v" }, "<F3>", ":Gen<CR>")
