@@ -36,7 +36,7 @@ setup() {
 	chmod +x "$hooks_dir"/pre-commit
 
 	cat >"$commit_msg_hook" <<-'EOF'
-		if ! echo "$1" | grep -Eq '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z -]+\))?!?: [a-z0-9 ]+$'; then
+		if ! grep -Eq '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z -]+\))?!?: [a-z0-9 ]+$' "$1"; then
 		  echo "Prompt does not follow conventional commiting style(https://www.conventionalcommits.org/). Aborting the commit."
 		  exit 1
 		fi
