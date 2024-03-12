@@ -5,7 +5,7 @@ cd ~
 touch /home/zeltron/.hushlogin
 
 sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y --purge
-sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux
+sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux ca-certificates
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -42,6 +42,16 @@ curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo bash -
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt update -y && sudo apt upgrade -y
 sudo apt install -y fish
+
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo \
+	"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |
+	sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+sudo apt update -y
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-11-source openjdk-21-source openjdk-17-source openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk openjdk-11-doc openjdk-17-doc openjdk-21-doc luajit luarocks texlive texlive-base texlive-science texlive-science-doc
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
