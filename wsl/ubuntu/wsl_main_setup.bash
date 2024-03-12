@@ -91,7 +91,7 @@ pip install pylint yamllint
 sudo npm install -g jsonlint@latest
 sudo npm install -g eslint@latest
 
-sudo apt install -y clang-format jq libxml2-utils
+sudo apt install -y clang-format jq libxml2-utils tidy
 pip install black
 sudo npm install -g google-java-format@latest
 sudo npm install -g prettier@latest
