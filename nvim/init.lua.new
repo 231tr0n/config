@@ -1,4 +1,3 @@
--- Terminal toggling functionality
 -- Globals declared and used
 MiniDeps = nil
 MiniStatusline = nil
@@ -58,7 +57,7 @@ now(function()
 	vim.opt.maxmempattern = 20000
 	vim.opt.number = true
 	vim.opt.shiftwidth = 2
-	vim.opt.signcolumn = "yes:1"
+	vim.opt.signcolumn = "auto"
 	vim.opt.tabstop = 2
 	vim.opt.undofile = false
 	vim.opt.wildmenu = true
@@ -80,64 +79,64 @@ end)
 now(function()
 	require("mini.ai").setup()
 	require("mini.align").setup()
-	require("mini.animate").setup({ scroll = { enable = false } })
+	-- require("mini.animate").setup({ scroll = { enable = false } })
 	require("mini.base16").setup({
 		-- solarized dark color palette
-		palette = {
-			base00 = "#002B36",
-			base01 = "#073642",
-			base02 = "#586E75",
-			base03 = "#657B83",
-			base04 = "#839496",
-			base05 = "#93A1A1",
-			base06 = "#EEE8D5",
-			base07 = "#FDF6E3",
-			base08 = "#DC322F",
-			base09 = "#CB4B16",
-			base0A = "#B58900",
-			base0B = "#859900",
-			base0C = "#2AA198",
-			base0D = "#268BD2",
-			base0E = "#6C71C4",
-			base0F = "#D33682",
-		},
-		-- one dark color palette
 		-- palette = {
-		--      base00 = "#282C34",
-		--      base01 = "#353B45",
-		--      base02 = "#3E4451",
-		--      base03 = "#545862",
-		--      base04 = "#565C64",
-		--      base05 = "#ABB2BF",
-		--      base06 = "#B6BDCA",
-		--      base07 = "#C8CCD4",
-		--      base08 = "#E06C75",
-		--      base09 = "#D19A66",
-		--      base0A = "#E5C07B",
-		--      base0B = "#98C379",
-		--      base0C = "#56B6C2",
-		--      base0D = "#61AFEF",
-		--      base0E = "#C678DD",
-		--      base0F = "#BE5046",
+		-- 	base00 = "#002B36",
+		-- 	base01 = "#073642",
+		-- 	base02 = "#586E75",
+		-- 	base03 = "#657B83",
+		-- 	base04 = "#839496",
+		-- 	base05 = "#93A1A1",
+		-- 	base06 = "#EEE8D5",
+		-- 	base07 = "#FDF6E3",
+		-- 	base08 = "#DC322F",
+		-- 	base09 = "#CB4B16",
+		-- 	base0A = "#B58900",
+		-- 	base0B = "#859900",
+		-- 	base0C = "#2AA198",
+		-- 	base0D = "#268BD2",
+		-- 	base0E = "#6C71C4",
+		-- 	base0F = "#D33682",
 		-- },
+		-- one dark color palette
+		palette = {
+			base00 = "#282C34",
+			base01 = "#353B45",
+			base02 = "#3E4451",
+			base03 = "#545862",
+			base04 = "#565C64",
+			base05 = "#ABB2BF",
+			base06 = "#B6BDCA",
+			base07 = "#C8CCD4",
+			base08 = "#E06C75",
+			base09 = "#D19A66",
+			base0A = "#E5C07B",
+			base0B = "#98C379",
+			base0C = "#56B6C2",
+			base0D = "#61AFEF",
+			base0E = "#C678DD",
+			base0F = "#BE5046",
+		},
 		-- nord dark color palette
 		-- palette = {
-		--      base00 = "#2E3440",
-		--      base01 = "#3B4252",
-		--      base02 = "#434C5E",
-		--      base03 = "#4C566A",
-		--      base04 = "#D8DEE9",
-		--      base05 = "#E5E9F0",
-		--      base06 = "#ECEFF4",
-		--      base07 = "#8FBCBB",
-		--      base08 = "#88C0D0",
-		--      base09 = "#81A1C1",
-		--      base0A = "#5E81AC",
-		--      base0B = "#BF616A",
-		--      base0C = "#D08770",
-		--      base0D = "#EBCB8B",
-		--      base0E = "#A3BE8C",
-		--      base0F = "#B48EAD",
+		-- 	base00 = "#2E3440",
+		-- 	base01 = "#3B4252",
+		-- 	base02 = "#434C5E",
+		-- 	base03 = "#4C566A",
+		-- 	base04 = "#D8DEE9",
+		-- 	base05 = "#E5E9F0",
+		-- 	base06 = "#ECEFF4",
+		-- 	base07 = "#8FBCBB",
+		-- 	base08 = "#88C0D0",
+		-- 	base09 = "#81A1C1",
+		-- 	base0A = "#5E81AC",
+		-- 	base0B = "#BF616A",
+		-- 	base0C = "#D08770",
+		-- 	base0D = "#EBCB8B",
+		-- 	base0E = "#A3BE8C",
+		-- 	base0F = "#B48EAD",
 		-- },
 		plugins = { default = true },
 	})
@@ -147,7 +146,7 @@ now(function()
 		},
 	})
 	require("mini.bracketed").setup()
-	-- require("mini.bufremove").setup()
+	require("mini.bufremove").setup()
 	require("mini.clue").setup({
 		triggers = {
 			{ mode = "n", keys = "<Leader>" },
@@ -173,6 +172,20 @@ now(function()
 			{ mode = "x", keys = "z" },
 		},
 		clues = {
+			{
+				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
+				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
+				{ mode = "n", keys = "<Leader>c", desc = "+Code outline" },
+				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
+				{ mode = "n", keys = "<Leader>e", desc = "+Explorer" },
+				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
+				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
+				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
+				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
+				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
+			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
 			require("mini.clue").gen_clues.marks(),
@@ -183,16 +196,21 @@ now(function()
 	})
 	-- require("mini.colors").setup()
 	require("mini.comment").setup()
-	require("mini.completion").setup({
-		window = {
-			info = { border = "rounded" },
-			signature = { border = "rounded" },
-		},
-	})
+	-- require("mini.completion").setup({
+	-- 	window = {
+	-- 		info = { border = "single" },
+	-- 		signature = { border = "single" },
+	-- 	},
+	-- })
 	require("mini.cursorword").setup()
 	-- require("mini.doc").setup()
 	require("mini.extra").setup()
-	require("mini.files").setup()
+	require("mini.files").setup({
+		windows = {
+			preview = true,
+			width_preview = 75,
+		},
+	})
 	require("mini.fuzzy").setup()
 	require("mini.hipatterns").setup({
 		highlighters = {
@@ -201,27 +219,56 @@ now(function()
 			todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
 			note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
 			hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
+			-- hl_words = require("mini.extra").gen_highlighter.words({ "TEST: " }, "MiniHipatternsTodo"),
 		},
 	})
-	-- require("mini.hues").setup()
-	require("mini.indentscope").setup()
+	-- math.randomseed(vim.loop.hrtime())
+	-- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
+	-- require("mini.hues").setup({
+	-- 	background = "#11262D",
+	-- 	foreground = "#C0C8CC",
+	-- 	n_hues = 8,
+	-- 	accent = "bg",
+	-- 	saturation = "medium",
+	-- })
+	require("mini.indentscope").setup({
+		symbol = "|",
+		draw = {
+			delay = 0,
+			animation = require("mini.indentscope").gen_animation.none(),
+		},
+	})
 	require("mini.jump").setup()
 	require("mini.jump2d").setup()
 	-- require("mini.map").setup()
 	require("mini.misc").setup()
-	require("mini.move").setup()
+	require("mini.move").setup({
+		mappings = {
+			left = "<C-left>",
+			right = "<C-right>",
+			down = "<C-down>",
+			up = "<C-up>",
+			line_left = "<C-left>",
+			line_right = "<C-right>",
+			line_down = "<C-down>",
+			line_up = "<C-up>",
+		},
+		options = {
+			reindent_linewise = true,
+		},
+	})
 	require("mini.notify").setup({
 		window = {
 			max_width_share = 0.5,
 		},
 	})
 	require("mini.operators").setup()
-	require("mini.pairs").setup({
-		mappings = {
-			["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
-			[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
-		},
-	})
+	-- require("mini.pairs").setup({
+	-- 	mappings = {
+	-- 		["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
+	-- 		[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+	-- 	},
+	-- })
 	require("mini.pick").setup()
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
@@ -297,8 +344,9 @@ now(function()
 	-- require("mini.test").setup()
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
-
+	-- defer setup
 	vim.notify = MiniNotify.make_notify()
+	vim.ui.select = MiniPick.ui_select
 end)
 
 -- Dependencies
@@ -312,6 +360,9 @@ now(function()
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
+			post_install = function()
+				vim.cmd("TSUpdate")
+			end,
 			post_checkout = function()
 				vim.cmd("TSUpdate")
 			end,
@@ -325,10 +376,12 @@ now(function()
 		source = "stevearc/aerial.nvim",
 		depends = { "neovim/nvim-lspconfig", "nvim-tree/nvim-web-devicons", "nvim-treesitter/nvim-treesitter" },
 	})
+	add({ source = "folke/neodev.nvim", depends = { "neovim/nvim-lspconfig" } })
 	add("mfussenegger/nvim-dap")
+	add({ source = "rcarriga/nvim-dap-ui", depends = { "mfussenegger/nvim-dap", "folke/neodev.nvim" } })
 	add({
 		source = "L3MON4D3/LuaSnip",
-		depends = { "rafamadriz/friendly-snippets" },
+		depends = { "rafamadriz/friendly-snippets", "honza/vim-snippets" },
 	})
 	add({
 		source = "mfussenegger/nvim-jdtls",
@@ -336,22 +389,32 @@ now(function()
 	})
 	add({
 		source = "danymat/neogen",
-		depends = { "nvim-treesitter/nvim-treesitter" },
+		depends = { "nvim-treesitter/nvim-treesitter", "L3MON4D3/LuaSnip" },
 	})
 	add({ source = "RRethy/nvim-treesitter-endwise", depends = { "nvim-treesitter/nvim-treesitter" } })
 	add({ source = "jbyuki/one-small-step-for-vimkind", depends = { "mfussenegger/nvim-dap" } })
 	add({
 		source = "microsoft/vscode-js-debug",
 		hooks = {
+			post_install = function()
+				local path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug"
+				vim.fn.system({
+					"bash",
+					"-c",
+					"cd "
+						.. path
+						.. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
+				})
+			end,
 			post_checkout = function()
-				-- local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/vscode-js-debug"
-				-- vim.fn.system({
-				-- "bash",
-				-- "-c",
-				-- "cd "
-				--	.. path
-				--	.. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
-				--})
+				local path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug"
+				vim.fn.system({
+					"bash",
+					"-c",
+					"cd "
+						.. path
+						.. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
+				})
 			end,
 		},
 	})
@@ -359,6 +422,32 @@ now(function()
 	add({
 		source = "mfussenegger/nvim-dap-python",
 		depends = { "mfussenegger/nvim-dap", "nvim-treesitter/nvim-treesitter" },
+		hooks = {
+			post_install = function()
+				local path = vim.fn.stdpath("data")
+				vim.fn.system({
+					"bash",
+					"-c",
+					"cd "
+						.. path
+						.. " && rm -rf debugpy && python -m venv debugpy && "
+						.. path
+						.. "/debugpy/bin/python -m pip install debugpy",
+				})
+			end,
+			post_checkout = function()
+				local path = vim.fn.stdpath("data")
+				vim.fn.system({
+					"bash",
+					"-c",
+					"cd "
+						.. path
+						.. " && rm -rf debugpy && python -m venv debugpy && "
+						.. path
+						.. "/debugpy/bin/python -m pip install debugpy",
+				})
+			end,
+		},
 	})
 	add({ source = "mxsdev/nvim-dap-vscode-js", depends = { "microsoft/vscode-js-debug", "mfussenegger/nvim-dap" } })
 	add("stevearc/conform.nvim")
@@ -415,11 +504,46 @@ now(function()
 		source = "folke/trouble.nvim",
 		depends = { "nvim-tree/nvim-web-devicons" },
 	})
-	add("stevearc/qf_helper.nvim")
+	add({ source = "hrsh7th/nvim-cmp", depends = { "L3MON4D3/LuaSnip" } })
+	add({
+		source = "hrsh7th/cmp-path",
+		depends = { "hrsh7th/nvim-cmp" },
+	})
+	add({
+		source = "hrsh7th/cmp-buffer",
+		depends = { "hrsh7th/nvim-cmp" },
+	})
+	add({
+		source = "hrsh7th/cmp-cmdline",
+		depends = { "hrsh7th/nvim-cmp" },
+	})
+	add({
+		source = "hrsh7th/cmp-nvim-lsp",
+		depends = { "hrsh7th/nvim-cmp", "neovim/nvim-lspconfig" },
+	})
+	add({
+		source = "saadparwaiz1/cmp_luasnip",
+		depends = { "hrsh7th/nvim-cmp", "L3MON4D3/LuaSnip" },
+	})
+	add({
+		source = "petertriho/cmp-git",
+		depends = { "hrsh7th/nvim-cmp", "nvim-lua/plenary.nvim" },
+	})
+	add({
+		source = "windwp/nvim-autopairs",
+		depends = { "hrsh7th/nvim-cmp" },
+	})
+	add({
+		source = "windwp/nvim-ts-autotag",
+		depends = { "nvim-treesitter/nvim-treesitter" },
+	})
 end)
 
 -- Utility libraries
 now(function()
+	local cmp = require("cmp")
+	local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+	-- defer setup
 	require("nvim-web-devicons").setup()
 	require("ibl").setup({
 		scope = {
@@ -430,11 +554,61 @@ now(function()
 	require("statuscol").setup({
 		relculright = true,
 		segments = {
-			{ text = { require("statuscol.builtin").foldfunc }, click = "v:lua.ScFa" },
-			{ text = { "%s" }, click = "v:lua.ScSa" },
-			{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
+			{ text = { " ", "%s" }, click = "v:lua.ScSa" },
+			{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
+			{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
 		},
 	})
+	require("trouble").setup()
+	require("nvim-autopairs").setup()
+	cmp.setup({
+		snippet = {
+			expand = function(args)
+				require("luasnip").lsp_expand(args.body)
+			end,
+		},
+		window = {
+			completion = cmp.config.window.bordered(),
+			documentation = cmp.config.window.bordered(),
+		},
+		mapping = cmp.mapping.preset.insert({
+			["<C-b>"] = cmp.mapping.scroll_docs(-4),
+			["<C-f>"] = cmp.mapping.scroll_docs(4),
+			["<C-Space>"] = cmp.mapping.complete(),
+			["<C-e>"] = cmp.mapping.abort(),
+			["<CR>"] = cmp.mapping.confirm({ select = true }),
+		}),
+		sources = cmp.config.sources({
+			{ name = "nvim_lsp" },
+			{ name = "luasnip" },
+		}, {
+			{ name = "buffer" },
+		}),
+	})
+	cmp.setup.filetype("gitcommit", {
+		sources = cmp.config.sources({
+			{ name = "git" },
+		}, {
+			{ name = "buffer" },
+		}),
+	})
+	cmp.setup.cmdline({ "/", "?" }, {
+		mapping = cmp.mapping.preset.cmdline(),
+		sources = {
+			{ name = "buffer" },
+		},
+	})
+	cmp.setup.cmdline(":", {
+		mapping = cmp.mapping.preset.cmdline(),
+		sources = cmp.config.sources({
+			{ name = "path" },
+		}, {
+			{ name = "cmdline" },
+		}),
+	})
+	cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+	require("luasnip.loaders.from_vscode").lazy_load()
+	require("luasnip.loaders.from_snipmate").lazy_load()
 end)
 
 -- Treesitter setup
@@ -522,64 +696,35 @@ now(function()
 		endwise = {
 			enable = true,
 		},
+		autotag = {
+			enable = true,
+		},
 	})
 end)
 
 -- Lsp setup
 now(function()
-	require("luasnip.loaders.from_vscode").lazy_load()
-
-	-- local luasnip = require("luasnip")
-	-- Luasnip_go_right = function()
-	--      if luasnip.expand_or_jumpable() then
-	--              luasnip.expand_or_jump()
-	--      end
-	-- end
-	--
-	-- Luasnip_go_left = function()
-	--      if luasnip.jumpable() then
-	--              luasnip.jump(-1)
-	--      end
-	-- end
-	--
-	-- vim.api.nvim_set_keymap("i", "<C-l>r", [[<Cmd>lua Luasnip_go_right()<CR>]], {})
-	-- vim.api.nvim_set_keymap("s", "<C-l>r", [[<Cmd>lua Luasnip_go_right()<CR>]], {})
-	--
-	-- vim.api.nvim_set_keymap("i", "<C-h>l", [[<Cmd>lua Luasnip_go_left()<CR>]], {})
-	-- vim.api.nvim_set_keymap("s", "<C-h>l", [[<Cmd>lua Luasnip_go_left()<CR>]], {})
-
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	local capabilities = require("cmp_nvim_lsp").default_capabilities()
 	capabilities.textDocument.foldingRange = {
 		dynamicRegistration = false,
 		lineFoldingOnly = true,
 	}
+	capabilities.textDocument.completion.completionItem.snippetSupport = true
 	local lspconfig = require("lspconfig")
+	require("neodev").setup()
 	require("lspconfig").lua_ls.setup({
-		on_init = function(client)
-			local path = client.workspace_folders[1].name
-			if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
-				return
-			end
-			client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-				runtime = {
-					version = "LuaJIT",
-				},
-				workspace = {
-					checkThirdParty = false,
-					-- library = {
-					-- 	vim.env.VIMRUNTIME,
-					-- 	"${3rd}/luv/library",
-					-- 	"${3rd}/busted/library",
-					-- },
-					library = vim.api.nvim_get_runtime_file("", true),
-				},
-			})
-		end,
 		settings = {
-			Lua = {},
+			Lua = {
+				completion = {
+					callSnippet = "Replace",
+				},
+			},
 		},
 	})
 	lspconfig.html.setup({
+		capabilities = capabilities,
+	})
+	lspconfig.eslint.setup({
 		capabilities = capabilities,
 	})
 	lspconfig.cssls.setup({
@@ -654,7 +799,9 @@ now(function()
 				jumpBot = "]",
 			},
 		},
-		close_fold_kinds = { "imports", "comment" },
+		close_fold_kinds_for_ft = {
+			default = { "imports", "comment" },
+		},
 		provider_selector = function(bufnr, filetype, buftype)
 			return ftMap[filetype] or customizeSelector
 		end,
@@ -670,7 +817,198 @@ now(function()
 end)
 
 -- Dap setup
-now(function() end)
+now(function()
+	require("dapui").setup()
+	local dap, dapui = require("dap"), require("dapui")
+	dap.listeners.before.attach.dapui_config = function()
+		dapui.open()
+	end
+	dap.listeners.before.launch.dapui_config = function()
+		dapui.open()
+	end
+	dap.listeners.before.event_terminated.dapui_config = function()
+		dapui.close()
+	end
+	dap.listeners.before.event_exited.dapui_config = function()
+		dapui.close()
+	end
+	require("dap-go").setup()
+	require("dap-python").setup(vim.fn.stdpath("data") .. "/debugpy/bin/python")
+	require("dap-vscode-js").setup({
+		debugger_path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug",
+		adapters = { "pwa-node" },
+	})
+	for _, language in ipairs({ "typescript", "javascript" }) do
+		require("dap").configurations[language] = {
+			{
+				type = "pwa-node",
+				request = "launch",
+				name = "Launch file",
+				program = "${file}",
+				cwd = "${workspaceFolder}",
+			},
+			{
+				type = "pwa-node",
+				request = "attach",
+				name = "Attach",
+				processId = require("dap.utils").pick_process,
+				cwd = "${workspaceFolder}",
+			},
+		}
+	end
+	dap.configurations.java = {
+		{
+			type = "java",
+			request = "attach",
+			name = "Debug (Attach) - Remote",
+			hostName = "127.0.0.1",
+			port = 5005,
+		},
+	}
+	dap.configurations.lua = {
+		{
+			type = "nlua",
+			request = "attach",
+			name = "Attach to running Neovim instance",
+		},
+	}
+	dap.adapters.nlua = function(callback, config)
+		callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
+	end
+	-- dap.adapters.nlua = function(callback, config)
+	--	local adapter = {
+	--		type = "server",
+	--		host = config.host or "127.0.0.1",
+	--		port = config.port or 8086,
+	--	}
+	--	if config.start_neovim then
+	--		local dap_run = dap.run
+	--		dap.run = function(c)
+	--			adapter.port = c.port
+	--			adapter.host = c.host
+	--		end
+	--		require("osv").run_this()
+	--		dap.run = dap_run
+	--	end
+	--	callback(adapter)
+	-- end
+	-- dap.configurations.lua = {
+	--	{
+	--		type = "nlua",
+	--		request = "attach",
+	--		name = "Run this file",
+	--		start_neovim = {},
+	--	},
+	--	{
+	--		type = "nlua",
+	--		request = "attach",
+	--		name = "Attach to running Neovim instance (port = 8086)",
+	--		port = 8086,
+	--	},
+	-- }
+	local function lldb_command()
+		if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
+			return "/usr/bin/lldb-vscode-14"
+		end
+		return "/usr/bin/lldb-vscode"
+	end
+	dap.adapters.lldb = {
+		type = "executable",
+		command = lldb_command(),
+		name = "lldb",
+	}
+	-- dap.configurations.c = {
+	--	{
+	--		name = "Run executable (GDB)",
+	--		type = "gdb",
+	--		request = "launch",
+	--		program = function()
+	--			local path = vim.fn.input({
+	--				prompt = "Path to executable: ",
+	--				default = vim.fn.getcwd() .. "/",
+	--				completion = "file",
+	--			})
+	--			return (path and path ~= "") and path or dap.ABORT
+	--		end,
+	--	},
+	--	{
+	--		name = "Run executable with arguments (GDB)",
+	--		type = "gdb",
+	--		request = "launch",
+	--		program = function()
+	--			local path = vim.fn.input({
+	--				prompt = "Path to executable: ",
+	--				default = vim.fn.getcwd() .. "/",
+	--				completion = "file",
+	--			})
+	--			return (path and path ~= "") and path or dap.ABORT
+	--		end,
+	--		args = function()
+	--			local args_str = vim.fn.input({
+	--				prompt = "Arguments: ",
+	--			})
+	--			return vim.split(args_str, " +")
+	--		end,
+	--	},
+	--	{
+	--		name = "Attach to process (GDB)",
+	--		type = "gdb",
+	--		request = "attach",
+	--		processId = require("dap.utils").pick_process,
+	--	},
+	-- }
+	dap.configurations.rust = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+			initCommands = function()
+				local rustc_sysroot = vim.fn.trim(vim.fn.system("rustc --print sysroot"))
+				local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
+				local commands_file = rustc_sysroot .. "/lib/rustlib/etc/lldb_commands"
+				local commands = {}
+				local file = io.open(commands_file, "r")
+				if file then
+					for line in file:lines() do
+						table.insert(commands, line)
+					end
+					file:close()
+				end
+				table.insert(commands, 1, script_import)
+				return commands
+			end,
+		},
+	}
+	dap.configurations.cpp = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+		},
+	}
+	dap.configurations.c = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+		},
+	}
+end)
 
 -- Formatting and linting setup
 now(function()
@@ -713,7 +1051,22 @@ now(function()
 end)
 
 -- Testing setup
-now(function() end)
+now(function()
+	require("neotest").setup({
+		adapters = {
+			require("neotest-python"),
+			require("neotest-playwright"),
+			require("neotest-go"),
+			require("neotest-jest"),
+			require("neotest-vitest"),
+			require("neotest-rust"),
+			require("neotest-deno"),
+			require("neotest-zig"),
+			require("neotest-gtest"),
+			require("neotest-bash"),
+		},
+	})
+end)
 
 -- Git setup
 now(function() end)
@@ -752,21 +1105,7 @@ now(function() end)
 now(function()
 	local te_buf = nil
 	local te_win_id = nil
-
-	local keys = {
-		["cr"] = vim.api.nvim_replace_termcodes("<CR>", true, true, true),
-		["ctrl-y"] = vim.api.nvim_replace_termcodes("<C-y>", true, true, true),
-		["ctrl-y_cr"] = vim.api.nvim_replace_termcodes("<C-y><CR>", true, true, true),
-	}
-	_G.cr_action = function()
-		if vim.fn.pumvisible() ~= 0 then
-			local item_selected = vim.fn.complete_info()["selected"] ~= -1
-			return item_selected and keys["ctrl-y"] or keys["ctrl-y_cr"]
-		else
-			-- return keys["cr"]
-			return require("mini.pairs").cr()
-		end
-	end
+	-- defer setup
 	local function tmap(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
@@ -787,10 +1126,15 @@ now(function()
 		opts.desc = desc
 		vim.keymap.set("i", suffix, rhs, opts)
 	end
-	local function nvmap(suffix, rhs, desc, opts)
+	local function smap(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
-		vim.keymap.set({ "n", "v" }, suffix, rhs, opts)
+		vim.keymap.set("s", suffix, rhs, opts)
+	end
+	local function xmap(suffix, rhs, desc, opts)
+		opts = opts or {}
+		opts.desc = desc
+		vim.keymap.set("x", suffix, rhs, opts)
 	end
 	local function openTerminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
@@ -816,38 +1160,65 @@ now(function()
 			openTerminal()
 		end
 	end
-
-	imap("<CR>", "v:lua._G.cr_action()", "Mini.pairs cr mapping", { expr = true })
+	local function toggleTabs()
+		vim.opt.expandtab = false
+		vim.cmd("retab!")
+	end
+	local function toggleSpaces()
+		vim.opt.expandtab = true
+		vim.cmd("retab!")
+	end
+	-- keymaps
 	imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Anticlockwise completions", { expr = true })
 	imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Clockwise completions", { expr = true })
+	nmap("<C-Space>", toggleTerminal, "Toggle terminal")
+	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
+	nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	nmap("<leader>am", require("gen").select_model, "Select model")
+	nmap("<leader>ap", ":Gen<cr>", "Prompt Model")
+	nmap("<leader>bD", "<Cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
+	nmap("<leader>bW", "<Cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
+	nmap("<leader>ba", "<Cmd>b#<CR>", "Alternate")
+	nmap("<leader>bd", "<Cmd>lua MiniBufremove.delete()<CR>", "Delete")
+	nmap("<leader>bw", "<Cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	nmap("<leader>cn", "<cmd>AerialNext<cr>", "Code outline next")
+	nmap("<leader>co", "<cmd>AerialNavToggle<cr>", "Code navigation toggle")
 	nmap("<leader>cp", "<cmd>AerialPrev<cr>", "Code outline prev")
 	nmap("<leader>ct", "<cmd>AerialToggle<cr>", "Code outline toggle")
-	nmap("<leader>db", "<cmd>lua require('dap').set_breakpoint()<cr>", "Set breakpoint")
+	nmap("<leader>dC", "<cmd>lua require('dap').clear_breakpoints()<cr>", "Clear breakpoints")
+	nmap("<leader>db", "<cmd>lua require('dap').list_breakpoints()<cr>", "List breakpoints")
 	nmap("<leader>dc", "<cmd>lua require('dap').continue()<cr>", "Continue")
 	nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<cr>", "Frames")
+	nmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
 	nmap("<leader>dl", "<cmd>lua require('dap').run_last()<cr>", "Run Last")
 	nmap("<leader>dlp", "<cmd>lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<cr>", "Set log point")
+	nmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
 	nmap("<leader>dr", "<cmd>lua require('dap').repl.open()<cr>", "Open Repl")
 	nmap("<leader>ds", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets'.scopes)<cr>", "Scopes")
 	nmap("<leader>dsi", "<cmd>lua require('dap').step_into()<cr>", "Step into")
 	nmap("<leader>dso", "<cmd>lua require('dap').step_out()<cr>", "Step out")
 	nmap("<leader>dso", "<cmd>lua require('dap').step_over()<cr>", "Step over")
 	nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle breakpoint")
+	nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
+	nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
+	nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
+	nmap("<leader>et", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
 	nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
 	nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 	nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 	nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
 	nmap("<leader>gg", "<cmd>lua require('neogen').generate()<cr>", "Generate annotations")
 	nmap("<leader>gt", "<cmd>lua require('neogen').generate({ type = 'type' })<cr>", "Generate type annotations")
+	nmap("<leader>lF", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", "Lsp Format")
 	nmap("<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code action")
+	nmap("<leader>ldd", "<cmd>lua require('osv').launch({ port = 8086 })<cr>", "Lua debug launch")
 	nmap("<leader>ldh", "<cmd>lua vim.diagnostic.hide()<cr>", "Hide diagnostics")
 	nmap("<leader>ldn", "<cmd>lua vim.diagnostic.goto_next()<cr>", "Goto next diagnostic")
 	nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
+	nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
 	nmap("<leader>lds", "<cmd>lua vim.diagnostic.show()<cr>", "Show diagnostics")
 	nmap("<leader>ldt", "<cmd>lua vim.diagnostic.open_float()<cr>", "Open diagnostic float")
-	nmap("<leader>lf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", "Format")
+	nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
 	nmap("<leader>lgb", "<C-t>", "Previous tag")
 	nmap("<leader>lgd", "<cmd>lua vim.lsp.buf.definition()<cr>", "Goto definition")
@@ -856,19 +1227,35 @@ now(function()
 	nmap("<leader>lgs", "<cmd>lua vim.lsp.buf.signature_help()<cr>", "Signature help")
 	nmap("<leader>lgtd", "<cmd>lua vim.lsp.buf.type_definition()<cr>", "Goto type definition")
 	nmap("<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", "Hover symbol")
+	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
+	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
+	nmap("<leader>lt", "<cmd>lua require('trouble').toggle('lsp_references')<cr>", "Toggle lsp references")
+	nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
+	nmap("<leader>td", "<cmd>lua require('neotest').run.run({ strategy = 'dap' })<cr>", "Run test with dap")
+	nmap("<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", "Run file tests")
+	nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
+	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
+	nmap("<leader>ts", "<cmd>lua require('neotest').run.stop()<cr>", "Stop test")
+	nmap("<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
+	nmap("<leader>xd", "<cmd>lua require('trouble').toggle('document_diagnostics')<cr>", "Toggle document diagnostics")
+	nmap("<leader>xl", "<cmd>lua require('trouble').toggle('loclist')<cr>", "Toggle loclist")
+	nmap("<leader>xq", "<cmd>lua require('trouble').toggle('quickfix')<cr>", "Toggle quickfix list")
+	nmap("<leader>xw", ":lua require('trouble').toggle('workspace_diagnostics')<cr>", "Toggle workspace diagnostics")
+	nmap("<leader>xx", "<cmd>lua require('trouble').toggle()<cr>", "Toggle trouble")
 	nmap("zM", require("ufo").closeAllFolds, "Close all folds")
 	nmap("zR", require("ufo").openAllFolds, "Open all folds")
 	nmap("zk", require("ufo").peekFoldedLinesUnderCursor, "Preview folded lines")
 	nmap("zm", require("ufo").closeFoldsWith, "Close folds with")
 	nmap("zr", require("ufo").openFoldsExceptKinds, "Open all folds except kinds")
-	nvmap("<F2>", "<cmd>Format<cr>", "Format code")
-	nvmap("<leader>ap", ":Gen<cr>", "Prompt Model")
-	nvmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
-	nvmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
+	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-c>", '"+y', "Copy to clipboard")
 	vmap("<C-c><C-c>", '"+x', "Cut to clipboard")
+	vmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
+	vmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
+	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
+	xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 end)
 
 -- Commands configuration
@@ -888,6 +1275,30 @@ end)
 
 -- Autocommand configuration
 now(function()
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		pattern = "quickfix",
+		callback = function()
+			local ok, trouble = pcall(require, "trouble")
+			if ok then
+				vim.defer_fn(function()
+					vim.cmd("cclose")
+					trouble.open("quickfix")
+				end, 0)
+			end
+		end,
+	})
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		pattern = "loclist",
+		callback = function()
+			local ok, trouble = pcall(require, "trouble")
+			if ok then
+				vim.defer_fn(function()
+					vim.cmd("lclose")
+					trouble.open("loclist")
+				end, 0)
+			end
+		end,
+	})
 	vim.api.nvim_create_autocmd("BufReadPost", {
 		callback = function()
 			vim.cmd("norm zx")
@@ -980,12 +1391,9 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
 		desc = "LSP actions",
-		callback = function(event)
-			-- local opts = { buffer = event.buf }
-			-- local bufnr = event.buf
-			-- local client = vim.lsp.get_client_by_id(event.data.client_id)
+		callback = function()
 			vim.diagnostic.config({
-				virtual_text = true,
+				virtual_text = false,
 			})
 			if vim.bo.filetype == "java" then
 				require("jdtls.dap").setup_dap_main_class_configs()
