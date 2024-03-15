@@ -502,6 +502,7 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
 require("nvim-tree").setup()
+require("spectre").setup()
 vim.cmd([[
   let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
   let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
