@@ -106,7 +106,8 @@ cargo install stylua --features luau
 
 cargo install git-delta ripgrep fd-find bob-nvim bat
 
-bob use latest
+# bob use latest
+bob use nightly
 
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --all
