@@ -35,7 +35,6 @@ bootstrap_paq({
 	"nvim-tree/nvim-web-devicons",
 	"nvim-pack/nvim-spectre",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-	"folke/neodev.nvim",
 	"neovim/nvim-lspconfig",
 	"lukas-reineke/indent-blankline.nvim",
 	"windwp/nvim-autopairs",
@@ -115,6 +114,15 @@ bootstrap_paq({
 })
 
 -- Default settings
+vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
@@ -150,15 +158,6 @@ vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
-vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
-vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
-vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
-vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
 
 -- Mini plugins initialisation
 require("mini.ai").setup()
@@ -233,27 +232,27 @@ require("mini.bracketed").setup()
 require("mini.bufremove").setup()
 require("mini.clue").setup({
 	triggers = {
+		{ mode = "c", keys = "<C-r>" },
+		{ mode = "i", keys = "<C-r>" },
+		{ mode = "i", keys = "<C-x>" },
+		{ mode = "n", keys = "'" },
+		{ mode = "n", keys = "<C-w>" },
 		{ mode = "n", keys = "<Leader>" },
-		{ mode = "x", keys = "<Leader>" },
-		{ mode = "n", keys = [[\]] },
 		{ mode = "n", keys = "[" },
 		{ mode = "n", keys = "]" },
+		{ mode = "n", keys = "`" },
+		{ mode = "n", keys = "g" },
+		{ mode = "n", keys = "z" },
+		{ mode = "n", keys = '"' },
+		{ mode = "n", keys = [[\]] },
+		{ mode = "x", keys = "'" },
+		{ mode = "x", keys = "<Leader>" },
 		{ mode = "x", keys = "[" },
 		{ mode = "x", keys = "]" },
-		{ mode = "i", keys = "<C-x>" },
-		{ mode = "n", keys = "g" },
-		{ mode = "x", keys = "g" },
-		{ mode = "n", keys = "'" },
-		{ mode = "n", keys = "`" },
-		{ mode = "x", keys = "'" },
 		{ mode = "x", keys = "`" },
-		{ mode = "n", keys = '"' },
-		{ mode = "x", keys = '"' },
-		{ mode = "i", keys = "<C-r>" },
-		{ mode = "c", keys = "<C-r>" },
-		{ mode = "n", keys = "<C-w>" },
-		{ mode = "n", keys = "z" },
+		{ mode = "x", keys = "g" },
 		{ mode = "x", keys = "z" },
+		{ mode = "x", keys = '"' },
 	},
 	clues = {
 		{
@@ -605,12 +604,18 @@ capabilities.textDocument.foldingRange = {
 }
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 local lspconfig = require("lspconfig")
-require("neodev").setup()
-require("lspconfig").lua_ls.setup({
+lspconfig.lua_ls.setup({
 	settings = {
 		Lua = {
+			runtime = {
+				version = "LuaJIT",
+			},
 			completion = {
 				callSnippet = "Replace",
+			},
+			workspace = {
+				checkThirdParty = false,
+				library = vim.api.nvim_get_runtime_file("", true),
 			},
 		},
 	},
@@ -1130,9 +1135,9 @@ nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval"
 nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
 nmap("<leader>eC", "<cmd>lua require('nvim-tree.api').tree.collapse_all(true)<cr>", "Tree collapse except buffers")
+nmap("<leader>eF", "<cmd>lua require('nvim-tree.api').tree.find_file()<cr>", "Find tree file")
 nmap("<leader>ec", "<cmd>lua require('nvim-tree.api').tree.collapse_all(false)<cr>", "Tree collapse")
 nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
-nmap("<leader>eF", "<cmd>lua require('nvim-tree.api').tree.find_file()<cr>", "Find tree file")
 nmap("<leader>er", "<cmd>lua require('nvim-tree.api').tree.refresh()<cr>", "Tree refresh")
 nmap("<leader>et", "<cmd>lua require('nvim-tree.api').tree.toggle()<cr>", "Toggle tree")
 nmap("<leader>fC", "<cmd>Changes<cr>", "Search changes")
