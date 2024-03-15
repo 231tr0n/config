@@ -363,9 +363,6 @@ now(function()
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
-			post_install = function()
-				vim.cmd("TSUpdate")
-			end,
 			post_checkout = function()
 				vim.cmd("TSUpdate")
 			end,
@@ -399,16 +396,6 @@ now(function()
 	add({
 		source = "microsoft/vscode-js-debug",
 		hooks = {
-			post_install = function()
-				local path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug"
-				vim.fn.system({
-					"bash",
-					"-c",
-					"cd "
-						.. path
-						.. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
-				})
-			end,
 			post_checkout = function()
 				local path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug"
 				vim.fn.system({
@@ -426,18 +413,6 @@ now(function()
 		source = "mfussenegger/nvim-dap-python",
 		depends = { "mfussenegger/nvim-dap", "nvim-treesitter/nvim-treesitter" },
 		hooks = {
-			post_install = function()
-				local path = vim.fn.stdpath("data")
-				vim.fn.system({
-					"bash",
-					"-c",
-					"cd "
-						.. path
-						.. " && rm -rf debugpy && python -m venv debugpy && "
-						.. path
-						.. "/debugpy/bin/python -m pip install debugpy",
-				})
-			end,
 			post_checkout = function()
 				local path = vim.fn.stdpath("data")
 				vim.fn.system({
@@ -547,9 +522,6 @@ now(function()
 		source = "junegunn/fzf.vim",
 		depends = { "junegunn/fzf" },
 		hooks = {
-			post_install = function()
-				vim.fn["fzf#install"]()
-			end,
 			post_checkout = function()
 				vim.fn["fzf#install"]()
 			end,
