@@ -712,7 +712,7 @@ require("ufo").setup({
 	end,
 })
 require("aerial").setup({
-	backends = { "lsp", "treesitter", "markdown", "man" },
+	backends = { "lsp", "treesitter" },
 	show_guides = true,
 	layout = {
 		filter_kind = false,
