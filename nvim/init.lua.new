@@ -84,22 +84,22 @@ now(function()
 	require("mini.base16").setup({
 		-- solarized dark color palette
 		-- palette = {
-		-- 	base00 = "#002B36",
-		-- 	base01 = "#073642",
-		-- 	base02 = "#586E75",
-		-- 	base03 = "#657B83",
-		-- 	base04 = "#839496",
-		-- 	base05 = "#93A1A1",
-		-- 	base06 = "#EEE8D5",
-		-- 	base07 = "#FDF6E3",
-		-- 	base08 = "#DC322F",
-		-- 	base09 = "#CB4B16",
-		-- 	base0A = "#B58900",
-		-- 	base0B = "#859900",
-		-- 	base0C = "#2AA198",
-		-- 	base0D = "#268BD2",
-		-- 	base0E = "#6C71C4",
-		-- 	base0F = "#D33682",
+		--  base00 = "#002B36",
+		--  base01 = "#073642",
+		--  base02 = "#586E75",
+		--  base03 = "#657B83",
+		--  base04 = "#839496",
+		--  base05 = "#93A1A1",
+		--  base06 = "#EEE8D5",
+		--  base07 = "#FDF6E3",
+		--  base08 = "#DC322F",
+		--  base09 = "#CB4B16",
+		--  base0A = "#B58900",
+		--  base0B = "#859900",
+		--  base0C = "#2AA198",
+		--  base0D = "#268BD2",
+		--  base0E = "#6C71C4",
+		--  base0F = "#D33682",
 		-- },
 		-- one dark color palette
 		palette = {
@@ -122,22 +122,22 @@ now(function()
 		},
 		-- nord dark color palette
 		-- palette = {
-		-- 	base00 = "#2E3440",
-		-- 	base01 = "#3B4252",
-		-- 	base02 = "#434C5E",
-		-- 	base03 = "#4C566A",
-		-- 	base04 = "#D8DEE9",
-		-- 	base05 = "#E5E9F0",
-		-- 	base06 = "#ECEFF4",
-		-- 	base07 = "#8FBCBB",
-		-- 	base08 = "#88C0D0",
-		-- 	base09 = "#81A1C1",
-		-- 	base0A = "#5E81AC",
-		-- 	base0B = "#BF616A",
-		-- 	base0C = "#D08770",
-		-- 	base0D = "#EBCB8B",
-		-- 	base0E = "#A3BE8C",
-		-- 	base0F = "#B48EAD",
+		--  base00 = "#2E3440",
+		--  base01 = "#3B4252",
+		--  base02 = "#434C5E",
+		--  base03 = "#4C566A",
+		--  base04 = "#D8DEE9",
+		--  base05 = "#E5E9F0",
+		--  base06 = "#ECEFF4",
+		--  base07 = "#8FBCBB",
+		--  base08 = "#88C0D0",
+		--  base09 = "#81A1C1",
+		--  base0A = "#5E81AC",
+		--  base0B = "#BF616A",
+		--  base0C = "#D08770",
+		--  base0D = "#EBCB8B",
+		--  base0E = "#A3BE8C",
+		--  base0F = "#B48EAD",
 		-- },
 		plugins = { default = true },
 	})
@@ -200,10 +200,10 @@ now(function()
 	-- require("mini.colors").setup()
 	require("mini.comment").setup()
 	-- require("mini.completion").setup({
-	-- 	window = {
-	-- 		info = { border = "single" },
-	-- 		signature = { border = "single" },
-	-- 	},
+	--  window = {
+	--    info = { border = "single" },
+	--    signature = { border = "single" },
+	--  },
 	-- })
 	require("mini.cursorword").setup()
 	-- require("mini.doc").setup()
@@ -228,11 +228,11 @@ now(function()
 	-- math.randomseed(vim.loop.hrtime())
 	-- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
 	-- require("mini.hues").setup({
-	-- 	background = "#11262D",
-	-- 	foreground = "#C0C8CC",
-	-- 	n_hues = 8,
-	-- 	accent = "bg",
-	-- 	saturation = "medium",
+	--  background = "#11262D",
+	--  foreground = "#C0C8CC",
+	--  n_hues = 8,
+	--  accent = "bg",
+	--  saturation = "medium",
 	-- })
 	require("mini.indentscope").setup({
 		symbol = "|",
@@ -267,10 +267,10 @@ now(function()
 	})
 	require("mini.operators").setup()
 	-- require("mini.pairs").setup({
-	-- 	mappings = {
-	-- 		["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
-	-- 		[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
-	-- 	},
+	--  mappings = {
+	--    ["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
+	--    [">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+	--  },
 	-- })
 	require("mini.pick").setup()
 	require("mini.sessions").setup()
@@ -607,13 +607,6 @@ now(function()
 			{ name = "buffer" },
 		}),
 	})
-	cmp.setup.filetype("gitcommit", {
-		sources = cmp.config.sources({
-			{ name = "git" },
-		}, {
-			{ name = "buffer" },
-		}),
-	})
 	cmp.setup.cmdline({ "/", "?" }, {
 		mapping = cmp.mapping.preset.cmdline(),
 		sources = {
@@ -906,35 +899,35 @@ now(function()
 		callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 	end
 	-- dap.adapters.nlua = function(callback, config)
-	--	local adapter = {
-	--		type = "server",
-	--		host = config.host or "127.0.0.1",
-	--		port = config.port or 8086,
-	--	}
-	--	if config.start_neovim then
-	--		local dap_run = dap.run
-	--		dap.run = function(c)
-	--			adapter.port = c.port
-	--			adapter.host = c.host
-	--		end
-	--		require("osv").run_this()
-	--		dap.run = dap_run
-	--	end
-	--	callback(adapter)
+	--  local adapter = {
+	--    type = "server",
+	--    host = config.host or "127.0.0.1",
+	--    port = config.port or 8086,
+	--  }
+	--  if config.start_neovim then
+	--    local dap_run = dap.run
+	--    dap.run = function(c)
+	--      adapter.port = c.port
+	--      adapter.host = c.host
+	--    end
+	--    require("osv").run_this()
+	--    dap.run = dap_run
+	--  end
+	--  callback(adapter)
 	-- end
 	-- dap.configurations.lua = {
-	--	{
-	--		type = "nlua",
-	--		request = "attach",
-	--		name = "Run this file",
-	--		start_neovim = {},
-	--	},
-	--	{
-	--		type = "nlua",
-	--		request = "attach",
-	--		name = "Attach to running Neovim instance (port = 8086)",
-	--		port = 8086,
-	--	},
+	--  {
+	--    type = "nlua",
+	--    request = "attach",
+	--    name = "Run this file",
+	--    start_neovim = {},
+	--  },
+	--  {
+	--    type = "nlua",
+	--    request = "attach",
+	--    name = "Attach to running Neovim instance (port = 8086)",
+	--    port = 8086,
+	--  },
 	-- }
 	local function lldb_command()
 		if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
@@ -948,44 +941,44 @@ now(function()
 		name = "lldb",
 	}
 	-- dap.configurations.c = {
-	--	{
-	--		name = "Run executable (GDB)",
-	--		type = "gdb",
-	--		request = "launch",
-	--		program = function()
-	--			local path = vim.fn.input({
-	--				prompt = "Path to executable: ",
-	--				default = vim.fn.getcwd() .. "/",
-	--				completion = "file",
-	--			})
-	--			return (path and path ~= "") and path or dap.ABORT
-	--		end,
-	--	},
-	--	{
-	--		name = "Run executable with arguments (GDB)",
-	--		type = "gdb",
-	--		request = "launch",
-	--		program = function()
-	--			local path = vim.fn.input({
-	--				prompt = "Path to executable: ",
-	--				default = vim.fn.getcwd() .. "/",
-	--				completion = "file",
-	--			})
-	--			return (path and path ~= "") and path or dap.ABORT
-	--		end,
-	--		args = function()
-	--			local args_str = vim.fn.input({
-	--				prompt = "Arguments: ",
-	--			})
-	--			return vim.split(args_str, " +")
-	--		end,
-	--	},
-	--	{
-	--		name = "Attach to process (GDB)",
-	--		type = "gdb",
-	--		request = "attach",
-	--		processId = require("dap.utils").pick_process,
-	--	},
+	--  {
+	--    name = "Run executable (GDB)",
+	--    type = "gdb",
+	--    request = "launch",
+	--    program = function()
+	--      local path = vim.fn.input({
+	--        prompt = "Path to executable: ",
+	--        default = vim.fn.getcwd() .. "/",
+	--        completion = "file",
+	--      })
+	--      return (path and path ~= "") and path or dap.ABORT
+	--    end,
+	--  },
+	--  {
+	--    name = "Run executable with arguments (GDB)",
+	--    type = "gdb",
+	--    request = "launch",
+	--    program = function()
+	--      local path = vim.fn.input({
+	--        prompt = "Path to executable: ",
+	--        default = vim.fn.getcwd() .. "/",
+	--        completion = "file",
+	--      })
+	--      return (path and path ~= "") and path or dap.ABORT
+	--    end,
+	--    args = function()
+	--      local args_str = vim.fn.input({
+	--        prompt = "Arguments: ",
+	--      })
+	--      return vim.split(args_str, " +")
+	--    end,
+	--  },
+	--  {
+	--    name = "Attach to process (GDB)",
+	--    type = "gdb",
+	--    request = "attach",
+	--    processId = require("dap.utils").pick_process,
+	--  },
 	-- }
 	dap.configurations.rust = {
 		{
@@ -1099,7 +1092,16 @@ now(function()
 end)
 
 -- Git setup
-now(function() end)
+now(function()
+	local cmp = require("cmp")
+	cmp.setup.filetype("gitcommit", {
+		sources = cmp.config.sources({
+			{ name = "git" },
+		}, {
+			{ name = "buffer" },
+		}),
+	})
+end)
 
 -- Api setup
 now(function()
@@ -1147,7 +1149,7 @@ now(function()
 		show_model = true,
 		no_auto_close = false,
 		-- init = function(options)
-		-- 	pcall(io.popen, "ollama serve > /dev/null 2>&1 &")
+		--  pcall(io.popen, "ollama serve > /dev/null 2>&1 &")
 		-- end,
 		command = function(options)
 			return "curl --silent --no-buffer -X POST http://"
@@ -1161,7 +1163,11 @@ now(function()
 end)
 
 -- Task runner setup
-now(function() end)
+now(function()
+	require("overseer").setup({
+		templates = { "builtin" },
+	})
+end)
 
 -- Keymap configuration
 now(function()
