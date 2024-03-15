@@ -270,7 +270,6 @@ require("mini.clue").setup({
 			{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 			{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 			{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
-			{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
 			{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 		},
 		require("mini.clue").gen_clues.builtin_completion(),
@@ -433,7 +432,7 @@ require("mini.surround").setup()
 require("mini.tabline").setup()
 -- require("mini.test").setup()
 require("mini.trailspace").setup()
-require("mini.visits").setup()
+-- require("mini.visits").setup()
 -- defer setup
 vim.notify = MiniNotify.make_notify()
 vim.ui.select = MiniPick.ui_select
@@ -712,7 +711,7 @@ require("ufo").setup({
 	end,
 })
 require("aerial").setup({
-	backends = { "lsp", "treesitter" },
+	backends = { "treesitter", "lsp" },
 	show_guides = true,
 	layout = {
 		filter_kind = false,
@@ -1114,10 +1113,6 @@ Global.diagnosticVirtualTextToggle = function()
 		})
 	end
 end
-Global.visitPick = function(cwd, desc)
-	local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
-	MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
-end
 -- keymaps
 imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Anticlockwise completions", { expr = true })
 imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Clockwise completions", { expr = true })
@@ -1164,7 +1159,6 @@ nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
 nmap("<leader>fM", "<cmd>Maps<cr>", "Search maps")
 nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
 nmap("<leader>fT", "<cmd>Tags<cr>", "Search tags")
-nmap("<leader>fX", '<cmd>Pick diagnostic scope="all"<cr>', "Workspace diagnostics")
 nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
 nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
 nmap("<leader>fco", "<cmd>Colors<cr>", "Search buffer commits")
@@ -1180,16 +1174,12 @@ nmap("<leader>fh:", "<cmd>History:<cr>", "Search command history")
 nmap("<leader>fht", "<cmd>Helptags<cr>", "Search help tags")
 nmap("<leader>fj", "<cmd>Jumps<cr>", "Search jumps")
 nmap("<leader>fl", "<cmd>BLines<cr>", "Search buffer lines")
-nmap("<leader>flS", '<cmd>Pick lsp scope="workspace_symbol"<cr>', "Workspace symbols")
 nmap("<leader>flo", "<cmd>Locate<cr>", "Search locate output")
-nmap("<leader>flr", '<cmd>Pick lsp scope="references"<cr>', "Lsp references")
-nmap("<leader>fls", '<cmd>Pick lsp scope="document_symbol"<cr>', "Document symbols")
 nmap("<leader>fm", "<cmd>Marks<cr>", "Search marks")
 nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
 nmap("<leader>fs", "<cmd>Rg<cr>", "Search content")
 nmap("<leader>ft", "<cmd>BTags<cr>", "Search buffer tags")
 nmap("<leader>fw", "<cmd>Windows<cr>", "Search windows")
-nmap("<leader>fx", '<cmd>Pick diagnostic scope="current"<cr>', "Buffer diagnostics")
 nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
@@ -1227,12 +1217,6 @@ nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
 nmap("<leader>ts", "<cmd>lua require('neotest').run.stop()<cr>", "Stop test")
 nmap("<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
-nmap("<leader>vA", "<cmd>lua MiniVisits.add_label()<cr>", "Visits add label")
-nmap("<leader>vC", "<cmd>lua Global.visitPick(nil, 'Visits cwd')<cr>", "Visits cwd")
-nmap("<leader>vR", "<cmd>lua MiniVisits.remove_label()<cr>", "Visits remove label")
-nmap("<leader>va", "<cmd>lua MiniVisits.add_label('core')<cr>", "Visits add core")
-nmap("<leader>vc", "<cmd>lua Global.visitPick('', 'Visits all')<cr>", "Visits all")
-nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Visits remove core")
 nmap("<leader>xd", "<cmd>lua require('trouble').toggle('document_diagnostics')<cr>", "Toggle document diagnostics")
 nmap("<leader>xl", "<cmd>lua require('trouble').toggle('loclist')<cr>", "Toggle loclist")
 nmap("<leader>xq", "<cmd>lua require('trouble').toggle('quickfix')<cr>", "Toggle quickfix list")
