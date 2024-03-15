@@ -114,6 +114,7 @@ bootstrap_paq({
 })
 
 -- Default settings
+-- let g:python_recommended_style=0
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
@@ -734,7 +735,7 @@ end
 require("dap-go").setup()
 require("dap-python").setup(vim.fn.stdpath("data") .. "/debugpy/bin/python")
 require("dap-vscode-js").setup({
-	debugger_path = vim.fn.stdpath("data") .. "/site/pack/deps/opt/vscode-js-debug",
+	debugger_path = paq_path() .. "/vscode-js-debug",
 	adapters = { "pwa-node" },
 })
 for _, language in ipairs({ "typescript", "javascript" }) do
@@ -1275,30 +1276,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 	end,
 })
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = "svelte,jsx,html,xml,xsl,javascriptreact",
-	callback = function()
-		vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-	end,
-})
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-	callback = function()
-		require("lint").try_lint()
-	end,
-})
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*",
-	callback = function(args)
-		require("conform").format({ bufnr = args.buf })
-	end,
-})
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*",
-	callback = function()
-		MiniTrailspace.trim()
-		MiniTrailspace.trim_last_lines()
-	end,
-})
-vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "java" },
 	callback = function()
 		local config = {
@@ -1367,5 +1344,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		if vim.bo.filetype == "java" then
 			require("jdtls.dap").setup_dap_main_class_configs()
 		end
+	end,
+})
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "svelte,jsx,html,xml,xsl,javascriptreact",
+	callback = function()
+		vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+	end,
+})
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+	callback = function()
+		require("lint").try_lint()
+	end,
+})
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*",
+	callback = function(args)
+		require("conform").format({ bufnr = args.buf })
+	end,
+})
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*",
+	callback = function()
+		MiniTrailspace.trim()
+		MiniTrailspace.trim_last_lines()
 	end,
 })
