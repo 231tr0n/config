@@ -1,5 +1,6 @@
 -- Globals declared and used
 Global = {}
+Global.virtual_text = false
 
 -- Paq auto download and configure setup
 local function paq_path()
@@ -144,7 +145,7 @@ vim.o.termguicolors = true
 vim.o.textwidth = 0
 vim.o.updatetime = 500
 vim.o.wildmode = "longest:full,full"
-vim.o.wrap = true
+vim.o.wrap = false
 vim.opt.cursorcolumn = false
 vim.opt.cursorline = true
 vim.opt.expandtab = true
@@ -609,6 +610,7 @@ capabilities.textDocument.foldingRange = {
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 local lspconfig = require("lspconfig")
 lspconfig.lua_ls.setup({
+	capabilities = capabilities,
 	settings = {
 		Lua = {
 			runtime = {
@@ -691,7 +693,7 @@ require("ufo").setup({
 	enable_get_fold_virt_text = false,
 	preview = {
 		win_config = {
-			border = { "", "─", "", "", "", "─", "", "" },
+			border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
 			winhighlight = "Normal:Folded",
 			winblend = 0,
 		},
@@ -1099,6 +1101,19 @@ local function toggleSpaces()
 	vim.opt.expandtab = true
 	vim.cmd("retab!")
 end
+Global.diagnosticVirtualTextToggle = function()
+	if Global.virtual_text then
+		Global.virtual_text = false
+		vim.diagnostic.config({
+			virtual_text = false,
+		})
+	else
+		Global.virtual_text = true
+		vim.diagnostic.config({
+			virtual_text = true,
+		})
+	end
+end
 Global.visitPick = function(cwd, desc)
 	local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
 	MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
@@ -1148,7 +1163,7 @@ nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
 nmap("<leader>fM", "<cmd>Maps<cr>", "Search maps")
 nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
 nmap("<leader>fT", "<cmd>Tags<cr>", "Search tags")
-nmap("<leader>fa", "<cmd>call aerial#fzf()<cr>", "Search aerial")
+nmap("<leader>fX", "<cmd>Pick diagnostic scope='all'<cr>", "Workspace diagnostics")
 nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
 nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
 nmap("<leader>fco", "<cmd>Colors<cr>", "Search buffer commits")
@@ -1164,12 +1179,16 @@ nmap("<leader>fh:", "<cmd>History:<cr>", "Search command history")
 nmap("<leader>fht", "<cmd>Helptags<cr>", "Search help tags")
 nmap("<leader>fj", "<cmd>Jumps<cr>", "Search jumps")
 nmap("<leader>fl", "<cmd>BLines<cr>", "Search buffer lines")
+nmap("<leader>flS", "<cmd>Pick lsp scope='workspace_symbol'<cr>", "Workspace symbols")
 nmap("<leader>flo", "<cmd>Locate<cr>", "Search locate output")
+nmap("<leader>flr", "<cmd>Pick lsp scope='references'<cr>", "Lsp references")
+nmap("<leader>fls", "<cmd>Pick lsp scope='document_symbol'<cr>", "Document symbols")
 nmap("<leader>fm", "<cmd>Marks<cr>", "Search marks")
 nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
 nmap("<leader>fs", "<cmd>Rg<cr>", "Search content")
 nmap("<leader>ft", "<cmd>BTags<cr>", "Search buffer tags")
 nmap("<leader>fw", "<cmd>Windows<cr>", "Search windows")
+nmap("<leader>fx", "<cmd>Pick diagnostic scope='current'<cr>", "Buffer diagnostics")
 nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
@@ -1182,8 +1201,8 @@ nmap("<leader>ldh", "<cmd>lua vim.diagnostic.hide()<cr>", "Hide diagnostics")
 nmap("<leader>ldn", "<cmd>lua vim.diagnostic.goto_next()<cr>", "Goto next diagnostic")
 nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
 nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
-nmap("<leader>lds", "<cmd>lua vim.diagnostic.show()<cr>", "Show diagnostics")
-nmap("<leader>ldt", "<cmd>lua vim.diagnostic.open_float()<cr>", "Open diagnostic float")
+nmap("<leader>lds", "<cmd>lua vim.diagnostic.open_float()<cr>", "Show diagnostics")
+nmap("<leader>ldt", "<cmd>lua Global.diagnosticVirtualTextToggle()<cr>", "Virtual text toggle")
 nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
 nmap("<leader>lgb", "<C-t>", "Previous tag")
@@ -1371,3 +1390,22 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		MiniTrailspace.trim_last_lines()
 	end,
 })
+
+-- Custom functionality
+-- Setting border for lsp hover
+local border = {
+	{ "╭", "FloatBorder" },
+	{ "─", "FloatBorder" },
+	{ "╮", "FloatBorder" },
+	{ "│", "FloatBorder" },
+	{ "╯", "FloatBorder" },
+	{ "─", "FloatBorder" },
+	{ "╰", "FloatBorder" },
+	{ "│", "FloatBorder" },
+}
+local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
+function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+	opts = opts or {}
+	opts.border = opts.border or border
+	return original_util_open_floating_preview(contents, syntax, opts, ...)
+end
