@@ -537,6 +537,25 @@ now(function()
 		source = "windwp/nvim-ts-autotag",
 		depends = { "nvim-treesitter/nvim-treesitter" },
 	})
+	add({
+		source = "junegunn/fzf",
+	})
+	add({
+		source = "junegunn/fzf.vim",
+		depends = { "junegunn/fzf" },
+		hooks = {
+			post_install = function()
+				vim.fn["fzf#install"]()
+			end,
+			post_checkout = function()
+				vim.fn["fzf#install"]()
+			end,
+		},
+	})
+	add({
+		source = "nvim-tree/nvim-tree.lua",
+		depends = { "nvim-tree/nvim-web-devicons" },
+	})
 end)
 
 -- Utility libraries
@@ -609,6 +628,14 @@ now(function()
 	cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 	require("luasnip.loaders.from_vscode").lazy_load()
 	require("luasnip.loaders.from_snipmate").lazy_load()
+	require("nvim-tree").setup()
+	vim.cmd([[
+    let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
+    let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
+    command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+    command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+    command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  ]])
 end)
 
 -- Treesitter setup
@@ -1202,8 +1229,39 @@ now(function()
 	nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 	nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 	nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
-	nmap("<leader>et", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
+	nmap("<leader>eC", "<cmd>require('nvim-tree.api').tree.collapse_all(true)<cr>", "Tree collapse")
+	nmap("<leader>ec", "<cmd>require('nvim-tree.api').tree.collapse_all(false)<cr>", "Tree collapse")
+	nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
+	nmap("<leader>ef", "<cmd>require('nvim-tree.api').tree.find_file()<cr>", "Find tree file")
+	nmap("<leader>er", "<cmd>require('nvim-tree.api').tree.refresh()<cr>", "Tree refresh")
+	nmap("<leader>et", "<cmd>require('nvim-tree.api').tree.toggle()<cr>", "Toggle tree")
+	nmap("<leader>fC", "<cmd>Changes<cr>", "Search changes")
+	nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
+	nmap("<leader>fM", "<cmd>Maps<cr>", "Search maps")
+	nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
+	nmap("<leader>fT", "<cmd>Tags<cr>", "Search tags")
+	nmap("<leader>fa", "<cmd>call aerial#fzf()<cr>", "Search aerial")
+	nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
+	nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
+	nmap("<leader>fco", "<cmd>Colors<cr>", "Search buffer commits")
+	nmap("<leader>ff", "<cmd>Files<cr>", "Search files")
+	nmap("<leader>fft", "<cmd>Helptags<cr>", "Search filetypes")
+	nmap("<leader>fg", "<cmd>GFiles<cr>", "Search Git files")
+	nmap("<leader>fgC", "<cmd>BCommits<cr>", "Search buffer commits")
+	nmap("<leader>fgc", "<cmd>Commits<cr>", "Search commits")
+	nmap("<leader>fgd", "<cmd>GFiles?<cr>", "Search Git files with diff")
+	nmap("<leader>fh", "<cmd>History<cr>", "Search history")
+	nmap("<leader>fh/", "<cmd>History/<cr>", "Search search history")
+	nmap("<leader>fh:", "<cmd>History:<cr>", "Search command history")
+	nmap("<leader>fht", "<cmd>Helptags<cr>", "Search help tags")
+	nmap("<leader>fj", "<cmd>Jumps<cr>", "Search jumps")
+	nmap("<leader>fl", "<cmd>BLines<cr>", "Search buffer lines")
+	nmap("<leader>flo", "<cmd>Locate<cr>", "Search locate output")
+	nmap("<leader>fm", "<cmd>Marks<cr>", "Search marks")
 	nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
+	nmap("<leader>fs", "<cmd>Rg<cr>", "Search content")
+	nmap("<leader>ft", "<cmd>BTags<cr>", "Search buffer tags")
+	nmap("<leader>fw", "<cmd>Windows<cr>", "Search windows")
 	nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 	nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 	nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
