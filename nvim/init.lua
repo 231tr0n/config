@@ -19,7 +19,7 @@ local function bootstrap_paq(packages)
 	vim.cmd.packadd("paq-nvim")
 	local paq = require("paq")
 	if first_install then
-		vim.notify("Installing plugins... If prompted, hit Enter to continue.")
+		vim.notify("Installing plugins")
 	end
 	paq(packages)
 	paq.install()
@@ -511,7 +511,9 @@ vim.cmd([[
   command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
   command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
   command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  let g:fzf_vim.tags_command = 'ctags -R'
   let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
+  " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
 ]])
 
 -- Treesitter setup
@@ -1164,7 +1166,7 @@ nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
 nmap("<leader>fT", "<cmd>Tags<cr>", "Search tags")
 nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
 nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
-nmap("<leader>fco", "<cmd>Colors<cr>", "Search buffer commits")
+nmap("<leader>fco", "<cmd>Colors<cr>", "Search colors")
 nmap("<leader>ff", "<cmd>Files<cr>", "Search files")
 nmap("<leader>fft", "<cmd>Filetypes<cr>", "Search filetypes")
 nmap("<leader>fg", "<cmd>GFiles<cr>", "Search Git files")
