@@ -3,6 +3,7 @@ MiniDeps = nil
 MiniStatusline = nil
 MiniNotify = nil
 MiniTrailspace = nil
+Global = {}
 
 -- Autoload mini.nvim
 local path_package = vim.fn.stdpath("data") .. "/site"
@@ -182,8 +183,10 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
@@ -497,7 +500,7 @@ now(function()
 		depends = { "nvim-neotest/neotest", "nvim-treesitter/nvim-treesitter" },
 	})
 	add("tpope/vim-fugitive")
-	add({ source = "rest-nvim/rest.nvim", depends = { "nvim-lua/plenary.nvim" } })
+	add({ source = "rest-nvim/rest.nvim", depends = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" } })
 	add("David-Kunz/gen.nvim")
 	add("stevearc/overseer.nvim")
 	add({
@@ -1099,7 +1102,39 @@ end)
 now(function() end)
 
 -- Api setup
-now(function() end)
+now(function()
+	require("rest-nvim").setup({
+		result_split_horizontal = false,
+		result_split_in_place = false,
+		stay_in_current_window_after_split = false,
+		skip_ssl_verification = false,
+		encode_url = true,
+		highlight = {
+			enabled = true,
+			timeout = 150,
+		},
+		result = {
+			show_url = true,
+			show_curl_command = true,
+			show_http_info = true,
+			show_headers = true,
+			show_statistics = true,
+			formatters = {
+				json = "jq",
+				html = function(body)
+					return vim.fn.system({ "tidy", "-i", "-q", "-" }, body)
+				end,
+			},
+		},
+		jump_to_request = false,
+		env_file = ".env",
+		env_pattern = "\\.env$",
+		env_edit_command = "tabedit",
+		custom_dynamic_variables = {},
+		yank_dry_run = true,
+		search_back = true,
+	})
+end)
 
 -- Ai setup
 now(function()
@@ -1195,6 +1230,10 @@ now(function()
 		vim.opt.expandtab = true
 		vim.cmd("retab!")
 	end
+	Global.visitPick = function(cwd, desc)
+		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
+		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
+	end
 	-- keymaps
 	imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Anticlockwise completions", { expr = true })
 	imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Clockwise completions", { expr = true })
@@ -1289,6 +1328,9 @@ now(function()
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
 	nmap("<leader>lt", "<cmd>lua require('trouble').toggle('lsp_references')<cr>", "Toggle lsp references")
+	nmap("<leader>rl", "<cmd>RestNvimLast<cr>", "Run last request")
+	nmap("<leader>rp", "<cmd>RestNvimPreview<cr>", "Preview command")
+	nmap("<leader>rr", "<cmd>RestNvim<cr>", "Run request")
 	nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
 	nmap("<leader>td", "<cmd>lua require('neotest').run.run({ strategy = 'dap' })<cr>", "Run test with dap")
 	nmap("<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", "Run file tests")
@@ -1296,6 +1338,12 @@ now(function()
 	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
 	nmap("<leader>ts", "<cmd>lua require('neotest').run.stop()<cr>", "Stop test")
 	nmap("<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
+	nmap("<leader>vA", "<cmd>lua MiniVisits.add_label()<cr>", "Visits add label")
+	nmap("<leader>vC", "<cmd>lua Global.visitPick(nil, 'Visits cwd')<cr>", "Visits cwd")
+	nmap("<leader>vR", "<cmd>lua MiniVisits.remove_label()<cr>", "Visits remove label")
+	nmap("<leader>va", "<cmd>lua MiniVisits.add_label('core')<cr>", "Visits add core")
+	nmap("<leader>vc", "<cmd>lua Global.visitPick('', 'Visits all')<cr>", "Visits all")
+	nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Visits remove core")
 	nmap("<leader>xd", "<cmd>lua require('trouble').toggle('document_diagnostics')<cr>", "Toggle document diagnostics")
 	nmap("<leader>xl", "<cmd>lua require('trouble').toggle('loclist')<cr>", "Toggle loclist")
 	nmap("<leader>xq", "<cmd>lua require('trouble').toggle('quickfix')<cr>", "Toggle quickfix list")
