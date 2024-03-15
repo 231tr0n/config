@@ -1118,7 +1118,7 @@ Global.diagnosticVirtualTextToggle = function()
 		})
 	end
 end
--- keymaps
+-- Keymaps
 imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Anticlockwise completions", { expr = true })
 imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Clockwise completions", { expr = true })
 nmap("<C-Space>", toggleTerminal, "Toggle terminal")
