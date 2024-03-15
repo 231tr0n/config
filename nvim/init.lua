@@ -363,6 +363,9 @@ now(function()
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
+			post_install = function()
+				vim.cmd("TSUpdate")
+			end,
 			post_checkout = function()
 				vim.cmd("TSUpdate")
 			end,
