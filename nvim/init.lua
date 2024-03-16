@@ -138,7 +138,7 @@ vim.o.foldenable = true
 vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.ignorecase = true
-vim.o.listchars = "eol:¬,tab:▎ ,trail:~,extends:>,precedes:<"
+vim.o.listchars = "eol:¬,tab:│-,trail:~,extends:>,precedes:<"
 vim.o.mousescroll = "ver:5,hor:5"
 vim.o.showcmd = true
 vim.o.showmatch = true
@@ -324,7 +324,7 @@ require("mini.hipatterns").setup({
 --  saturation = "medium",
 -- })
 require("mini.indentscope").setup({
-	symbol = "▎",
+	symbol = "│",
 	draw = {
 		delay = 0,
 		animation = require("mini.indentscope").gen_animation.none(),
@@ -446,9 +446,12 @@ local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 -- defer setup
 require("nvim-web-devicons").setup()
 require("ibl").setup({
+  indent = {
+    char = "│",
+    tab_char = "│-",
+  }
 	scope = {
-		show_start = false,
-		show_end = false,
+		enabled = false,
 	},
 })
 require("statuscol").setup({
