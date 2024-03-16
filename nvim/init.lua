@@ -446,10 +446,10 @@ local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 -- defer setup
 require("nvim-web-devicons").setup()
 require("ibl").setup({
-  indent = {
-    char = "│",
-    tab_char = "│-",
-  }
+	indent = {
+		char = "│",
+		tab_char = "│",
+	},
 	scope = {
 		enabled = false,
 	},
