@@ -27,10 +27,20 @@ end
 
 -- Paq plugin setup
 bootstrap_paq({
+	-- Vimscript plugins
+	"tpope/vim-fugitive",
+	{
+		"junegunn/fzf",
+		build = ":call fzf#install()",
+	},
+	"junegunn/fzf.vim",
+	"honza/vim-snippets",
+	"mbbill/undotree",
+	"antoinemadec/FixCursorHold.nvim",
+	-- Lua plugins
 	"savq/paq-nvim",
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
-	"antoinemadec/FixCursorHold.nvim",
 	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
 	"nvim-tree/nvim-web-devicons",
@@ -41,15 +51,8 @@ bootstrap_paq({
 	"windwp/nvim-autopairs",
 	"windwp/nvim-ts-autotag",
 	"RRethy/nvim-treesitter-endwise",
-	"tpope/vim-fugitive",
 	"nvim-tree/nvim-tree.lua",
-	{
-		"junegunn/fzf",
-		build = ":call fzf#install()",
-	},
-	"junegunn/fzf.vim",
 	"rafamadriz/friendly-snippets",
-	"honza/vim-snippets",
 	"L3MON4D3/LuaSnip",
 	"hrsh7th/nvim-cmp",
 	"hrsh7th/cmp-path",
@@ -158,7 +161,7 @@ vim.opt.number = true
 vim.opt.shiftwidth = 2
 vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
-vim.opt.undofile = false
+vim.opt.undofile = true
 vim.opt.wildmenu = true
 
 -- Mini plugins initialisation
@@ -333,10 +336,10 @@ require("mini.jump2d").setup()
 require("mini.misc").setup()
 require("mini.move").setup({
 	mappings = {
-		left = "<C-left>",
-		right = "<C-right>",
-		down = "<C-down>",
-		up = "<C-up>",
+		left = "<C-S-left>",
+		right = "<C-S-right>",
+		down = "<C-S-down>",
+		up = "<C-S-up>",
 		line_left = "<C-S-left>",
 		line_right = "<C-S-right>",
 		line_down = "<C-S-down>",
@@ -1131,6 +1134,7 @@ nmap("<leader>bW", "<Cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 nmap("<leader>ba", "<Cmd>b#<CR>", "Alternate")
 nmap("<leader>bd", "<Cmd>lua MiniBufremove.delete()<CR>", "Delete")
 nmap("<leader>bw", "<Cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
+nmap("<leader>bu", "<Cmd>UndotreeToggle<CR>", "Undotree")
 nmap("<leader>cf", "<cmd>call aerial#fzf()<cr>", "Code outline fzf")
 nmap("<leader>cn", "<cmd>AerialNext<cr>", "Code outline next")
 nmap("<leader>co", "<cmd>AerialNavToggle<cr>", "Code navigation toggle")
