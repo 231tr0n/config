@@ -337,10 +337,10 @@ require("mini.move").setup({
 		right = "<C-right>",
 		down = "<C-down>",
 		up = "<C-up>",
-		line_left = "<C-left>",
-		line_right = "<C-right>",
-		line_down = "<C-down>",
-		line_up = "<C-up>",
+		line_left = "<C-S-left>",
+		line_right = "<C-S-right>",
+		line_down = "<C-S-down>",
+		line_up = "<C-S-up>",
 	},
 	options = {
 		reindent_linewise = true,
@@ -1160,6 +1160,7 @@ nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<
 nmap("<leader>er", "<cmd>lua require('nvim-tree.api').tree.refresh()<cr>", "Tree refresh")
 nmap("<leader>et", "<cmd>lua require('nvim-tree.api').tree.toggle()<cr>", "Toggle tree")
 nmap("<leader>fC", "<cmd>Changes<cr>", "Search changes")
+nmap("<leader>fF", "<cmd>Filetypes<cr>", "Search filetypes")
 nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
 nmap("<leader>fM", "<cmd>Maps<cr>", "Search maps")
 nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
@@ -1168,7 +1169,6 @@ nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
 nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
 nmap("<leader>fco", "<cmd>Colors<cr>", "Search colors")
 nmap("<leader>ff", "<cmd>Files<cr>", "Search files")
-nmap("<leader>fft", "<cmd>Filetypes<cr>", "Search filetypes")
 nmap("<leader>fg", "<cmd>GFiles<cr>", "Search Git files")
 nmap("<leader>fgC", "<cmd>BCommits<cr>", "Search buffer commits")
 nmap("<leader>fgc", "<cmd>Commits<cr>", "Search commits")
