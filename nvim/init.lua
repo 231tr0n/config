@@ -51,7 +51,7 @@ bootstrap_paq({
 	"windwp/nvim-autopairs",
 	"windwp/nvim-ts-autotag",
 	"RRethy/nvim-treesitter-endwise",
-	"nvim-tree/nvim-tree.lua",
+	"prichrd/netrw.nvim",
 	"rafamadriz/friendly-snippets",
 	"L3MON4D3/LuaSnip",
 	"hrsh7th/nvim-cmp",
@@ -128,8 +128,6 @@ vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "",
 vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
 vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
 vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
 vim.o.conceallevel = 2
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
@@ -455,8 +453,8 @@ require("ibl").setup({
 	},
 })
 require("statuscol").setup({
-	ft_ignore = { "NvimTree" },
-	bt_ignore = { "NvimTree" },
+	ft_ignore = { "netrw" },
+	bt_ignore = { "netrw" },
 	relculright = true,
 	segments = {
 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
@@ -507,9 +505,10 @@ cmp.setup.cmdline(":", {
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
-require("nvim-tree").setup()
+require("netrw").setup()
 require("spectre").setup()
 vim.cmd([[
+  " Fzf config
   let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
   let g:fzf_vim = {}
   let g:fzf_vim.preview_window = ['up', 'ctrl-/']
@@ -520,6 +519,35 @@ vim.cmd([[
   let g:fzf_vim.tags_command = 'ctags -R'
   let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
   " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
+  " Netrw config
+  set nocompatible
+  filetype plugin on
+  let g:netrw_banner=0
+  let g:netrw_liststyle=3
+  let g:netrw_browse_split=4
+  let g:netrw_altv=1
+  let g:netrw_winsize=40
+  let g:netrw_preview=1
+  au FileType netrw setl signcolumn=no
+  au FileType netrw vertical resize 40
+  function FileBrowserToggle()
+    if !exists("t:NetrwIsOpen")
+      let t:NetrwIsOpen=0
+    endif
+    if t:NetrwIsOpen
+      let i = bufnr("$")
+      while (i >= 1)
+        if (getbufvar(i, "&filetype") == "netrw")
+          silent exe "bwipeout " . i
+        endif
+        let i-=1
+      endwhile
+      let t:NetrwIsOpen=0
+    else
+      let t:NetrwIsOpen=1
+      silent Lexplore
+    endif
+  endfunction
 ]])
 
 -- Treesitter setup
@@ -1160,12 +1188,8 @@ nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle br
 nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
-nmap("<leader>eC", "<cmd>lua require('nvim-tree.api').tree.collapse_all(true)<cr>", "Tree collapse except buffers")
-nmap("<leader>eF", "<cmd>lua require('nvim-tree.api').tree.find_file()<cr>", "Find tree file")
-nmap("<leader>ec", "<cmd>lua require('nvim-tree.api').tree.collapse_all(false)<cr>", "Tree collapse")
 nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
-nmap("<leader>er", "<cmd>lua require('nvim-tree.api').tree.refresh()<cr>", "Tree refresh")
-nmap("<leader>et", "<cmd>lua require('nvim-tree.api').tree.toggle()<cr>", "Toggle tree")
+nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 nmap("<leader>fC", "<cmd>Changes<cr>", "Search changes")
 nmap("<leader>fF", "<cmd>Filetypes<cr>", "Search filetypes")
 nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
@@ -1186,7 +1210,7 @@ nmap("<leader>fh:", "<cmd>History:<cr>", "Search command history")
 nmap("<leader>fht", "<cmd>Helptags<cr>", "Search help tags")
 nmap("<leader>fj", "<cmd>Jumps<cr>", "Search jumps")
 nmap("<leader>fl", "<cmd>BLines<cr>", "Search buffer lines")
-nmap("<leader>flo", "<cmd>Locate<cr>", "Search locate output")
+nmap("<leader>flo", "<cmd>Locate ", "Search locate output")
 nmap("<leader>fm", "<cmd>Marks<cr>", "Search marks")
 nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
 nmap("<leader>fs", "<cmd>Rg<cr>", "Search content")
