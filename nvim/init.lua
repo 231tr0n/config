@@ -1385,6 +1385,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function()
 		vim.diagnostic.config({
 			virtual_text = false,
+			underline = false,
 		})
 		if vim.bo.filetype == "java" then
 			require("jdtls.dap").setup_dap_main_class_configs()
