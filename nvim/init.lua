@@ -138,7 +138,7 @@ vim.o.foldenable = true
 vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.ignorecase = true
-vim.o.listchars = "eol:¬,tab:|-,trail:~,extends:>,precedes:<"
+vim.o.listchars = "eol:¬,tab:| ,trail:~,extends:>,precedes:<"
 vim.o.mousescroll = "ver:5,hor:5"
 vim.o.showcmd = true
 vim.o.showmatch = true
@@ -161,7 +161,7 @@ vim.opt.number = true
 vim.opt.shiftwidth = 2
 vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
-vim.opt.undofile = true
+vim.opt.undofile = false
 vim.opt.wildmenu = true
 
 -- Mini plugins initialisation
