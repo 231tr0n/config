@@ -300,6 +300,10 @@ require("mini.files").setup({
 		preview = true,
 		width_preview = 75,
 	},
+	options = {
+		permanent_delete = true,
+		use_as_default_explorer = false,
+	},
 })
 require("mini.fuzzy").setup()
 require("mini.hipatterns").setup({
