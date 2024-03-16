@@ -348,7 +348,7 @@ require("mini.move").setup({
 		line_up = "<C-S-up>",
 	},
 	options = {
-		reindent_linewise = true,
+		reindent_linewise = false,
 	},
 })
 require("mini.notify").setup({
