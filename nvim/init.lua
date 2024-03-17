@@ -101,7 +101,6 @@ bootstrap_paq({
 	"stevearc/aerial.nvim",
 	"David-Kunz/gen.nvim",
 	"danymat/neogen",
-	"kevinhwang91/nvim-ufo",
 	"nvim-neotest/neotest",
 	"nvim-neotest/neotest-python",
 	"nvim-neotest/neotest-go",
@@ -169,6 +168,55 @@ vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
+vim.cmd([[
+  " Fzf config
+  let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
+  let g:fzf_vim = {}
+  let g:fzf_vim.preview_window = ['up', 'ctrl-/']
+  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
+  command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  let g:fzf_vim.tags_command = 'ctags -R'
+  let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
+  " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
+  " Netrw config
+  set nocompatible
+  filetype plugin on
+  let g:netrw_banner=0
+  let g:netrw_liststyle=3
+  let g:netrw_browse_split=4
+  let g:netrw_altv=1
+  let g:netrw_winsize=40
+  let g:netrw_preview=1
+  au FileType netrw setl signcolumn=no
+  au FileType netrw vertical resize 40
+  function FileBrowserToggle()
+    if !exists("t:NetrwIsOpen")
+      let t:NetrwIsOpen=0
+    endif
+    if t:NetrwIsOpen
+      let i = bufnr("$")
+      while (i >= 1)
+        if (getbufvar(i, "&filetype") == "netrw")
+          silent exe "bwipeout " . i
+        endif
+        let i-=1
+      endwhile
+      let t:NetrwIsOpen=0
+    else
+      let t:NetrwIsOpen=1
+      silent Lexplore
+    endif
+  endfunction
+  " Highlight groups
+  highlight! link WinBar LineNr
+  highlight! link WinBarNC LineNr
+  highlight! link CursorLineSign CursorLine
+  highlight! link CursorLineFold CursorLine
+  highlight! link CursorLineNr CursorLine
+  highlight! link IblScope MiniIndentscopeSymbol
+]])
 
 -- Mini plugins initialisation
 require("mini.ai").setup()
@@ -288,11 +336,11 @@ require("mini.hipatterns").setup({
 -- math.randomseed(vim.loop.hrtime())
 -- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
 -- require("mini.hues").setup({
---  background = "#11262D",
---  foreground = "#C0C8CC",
---  n_hues = 8,
---  accent = "bg",
---  saturation = "high",
+-- 	background = "#11262D",
+-- 	foreground = "#C0C8CC",
+-- 	n_hues = 8,
+-- 	accent = "bg",
+-- 	saturation = "high",
 -- })
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
@@ -307,13 +355,13 @@ require("mini.hipatterns").setup({
 --    winbar = true,
 --  })
 --  :apply()
-require("mini.indentscope").setup({
-	symbol = "│",
-	draw = {
-		delay = 0,
-		animation = require("mini.indentscope").gen_animation.none(),
-	},
-})
+-- require("mini.indentscope").setup({
+-- 	symbol = "│",
+-- 	draw = {
+-- 		delay = 0,
+-- 		animation = require("mini.indentscope").gen_animation.none(),
+-- 	},
+-- })
 require("mini.jump").setup()
 require("mini.jump2d").setup()
 -- require("mini.map").setup()
@@ -429,15 +477,6 @@ local cmp = require("cmp")
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 -- defer setup
 require("nvim-web-devicons").setup()
-require("ibl").setup({
-	indent = {
-		char = "│",
-		tab_char = "│",
-	},
-	scope = {
-		enabled = false,
-	},
-})
 require("statuscol").setup({
 	ft_ignore = { "netrw" },
 	bt_ignore = { "netrw" },
@@ -495,51 +534,17 @@ require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
 require("netrw").setup()
 require("spectre").setup()
-vim.cmd([[
-  " Fzf config
-  let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
-  let g:fzf_vim = {}
-  let g:fzf_vim.preview_window = ['up', 'ctrl-/']
-  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
-  command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  let g:fzf_vim.tags_command = 'ctags -R'
-  let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
-  " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
-  " Netrw config
-  set nocompatible
-  filetype plugin on
-  let g:netrw_banner=0
-  let g:netrw_liststyle=3
-  let g:netrw_browse_split=4
-  let g:netrw_altv=1
-  let g:netrw_winsize=40
-  let g:netrw_preview=1
-  au FileType netrw setl signcolumn=no
-  au FileType netrw vertical resize 40
-  function FileBrowserToggle()
-    if !exists("t:NetrwIsOpen")
-      let t:NetrwIsOpen=0
-    endif
-    if t:NetrwIsOpen
-      let i = bufnr("$")
-      while (i >= 1)
-        if (getbufvar(i, "&filetype") == "netrw")
-          silent exe "bwipeout " . i
-        endif
-        let i-=1
-      endwhile
-      let t:NetrwIsOpen=0
-    else
-      let t:NetrwIsOpen=1
-      silent Lexplore
-    endif
-  endfunction
-  " Highlight groups
-  highlight! link WinBar LineNr
-  highlight! link WinBarNC LineNr
-]])
+require("ibl").setup({
+	indent = {
+		char = "│",
+		tab_char = "│",
+	},
+	scope = {
+		enabled = true,
+		show_start = false,
+		show_end = false,
+	},
+})
 
 -- Treesitter setup
 require("nvim-treesitter.configs").setup({
@@ -629,6 +634,10 @@ require("nvim-treesitter.configs").setup({
 		enable = true,
 	},
 })
+vim.cmd([[
+  set foldmethod=expr
+  set foldexpr=nvim_treesitter#foldexpr()
+]])
 
 -- Lsp setup
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -696,49 +705,6 @@ lspconfig.lemminx.setup({
 })
 lspconfig.angularls.setup({
 	capabilities = capabilities,
-})
-local ftMap = {
-	python = { "indent" },
-}
-local function customizeSelector(bufnr)
-	local function handleFallbackException(err, providerName)
-		if type(err) == "string" and err:match("UfoFallbackException") then
-			return require("ufo").getFolds(bufnr, providerName)
-		else
-			return require("promise").reject(err)
-		end
-	end
-	return require("ufo")
-		.getFolds(bufnr, "lsp")
-		:catch(function(err)
-			return handleFallbackException(err, "treesitter")
-		end)
-		:catch(function(err)
-			return handleFallbackException(err, "indent")
-		end)
-end
-require("ufo").setup({
-	open_fold_hl_timeout = 150,
-	enable_get_fold_virt_text = false,
-	preview = {
-		win_config = {
-			border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
-			winhighlight = "Normal:Folded",
-			winblend = 0,
-		},
-		mappings = {
-			scrollU = "<C-u>",
-			scrollD = "<C-d>",
-			jumpTop = "[",
-			jumpBot = "]",
-		},
-	},
-	close_fold_kinds_for_ft = {
-		default = { "imports", "comment" },
-	},
-	provider_selector = function(bufnr, filetype, buftype)
-		return ftMap[filetype] or customizeSelector
-	end,
 })
 require("aerial").setup({
 	backends = { "treesitter", "lsp" },
@@ -1258,11 +1224,6 @@ nmap("<leader>xq", "<cmd>lua require('trouble').toggle('quickfix')<cr>", "Toggle
 nmap("<leader>xt", "<cmd>lua require('trouble').toggle()<cr>", "Toggle trouble")
 nmap("<leader>xw", ":lua require('trouble').toggle('workspace_diagnostics')<cr>", "Toggle workspace diagnostics")
 nmap("<leader>xx", "<cmd>lua require('trouble').toggle('document_diagnostics')<cr>", "Toggle document diagnostics")
-nmap("zM", require("ufo").closeAllFolds, "Close all folds")
-nmap("zR", require("ufo").openAllFolds, "Open all folds")
-nmap("zk", require("ufo").peekFoldedLinesUnderCursor, "Preview folded lines")
-nmap("zm", require("ufo").closeFoldsWith, "Close folds with")
-nmap("zr", require("ufo").openFoldsExceptKinds, "Open all folds except kinds")
 smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 vmap("<C-c>", '"+y', "Copy to clipboard")
