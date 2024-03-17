@@ -42,7 +42,7 @@ bootstrap_paq({
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
 	"kevinhwang91/promise-async",
-	-- "luukvbaal/statuscol.nvim",
+	"luukvbaal/statuscol.nvim",
 	"nvim-tree/nvim-web-devicons",
 	"nvim-pack/nvim-spectre",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
@@ -129,8 +129,8 @@ bootstrap_paq({
 -- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 -- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
-vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
-vim.fn.sign_define("DapStopped", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
+vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
 vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "" })
@@ -165,7 +165,7 @@ vim.opt.maxmempattern = 20000
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.shiftwidth = 2
-vim.opt.signcolumn = "no"
+vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
@@ -438,18 +438,18 @@ require("ibl").setup({
 		enabled = false,
 	},
 })
--- require("statuscol").setup({
--- 	ft_ignore = { "netrw" },
--- 	bt_ignore = { "netrw" },
--- 	relculright = false,
--- 	segments = {
--- 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
--- 		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
--- 		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
--- 		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
--- 		-- { text = { " " }, hl = "Comment" },
--- 	},
--- })
+require("statuscol").setup({
+	ft_ignore = { "netrw" },
+	bt_ignore = { "netrw" },
+	relculright = false,
+	segments = {
+		-- { text = { " ", "%s" }, click = "v:lua.ScSa" },
+		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
+		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
+		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
+		-- { text = { " " }, hl = "Comment" },
+	},
+})
 require("trouble").setup()
 require("nvim-autopairs").setup()
 cmp.setup({
