@@ -115,6 +115,7 @@ bootstrap_paq({
 	"rcasia/neotest-bash",
 	"rest-nvim/rest.nvim",
 	"stevearc/overseer.nvim",
+	"SmiteshP/nvim-navic",
 })
 
 -- Default settings
@@ -124,10 +125,10 @@ vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignErr
 vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
+vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.g.mapleader = " "
 vim.o.conceallevel = 2
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
@@ -157,7 +158,7 @@ vim.opt.matchpairs:append("<:>")
 vim.opt.maxmempattern = 20000
 vim.opt.number = true
 vim.opt.shiftwidth = 2
-vim.opt.signcolumn = "auto"
+vim.opt.signcolumn = "yes"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
@@ -186,44 +187,6 @@ require("mini.base16").setup({
 		base0E = "#6C71C4",
 		base0F = "#D33682",
 	},
-	-- one dark color palette
-	-- palette = {
-	--  base00 = "#282C34",
-	--  base01 = "#353B45",
-	--  base02 = "#3E4451",
-	--  base03 = "#545862",
-	--  base04 = "#565C64",
-	--  base05 = "#ABB2BF",
-	--  base06 = "#B6BDCA",
-	--  base07 = "#C8CCD4",
-	--  base08 = "#E06C75",
-	--  base09 = "#D19A66",
-	--  base0A = "#E5C07B",
-	--  base0B = "#98C379",
-	--  base0C = "#56B6C2",
-	--  base0D = "#61AFEF",
-	--  base0E = "#C678DD",
-	--  base0F = "#BE5046",
-	-- },
-	-- nord dark color palette
-	-- palette = {
-	--  base00 = "#2E3440",
-	--  base01 = "#3B4252",
-	--  base02 = "#434C5E",
-	--  base03 = "#4C566A",
-	--  base04 = "#D8DEE9",
-	--  base05 = "#E5E9F0",
-	--  base06 = "#ECEFF4",
-	--  base07 = "#8FBCBB",
-	--  base08 = "#88C0D0",
-	--  base09 = "#81A1C1",
-	--  base0A = "#5E81AC",
-	--  base0B = "#BF616A",
-	--  base0C = "#D08770",
-	--  base0D = "#EBCB8B",
-	--  base0E = "#A3BE8C",
-	--  base0F = "#B48EAD",
-	-- },
 	plugins = { default = true },
 })
 require("mini.basics").setup({
@@ -284,7 +247,6 @@ require("mini.clue").setup({
 		delay = 0,
 	},
 })
--- require("mini.colors").setup()
 require("mini.comment").setup()
 -- require("mini.completion").setup({
 --  window = {
@@ -323,8 +285,21 @@ require("mini.hipatterns").setup({
 --  foreground = "#C0C8CC",
 --  n_hues = 8,
 --  accent = "bg",
---  saturation = "medium",
+--  saturation = "high",
 -- })
+-- require("mini.colors").setup()
+-- local colors = require("mini.colors")
+-- colors
+--  .get_colorscheme()
+--  :add_transparency({
+--    general = true,
+--    float = true,
+--    statuscolumn = true,
+--    statusline = false,
+--    tabline = true,
+--    winbar = true,
+--  })
+--  :apply()
 require("mini.indentscope").setup({
 	symbol = "│",
 	draw = {
@@ -461,9 +436,10 @@ require("statuscol").setup({
 	bt_ignore = { "netrw" },
 	relculright = true,
 	segments = {
-		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
-		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
 		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
+		{ text = { "%s" }, click = "v:lua.ScSa" },
+		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
+		{ text = { "▏" }, hl = "Comment" },
 	},
 })
 require("trouble").setup()
@@ -552,6 +528,38 @@ vim.cmd([[
       silent Lexplore
     endif
   endfunction
+  " Highlight groups
+  highlight! link WinBar LineNr
+  highlight! link WinBarNC LineNr
+
+  highlight! link NavicText LineNr
+  highlight NavicIconsFile guifg=#D33682 guibg=#073642
+  highlight NavicIconsModule guifg=#D33682 guibg=#073642
+  highlight NavicIconsNamespace guifg=#D33682 guibg=#073642
+  highlight NavicIconsPackage guifg=#D33682 guibg=#073642
+  highlight NavicIconsClass guifg=#D33682 guibg=#073642
+  highlight NavicIconsMethod guifg=#D33682 guibg=#073642
+  highlight NavicIconsProperty guifg=#D33682 guibg=#073642
+  highlight NavicIconsField guifg=#D33682 guibg=#073642
+  highlight NavicIconsConstructor guifg=#D33682 guibg=#073642
+  highlight NavicIconsEnum guifg=#D33682 guibg=#073642
+  highlight NavicIconsInterface guifg=#D33682 guibg=#073642
+  highlight NavicIconsFunction guifg=#D33682 guibg=#073642
+  highlight NavicIconsVariable guifg=#D33682 guibg=#073642
+  highlight NavicIconsConstant guifg=#D33682 guibg=#073642
+  highlight NavicIconsString guifg=#D33682 guibg=#073642
+  highlight NavicIconsNumber guifg=#D33682 guibg=#073642
+  highlight NavicIconsBoolean guifg=#D33682 guibg=#073642
+  highlight NavicIconsArray guifg=#D33682 guibg=#073642
+  highlight NavicIconsObject guifg=#D33682 guibg=#073642
+  highlight NavicIconsKey guifg=#D33682 guibg=#073642
+  highlight NavicIconsNull guifg=#D33682 guibg=#073642
+  highlight NavicIconsEnumMember guifg=#D33682 guibg=#073642
+  highlight NavicIconsStruct guifg=#D33682 guibg=#073642
+  highlight NavicIconsEvent guifg=#D33682 guibg=#073642
+  highlight NavicIconsOperator guifg=#D33682 guibg=#073642
+  highlight NavicIconsTypeParameter guifg=#D33682 guibg=#073642
+  highlight NavicSeparator guifg=#6C71C4 guibg=#073642
 ]])
 
 -- Treesitter setup
@@ -761,6 +769,16 @@ require("aerial").setup({
 	},
 })
 require("neogen").setup({ snippet_engine = "luasnip" })
+local navic = require("nvim-navic")
+navic.setup({
+	lsp = {
+		auto_attach = true,
+		preference = { "tsserver", "eslint" },
+	},
+	highlight = true,
+	depth_limit = 9,
+})
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 -- Dap setup
 require("dapui").setup()
