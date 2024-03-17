@@ -474,6 +474,12 @@ vim.cmd([[
   highlight! link CursorLineFold CursorLine
   highlight! link CursorLineNr CursorLine
   highlight! link IblScope MiniIndentscopeSymbol
+  au ColorScheme * highlight! link WinBar LineNr
+  au ColorScheme * highlight! link WinBarNC LineNr
+  au ColorScheme * highlight! link CursorLineSign CursorLine
+  au ColorScheme * highlight! link CursorLineFold CursorLine
+  au ColorScheme * highlight! link CursorLineNr CursorLine
+  au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
 ]])
 local cmp = require("cmp")
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
