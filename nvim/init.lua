@@ -120,15 +120,19 @@ bootstrap_paq({
 
 -- Default settings
 -- let g:python_recommended_style=0
+-- vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+-- vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+-- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+-- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignHint" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignInfo" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
 vim.g.mapleader = " "
 vim.o.conceallevel = 2
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
@@ -157,8 +161,9 @@ vim.opt.list = true
 vim.opt.matchpairs:append("<:>")
 vim.opt.maxmempattern = 20000
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.opt.shiftwidth = 2
-vim.opt.signcolumn = "yes"
+vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
@@ -434,12 +439,12 @@ require("ibl").setup({
 require("statuscol").setup({
 	ft_ignore = { "netrw" },
 	bt_ignore = { "netrw" },
-	relculright = true,
+	relculright = false,
 	segments = {
 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
 		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
-		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
-		{ text = { "▏" }, hl = "Comment" },
+		{ text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
+		{ text = { " " }, hl = "Comment" },
 	},
 })
 require("trouble").setup()
@@ -559,7 +564,7 @@ vim.cmd([[
   highlight NavicIconsEvent guifg=#D33682 guibg=#073642
   highlight NavicIconsOperator guifg=#D33682 guibg=#073642
   highlight NavicIconsTypeParameter guifg=#D33682 guibg=#073642
-  highlight NavicSeparator guifg=#6C71C4 guibg=#073642
+  highlight NavicSeparator guifg=#859900 guibg=#073642
 ]])
 
 -- Treesitter setup
