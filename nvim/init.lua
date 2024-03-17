@@ -209,13 +209,6 @@ vim.cmd([[
       silent Lexplore
     endif
   endfunction
-  " Highlight groups
-  highlight! link WinBar LineNr
-  highlight! link WinBarNC LineNr
-  highlight! link CursorLineSign CursorLine
-  highlight! link CursorLineFold CursorLine
-  highlight! link CursorLineNr CursorLine
-  highlight! link IblScope MiniIndentscopeSymbol
 ]])
 
 -- Mini plugins initialisation
@@ -336,11 +329,11 @@ require("mini.hipatterns").setup({
 -- math.randomseed(vim.loop.hrtime())
 -- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
 -- require("mini.hues").setup({
--- 	background = "#11262D",
--- 	foreground = "#C0C8CC",
--- 	n_hues = 8,
--- 	accent = "bg",
--- 	saturation = "high",
+--  background = "#11262D",
+--  foreground = "#C0C8CC",
+--  n_hues = 8,
+--  accent = "bg",
+--  saturation = "high",
 -- })
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
@@ -355,13 +348,13 @@ require("mini.hipatterns").setup({
 --    winbar = true,
 --  })
 --  :apply()
--- require("mini.indentscope").setup({
--- 	symbol = "│",
--- 	draw = {
--- 		delay = 0,
--- 		animation = require("mini.indentscope").gen_animation.none(),
--- 	},
--- })
+require("mini.indentscope").setup({
+	symbol = "│",
+	draw = {
+		delay = 0,
+		animation = require("mini.indentscope").gen_animation.none(),
+	},
+})
 require("mini.jump").setup()
 require("mini.jump2d").setup()
 -- require("mini.map").setup()
@@ -473,6 +466,15 @@ vim.notify = MiniNotify.make_notify()
 vim.ui.select = MiniPick.ui_select
 
 -- Utility libraries
+vim.cmd([[
+  " Highlight groups
+  highlight! link WinBar LineNr
+  highlight! link WinBarNC LineNr
+  highlight! link CursorLineSign CursorLine
+  highlight! link CursorLineFold CursorLine
+  highlight! link CursorLineNr CursorLine
+  highlight! link IblScope MiniIndentscopeSymbol
+]])
 local cmp = require("cmp")
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 -- defer setup
@@ -540,7 +542,7 @@ require("ibl").setup({
 		tab_char = "│",
 	},
 	scope = {
-		enabled = true,
+		enabled = false,
 		show_start = false,
 		show_end = false,
 	},
