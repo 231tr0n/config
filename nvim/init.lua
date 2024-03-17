@@ -442,8 +442,8 @@ require("statuscol").setup({
 	relculright = false,
 	segments = {
 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
-		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
 		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
+		{ text = { require("statuscol.builtin").lnumfunc, " " }, click = "v:lua.ScLa" },
 		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
 		-- { text = { " " }, hl = "Comment" },
 	},
@@ -537,35 +537,6 @@ vim.cmd([[
   " Highlight groups
   highlight! link WinBar LineNr
   highlight! link WinBarNC LineNr
-
-  highlight! link NavicText LineNr
-  highlight NavicIconsFile guifg=#D33682 guibg=#073642
-  highlight NavicIconsModule guifg=#D33682 guibg=#073642
-  highlight NavicIconsNamespace guifg=#D33682 guibg=#073642
-  highlight NavicIconsPackage guifg=#D33682 guibg=#073642
-  highlight NavicIconsClass guifg=#D33682 guibg=#073642
-  highlight NavicIconsMethod guifg=#D33682 guibg=#073642
-  highlight NavicIconsProperty guifg=#D33682 guibg=#073642
-  highlight NavicIconsField guifg=#D33682 guibg=#073642
-  highlight NavicIconsConstructor guifg=#D33682 guibg=#073642
-  highlight NavicIconsEnum guifg=#D33682 guibg=#073642
-  highlight NavicIconsInterface guifg=#D33682 guibg=#073642
-  highlight NavicIconsFunction guifg=#D33682 guibg=#073642
-  highlight NavicIconsVariable guifg=#D33682 guibg=#073642
-  highlight NavicIconsConstant guifg=#D33682 guibg=#073642
-  highlight NavicIconsString guifg=#D33682 guibg=#073642
-  highlight NavicIconsNumber guifg=#D33682 guibg=#073642
-  highlight NavicIconsBoolean guifg=#D33682 guibg=#073642
-  highlight NavicIconsArray guifg=#D33682 guibg=#073642
-  highlight NavicIconsObject guifg=#D33682 guibg=#073642
-  highlight NavicIconsKey guifg=#D33682 guibg=#073642
-  highlight NavicIconsNull guifg=#D33682 guibg=#073642
-  highlight NavicIconsEnumMember guifg=#D33682 guibg=#073642
-  highlight NavicIconsStruct guifg=#D33682 guibg=#073642
-  highlight NavicIconsEvent guifg=#D33682 guibg=#073642
-  highlight NavicIconsOperator guifg=#D33682 guibg=#073642
-  highlight NavicIconsTypeParameter guifg=#D33682 guibg=#073642
-  highlight NavicSeparator guifg=#859900 guibg=#073642
 ]])
 
 -- Treesitter setup
