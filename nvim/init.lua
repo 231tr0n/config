@@ -112,7 +112,7 @@ bootstrap_paq({
 	"lawrence-laz/neotest-zig",
 	"alfaix/neotest-gtest",
 	"rcasia/neotest-bash",
-	"rest-nvim/rest.nvim",
+	"ray-x/web-tools.nvim",
 	"stevearc/overseer.nvim",
 	"SmiteshP/nvim-navic",
 })
@@ -583,12 +583,14 @@ require("nvim-treesitter.configs").setup({
 		"graphql",
 		"html",
 		"http",
+		"hurl",
 		"ini",
 		"java",
 		"javascript",
 		"jq",
 		"jsdoc",
 		"json",
+		"json5",
 		"lua",
 		"luadoc",
 		"make",
@@ -990,36 +992,20 @@ require("cmp").setup.filetype("gitcommit", {
 })
 
 -- Api setup
-require("rest-nvim").setup({
-	result_split_horizontal = false,
-	result_split_in_place = false,
-	stay_in_current_window_after_split = false,
-	skip_ssl_verification = false,
-	encode_url = true,
-	highlight = {
-		enabled = true,
-		timeout = 150,
+require("web-tools").setup({
+	keymaps = {
+		rename = nil,
+		repeat_rename = ".",
 	},
-	result = {
-		show_url = true,
-		show_curl_command = true,
-		show_http_info = true,
+	hurl = {
 		show_headers = true,
-		show_statistics = true,
+		floating = true,
+		json5 = true,
 		formatters = {
-			json = "jq",
-			html = function(body)
-				return vim.fn.system({ "tidy", "-i", "-q", "-" }, body)
-			end,
+			json = { "jq" },
+			html = { "prettier", "--parser", "html" },
 		},
 	},
-	jump_to_request = false,
-	env_file = ".env",
-	env_pattern = "\\.env$",
-	env_edit_command = "tabedit",
-	custom_dynamic_variables = {},
-	yank_dry_run = true,
-	search_back = true,
 })
 
 -- Ai setup
@@ -1218,9 +1204,8 @@ nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organiz
 nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
 nmap("<leader>lt", "<cmd>lua require('trouble').toggle('lsp_references')<cr>", "Toggle lsp references")
-nmap("<leader>rl", "<cmd>RestNvimLast<cr>", "Run last request")
-nmap("<leader>rp", "<cmd>RestNvimPreview<cr>", "Preview command")
-nmap("<leader>rr", "<cmd>RestNvim<cr>", "Run request")
+nmap("<leader>rr", "<cmd>HurlRun<cr>", "Run request")
+nmap("<leader>rc", "<cmd>CurlToHurl<cr>", "Convert curl to hurl")
 nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
 nmap("<leader>td", "<cmd>lua require('neotest').run.run({ strategy = 'dap' })<cr>", "Run test with dap")
 nmap("<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", "Run file tests")

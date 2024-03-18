@@ -104,7 +104,7 @@ cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
 
-cargo install git-delta ripgrep fd-find bob-nvim bat
+cargo install git-delta ripgrep fd-find bob-nvim bat hurl
 
 # bob use latest
 bob use nightly
@@ -113,6 +113,8 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --all
 go install github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
+
+npm install -g browser-sync
 
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
