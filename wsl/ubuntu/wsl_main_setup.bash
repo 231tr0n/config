@@ -5,7 +5,7 @@ cd ~
 touch /home/zeltron/.hushlogin
 
 sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y --purge
-sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux ca-certificates
+sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux ca-certificates libssl-dev
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
