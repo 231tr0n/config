@@ -153,7 +153,7 @@ vim.o.termguicolors = true
 vim.o.textwidth = 0
 vim.o.updatetime = 500
 vim.o.wildmode = "longest:full,full"
-vim.o.wrap = false
+vim.o.wrap = true
 vim.opt.cursorcolumn = false
 vim.opt.cursorline = true
 vim.opt.expandtab = true
@@ -1224,8 +1224,8 @@ nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organiz
 nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
 nmap("<leader>lt", "<cmd>lua require('trouble').toggle('lsp_references')<cr>", "Toggle lsp references")
-nmap("<leader>rr", "<cmd>HurlRun<cr>", "Run request")
 nmap("<leader>rc", "<cmd>CurlToHurl<cr>", "Convert curl to hurl")
+nmap("<leader>rr", "<cmd>HurlRun<cr>", "Run request")
 nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
 nmap("<leader>td", "<cmd>lua require('neotest').run.run({ strategy = 'dap' })<cr>", "Run test with dap")
 nmap("<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", "Run file tests")
@@ -1245,6 +1245,7 @@ vmap("<C-c><C-c>", '"+x', "Cut to clipboard")
 vmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
 vmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
 vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
+xmap("<leader>ap", ":Gen<cr>", "Prompt Model")
 xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 
 -- Commands configuration
