@@ -62,6 +62,7 @@ bootstrap_paq({
 	"saadparwaiz1/cmp_luasnip",
 	"petertriho/cmp-git",
 	"folke/trouble.nvim",
+	"nvim-neotest/nvim-nio",
 	"mfussenegger/nvim-dap",
 	"rcarriga/nvim-dap-ui",
 	"jbyuki/one-small-step-for-vimkind",
@@ -236,6 +237,25 @@ require("mini.base16").setup({
 		base0E = "#6C71C4",
 		base0F = "#D33682",
 	},
+	-- one dark color palette
+	-- palette = {
+	-- 	base00 = "#282C34",
+	-- 	base01 = "#353B45",
+	-- 	base02 = "#3E4451",
+	-- 	base03 = "#545862",
+	-- 	base04 = "#565C64",
+	-- 	base05 = "#ABB2BF",
+	-- 	base06 = "#B6BDCA",
+	-- 	base07 = "#C8CCD4",
+	-- 	base08 = "#E06C75",
+	-- 	base09 = "#D19A66",
+	-- 	base0A = "#E5C07B",
+	-- 	base0B = "#98C379",
+	-- 	base0C = "#56B6C2",
+	-- 	base0D = "#61AFEF",
+	-- 	base0E = "#C678DD",
+	-- 	base0F = "#BE5046",
+	-- },
 	plugins = { default = true },
 })
 require("mini.basics").setup({
