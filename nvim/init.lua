@@ -41,7 +41,6 @@ bootstrap_paq({
 	"savq/paq-nvim",
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
-	"kevinhwang91/promise-async",
 	"luukvbaal/statuscol.nvim",
 	"nvim-tree/nvim-web-devicons",
 	"nvim-pack/nvim-spectre",
