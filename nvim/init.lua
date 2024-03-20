@@ -1161,9 +1161,8 @@ Global.diagnosticVirtualTextToggle = function()
 	end
 end
 -- Keymaps
-imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Anticlockwise completions", { expr = true })
-imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Clockwise completions", { expr = true })
 nmap("<C-Space>", toggleTerminal, "Toggle terminal")
+nmap("<F2>", MiniNotify.clear, "Clear all notifications")
 nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 nmap("<leader>am", require("gen").select_model, "Select model")
