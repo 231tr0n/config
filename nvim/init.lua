@@ -45,7 +45,7 @@ bootstrap_paq({
 	"nvim-tree/nvim-web-devicons",
 	"nvim-pack/nvim-spectre",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-	-- "nvim-treesitter/nvim-treesitter-context",
+	"nvim-treesitter/nvim-treesitter-context",
 	"neovim/nvim-lspconfig",
 	"lukas-reineke/indent-blankline.nvim",
 	"windwp/nvim-autopairs",
@@ -210,6 +210,12 @@ vim.cmd([[
       silent Lexplore
     endif
   endfunction
+  function SynGroup()
+    if !exists("*synstack")
+      return
+    endif
+    echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+  endfun
 ]])
 
 -- Mini plugins initialisation
@@ -490,15 +496,9 @@ vim.cmd([[
   " Highlight groups
   highlight! link WinBar LineNr
   highlight! link WinBarNC LineNr
-  highlight! link CursorLineSign CursorLine
-  highlight! link CursorLineFold CursorLine
-  highlight! link CursorLineNr CursorLine
   highlight! link IblScope MiniIndentscopeSymbol
   au ColorScheme * highlight! link WinBar LineNr
   au ColorScheme * highlight! link WinBarNC LineNr
-  au ColorScheme * highlight! link CursorLineSign CursorLine
-  au ColorScheme * highlight! link CursorLineFold CursorLine
-  au ColorScheme * highlight! link CursorLineNr CursorLine
   au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
 ]])
 local cmp = require("cmp")
@@ -517,8 +517,8 @@ require("statuscol").setup({
 	relculright = false,
 	segments = {
 		-- { text = { " ", "%s" }, click = "v:lua.ScSa" },
-		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa" },
-		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa" },
+		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa", hl = "" },
+		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa", hl = "" },
 		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
 		-- { text = { " " }, hl = "Comment" },
 	},
@@ -690,7 +690,7 @@ require("nvim-treesitter.configs").setup({
 		enable = true,
 	},
 })
--- require("treesitter-context").setup()
+require("treesitter-context").setup()
 vim.cmd([[
   set foldmethod=expr
   set foldexpr=nvim_treesitter#foldexpr()
@@ -1154,6 +1154,7 @@ end
 -- Keymaps
 nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 nmap("<F2>", MiniNotify.clear, "Clear all notifications")
+nmap("<F3>", "<cmd>call SynGroup()<cr>", "Echo highlight group")
 nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 nmap("<leader>am", require("gen").select_model, "Select model")
