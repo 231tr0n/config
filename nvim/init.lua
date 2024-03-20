@@ -116,6 +116,7 @@ bootstrap_paq({
 	"ray-x/web-tools.nvim",
 	"stevearc/overseer.nvim",
 	"SmiteshP/nvim-navic",
+	"nvim-treesitter/nvim-treesitter-context",
 })
 
 -- Default settings
@@ -691,6 +692,7 @@ require("nvim-treesitter.configs").setup({
 		enable = true,
 	},
 })
+require("treesitter-context").setup()
 vim.cmd([[
   set foldmethod=expr
   set foldexpr=nvim_treesitter#foldexpr()
