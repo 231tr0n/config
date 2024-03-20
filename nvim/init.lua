@@ -45,6 +45,7 @@ bootstrap_paq({
 	"nvim-tree/nvim-web-devicons",
 	"nvim-pack/nvim-spectre",
 	{ "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+	-- "nvim-treesitter/nvim-treesitter-context",
 	"neovim/nvim-lspconfig",
 	"lukas-reineke/indent-blankline.nvim",
 	"windwp/nvim-autopairs",
@@ -114,8 +115,6 @@ bootstrap_paq({
 	"rcasia/neotest-bash",
 	"ray-x/web-tools.nvim",
 	"stevearc/overseer.nvim",
-	"SmiteshP/nvim-navic",
-	"nvim-treesitter/nvim-treesitter-context",
 })
 
 -- Default settings
@@ -696,6 +695,7 @@ vim.cmd([[
   set foldmethod=expr
   set foldexpr=nvim_treesitter#foldexpr()
 ]])
+vim.o.winbar = "%{nvim_treesitter#statusline()}"
 
 -- Lsp setup
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -772,16 +772,6 @@ require("aerial").setup({
 	},
 })
 require("neogen").setup({ snippet_engine = "luasnip" })
-local navic = require("nvim-navic")
-navic.setup({
-	lsp = {
-		auto_attach = true,
-		preference = { "tsserver", "eslint" },
-	},
-	highlight = true,
-	depth_limit = 9,
-})
-vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 -- Dap setup
 require("dapui").setup()
