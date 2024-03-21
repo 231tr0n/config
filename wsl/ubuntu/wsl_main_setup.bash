@@ -64,6 +64,7 @@ cd ~
 
 sudo apt install -y clangd
 pip install pyright
+pip install basedpyright
 go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest

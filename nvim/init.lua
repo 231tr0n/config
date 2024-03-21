@@ -736,7 +736,10 @@ lspconfig.bashls.setup({
 lspconfig.gopls.setup({
 	capabilities = capabilities,
 })
-lspconfig.pyright.setup({
+-- lspconfig.pyright.setup({
+-- 	capabilities = capabilities,
+-- })
+lspconfig.basedpyright.setup({
 	capabilities = capabilities,
 })
 lspconfig.rust_analyzer.setup({
