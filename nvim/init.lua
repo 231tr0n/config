@@ -127,7 +127,6 @@ bootstrap_paq({
 -- vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 -- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 -- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
-vim.cmd("cd " .. vim.fn.system("git rev-parse --show-toplevel 2> /dev/null"))
 vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
 vim.fn.sign_define("DapStopped", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
 vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "" })
@@ -174,9 +173,9 @@ vim.cmd([[
   let g:fzf_vim = {}
   let g:fzf_vim.preview_window = ['up', 'ctrl-/']
   let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
-  command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  " command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  " command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
+  " command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
   let g:fzf_vim.tags_command = 'ctags -R'
   let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
   " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
@@ -1385,6 +1384,17 @@ vim.api.nvim_create_autocmd("FileType", {
 	pattern = "svelte,jsx,html,xml,xsl,javascriptreact",
 	callback = function()
 		vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+	end,
+})
+vim.api.nvim_create_autocmd("VimEnter", {
+	pattern = "*",
+	callback = function()
+		local git_root = vim.fn.system("git rev-parse --show-toplevel 2> /dev/null")
+		if git_root == "" then
+			vim.cmd("cd .")
+		else
+			vim.cmd("cd " .. git_root)
+		end
 	end,
 })
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
