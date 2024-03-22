@@ -210,12 +210,14 @@ vim.cmd([[
       silent Lexplore
     endif
   endfunction
+  " Colorscheme related config
   function SynGroup()
     if !exists("*synstack")
       return
     endif
     echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
   endfun
+  colorscheme retrobox
 ]])
 
 -- Mini plugins initialisation
@@ -354,13 +356,15 @@ require("mini.hipatterns").setup({
 })
 -- math.randomseed(vim.loop.hrtime())
 -- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
-require("mini.hues").setup({
-	background = "#11262D",
-	foreground = "#C0C8CC",
-	n_hues = 8,
-	accent = "bg",
-	saturation = "high",
-})
+-- require("mini.hues").setup({
+-- 	-- background = "#1c1c1c",
+-- 	-- foreground = "#83a598",
+-- 	background = "#11262D",
+-- 	foreground = "#C0C8CC",
+-- 	n_hues = 8,
+-- 	accent = "bg",
+-- 	saturation = "high",
+-- })
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
 -- colors
@@ -497,9 +501,11 @@ vim.cmd([[
   highlight! link WinBar LineNr
   highlight! link WinBarNC LineNr
   highlight! link IblScope MiniIndentscopeSymbol
+  highlight! link CursorLineFold CursorLineNr
   au ColorScheme * highlight! link WinBar LineNr
   au ColorScheme * highlight! link WinBarNC LineNr
   au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
+  au ColorScheme * highlight! link CursorLineFold CursorLineNr
 ]])
 local cmp = require("cmp")
 local luasnip = require("luasnip")
@@ -738,7 +744,7 @@ lspconfig.gopls.setup({
 	capabilities = capabilities,
 })
 -- lspconfig.pyright.setup({
--- 	capabilities = capabilities,
+--  capabilities = capabilities,
 -- })
 lspconfig.basedpyright.setup({
 	capabilities = capabilities,
