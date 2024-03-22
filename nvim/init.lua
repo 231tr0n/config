@@ -699,8 +699,9 @@ require("treesitter-context").setup()
 vim.cmd([[
   set foldmethod=expr
   set foldexpr=nvim_treesitter#foldexpr()
+  au BufWinEnter * setlocal winbar=%{nvim_treesitter#statusline()}
+  au TermOpen * setlocal winbar=""
 ]])
-vim.o.winbar = "%{nvim_treesitter#statusline()}"
 
 -- Lsp setup
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
