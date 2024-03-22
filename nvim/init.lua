@@ -217,7 +217,6 @@ vim.cmd([[
     endif
     echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
   endfun
-  colorscheme retrobox
 ]])
 
 -- Mini plugins initialisation
@@ -356,15 +355,15 @@ require("mini.hipatterns").setup({
 })
 -- math.randomseed(vim.loop.hrtime())
 -- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
--- require("mini.hues").setup({
--- 	-- background = "#1c1c1c",
--- 	-- foreground = "#83a598",
--- 	background = "#11262D",
--- 	foreground = "#C0C8CC",
--- 	n_hues = 8,
--- 	accent = "bg",
--- 	saturation = "high",
--- })
+require("mini.hues").setup({
+	-- background = "#1c1c1c",
+	-- foreground = "#83a598",
+	background = "#11262D",
+	foreground = "#C0C8CC",
+	n_hues = 8,
+	accent = "bg",
+	saturation = "high",
+})
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
 -- colors
