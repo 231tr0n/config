@@ -223,47 +223,46 @@ vim.cmd([[
 require("mini.ai").setup()
 require("mini.align").setup()
 -- require("mini.animate").setup({ scroll = { enable = false } })
--- require("mini.base16").setup({
--- solarized dark color palette
--- palette = {
---  base00 = "#002B36",
---  base01 = "#073642",
---  base02 = "#586E75",
---  base03 = "#657B83",
---  base04 = "#839496",
---  base05 = "#93A1A1",
---  base06 = "#EEE8D5",
---  base07 = "#FDF6E3",
---  base08 = "#DC322F",
---  base09 = "#CB4B16",
---  base0A = "#B58900",
---  base0B = "#859900",
---  base0C = "#2AA198",
---  base0D = "#268BD2",
---  base0E = "#6C71C4",
---  base0F = "#D33682",
--- },
--- one dark color palette
--- palette = {
---  base00 = "#282C34",
---  base01 = "#353B45",
---  base02 = "#3E4451",
---  base03 = "#545862",
---  base04 = "#565C64",
---  base05 = "#ABB2BF",
---  base06 = "#B6BDCA",
---  base07 = "#C8CCD4",
---  base08 = "#E06C75",
---  base09 = "#D19A66",
---  base0A = "#E5C07B",
---  base0B = "#98C379",
---  base0C = "#56B6C2",
---  base0D = "#61AFEF",
---  base0E = "#C678DD",
---  base0F = "#BE5046",
--- },
---  plugins = { default = true },
--- })
+require("mini.base16").setup({
+	-- solarized dark color palette
+	palette = {
+		base00 = "#002B36",
+		base01 = "#073642",
+		base02 = "#586E75",
+		base03 = "#657B83",
+		base04 = "#839496",
+		base05 = "#93A1A1",
+		base06 = "#EEE8D5",
+		base07 = "#FDF6E3",
+		base08 = "#DC322F",
+		base09 = "#CB4B16",
+		base0A = "#B58900",
+		base0B = "#859900",
+		base0C = "#2AA198",
+		base0D = "#268BD2",
+		base0E = "#6C71C4",
+		base0F = "#D33682",
+	},
+	-- one dark color palette
+	-- palette = {
+	--  base00 = "#282C34",
+	--  base01 = "#353B45",
+	--  base02 = "#3E4451",
+	--  base03 = "#545862",
+	--  base04 = "#565C64",
+	--  base05 = "#ABB2BF",
+	--  base06 = "#B6BDCA",
+	--  base07 = "#C8CCD4",
+	--  base08 = "#E06C75",
+	--  base09 = "#D19A66",
+	--  base0A = "#E5C07B",
+	--  base0B = "#98C379",
+	--  base0C = "#56B6C2",
+	--  base0D = "#61AFEF",
+	--  base0E = "#C678DD",
+	--  base0F = "#BE5046",
+	-- },
+})
 require("mini.basics").setup({
 	mappings = {
 		windows = true,
@@ -355,15 +354,15 @@ require("mini.hipatterns").setup({
 })
 -- math.randomseed(vim.loop.hrtime())
 -- require("mini.hues").setup(require("mini.hues").gen_random_base_colors())
-require("mini.hues").setup({
-	-- background = "#1c1c1c",
-	-- foreground = "#83a598",
-	background = "#11262D",
-	foreground = "#C0C8CC",
-	n_hues = 8,
-	accent = "bg",
-	saturation = "high",
-})
+-- require("mini.hues").setup({
+-- 	-- background = "#1c1c1c",
+-- 	-- foreground = "#83a598",
+-- 	background = "#11262D",
+-- 	foreground = "#C0C8CC",
+-- 	n_hues = 8,
+-- 	accent = "bg",
+-- 	saturation = "high",
+-- })
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
 -- colors
