@@ -1,6 +1,6 @@
 -- Globals declared and used
 Global = {}
-Global.virtual_text = true
+Global.virtual_text = false
 
 -- Paq auto download and configure setup
 local function paq_path()
@@ -119,20 +119,14 @@ bootstrap_paq({
 
 -- Default settings
 -- let g:python_recommended_style=0
--- vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
--- vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
--- vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
--- vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
--- vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
--- vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
--- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
--- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
-vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignWarn" })
-vim.fn.sign_define("DapStopped", { text = "", texthl = "", linehl = "", numhl = "DiagnosticSignError" })
-vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 vim.g.mapleader = " "
 vim.o.conceallevel = 2
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
@@ -499,11 +493,11 @@ vim.cmd([[
   highlight! link WinBar LineNr
   highlight! link WinBarNC LineNr
   highlight! link IblScope MiniIndentscopeSymbol
-  highlight! link CursorLineFold CursorLineNr
+  " highlight! link CursorLineFold CursorLineNr
   au ColorScheme * highlight! link WinBar LineNr
   au ColorScheme * highlight! link WinBarNC LineNr
   au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
-  au ColorScheme * highlight! link CursorLineFold CursorLineNr
+  " au ColorScheme * highlight! link CursorLineFold CursorLineNr
 ]])
 local cmp = require("cmp")
 local luasnip = require("luasnip")
@@ -520,7 +514,7 @@ require("statuscol").setup({
 	bt_ignore = { "netrw" },
 	relculright = false,
 	segments = {
-		-- { text = { " ", "%s" }, click = "v:lua.ScSa" },
+		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
 		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa", hl = "" },
 		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa", hl = "" },
 		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
