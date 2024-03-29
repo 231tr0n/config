@@ -323,6 +323,7 @@ require("mini.comment").setup()
 --  },
 -- })
 require("mini.cursorword").setup()
+require("mini.diff").setup()
 -- require("mini.doc").setup()
 require("mini.extra").setup()
 require("mini.files").setup({
