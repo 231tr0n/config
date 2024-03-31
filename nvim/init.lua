@@ -27,6 +27,7 @@ end
 
 -- Paq plugin setup
 bootstrap_paq({
+	"savq/paq-nvim",
 	-- Vimscript plugins
 	"tpope/vim-fugitive",
 	{
@@ -38,7 +39,6 @@ bootstrap_paq({
 	"mbbill/undotree",
 	"antoinemadec/FixCursorHold.nvim",
 	-- Lua plugins
-	"savq/paq-nvim",
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
 	"luukvbaal/statuscol.nvim",
