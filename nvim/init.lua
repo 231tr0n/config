@@ -34,7 +34,6 @@ bootstrap_paq({
 		"junegunn/fzf",
 		build = ":call fzf#install()",
 	},
-	"junegunn/fzf.vim",
 	"honza/vim-snippets",
 	"mbbill/undotree",
 	"antoinemadec/FixCursorHold.nvim",
@@ -115,6 +114,7 @@ bootstrap_paq({
 	"rcasia/neotest-bash",
 	"ray-x/web-tools.nvim",
 	"stevearc/overseer.nvim",
+	"ibhagwan/fzf-lua",
 })
 
 -- Default settings
@@ -162,18 +162,6 @@ vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
 vim.cmd([[
-  " Fzf config
-  let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
-  let g:fzf_vim = {}
-  let g:fzf_vim.preview_window = ['up', 'ctrl-/']
-  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden'
-  " let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git --exclude node_modules'
-  " command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  " command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ".fzf#shellescape(<q-args>), fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  " command! -bang -nargs=* RG call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -g '!.git/' -g '!node_modules/' -- ", <q-args>, fzf#vim#with_preview('up', 'ctrl-/'), <bang>0)
-  let g:fzf_vim.tags_command = 'ctags -R'
-  let g:fzf_vim.listproc = { list -> fzf#vim#listproc#quickfix(list) }
-  " let g:fzf_vim.listproc = { list -> fzf#vim#listproc#location(list) }
   " Netrw config
   set nocompatible
   filetype plugin on
@@ -596,6 +584,21 @@ require("ibl").setup({
 		enabled = false,
 		show_start = false,
 		show_end = false,
+	},
+})
+require("fzf-lua").setup({
+	"max-perf",
+	winopts = {
+		width = 0.85,
+		height = 0.85,
+		preview = {
+			default = "bat",
+			vertical = "up:50%",
+			layout = "vertical",
+		},
+	},
+	fzf_opts = {
+		["--layout"] = "default",
 	},
 })
 
@@ -1192,32 +1195,33 @@ nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
 nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
 nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
-nmap("<leader>fC", "<cmd>Changes<cr>", "Search changes")
-nmap("<leader>fF", "<cmd>Filetypes<cr>", "Search filetypes")
-nmap("<leader>fL", "<cmd>Lines<cr>", "Search lines")
-nmap("<leader>fM", "<cmd>Maps<cr>", "Search maps")
-nmap("<leader>fS", "<cmd>RG<cr>", "Search content live")
-nmap("<leader>fT", "<cmd>Tags<cr>", "Search tags")
-nmap("<leader>fb", "<cmd>Buffers<cr>", "Search buffers")
-nmap("<leader>fc", "<cmd>Commands<cr>", "Search commands")
-nmap("<leader>fco", "<cmd>Colors<cr>", "Search colors")
-nmap("<leader>ff", "<cmd>Files<cr>", "Search files")
-nmap("<leader>fg", "<cmd>GFiles<cr>", "Search Git files")
-nmap("<leader>fgC", "<cmd>BCommits<cr>", "Search buffer commits")
-nmap("<leader>fgc", "<cmd>Commits<cr>", "Search commits")
-nmap("<leader>fgd", "<cmd>GFiles?<cr>", "Search Git files with diff")
-nmap("<leader>fh", "<cmd>History<cr>", "Search history")
-nmap("<leader>fh/", "<cmd>History/<cr>", "Search search history")
-nmap("<leader>fh:", "<cmd>History:<cr>", "Search command history")
-nmap("<leader>fht", "<cmd>Helptags<cr>", "Search help tags")
-nmap("<leader>fj", "<cmd>Jumps<cr>", "Search jumps")
-nmap("<leader>fl", "<cmd>BLines<cr>", "Search buffer lines")
-nmap("<leader>flo", "<cmd>Locate ", "Search locate output")
-nmap("<leader>fm", "<cmd>Marks<cr>", "Search marks")
+nmap("<leader>fL", "<cmd>FzfLua lines<cr>", "Search lines")
+nmap("<leader>fS", "<cmd>FzfLua live_grep_native<cr>", "Search content live")
+nmap("<leader>fT", "<cmd>FzfLua tags<cr>", "Search tags")
+nmap("<leader>fX", "<cmd>FzfLua diagnostics_workspace<cr>", "Search workspace diagnostics")
+nmap("<leader>fb", "<cmd>FzfLua buffers<cr>", "Search buffers")
+nmap("<leader>fdb", "<cmd>FzfLua dap_breakpoints<cr>", "Search dap breakpoints")
+nmap("<leader>fdc", "<cmd>FzfLua dap_configurations<cr>", "Search dap configurations")
+nmap("<leader>fdf", "<cmd>FzfLua dap_frames<cr>", "Search dap frames")
+nmap("<leader>fdv", "<cmd>FzfLua dap_variables<cr>", "Search dap variables")
+nmap("<leader>ff", "<cmd>FzfLua files<cr>", "Search files")
+nmap("<leader>fg", "<cmd>FzfLua git_files<cr>", "Search Git files")
+nmap("<leader>fgC", "<cmd>FzfLua git_commits<cr>", "Search commits")
+nmap("<leader>fgS", "<cmd>FzfLua git_stash<cr>", "Search git stash")
+nmap("<leader>fgb", "<cmd>FzfLua git_branches<cr>", "Search branches")
+nmap("<leader>fgc", "<cmd>FzfLua git_bcommits<cr>", "Search buffer commits")
+nmap("<leader>fgs", "<cmd>FzfLua git_status<cr>", "Search git status")
+nmap("<leader>fgt", "<cmd>FzfLua git_tags<cr>", "Search git tags")
+nmap("<leader>fj", "<cmd>FzfLua jumps<cr>", "Search jumps")
+nmap("<leader>fk", "<cmd>FzfLua keymaps<cr>", "Search keymaps")
+nmap("<leader>fl", "<cmd>FzfLua blines<cr>", "Search buffer lines")
+nmap("<leader>fm", "<cmd>FzfLua marks<cr>", "Search marks")
+nmap("<leader>fo", "<cmd>FzfLua loclist<cr>", "Search loclist")
+nmap("<leader>fq", "<cmd>FzfLua quickfix<cr>", "Search quickfix")
 nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and replace")
-nmap("<leader>fs", "<cmd>Rg<cr>", "Search content")
-nmap("<leader>ft", "<cmd>BTags<cr>", "Search buffer tags")
-nmap("<leader>fw", "<cmd>Windows<cr>", "Search windows")
+nmap("<leader>fs", "<cmd>FzfLua grep_project<cr>", "Search content")
+nmap("<leader>ft", "<cmd>FzfLua btags<cr>", "Search buffer tags")
+nmap("<leader>fx", "<cmd>FzfLua diagnostics_document<cr>", "Search document diagnostics")
 nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
