@@ -5,7 +5,7 @@ cd ~
 touch /home/zeltron/.hushlogin
 
 sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y --purge
-sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux ca-certificates libssl-dev
+sudo apt install -y git curl wget neofetch openssl ssh sshfs man-db htop jq vim tmux ca-certificates libssl-dev libssh-dev libgit2-dev libcurl4-openssl-dev pkgconf
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -109,7 +109,7 @@ cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
 
-cargo install git-delta ripgrep fd-find bob-nvim bat hurl
+cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
 
 # bob use latest
 bob use nightly
