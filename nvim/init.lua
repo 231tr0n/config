@@ -51,7 +51,7 @@ bootstrap_paq({
 	"windwp/nvim-autopairs",
 	"windwp/nvim-ts-autotag",
 	"RRethy/nvim-treesitter-endwise",
-	"prichrd/netrw.nvim",
+	-- "prichrd/netrw.nvim",
 	"rafamadriz/friendly-snippets",
 	"L3MON4D3/LuaSnip",
 	"hrsh7th/nvim-cmp",
@@ -128,6 +128,8 @@ vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSi
 vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
 vim.o.conceallevel = 2
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
@@ -163,36 +165,36 @@ vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
 vim.cmd([[
-  " Netrw config
   set nocompatible
   filetype plugin on
   filetype plugin indent off
-  let g:netrw_banner=0
-  let g:netrw_liststyle=3
-  let g:netrw_browse_split=4
-  let g:netrw_altv=1
-  let g:netrw_winsize=40
-  let g:netrw_preview=1
-  au FileType netrw setl signcolumn=no
-  au FileType netrw vertical resize 40
-  function FileBrowserToggle()
-    if !exists("t:NetrwIsOpen")
-      let t:NetrwIsOpen=0
-    endif
-    if t:NetrwIsOpen
-      let i = bufnr("$")
-      while (i >= 1)
-        if (getbufvar(i, "&filetype") == "netrw")
-          silent exe "bwipeout " . i
-        endif
-        let i-=1
-      endwhile
-      let t:NetrwIsOpen=0
-    else
-      let t:NetrwIsOpen=1
-      silent Lexplore
-    endif
-  endfunction
+  " Netrw config
+  " let g:netrw_banner=0
+  " let g:netrw_liststyle=3
+  " let g:netrw_browse_split=4
+  " let g:netrw_altv=1
+  " let g:netrw_winsize=40
+  " let g:netrw_preview=1
+  " au FileType netrw setl signcolumn=no
+  " au FileType netrw vertical resize 40
+  " function FileBrowserToggle()
+  "   if !exists("t:NetrwIsOpen")
+  "     let t:NetrwIsOpen=0
+  "   endif
+  "   if t:NetrwIsOpen
+  "     let i = bufnr("$")
+  "     while (i >= 1)
+  "       if (getbufvar(i, "&filetype") == "netrw")
+  "         silent exe "bwipeout " . i
+  "       endif
+  "       let i-=1
+  "     endwhile
+  "     let t:NetrwIsOpen=0
+  "   else
+  "     let t:NetrwIsOpen=1
+  "     silent Lexplore
+  "   endif
+  " endfunction
   " Colorscheme related config
   function SynGroup()
     if !exists("*synstack")
@@ -574,7 +576,7 @@ cmp.setup.cmdline(":", {
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
-require("netrw").setup()
+-- require("netrw").setup()
 require("spectre").setup()
 require("ibl").setup({
 	indent = {
@@ -1194,8 +1196,8 @@ nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle br
 nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
-nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
-nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
+nmap("<leader>et", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
+-- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 nmap("<leader>fL", "<cmd>FzfLua lines<cr>", "Search lines")
 nmap("<leader>fS", "<cmd>FzfLua live_grep_native<cr>", "Search content live")
 nmap("<leader>fT", "<cmd>FzfLua tags<cr>", "Search tags")
