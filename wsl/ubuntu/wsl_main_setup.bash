@@ -109,7 +109,7 @@ cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
 
-cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
+cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update tree-sitter-cli
 
 # bob use latest
 bob use nightly
