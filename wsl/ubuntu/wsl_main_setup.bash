@@ -127,5 +127,7 @@ ssh-keygen -t rsa
 
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 
+curl -fsSL https://ollama.com/install.sh | sh
+
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
