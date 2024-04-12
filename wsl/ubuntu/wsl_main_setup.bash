@@ -109,7 +109,7 @@ cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
 
-cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update tree-sitter-cli
+cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
 
 # bob use latest
 bob use nightly
@@ -119,7 +119,7 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 go install github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
 
-npm install -g browser-sync
+sudo npm install -g browser-sync tree-sitter-cli
 
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
