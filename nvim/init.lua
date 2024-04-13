@@ -38,6 +38,7 @@ bootstrap_paq({
 	"mbbill/undotree",
 	"antoinemadec/FixCursorHold.nvim",
 	"itchyny/vim-qfedit",
+	"mg979/vim-visual-multi",
 	-- Lua plugins
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
