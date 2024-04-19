@@ -53,6 +53,7 @@ bootstrap_paq({
 	"windwp/nvim-ts-autotag",
 	"RRethy/nvim-treesitter-endwise",
 	-- "prichrd/netrw.nvim",
+	"nvim-tree/nvim-tree.lua",
 	"rafamadriz/friendly-snippets",
 	"L3MON4D3/LuaSnip",
 	"hrsh7th/nvim-cmp",
@@ -503,8 +504,8 @@ end
 -- defer setup
 require("nvim-web-devicons").setup()
 require("statuscol").setup({
-	ft_ignore = { "netrw" },
-	bt_ignore = { "netrw" },
+	ft_ignore = { "netrw", "NvimTree" },
+	bt_ignore = { "netrw", "NvimTree" },
 	relculright = false,
 	segments = {
 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
@@ -578,6 +579,7 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
 -- require("netrw").setup()
+require("nvim-tree").setup()
 require("spectre").setup()
 require("ibl").setup({
 	indent = {
@@ -1171,12 +1173,12 @@ nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 nmap("<leader>am", require("gen").select_model, "Select model")
 nmap("<leader>ap", ":Gen<cr>", "Prompt Model")
-nmap("<leader>bD", "<Cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
-nmap("<leader>bW", "<Cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
-nmap("<leader>ba", "<Cmd>b#<CR>", "Alternate")
-nmap("<leader>bd", "<Cmd>lua MiniBufremove.delete()<CR>", "Delete")
-nmap("<leader>bu", "<Cmd>UndotreeToggle<CR>", "Undotree")
-nmap("<leader>bw", "<Cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
+nmap("<leader>bD", "<cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
+nmap("<leader>bW", "<cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
+nmap("<leader>ba", "<cmd>b#<CR>", "Alternate")
+nmap("<leader>bd", "<cmd>lua MiniBufremove.delete()<CR>", "Delete")
+nmap("<leader>bu", "<cmd>UndotreeToggle<CR>", "Undotree")
+nmap("<leader>bw", "<cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
 nmap("<leader>cf", "<cmd>call aerial#fzf()<cr>", "Code outline fzf")
 nmap("<leader>cn", "<cmd>AerialNext<cr>", "Code outline next")
 nmap("<leader>co", "<cmd>AerialNavToggle<cr>", "Code navigation toggle")
@@ -1199,7 +1201,8 @@ nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle br
 nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
-nmap("<leader>et", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
+nmap("<leader>ef", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
+nmap("<leader>et", "<cmd>NvimTreeToggle<cr>", "Toggle file tree")
 -- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 nmap("<leader>fL", "<cmd>FzfLua lines<cr>", "Search lines")
 nmap("<leader>fS", "<cmd>FzfLua live_grep_native<cr>", "Search content live")
