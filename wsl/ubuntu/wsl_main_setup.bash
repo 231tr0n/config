@@ -119,7 +119,7 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 go install github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
 
-sudo npm install -g browser-sync tree-sitter-cli
+sudo npm install -g browser-sync tree-sitter-cli n
 
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
