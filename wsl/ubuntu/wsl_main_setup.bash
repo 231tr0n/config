@@ -57,7 +57,7 @@ sudo add-apt-repository -y ppa:git-core/ppa
 sudo apt update -y
 sudo apt install -y git
 
-sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-11-source openjdk-21-source openjdk-17-source openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk openjdk-11-doc openjdk-17-doc openjdk-21-doc luajit luarocks texlive texlive-base texlive-science texlive-science-doc universal-ctags
+sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-11-source openjdk-21-source openjdk-17-source openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk openjdk-11-doc openjdk-17-doc openjdk-21-doc luajit luarocks texlive texlive-base texlive-science texlive-science-doc universal-ctags pipx
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
 sudo npm install -g typescript@latest
@@ -67,8 +67,8 @@ export PATH=$PATH:/usr/local/go/bin
 cd ~
 
 sudo apt install -y clangd
-pip install pyright
-pip install basedpyright
+pipx install pyright
+pipx install basedpyright
 go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
@@ -92,12 +92,12 @@ cd ~
 sudo apt install -y clang-tidy shellcheck checkstyle checkstyle-doc
 sudo luarocks install luacheck
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ~/.local/bin
-pip install pylint yamllint
+pipx install pylint yamllint
 sudo npm install -g jsonlint@latest
 sudo npm install -g eslint@latest
 
 sudo apt install -y clang-format jq libxml2-utils tidy
-pip install black
+pipx install black
 sudo npm install -g google-java-format@latest
 sudo npm install -g prettier@latest
 go install github.com/google/yamlfmt/cmd/yamlfmt@latest
