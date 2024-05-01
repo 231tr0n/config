@@ -1061,7 +1061,7 @@ require("web-tools").setup({
 
 -- Ai setup
 require("gen").setup({
-	model = "dolphin-mistral",
+	model = "dolphin-llama3",
 	host = "localhost",
 	port = "11434",
 	display_mode = "float",
