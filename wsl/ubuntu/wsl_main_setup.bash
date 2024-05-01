@@ -119,8 +119,6 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 go install github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
 
-sudo npm install -g browser-sync tree-sitter-cli n
-
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
 ssh-keygen -t rsa
@@ -128,6 +126,8 @@ ssh-keygen -t rsa
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 
 curl -fsSL https://ollama.com/install.sh | sh
+
+sudo npm install -g browser-sync tree-sitter-cli n
 
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
