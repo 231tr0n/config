@@ -504,8 +504,8 @@ end
 -- defer setup
 require("nvim-web-devicons").setup()
 require("statuscol").setup({
-	ft_ignore = { "netrw", "NvimTree" },
-	bt_ignore = { "netrw", "NvimTree" },
+	ft_ignore = { "netrw", "NvimTree", "aerial" },
+	bt_ignore = { "netrw", "NvimTree", "aerial" },
 	relculright = false,
 	segments = {
 		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
