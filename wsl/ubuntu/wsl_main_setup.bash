@@ -129,5 +129,8 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 sudo npm install -g browser-sync tree-sitter-cli n
 
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
