@@ -127,7 +127,9 @@ sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 
 curl -fsSL https://ollama.com/install.sh | sh
 
-sudo npm install -g browser-sync tree-sitter-cli n
+sudo npm install -g browser-sync tree-sitter-cli n nodemon
+pipx install watchdog
+go install github.com/cosmtrek/air@latest
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
