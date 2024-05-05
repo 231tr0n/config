@@ -802,7 +802,16 @@ end
 dap.listeners.before.event_exited.dapui_config = function()
 	dapui.close()
 end
-require("dap-go").setup()
+require("dap-go").setup({
+	dap_configurations = {
+		{
+			type = "go",
+			name = "Attach remote",
+			mode = "remote",
+			request = "attach",
+		},
+	},
+})
 require("dap-python").setup(vim.fn.stdpath("data") .. "/debugpy/bin/python")
 require("dap-vscode-js").setup({
 	debugger_path = paq_path() .. "/vscode-js-debug",
