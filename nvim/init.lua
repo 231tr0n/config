@@ -118,6 +118,7 @@ bootstrap_paq({
 	"ray-x/web-tools.nvim",
 	"stevearc/overseer.nvim",
 	"ibhagwan/fzf-lua",
+	"folke/tokyonight.nvim",
 })
 
 -- Default settings
@@ -210,46 +211,46 @@ vim.cmd([[
 require("mini.ai").setup()
 require("mini.align").setup()
 -- require("mini.animate").setup({ scroll = { enable = false } })
-require("mini.base16").setup({
-	-- solarized dark color palette
-	palette = {
-		base00 = "#002B36",
-		base01 = "#073642",
-		base02 = "#586E75",
-		base03 = "#657B83",
-		base04 = "#839496",
-		base05 = "#93A1A1",
-		base06 = "#EEE8D5",
-		base07 = "#FDF6E3",
-		base08 = "#DC322F",
-		base09 = "#CB4B16",
-		base0A = "#B58900",
-		base0B = "#859900",
-		base0C = "#2AA198",
-		base0D = "#268BD2",
-		base0E = "#6C71C4",
-		base0F = "#D33682",
-	},
-	-- one dark color palette
-	-- palette = {
-	--  base00 = "#282C34",
-	--  base01 = "#353B45",
-	--  base02 = "#3E4451",
-	--  base03 = "#545862",
-	--  base04 = "#565C64",
-	--  base05 = "#ABB2BF",
-	--  base06 = "#B6BDCA",
-	--  base07 = "#C8CCD4",
-	--  base08 = "#E06C75",
-	--  base09 = "#D19A66",
-	--  base0A = "#E5C07B",
-	--  base0B = "#98C379",
-	--  base0C = "#56B6C2",
-	--  base0D = "#61AFEF",
-	--  base0E = "#C678DD",
-	--  base0F = "#BE5046",
-	-- },
-})
+-- require("mini.base16").setup({
+-- 	-- solarized dark color palette
+-- 	palette = {
+-- 		base00 = "#002B36",
+-- 		base01 = "#073642",
+-- 		base02 = "#586E75",
+-- 		base03 = "#657B83",
+-- 		base04 = "#839496",
+-- 		base05 = "#93A1A1",
+-- 		base06 = "#EEE8D5",
+-- 		base07 = "#FDF6E3",
+-- 		base08 = "#DC322F",
+-- 		base09 = "#CB4B16",
+-- 		base0A = "#B58900",
+-- 		base0B = "#859900",
+-- 		base0C = "#2AA198",
+-- 		base0D = "#268BD2",
+-- 		base0E = "#6C71C4",
+-- 		base0F = "#D33682",
+-- 	},
+-- 	-- one dark color palette
+-- 	-- palette = {
+-- 	--  base00 = "#282C34",
+-- 	--  base01 = "#353B45",
+-- 	--  base02 = "#3E4451",
+-- 	--  base03 = "#545862",
+-- 	--  base04 = "#565C64",
+-- 	--  base05 = "#ABB2BF",
+-- 	--  base06 = "#B6BDCA",
+-- 	--  base07 = "#C8CCD4",
+-- 	--  base08 = "#E06C75",
+-- 	--  base09 = "#D19A66",
+-- 	--  base0A = "#E5C07B",
+-- 	--  base0B = "#98C379",
+-- 	--  base0C = "#56B6C2",
+-- 	--  base0D = "#61AFEF",
+-- 	--  base0E = "#C678DD",
+-- 	--  base0F = "#BE5046",
+-- 	-- },
+-- })
 require("mini.basics").setup({
 	mappings = {
 		windows = true,
@@ -482,7 +483,28 @@ vim.notify = MiniNotify.make_notify()
 vim.ui.select = MiniPick.ui_select
 
 -- Utility libraries
+require("tokyonight").setup({
+	style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+	light_style = "day", -- The theme is used when the background is set to light
+	transparent = true,
+	terminal_colors = true,
+	styles = {
+		comments = { italic = true },
+		keywords = { italic = true },
+		functions = {},
+		variables = {},
+		-- Background styles. Can be "dark", "transparent" or "normal"
+		sidebars = "normal",
+		floats = "normal",
+	},
+	sidebars = { "qf", "help" },
+	day_brightness = 0.3,
+	hide_inactive_statusline = true,
+	dim_inactive = true,
+	lualine_bold = false,
+})
 vim.cmd([[
+  colorscheme tokyonight
   " Highlight groups
   highlight! link WinBar LineNr
   highlight! link WinBarNC LineNr
@@ -1241,6 +1263,8 @@ nmap("<leader>fr", "<cmd>lua require('spectre').toggle()<cr>", "Search and repla
 nmap("<leader>fs", "<cmd>FzfLua grep_project<cr>", "Search content")
 nmap("<leader>ft", "<cmd>FzfLua btags<cr>", "Search buffer tags")
 nmap("<leader>fx", "<cmd>FzfLua diagnostics_document<cr>", "Search document diagnostics")
+nmap("<leader>fy", "<cmd>FzfLua lsp_document_symbols<cr>", "Search document symbols")
+nmap("<leader>fY", "<cmd>FzfLua lsp_workspace_symbols<cr>", "Search workspace symbols")
 nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
