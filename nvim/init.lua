@@ -1458,6 +1458,12 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 	end,
 })
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "NvimTree,aerial,netrw",
+	callback = function()
+		vim.b.minicursorword_disable = true
+	end,
+})
 vim.api.nvim_create_autocmd("VimEnter", {
 	pattern = "*",
 	callback = function()
