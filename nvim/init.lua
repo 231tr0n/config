@@ -119,6 +119,7 @@ bootstrap_paq({
 	"stevearc/overseer.nvim",
 	"ibhagwan/fzf-lua",
 	"folke/tokyonight.nvim",
+	"HiPhish/rainbow-delimiters.nvim",
 })
 
 -- Default settings
@@ -388,7 +389,7 @@ require("mini.move").setup({
 		line_up = "<C-S-up>",
 	},
 	options = {
-		reindent_linewise = false,
+		reindent_linewise = true,
 	},
 })
 require("mini.notify").setup({
@@ -515,6 +516,26 @@ vim.cmd([[
   au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
   " au ColorScheme * highlight! link CursorLineFold CursorLineNr
 ]])
+local rainbow_delimiters = require("rainbow-delimiters")
+vim.g.rainbow_delimiters = {
+	strategy = {
+		[""] = rainbow_delimiters.strategy["global"],
+		commonlisp = rainbow_delimiters.strategy["local"],
+	},
+	query = {
+		[""] = "rainbow-delimiters",
+		lua = "rainbow-blocks",
+	},
+	highlight = {
+		"RainbowDelimiterRed",
+		-- "RainbowDelimiterYellow",
+		-- "RainbowDelimiterBlue",
+		-- "RainbowDelimiterOrange",
+		-- "RainbowDelimiterGreen",
+		-- "RainbowDelimiterViolet",
+		-- "RainbowDelimiterCyan",
+	},
+}
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
