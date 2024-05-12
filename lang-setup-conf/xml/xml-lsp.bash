@@ -6,7 +6,7 @@ mkdir -p xml-lsp
 cd xml-lsp
 
 wget "https://www.eclipse.org/downloads/download.php?file=/lemminx/snapshots/org.eclipse.lemminx-uber.jar" -O lemminx.jar
-cat > wrapper << 'EOL'
+cat >wrapper <<'EOL'
 #!/bin/sh
 
 java \

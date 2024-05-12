@@ -5,10 +5,10 @@ rm -rf lua-lsp
 mkdir -p lua-lsp
 cd lua-lsp
 
-VERSION=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/tags | jq -r '.[0].name')
+VERSION=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases | jq -r '.[0].name')
 
 wget "https://github.com/LuaLS/lua-language-server/releases/download/$VERSION/lua-language-server-$VERSION-linux-x64.tar.gz" -O lua-language-server.tar.gz
-cat > wrapper << 'EOL'
+cat >wrapper <<'EOL'
 #!/usr/bin/env sh
 TMPPATH="/tmp/lua-language-server-$(id -u)"
 mkdir -p "$TMPPATH"
