@@ -356,16 +356,16 @@ require("mini.hipatterns").setup({
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
 -- colors
---  .get_colorscheme()
---  :add_transparency({
---    general = true,
---    float = true,
---    statuscolumn = true,
---    statusline = false,
---    tabline = true,
---    winbar = true,
---  })
---  :apply()
+-- 	.get_colorscheme()
+-- 	:add_transparency({
+-- 		general = true,
+-- 		float = true,
+-- 		statuscolumn = true,
+-- 		statusline = false,
+-- 		tabline = true,
+-- 		winbar = true,
+-- 	})
+-- 	:apply()
 require("mini.indentscope").setup({
 	symbol = "│",
 	draw = {
@@ -494,9 +494,8 @@ require("tokyonight").setup({
 		keywords = { italic = true },
 		functions = {},
 		variables = {},
-		-- Background styles. Can be "dark", "transparent" or "normal"
-		sidebars = "normal",
-		floats = "normal",
+		sidebars = "transparent",
+		floats = "transparent",
 	},
 	sidebars = { "qf", "help" },
 	day_brightness = 0.3,
@@ -1496,19 +1495,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 -- Custom functionality
 -- Setting border for lsp hover
-local border = {
-	{ "╭", "FloatBorder" },
-	{ "─", "FloatBorder" },
-	{ "╮", "FloatBorder" },
-	{ "│", "FloatBorder" },
-	{ "╯", "FloatBorder" },
-	{ "─", "FloatBorder" },
-	{ "╰", "FloatBorder" },
-	{ "│", "FloatBorder" },
-}
-local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
-function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-	opts = opts or {}
-	opts.border = opts.border or border
-	return original_util_open_floating_preview(contents, syntax, opts, ...)
-end
+-- local border = {
+-- 	{ "╭", "FloatBorder" },
+-- 	{ "─", "FloatBorder" },
+-- 	{ "╮", "FloatBorder" },
+-- 	{ "│", "FloatBorder" },
+-- 	{ "╯", "FloatBorder" },
+-- 	{ "─", "FloatBorder" },
+-- 	{ "╰", "FloatBorder" },
+-- 	{ "│", "FloatBorder" },
+-- }
+-- local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
+-- function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+-- 	opts = opts or {}
+-- 	opts.border = opts.border or border
+-- 	return original_util_open_floating_preview(contents, syntax, opts, ...)
+-- end
