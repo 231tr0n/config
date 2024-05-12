@@ -297,6 +297,8 @@ require("mini.clue").setup({
 			{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 			{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 			{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
+			{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
+			{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 			{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 		},
 		require("mini.clue").gen_clues.builtin_completion(),
@@ -875,6 +877,35 @@ for _, language in ipairs({ "typescript", "javascript" }) do
 			processId = require("dap.utils").pick_process,
 			cwd = "${workspaceFolder}",
 		},
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Debug Jest Tests",
+			-- trace = true, -- include debugger info
+			runtimeExecutable = "node",
+			runtimeArgs = {
+				"./node_modules/jest/bin/jest.js",
+				"--runInBand",
+			},
+			rootPath = "${workspaceFolder}",
+			cwd = "${workspaceFolder}",
+			console = "integratedTerminal",
+			internalConsoleOptions = "neverOpen",
+		},
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Debug Mocha Tests",
+			-- trace = true, -- include debugger info
+			runtimeExecutable = "node",
+			runtimeArgs = {
+				"./node_modules/mocha/bin/mocha.js",
+			},
+			rootPath = "${workspaceFolder}",
+			cwd = "${workspaceFolder}",
+			console = "integratedTerminal",
+			internalConsoleOptions = "neverOpen",
+		},
 	}
 end
 dap.configurations.java = {
@@ -1217,6 +1248,7 @@ Global.diagnosticVirtualTextToggle = function()
 	end
 end
 -- Keymaps
+-- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 nmap("<F2>", MiniNotify.clear, "Clear all notifications")
 nmap("<F3>", "<cmd>call SynGroup()<cr>", "Echo highlight group")
@@ -1253,13 +1285,13 @@ nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval"
 nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
 nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
 nmap("<leader>eT", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
-nmap("<leader>et", "<cmd>NvimTreeToggle<cr>", "Toggle file tree")
 nmap("<leader>ef", "<cmd>NvimTreeFindFile<cr>", "Goto file in tree")
--- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
+nmap("<leader>et", "<cmd>NvimTreeToggle<cr>", "Toggle file tree")
 nmap("<leader>fL", "<cmd>FzfLua lines<cr>", "Search lines")
 nmap("<leader>fS", "<cmd>FzfLua live_grep_native<cr>", "Search content live")
 nmap("<leader>fT", "<cmd>FzfLua tags<cr>", "Search tags")
 nmap("<leader>fX", "<cmd>FzfLua diagnostics_workspace<cr>", "Search workspace diagnostics")
+nmap("<leader>fY", "<cmd>FzfLua lsp_workspace_symbols<cr>", "Search workspace symbols")
 nmap("<leader>fb", "<cmd>FzfLua buffers<cr>", "Search buffers")
 nmap("<leader>fdb", "<cmd>FzfLua dap_breakpoints<cr>", "Search dap breakpoints")
 nmap("<leader>fdc", "<cmd>FzfLua dap_configurations<cr>", "Search dap configurations")
@@ -1284,7 +1316,6 @@ nmap("<leader>fs", "<cmd>FzfLua grep_project<cr>", "Search content")
 nmap("<leader>ft", "<cmd>FzfLua btags<cr>", "Search buffer tags")
 nmap("<leader>fx", "<cmd>FzfLua diagnostics_document<cr>", "Search document diagnostics")
 nmap("<leader>fy", "<cmd>FzfLua lsp_document_symbols<cr>", "Search document symbols")
-nmap("<leader>fY", "<cmd>FzfLua lsp_workspace_symbols<cr>", "Search workspace symbols")
 nmap("<leader>gc", "<cmd>lua require('neogen').generate({ type = 'class' })<cr>", "Generate class annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'file' })<cr>", "Generate file annotations")
 nmap("<leader>gf", "<cmd>lua require('neogen').generate({ type = 'func' })<cr>", "Generate function annotations")
@@ -1316,8 +1347,12 @@ nmap("<leader>rr", "<cmd>HurlRun<cr>", "Run request")
 nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
 nmap("<leader>td", "<cmd>lua require('neotest').run.run({ strategy = 'dap' })<cr>", "Run test with dap")
 nmap("<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", "Run file tests")
+nmap("<leader>tgm", "<cmd>lua require('dap-go').debug_test()<cr>", "Test method")
 nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
+nmap("<leader>tpc", "<cmd>lua require('dap-python').test_class()<cr>", "Test class")
+nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test method")
+nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
 nmap("<leader>ts", "<cmd>lua require('neotest').run.stop()<cr>", "Stop test")
 nmap("<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
 nmap("<leader>xl", "<cmd>lua require('trouble').toggle('loclist')<cr>", "Toggle loclist")
