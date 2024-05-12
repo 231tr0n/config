@@ -449,22 +449,22 @@ require("mini.statusline").setup({
 				{ hl = mode_hl, strings = { location } },
 			})
 		end,
-		inactive = function()
-			local git = MiniStatusline.section_git({ trunc_width = 75 })
-			local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-			local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-			if filename:sub(1, 2) == "%F" or filename:sub(1, 2) == "%f" then
-				filename = filename:sub(1, 2) .. " " .. filename:sub(3, -1)
-			end
-			local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
-			return MiniStatusline.combine_groups({
-				{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics } },
-				"%<",
-				{ hl = "MiniStatuslineFileinfo", strings = { filename } },
-				"%=",
-				{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
-			})
-		end,
+		-- inactive = function()
+		-- 	local git = MiniStatusline.section_git({ trunc_width = 75 })
+		-- 	local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+		-- 	local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+		-- 	if filename:sub(1, 2) == "%F" or filename:sub(1, 2) == "%f" then
+		-- 		filename = filename:sub(1, 2) .. " " .. filename:sub(3, -1)
+		-- 	end
+		-- 	local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
+		-- 	return MiniStatusline.combine_groups({
+		-- 		{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics } },
+		-- 		"%<",
+		-- 		{ hl = "MiniStatuslineFileinfo", strings = { filename } },
+		-- 		"%=",
+		-- 		{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+		-- 	})
+		-- end,
 	},
 })
 require("mini.surround").setup()
