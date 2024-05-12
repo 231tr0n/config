@@ -447,11 +447,11 @@ require("mini.statusline").setup({
 			-- local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
 			return MiniStatusline.combine_groups({
 				{ hl = mode_hl, strings = { mode } },
-				{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics } },
+				{ hl = "MiniStatuslineFilename", strings = { git, diagnostics } },
 				"%<",
-				{ hl = "MiniStatuslineFilename", strings = { filename } },
+				{ hl = "MiniStatuslineFileinfo", strings = { filename } },
 				"%=",
-				{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+				{ hl = "MiniStatuslineFilename", strings = { fileinfo } },
 				-- { hl = mode_hl, strings = { search, location } },
 				{ hl = mode_hl, strings = { location } },
 			})
@@ -467,7 +467,7 @@ require("mini.statusline").setup({
 			return MiniStatusline.combine_groups({
 				{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics } },
 				"%<",
-				{ hl = "MiniStatuslineFilename", strings = { filename } },
+				{ hl = "MiniStatuslineFileinfo", strings = { filename } },
 				"%=",
 				{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
 			})
