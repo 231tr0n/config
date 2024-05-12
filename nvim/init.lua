@@ -86,19 +86,6 @@ bootstrap_paq({
 		end,
 	},
 	"mfussenegger/nvim-jdtls",
-	{
-		"microsoft/vscode-js-debug",
-		build = function()
-			local path = paq_path() .. "/vscode-js-debug"
-			vim.fn.system({
-				"bash",
-				"-c",
-				"cd " .. path .. " && rm -rf dist out && npm install && npx gulp vsDebugServerBundle && mv dist out",
-			})
-			return true
-		end,
-	},
-	"mxsdev/nvim-dap-vscode-js",
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
 	"stevearc/aerial.nvim",
@@ -397,6 +384,7 @@ require("mini.move").setup({
 require("mini.notify").setup({
 	window = {
 		max_width_share = 0.5,
+		-- winblend = 100,
 	},
 })
 require("mini.operators").setup()
@@ -857,10 +845,15 @@ require("dap-go").setup({
 	},
 })
 require("dap-python").setup(vim.fn.stdpath("data") .. "/debugpy/bin/python")
-require("dap-vscode-js").setup({
-	debugger_path = paq_path() .. "/vscode-js-debug",
-	adapters = { "pwa-node" },
-})
+require("dap").adapters["pwa-node"] = {
+	type = "server",
+	host = "localhost",
+	port = "${port}",
+	executable = {
+		command = "node",
+		args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
+	},
+}
 for _, language in ipairs({ "typescript", "javascript" }) do
 	require("dap").configurations[language] = {
 		{
