@@ -384,7 +384,7 @@ require("mini.move").setup({
 require("mini.notify").setup({
 	window = {
 		max_width_share = 0.5,
-		-- winblend = 100,
+		winblend = 0,
 	},
 })
 require("mini.operators").setup()
@@ -492,6 +492,20 @@ require("tokyonight").setup({
 	hide_inactive_statusline = true,
 	dim_inactive = true,
 	lualine_bold = false,
+	on_highlights = function(highlights, colors)
+		highlights.MiniNotifyNormal = {
+			bg = colors.none,
+			fg = colors.border_highlight,
+		}
+		highlights.MiniNotifyTitle = {
+			bg = colors.none,
+			fg = colors.border_highlight,
+		}
+		highlights.MiniNotifyBorder = {
+			bg = colors.none,
+			fg = colors.border_highlight,
+		}
+	end,
 })
 vim.cmd([[
   colorscheme tokyonight
