@@ -127,7 +127,6 @@ go install -v github.com/jesseduffield/lazygit@latest
 
 git config --global core.editor "nvim"
 chsh -s /usr/bin/fish
-ssh-keygen -t rsa
 
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 
@@ -139,6 +138,8 @@ go install github.com/cosmtrek/air@latest
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
+
+ssh-keygen -t rsa
 
 echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
