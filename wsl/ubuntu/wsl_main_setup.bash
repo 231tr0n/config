@@ -29,6 +29,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/go/go
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/lua-lsp.bash -o ~/scripts/lua-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/js/node-debug.bash -o ~/scripts/node-debug.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/python/python-debug.bash -o ~/scripts/python-debug.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
@@ -90,6 +91,7 @@ cd ~/scripts
 ./java-debug.bash
 ./java-test.bash
 ./node-debug.bash
+./python-debug.bash
 cd ~
 
 sudo apt install -y clang-tidy shellcheck checkstyle checkstyle-doc
