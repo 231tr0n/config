@@ -38,6 +38,7 @@ chmod +x ~/scripts/go-install.bash
 chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
 chmod +x ~/scripts/node-debug.bash
+chmod +x ~/scripts/python-debug.bash
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH=$PATH:$HOME/.cargo/bin
