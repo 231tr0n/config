@@ -69,22 +69,7 @@ bootstrap_paq({
 	"rcarriga/nvim-dap-ui",
 	"jbyuki/one-small-step-for-vimkind",
 	"leoluz/nvim-dap-go",
-	{
-		"mfussenegger/nvim-dap-python",
-		build = function()
-			local path = vim.fn.stdpath("data")
-			vim.fn.system({
-				"bash",
-				"-c",
-				"cd "
-					.. path
-					.. " && rm -rf debugpy && python -m venv debugpy && "
-					.. path
-					.. "/debugpy/bin/python -m pip install debugpy",
-			})
-			return true
-		end,
-	},
+	"mfussenegger/nvim-dap-python",
 	"mfussenegger/nvim-jdtls",
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
@@ -498,11 +483,11 @@ require("tokyonight").setup({
 	on_highlights = function(highlights, colors)
 		highlights.MiniNotifyNormal = {
 			bg = colors.none,
-			fg = colors.border_highlight,
+			fg = colors.fg_dark,
 		}
 		highlights.MiniNotifyTitle = {
 			bg = colors.none,
-			fg = colors.border_highlight,
+			fg = colors.fg_dark,
 		}
 		highlights.MiniNotifyBorder = {
 			bg = colors.none,
@@ -530,7 +515,7 @@ vim.g.rainbow_delimiters = {
 	},
 	query = {
 		[""] = "rainbow-delimiters",
-		lua = "rainbow-blocks",
+		-- lua = "rainbow-blocks",
 	},
 	highlight = {
 		"RainbowDelimiterRed",
@@ -861,7 +846,7 @@ require("dap-go").setup({
 		},
 	},
 })
-require("dap-python").setup(vim.fn.stdpath("data") .. "/debugpy/bin/python")
+require("dap-python").setup("~/.local/share/debugpy/bin/python")
 require("dap").adapters["pwa-node"] = {
 	type = "server",
 	host = "localhost",
