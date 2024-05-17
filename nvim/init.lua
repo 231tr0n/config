@@ -463,37 +463,23 @@ vim.ui.select = MiniPick.ui_select
 
 -- Utility libraries
 require("tokyonight").setup({
-	style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-	light_style = "day", -- The theme is used when the background is set to light
-	transparent = true,
+	style = "storm",
+	light_style = "day",
+	transparent = false,
 	terminal_colors = true,
 	styles = {
 		comments = { italic = true },
 		keywords = { italic = true },
 		functions = {},
 		variables = {},
-		sidebars = "dark",
-		floats = "dark",
+		sidebars = "normal",
+		floats = "normal",
 	},
 	sidebars = { "qf", "help" },
 	day_brightness = 0.3,
 	hide_inactive_statusline = true,
 	dim_inactive = true,
 	lualine_bold = false,
-	on_highlights = function(highlights, colors)
-		highlights.MiniNotifyNormal = {
-			bg = colors.none,
-			fg = colors.fg_dark,
-		}
-		highlights.MiniNotifyTitle = {
-			bg = colors.none,
-			fg = colors.fg_dark,
-		}
-		highlights.MiniNotifyBorder = {
-			bg = colors.none,
-			fg = colors.border_highlight,
-		}
-	end,
 })
 vim.cmd([[
   colorscheme tokyonight
@@ -542,11 +528,15 @@ require("statuscol").setup({
 	bt_ignore = { "netrw", "NvimTree", "aerial" },
 	relculright = false,
 	segments = {
-		{ text = { " ", "%s" }, click = "v:lua.ScSa" },
-		{ text = { require("statuscol.builtin").lnumfunc }, click = "v:lua.ScLa", hl = "" },
-		{ text = { require("statuscol.builtin").foldfunc, " " }, click = "v:lua.ScFa", hl = "" },
-		-- { text = { require("statuscol.builtin").foldfunc, "▕" }, click = "v:lua.ScFa" },
-		-- { text = { " " }, hl = "Comment" },
+		{
+			text = { require("statuscol.builtin").foldfunc, " " },
+			click = "v:lua.ScFa",
+		},
+		{ text = { "%s" }, click = "v:lua.ScSa" },
+		{
+			text = { require("statuscol.builtin").lnumfunc, " " },
+			click = "v:lua.ScLa",
+		},
 	},
 })
 require("trouble").setup()
