@@ -528,10 +528,10 @@ require("statuscol").setup({
 	bt_ignore = { "netrw", "NvimTree", "aerial" },
 	relculright = false,
 	segments = {
-		{
-			text = { require("statuscol.builtin").foldfunc, " " },
-			click = "v:lua.ScFa",
-		},
+		-- {
+		-- 	text = { require("statuscol.builtin").foldfunc, " " },
+		-- 	click = "v:lua.ScFa",
+		-- },
 		{ text = { "%s" }, click = "v:lua.ScSa" },
 		{
 			text = { require("statuscol.builtin").lnumfunc, " " },
