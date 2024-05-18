@@ -757,6 +757,9 @@ lspconfig.lua_ls.setup({
 		},
 	},
 })
+lspconfig.texlab.setup({
+	capabilities = capabilities,
+})
 lspconfig.html.setup({
 	capabilities = capabilities,
 })

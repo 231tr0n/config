@@ -80,6 +80,7 @@ sudo npm install -g bash-language-server@latest
 sudo npm install -g typescript-language-server@latest
 sudo npm install -g @angular/language-server@latest
 sudo npm install -g svelte-language-server@latest
+cargo install --git https://github.com/latex-lsp/texlab
 cd ~/scripts
 ./java-lsp.bash
 ./lua-lsp.bash
