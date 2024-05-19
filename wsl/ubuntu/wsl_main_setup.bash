@@ -115,6 +115,7 @@ cargo install stylua --features lua52
 cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
+pipx install yamlfix
 
 cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
 
