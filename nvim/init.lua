@@ -1070,7 +1070,7 @@ require("conform").setup({
 		python = { "black" },
 		svelte = { "prettier" },
 		java = { "google-java-format" },
-		go = { "gofumpt" },
+		go = { "gofmt" },
 		tex = { "latexindent" },
 		xml = { "xmllint" },
 		yaml = { "yamlfix" },
