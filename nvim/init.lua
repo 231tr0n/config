@@ -424,16 +424,16 @@ require("mini.statusline").setup({
 			end
 			local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
 			local location = MiniStatusline.section_location({ trunc_width = 75 })
-			-- local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+			local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+			local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
 			return MiniStatusline.combine_groups({
 				{ hl = mode_hl, strings = { mode } },
-				{ hl = "MiniStatuslineFilename", strings = { git, diagnostics } },
+				{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics, lsp } },
 				"%<",
-				{ hl = "MiniStatuslineFileinfo", strings = { filename } },
+				{ hl = "MiniStatuslineFilename", strings = { filename } },
 				"%=",
-				{ hl = "MiniStatuslineFilename", strings = { fileinfo } },
-				-- { hl = mode_hl, strings = { search, location } },
-				{ hl = mode_hl, strings = { location } },
+				{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+				{ hl = mode_hl, strings = { search, location } },
 			})
 		end,
 		-- inactive = function()
@@ -482,6 +482,11 @@ require("tokyonight").setup({
 	hide_inactive_statusline = true,
 	dim_inactive = true,
 	lualine_bold = false,
+	on_highlights = function(highlights, colors)
+		highlights.MiniStatuslineDevinfo = { fg = colors.fg_dark, bg = colors.fg_gutter }
+		highlights.MiniStatuslineFileinfo = { fg = colors.fg_dark, bg = colors.fg_gutter }
+		highlights.MiniStatuslineFilename = { fg = colors.fg_dark, bg = colors.bg_highlight }
+	end,
 })
 vim.cmd([[
   colorscheme tokyonight
@@ -919,6 +924,11 @@ end
 dap.listeners.before.event_exited.dapui_config = function()
 	dapui.close()
 end
+dap.adapters.delve = {
+	type = "server",
+	host = "127.0.0.1",
+	port = 38697,
+}
 require("dap-go").setup({
 	dap_configurations = {
 		{
