@@ -93,6 +93,7 @@ bootstrap_paq({
 	"ibhagwan/fzf-lua",
 	"folke/tokyonight.nvim",
 	"HiPhish/rainbow-delimiters.nvim",
+	"MysticalDevil/inlay-hints.nvim",
 })
 
 -- Default settings
@@ -746,6 +747,9 @@ lspconfig.lua_ls.setup({
 	capabilities = capabilities,
 	settings = {
 		Lua = {
+			hint = {
+				enable = true,
+			},
 			runtime = {
 				version = "LuaJIT",
 			},
@@ -776,6 +780,17 @@ lspconfig.bashls.setup({
 })
 lspconfig.gopls.setup({
 	capabilities = capabilities,
+	settings = {
+		hints = {
+			rangeVariableTypes = true,
+			parameterNames = true,
+			constantValues = true,
+			assignVariableTypes = true,
+			compositeLiteralFields = true,
+			compositeLiteralTypes = true,
+			functionTypeParameters = true,
+		},
+	},
 })
 lspconfig.pyright.setup({
 	capabilities = capabilities,
@@ -785,15 +800,87 @@ lspconfig.pyright.setup({
 -- })
 lspconfig.rust_analyzer.setup({
 	capabilities = capabilities,
+	settings = {
+		["rust-analyzer"] = {
+			inlayHints = {
+				bindingModeHints = {
+					enable = false,
+				},
+				chainingHints = {
+					enable = true,
+				},
+				closingBraceHints = {
+					enable = true,
+					minLines = 25,
+				},
+				closureReturnTypeHints = {
+					enable = "never",
+				},
+				lifetimeElisionHints = {
+					enable = "never",
+					useParameterNames = false,
+				},
+				maxLength = 25,
+				parameterHints = {
+					enable = true,
+				},
+				reborrowHints = {
+					enable = "never",
+				},
+				renderColons = true,
+				typeHints = {
+					enable = true,
+					hideClosureInitialization = false,
+					hideNamedConstructor = false,
+				},
+			},
+		},
+	},
 })
 lspconfig.tsserver.setup({
 	capabilities = capabilities,
+	settings = {
+		typescript = {
+			inlayHints = {
+				includeInlayParameterNameHints = "all",
+				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+				includeInlayFunctionParameterTypeHints = true,
+				includeInlayVariableTypeHints = true,
+				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayFunctionLikeReturnTypeHints = true,
+				includeInlayEnumMemberValueHints = true,
+			},
+		},
+		javascript = {
+			inlayHints = {
+				includeInlayParameterNameHints = "all",
+				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+				includeInlayFunctionParameterTypeHints = true,
+				includeInlayVariableTypeHints = true,
+				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayFunctionLikeReturnTypeHints = true,
+				includeInlayEnumMemberValueHints = true,
+			},
+		},
+	},
 })
 lspconfig.svelte.setup({
 	capabilities = capabilities,
 })
 lspconfig.clangd.setup({
 	capabilities = capabilities,
+	settings = {
+		clangd = {
+			InlayHints = {
+				Designators = true,
+				Enabled = true,
+				ParameterNames = true,
+				DeducedTypes = true,
+			},
+		},
+	},
 })
 lspconfig.yamlls.setup({
 	capabilities = capabilities,
@@ -807,6 +894,7 @@ lspconfig.lemminx.setup({
 lspconfig.angularls.setup({
 	capabilities = capabilities,
 })
+require("inlay-hints").setup()
 require("aerial").setup({
 	backends = { "treesitter", "lsp" },
 	show_guides = true,
@@ -1428,6 +1516,12 @@ vim.api.nvim_create_autocmd("FileType", {
 						--      profile = "GoogleStyle",
 						-- },
 					},
+					inlayHints = {
+						parameterNames = {
+							enabled = "all",
+							exclusions = { "this" },
+						},
+					},
 					signatureHelp = { enabled = true },
 					contentProvider = { preferred = "fernflower" },
 					codeGeneration = {
@@ -1474,16 +1568,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		if vim.bo.filetype == "java" then
 			require("jdtls.dap").setup_dap_main_class_configs()
 		end
-	end,
-})
-vim.api.nvim_create_autocmd({ "InsertEnter" }, {
-	callback = function()
-		vim.lsp.buf.inlay_hint(0, true)
-	end,
-})
-vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-	callback = function()
-		vim.lsp.buf.inlay_hint(0, false)
 	end,
 })
 vim.api.nvim_create_autocmd("FileType", {
