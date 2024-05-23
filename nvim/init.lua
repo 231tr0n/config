@@ -61,6 +61,7 @@ bootstrap_paq({
 	"hrsh7th/cmp-buffer",
 	"hrsh7th/cmp-cmdline",
 	"hrsh7th/cmp-nvim-lsp",
+	"hrsh7th/cmp-nvim-lsp-signature-help",
 	"saadparwaiz1/cmp_luasnip",
 	"petertriho/cmp-git",
 	"folke/trouble.nvim",
@@ -580,6 +581,7 @@ cmp.setup({
 	}),
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp" },
+		{ name = "nvim_lsp_signature_help" },
 		{ name = "luasnip" },
 	}, {
 		{ name = "buffer" },
@@ -1474,6 +1476,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end
 	end,
 })
+vim.api.nvim_create_autocmd({ "InsertEnter" }, {
+	callback = function()
+		vim.lsp.buf.inlay_hint(0, true)
+	end,
+})
+vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+	callback = function()
+		vim.lsp.buf.inlay_hint(0, false)
+	end,
+})
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "svelte,jsx,html,xml,xsl,javascriptreact",
 	callback = function()
@@ -1518,19 +1530,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 -- Custom functionality
 -- Setting border for lsp hover
--- local border = {
--- 	{ "╭", "FloatBorder" },
--- 	{ "─", "FloatBorder" },
--- 	{ "╮", "FloatBorder" },
--- 	{ "│", "FloatBorder" },
--- 	{ "╯", "FloatBorder" },
--- 	{ "─", "FloatBorder" },
--- 	{ "╰", "FloatBorder" },
--- 	{ "│", "FloatBorder" },
--- }
--- local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
--- function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
--- 	opts = opts or {}
--- 	opts.border = opts.border or border
--- 	return original_util_open_floating_preview(contents, syntax, opts, ...)
--- end
+local border = {
+	{ "╭", "FloatBorder" },
+	{ "─", "FloatBorder" },
+	{ "╮", "FloatBorder" },
+	{ "│", "FloatBorder" },
+	{ "╯", "FloatBorder" },
+	{ "─", "FloatBorder" },
+	{ "╰", "FloatBorder" },
+	{ "│", "FloatBorder" },
+}
+local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
+function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+	opts = opts or {}
+	opts.border = opts.border or border
+	return original_util_open_floating_preview(contents, syntax, opts, ...)
+end
