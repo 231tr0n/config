@@ -937,6 +937,15 @@ require("dap-go").setup({
 			mode = "remote",
 			request = "attach",
 		},
+		{
+			type = "go",
+			name = "Attach remote(Substitute path)",
+			mode = "remote",
+			request = "attach",
+			substitutePath = {
+				{ from = "${workspaceFolder}", to = "${workspaceFolder}" },
+			},
+		},
 	},
 })
 require("dap-python").setup("~/.local/share/debugpy/bin/python")
