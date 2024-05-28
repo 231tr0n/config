@@ -802,6 +802,15 @@ lspconfig.pyright.setup({
 })
 -- lspconfig.basedpyright.setup({
 -- 	capabilities = capabilities,
+-- 	settings = {
+-- 		basedpyright = {
+-- 			analysis = {
+-- 				autoSearchPaths = true,
+-- 				diagnosticMode = "openFilesOnly",
+-- 				useLibraryCodeForTypes = true,
+-- 			},
+-- 		},
+-- 	},
 -- })
 lspconfig.rust_analyzer.setup({
 	capabilities = capabilities,
@@ -873,6 +882,18 @@ lspconfig.tsserver.setup({
 })
 lspconfig.svelte.setup({
 	capabilities = capabilities,
+	settings = {
+		typescript = {
+			inlayHints = {
+				parameterNames = { enabled = "all" },
+				parameterTypes = { enabled = true },
+				variableTypes = { enabled = true },
+				propertyDeclarationTypes = { enabled = true },
+				functionLikeReturnTypes = { enabled = true },
+				enumMemberValues = { enabled = true },
+			},
+		},
+	},
 })
 lspconfig.clangd.setup({
 	capabilities = capabilities,
