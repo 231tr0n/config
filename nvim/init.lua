@@ -74,7 +74,6 @@ bootstrap_paq({
 	"mfussenegger/nvim-jdtls",
 	"mfussenegger/nvim-lint",
 	"stevearc/conform.nvim",
-	"stevearc/aerial.nvim",
 	"David-Kunz/gen.nvim",
 	"danymat/neogen",
 	"nvim-neotest/neotest",
@@ -531,8 +530,8 @@ end
 -- defer setup
 require("nvim-web-devicons").setup()
 require("statuscol").setup({
-	ft_ignore = { "netrw", "NvimTree", "aerial" },
-	bt_ignore = { "netrw", "NvimTree", "aerial" },
+	ft_ignore = { "netrw", "NvimTree" },
+	bt_ignore = { "netrw", "NvimTree" },
 	relculright = false,
 	segments = {
 		-- {
@@ -921,13 +920,6 @@ lspconfig.angularls.setup({
 	capabilities = capabilities,
 })
 require("inlay-hints").setup()
-require("aerial").setup({
-	backends = { "treesitter", "lsp" },
-	show_guides = true,
-	layout = {
-		filter_kind = false,
-	},
-})
 require("neogen").setup({ snippet_engine = "luasnip" })
 
 -- Dap setup
@@ -1380,11 +1372,6 @@ nmap("<leader>ba", "<cmd>b#<CR>", "Alternate")
 nmap("<leader>bd", "<cmd>lua MiniBufremove.delete()<CR>", "Delete")
 nmap("<leader>bu", "<cmd>UndotreeToggle<CR>", "Undotree")
 nmap("<leader>bw", "<cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
-nmap("<leader>cf", "<cmd>call aerial#fzf()<cr>", "Code outline fzf")
-nmap("<leader>cn", "<cmd>AerialNext<cr>", "Code outline next")
-nmap("<leader>co", "<cmd>AerialNavToggle<cr>", "Code navigation toggle")
-nmap("<leader>cp", "<cmd>AerialPrev<cr>", "Code outline prev")
-nmap("<leader>ct", "<cmd>AerialToggle<cr>", "Code outline toggle")
 nmap("<leader>dC", "<cmd>lua require('dap').clear_breakpoints()<cr>", "Clear breakpoints")
 nmap("<leader>db", "<cmd>lua require('dap').list_breakpoints()<cr>", "List breakpoints")
 nmap("<leader>dc", "<cmd>lua require('dap').continue()<cr>", "Continue")
@@ -1613,7 +1600,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = "NvimTree,aerial,netrw",
+	pattern = "NvimTree,netrw",
 	callback = function()
 		vim.b.minicursorword_disable = true
 	end,
