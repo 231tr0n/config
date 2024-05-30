@@ -1459,7 +1459,6 @@ nmap("<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", "Hover symbol")
 nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
-nmap("<leader>lt", "<cmd>lua require('trouble').toggle('lsp_references')<cr>", "Toggle lsp references")
 nmap("<leader>rc", "<cmd>CurlToHurl<cr>", "Convert curl to hurl")
 nmap("<leader>rr", "<cmd>HurlRun<cr>", "Run request")
 nmap("<leader>ta", "<cmd>lua require('neotest').run.attach()<cr>", "Attach to test")
@@ -1473,11 +1472,12 @@ nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test me
 nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
 nmap("<leader>ts", "<cmd>lua require('neotest').run.stop()<cr>", "Stop test")
 nmap("<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
-nmap("<leader>xl", "<cmd>lua require('trouble').toggle('loclist')<cr>", "Toggle loclist")
-nmap("<leader>xq", "<cmd>lua require('trouble').toggle('quickfix')<cr>", "Toggle quickfix list")
-nmap("<leader>xt", "<cmd>lua require('trouble').toggle()<cr>", "Toggle trouble")
-nmap("<leader>xw", ":lua require('trouble').toggle('workspace_diagnostics')<cr>", "Toggle workspace diagnostics")
-nmap("<leader>xx", "<cmd>lua require('trouble').toggle('document_diagnostics')<cr>", "Toggle document diagnostics")
+nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
+nmap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", "Toggle quickfix")
+nmap("<leader>xr", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", "Toggle LSP Definitions / references")
+nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
+nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
+nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 vmap("<C-c>", '"+y', "Copy to clipboard")
@@ -1502,27 +1502,23 @@ vim.api.nvim_create_user_command("Format", function(args)
 end, { range = true })
 
 -- Autocommand configuration
-vim.api.nvim_create_autocmd("BufWinEnter", {
-	pattern = "quickfix",
-	callback = function()
-		local ok, trouble = pcall(require, "trouble")
-		if ok then
-			vim.defer_fn(function()
-				vim.cmd("cclose")
-				trouble.open("quickfix")
-			end, 0)
+vim.api.nvim_create_autocmd("BufRead", {
+	callback = function(ev)
+		if vim.bo[ev.buf].buftype == "quickfix" then
+			vim.schedule(function()
+				vim.cmd([[cclose]])
+				vim.cmd([[Trouble qflist open]])
+			end)
 		end
 	end,
 })
-vim.api.nvim_create_autocmd("BufWinEnter", {
-	pattern = "loclist",
-	callback = function()
-		local ok, trouble = pcall(require, "trouble")
-		if ok then
-			vim.defer_fn(function()
-				vim.cmd("lclose")
-				trouble.open("loclist")
-			end, 0)
+vim.api.nvim_create_autocmd("BufRead", {
+	callback = function(ev)
+		if vim.bo[ev.buf].buftype == "loclist" then
+			vim.schedule(function()
+				vim.cmd([[lclose]])
+				vim.cmd([[Trouble loclist open]])
+			end)
 		end
 	end,
 })
