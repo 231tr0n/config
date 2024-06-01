@@ -466,7 +466,7 @@ vim.ui.select = MiniPick.ui_select
 -- Utility libraries
 require("regexplainer").setup({
 	mode = "narrative",
-	auto = true,
+	auto = false,
 	filetypes = {
 		"html",
 		"js",
