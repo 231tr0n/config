@@ -40,6 +40,7 @@ bootstrap_paq({
 	"itchyny/vim-qfedit",
 	"mg979/vim-visual-multi",
 	-- Lua plugins
+	"MunifTanjim/nui.nvim",
 	"echasnovski/mini.nvim",
 	"nvim-lua/plenary.nvim",
 	"luukvbaal/statuscol.nvim",
@@ -93,6 +94,7 @@ bootstrap_paq({
 	"folke/tokyonight.nvim",
 	"HiPhish/rainbow-delimiters.nvim",
 	"MysticalDevil/inlay-hints.nvim",
+	"bennypowers/nvim-regexplainer",
 })
 
 -- Default settings
@@ -462,6 +464,33 @@ vim.notify = MiniNotify.make_notify()
 vim.ui.select = MiniPick.ui_select
 
 -- Utility libraries
+require("regexplainer").setup({
+	mode = "narrative",
+	auto = true,
+	filetypes = {
+		"html",
+		"js",
+		"cjs",
+		"mjs",
+		"ts",
+		"jsx",
+		"tsx",
+		"cjsx",
+		"mjsx",
+	},
+	debug = false,
+	display = "split",
+	mappings = {
+		-- toggle = "gR",
+		-- show = 'gS',
+		-- hide = 'gH',
+		-- show_split = 'gP',
+		-- show_popup = 'gU',
+	},
+	narrative = {
+		indendation_string = "> ",
+	},
+})
 require("tokyonight").setup({
 	style = "storm",
 	light_style = "day",
@@ -665,6 +694,7 @@ require("nvim-treesitter.configs").setup({
 		"gosum",
 		"gowork",
 		"graphql",
+		"groovy",
 		"html",
 		"http",
 		"hurl",
@@ -688,6 +718,7 @@ require("nvim-treesitter.configs").setup({
 		"php",
 		"pug",
 		"python",
+		"regex",
 		"ruby",
 		"rust",
 		"scala",
