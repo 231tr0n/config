@@ -479,13 +479,19 @@ require("regexplainer").setup({
 		"mjsx",
 	},
 	debug = false,
-	display = "split",
+	display = "popup",
 	mappings = {
 		-- toggle = "gR",
 		-- show = 'gS',
 		-- hide = 'gH',
 		-- show_split = 'gP',
 		-- show_popup = 'gU',
+	},
+	popup = {
+		border = {
+			padding = { 0, 0 },
+			style = "single",
+		},
 	},
 	narrative = {
 		indendation_string = "> ",
