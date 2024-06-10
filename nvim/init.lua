@@ -82,7 +82,6 @@ bootstrap_paq({
 	"nvim-neotest/neotest-go",
 	"nvim-neotest/neotest-jest",
 	"marilari88/neotest-vitest",
-	"thenbe/neotest-playwright",
 	"rouge8/neotest-rust",
 	"MarkEmmons/neotest-deno",
 	"lawrence-laz/neotest-zig",
@@ -1249,7 +1248,6 @@ require("conform").setup({
 require("neotest").setup({
 	adapters = {
 		require("neotest-python"),
-		require("neotest-playwright"),
 		require("neotest-go"),
 		require("neotest-jest"),
 		require("neotest-vitest"),
