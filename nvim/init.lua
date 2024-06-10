@@ -1231,7 +1231,7 @@ require("conform").setup({
 		go = { "gofmt" },
 		tex = { "latexindent" },
 		xml = { "xmllint" },
-		yaml = { "yamlfix" },
+		yaml = { "yamlfmt" },
 		json = { "jq", "prettier" },
 		jsonc = { "prettier" },
 		css = { "prettier" },
