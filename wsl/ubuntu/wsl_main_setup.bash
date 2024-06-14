@@ -136,7 +136,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 sudo npm install -g browser-sync tree-sitter-cli n nodemon
 pipx install watchdog
-go install github.com/cosmtrek/air@latest
+go install github.com/air-verse/air@latest
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
