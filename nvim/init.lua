@@ -521,16 +521,15 @@ require("tokyonight").setup({
 	end,
 })
 vim.cmd([[
-  colorscheme tokyonight
   " Highlight groups
-  " highlight! link WinBar LineNr
-  " highlight! link WinBarNC LineNr
-  " highlight! link IblScope MiniIndentscopeSymbol
-  " highlight! link CursorLineFold CursorLineNr
   " au ColorScheme * highlight! link WinBar LineNr
   " au ColorScheme * highlight! link WinBarNC LineNr
   " au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
   " au ColorScheme * highlight! link CursorLineFold CursorLineNr
+  au ColorScheme * highlight! link SignColumn LineNr
+  au ColorScheme * highlight! link FoldColumn LineNr
+  au ColorScheme * highlight! link CursorLineFold CursorLineNr
+  colorscheme tokyonight
 ]])
 local rainbow_delimiters = require("rainbow-delimiters")
 vim.g.rainbow_delimiters = {
@@ -567,14 +566,14 @@ require("statuscol").setup({
 	bt_ignore = { "netrw", "NvimTree" },
 	relculright = false,
 	segments = {
-		-- {
-		-- 	text = { require("statuscol.builtin").foldfunc, " " },
-		-- 	click = "v:lua.ScFa",
-		-- },
 		{ text = { "%s" }, click = "v:lua.ScSa" },
 		{
-			text = { require("statuscol.builtin").lnumfunc, " " },
+			text = { require("statuscol.builtin").lnumfunc },
 			click = "v:lua.ScLa",
+		},
+		{
+			text = { require("statuscol.builtin").foldfunc, " " },
+			click = "v:lua.ScFa",
 		},
 	},
 })
