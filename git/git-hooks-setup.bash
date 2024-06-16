@@ -39,8 +39,8 @@ setup() {
 		#!/bin/bash
 
 		if ! grep -Eq '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z -]+\))?!?: [a-z0-9 ]+$' "$1"; then
-			echo "Prompt does not follow conventional commiting style(https://www.conventionalcommits.org/). Aborting the commit."
-			exit 1
+		  echo "Prompt does not follow conventional commiting style(https://www.conventionalcommits.org/). Aborting the commit."
+		  exit 1
 		fi
 	EOF
 
