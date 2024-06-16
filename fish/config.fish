@@ -65,3 +65,5 @@ if status is-interactive
 and not set -q TMUX
 	exec tmux -2u
 end
+
+zoxide init --cmd cd fish | source
