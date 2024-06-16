@@ -65,6 +65,7 @@ sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clan
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
 sudo npm install -g typescript@latest
+sudo npm install -g ts-node@latest
 cd ~/scripts
 ./go-install.bash
 export PATH=$PATH:/usr/local/go/bin
@@ -78,7 +79,7 @@ sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
 sudo npm install -g bash-language-server@latest
 sudo npm install -g typescript-language-server@latest
-sudo npm install -g @angular/language-server@latest
+sudo npm install -g @angular/language-server@latest @angular/language-service@latest
 sudo npm install -g svelte-language-server@latest
 cargo install --git https://github.com/latex-lsp/texlab
 cd ~/scripts
