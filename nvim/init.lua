@@ -1245,6 +1245,7 @@ require("conform").setup({
 	},
 	lsp_fallback = true,
 })
+vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
 -- Testing setup
 require("neotest").setup({
