@@ -527,9 +527,19 @@ require("tokyonight").setup({
 require("cyberdream").setup({
 	transparent = true,
 	italic_comments = true,
-	hide_fillchars = false,
 	borderless_telescope = true,
 	terminal_colors = true,
+	theme = {
+		colors = {
+			fg = "#c5c8c6",
+		},
+		overrides = function(colors)
+			return {
+				["@variable.member"] = { fg = colors.yellow },
+				["@lsp.type.property"] = { fg = colors.yellow },
+			}
+		end,
+	},
 })
 vim.cmd([[
   " Highlight groups
@@ -666,7 +676,7 @@ require("ibl").setup({
 })
 require("fzf-lua").setup({
 	"max-perf",
-	fzf_colors = true,
+	-- fzf_colors = true,
 	winopts = {
 		width = 0.85,
 		height = 0.85,
