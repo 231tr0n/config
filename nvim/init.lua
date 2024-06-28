@@ -94,6 +94,7 @@ bootstrap_paq({
 	"HiPhish/rainbow-delimiters.nvim",
 	"MysticalDevil/inlay-hints.nvim",
 	"bennypowers/nvim-regexplainer",
+	"scottmckendry/cyberdream.nvim",
 })
 
 -- Default settings
@@ -187,44 +188,44 @@ require("mini.ai").setup()
 require("mini.align").setup()
 -- require("mini.animate").setup({ scroll = { enable = false } })
 -- require("mini.base16").setup({
---  -- solarized dark color palette
---  palette = {
---    base00 = "#002B36",
---    base01 = "#073642",
---    base02 = "#586E75",
---    base03 = "#657B83",
---    base04 = "#839496",
---    base05 = "#93A1A1",
---    base06 = "#EEE8D5",
---    base07 = "#FDF6E3",
---    base08 = "#DC322F",
---    base09 = "#CB4B16",
---    base0A = "#B58900",
---    base0B = "#859900",
---    base0C = "#2AA198",
---    base0D = "#268BD2",
---    base0E = "#6C71C4",
---    base0F = "#D33682",
---  },
---  -- one dark color palette
---  -- palette = {
---  --  base00 = "#282C34",
---  --  base01 = "#353B45",
---  --  base02 = "#3E4451",
---  --  base03 = "#545862",
---  --  base04 = "#565C64",
---  --  base05 = "#ABB2BF",
---  --  base06 = "#B6BDCA",
---  --  base07 = "#C8CCD4",
---  --  base08 = "#E06C75",
---  --  base09 = "#D19A66",
---  --  base0A = "#E5C07B",
---  --  base0B = "#98C379",
---  --  base0C = "#56B6C2",
---  --  base0D = "#61AFEF",
---  --  base0E = "#C678DD",
---  --  base0F = "#BE5046",
---  -- },
+-- 	-- solarized dark color palette
+-- 	palette = {
+-- 		base00 = "#002B36",
+-- 		base01 = "#073642",
+-- 		base02 = "#586E75",
+-- 		base03 = "#657B83",
+-- 		base04 = "#839496",
+-- 		base05 = "#93A1A1",
+-- 		base06 = "#EEE8D5",
+-- 		base07 = "#FDF6E3",
+-- 		base08 = "#DC322F",
+-- 		base09 = "#CB4B16",
+-- 		base0A = "#B58900",
+-- 		base0B = "#859900",
+-- 		base0C = "#2AA198",
+-- 		base0D = "#268BD2",
+-- 		base0E = "#6C71C4",
+-- 		base0F = "#D33682",
+-- 	},
+-- 	-- one dark color palette
+-- 	-- palette = {
+-- 	--  base00 = "#282C34",
+-- 	--  base01 = "#353B45",
+-- 	--  base02 = "#3E4451",
+-- 	--  base03 = "#545862",
+-- 	--  base04 = "#565C64",
+-- 	--  base05 = "#ABB2BF",
+-- 	--  base06 = "#B6BDCA",
+-- 	--  base07 = "#C8CCD4",
+-- 	--  base08 = "#E06C75",
+-- 	--  base09 = "#D19A66",
+-- 	--  base0A = "#E5C07B",
+-- 	--  base0B = "#98C379",
+-- 	--  base0C = "#56B6C2",
+-- 	--  base0D = "#61AFEF",
+-- 	--  base0E = "#C678DD",
+-- 	--  base0F = "#BE5046",
+-- 	-- },
 -- })
 require("mini.basics").setup({
 	mappings = {
@@ -331,16 +332,16 @@ require("mini.hipatterns").setup({
 -- require("mini.colors").setup()
 -- local colors = require("mini.colors")
 -- colors
---  .get_colorscheme()
---  :add_transparency({
---    general = true,
---    float = true,
---    statuscolumn = true,
---    statusline = false,
---    tabline = true,
---    winbar = true,
---  })
---  :apply()
+-- 	.get_colorscheme()
+-- 	:add_transparency({
+-- 		general = true,
+-- 		float = true,
+-- 		statuscolumn = true,
+-- 		statusline = false,
+-- 		tabline = true,
+-- 		winbar = true,
+-- 	})
+-- 	:apply()
 require("mini.indentscope").setup({
 	symbol = "│",
 	draw = {
@@ -523,6 +524,13 @@ require("tokyonight").setup({
 		highlights.CursorLineFold = { link = "CursorLineNr" }
 	end,
 })
+require("cyberdream").setup({
+	transparent = true,
+	italic_comments = true,
+	hide_fillchars = false,
+	borderless_telescope = true,
+	terminal_colors = true,
+})
 vim.cmd([[
   " Highlight groups
   " au ColorScheme * highlight! link WinBar LineNr
@@ -530,6 +538,7 @@ vim.cmd([[
   " au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
   " au ColorScheme * highlight! link CursorLineFold CursorLineNr
   colorscheme tokyonight
+  " colorscheme cyberdream
 ]])
 local rainbow_delimiters = require("rainbow-delimiters")
 vim.g.rainbow_delimiters = {
@@ -657,6 +666,7 @@ require("ibl").setup({
 })
 require("fzf-lua").setup({
 	"max-perf",
+	fzf_colors = true,
 	winopts = {
 		width = 0.85,
 		height = 0.85,
