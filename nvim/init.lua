@@ -143,6 +143,7 @@ vim.opt.signcolumn = "auto"
 vim.opt.tabstop = 2
 vim.opt.undofile = false
 vim.opt.wildmenu = true
+vim.opt.laststatus = 3
 vim.cmd([[
   set nocompatible
   filetype plugin on
@@ -453,6 +454,7 @@ require("mini.statusline").setup({
 		--  })
 		-- end,
 	},
+	set_vim_settings = false,
 })
 require("mini.surround").setup()
 require("mini.tabline").setup()
@@ -547,8 +549,8 @@ vim.cmd([[
   " au ColorScheme * highlight! link WinBarNC LineNr
   " au ColorScheme * highlight! link IblScope MiniIndentscopeSymbol
   " au ColorScheme * highlight! link CursorLineFold CursorLineNr
-  colorscheme tokyonight
-  " colorscheme cyberdream
+  " colorscheme tokyonight
+  colorscheme cyberdream
 ]])
 local rainbow_delimiters = require("rainbow-delimiters")
 vim.g.rainbow_delimiters = {
