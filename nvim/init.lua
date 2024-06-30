@@ -664,7 +664,7 @@ now(function()
 	require("trouble").setup()
 	local fzf_config = require("fzf-lua.config")
 	local fzf_actions = require("trouble.sources.fzf").actions
-	fzf_config.defaults.actions.files["ctrl+t"] = fzf_actions.open
+	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
 	-- require("netrw").setup()
 
 	-- Lsp, auto completion and snippet setup
