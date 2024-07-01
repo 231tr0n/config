@@ -433,8 +433,7 @@ now(function()
 	add("mfussenegger/nvim-lint")
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
-	add("folke/tokyonight.nvim")
-	add("scottmckendry/cyberdream.nvim")
+	add("projekt0n/github-nvim-theme")
 	add({
 		source = "L3MON4D3/LuaSnip",
 		hooks = {
@@ -596,58 +595,52 @@ now(function()
 			},
 		},
 	})
-	require("tokyonight").setup({
-		style = "storm",
-		light_style = "day",
-		transparent = true,
-		terminal_colors = true,
-		styles = {
-			comments = { italic = true },
-			keywords = { italic = true },
-			functions = {},
-			variables = {},
-			sidebars = "transparent",
-			floats = "transparent",
-		},
-		sidebars = { "qf", "help" },
-		day_brightness = 0.3,
-		hide_inactive_statusline = true,
-		dim_inactive = true,
-		lualine_bold = false,
-		on_highlights = function(highlights, colors)
-			highlights.MiniStatuslineDevinfo = { fg = colors.fg_dark, bg = colors.fg_gutter }
-			highlights.MiniStatuslineFileinfo = { fg = colors.fg_dark, bg = colors.fg_gutter }
-			highlights.MiniStatuslineFilename = { fg = colors.fg_dark, bg = colors.bg_highlight }
-			highlights.SignColumn = { link = "LineNr" }
-			highlights.FoldColumn = { link = "LineNr" }
-			highlights.CursorLineFold = { link = "CursorLineNr" }
-			highlights.CursorLineSign = { link = "CursorLineNr" }
-		end,
-	})
-	require("cyberdream").setup({
-		transparent = true,
-		italic_comments = true,
-		borderless_telescope = true,
-		terminal_colors = true,
-		theme = {
-			colors = {
-				fg = "#c5c8c6",
+	require("github-theme").setup({
+		options = {
+			compile_path = vim.fn.stdpath("cache") .. "/github-theme",
+			compile_file_suffix = "_compiled",
+			hide_end_of_buffer = true,
+			hide_nc_statusline = true,
+			transparent = true,
+			terminal_colors = true,
+			dim_inactive = false,
+			module_default = true,
+			styles = {
+				comments = "italic",
+				functions = "NONE",
+				keywords = "NONE",
+				variables = "NONE",
+				conditionals = "NONE",
+				constants = "NONE",
+				numbers = "NONE",
+				operators = "NONE",
+				strings = "NONE",
+				types = "NONE",
 			},
-			overrides = function(colors)
-				return {
-					["@variable.member"] = { fg = colors.yellow },
-					["@lsp.type.property"] = { fg = colors.yellow },
-				}
-			end,
+			inverse = {
+				match_paren = false,
+				visual = false,
+				search = false,
+			},
+			darken = {
+				floats = false,
+				sidebars = {
+					enabled = false,
+					list = {},
+				},
+			},
+			modules = {},
 		},
+		palettes = {},
+		specs = {},
+		groups = {},
 	})
-	-- vim.cmd.colorscheme("tokyonight")
-	vim.cmd.colorscheme("cyberdream")
+	vim.cmd.colorscheme("github_dark_dimmed")
 	require("nvim-tree").setup()
 	require("spectre").setup()
 	require("fzf-lua").setup({
 		"max-perf",
-		-- fzf_colors = true,
+		fzf_colors = true,
 		winopts = {
 			width = 0.85,
 			height = 0.85,
@@ -989,7 +982,9 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
 		desc = "LSP actions",
-		callback = function()
+		callback = function(args)
+			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
+			-- client.server_capabilities.semanticTokensProvider = nil
 			vim.diagnostic.config({
 				virtual_text = true,
 				underline = false,
@@ -1146,12 +1141,12 @@ now(function()
 			-- lua = "rainbow-blocks",
 		},
 		highlight = {
-			"RainbowDelimiterRed",
+			-- "RainbowDelimiterRed",
 			-- "RainbowDelimiterYellow",
 			-- "RainbowDelimiterBlue",
 			-- "RainbowDelimiterOrange",
 			-- "RainbowDelimiterGreen",
-			-- "RainbowDelimiterViolet",
+			"RainbowDelimiterViolet",
 			-- "RainbowDelimiterCyan",
 		},
 	}
