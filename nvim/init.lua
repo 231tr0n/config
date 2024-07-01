@@ -35,7 +35,7 @@ now(function()
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
 	vim.o.conceallevel = 2
-	vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+	vim.o.fillchars = [[eob: ,fold:  ,foldopen: ,foldsep:  ,foldclose: ]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -590,8 +590,12 @@ now(function()
 				click = "v:lua.ScLa",
 			},
 			{
-				text = { require("statuscol.builtin").foldfunc, " " },
+				text = { require("statuscol.builtin").foldfunc },
 				click = "v:lua.ScFa",
+			},
+			{
+				text = { " " },
+				hl = "FoldColumn",
 			},
 		},
 	})
