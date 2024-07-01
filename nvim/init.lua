@@ -35,7 +35,7 @@ now(function()
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
 	vim.o.conceallevel = 2
-	vim.o.fillchars = [[eob: ,fold:  ,foldopen: ,foldsep:  ,foldclose: ]]
+	vim.o.fillchars = [[eob: ,foldopen:▾,foldsep:│,foldclose:▸]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
