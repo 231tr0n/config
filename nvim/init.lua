@@ -458,12 +458,6 @@ now(function()
 		},
 	})
 	add({
-		source = "SmiteshP/nvim-navic",
-		depends = {
-			"neovim/nvim-lspconfig",
-		},
-	})
-	add({
 		source = "rcarriga/nvim-dap-ui",
 		depends = {
 			"nvim-tree/nvim-web-devicons",
@@ -664,7 +658,6 @@ now(function()
 			["--layout"] = "default",
 		},
 	})
-	require("trouble").setup()
 	local fzf_config = require("fzf-lua.config")
 	local fzf_actions = require("trouble.sources.fzf").actions
 	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
@@ -1005,48 +998,18 @@ now(function()
 		end,
 	})
 	require("inlay-hints").setup()
-	require("nvim-navic").setup({
-		icons = {
-			File = "󰈙 ",
-			Module = " ",
-			Namespace = "󰌗 ",
-			Package = " ",
-			Class = "󰌗 ",
-			Method = "󰆧 ",
-			Property = " ",
-			Field = " ",
-			Constructor = " ",
-			Enum = "󰕘",
-			Interface = "󰕘",
-			Function = "󰊕 ",
-			Variable = "󰆧 ",
-			Constant = "󰏿 ",
-			String = "󰀬 ",
-			Number = "󰎠 ",
-			Boolean = "◩ ",
-			Array = "󰅪 ",
-			Object = "󰅩 ",
-			Key = "󰌋 ",
-			Null = "󰟢 ",
-			EnumMember = " ",
-			Struct = "󰌗 ",
-			Event = " ",
-			Operator = "󰆕 ",
-			TypeParameter = "󰊄 ",
-		},
-		lsp = {
-			auto_attach = true,
-			preference = nil,
-		},
-		highlight = true,
-		separator = " > ",
-		depth_limit = 0,
-		depth_limit_indicator = "..",
-		safe_output = true,
-		lazy_update_context = false,
-		click = false,
+	require("trouble").setup()
+	Global.symbols = require("trouble").statusline({
+		mode = "lsp_document_symbols",
+		groups = {},
+		title = false,
+		filter = { range = true },
+		format = "> {kind_icon}{symbol.name:Normal}",
 	})
-	vim.o.winbar = " > %{%v:lua.require'nvim-navic'.get_location()%}"
+	vim.cmd([[
+    au BufWinEnter *.* setlocal winbar=\ %{%v:lua.Global.symbols.get()%}
+    au TermOpen * setlocal winbar=""
+	]])
 
 	-- Syntax highlighting setup
 	require("nvim-treesitter.configs").setup({
@@ -1145,29 +1108,9 @@ now(function()
 		},
 	})
 	require("treesitter-context").setup()
-	-- Global.current_treesitter_context = function()
-	-- 	return require("nvim-treesitter").statusline({
-	-- 		indicator_size = 300,
-	-- 		type_patterns = {
-	-- 			"class",
-	-- 			"function",
-	-- 			"method",
-	-- 			"interface",
-	-- 			"type_spec",
-	-- 			"table",
-	-- 			"if_statement",
-	-- 			"for_statement",
-	-- 			"for_in_statement",
-	-- 		},
-	-- 		separator = " > ",
-	-- 	})
-	-- end
 	vim.cmd([[
     set foldmethod=expr
     set foldexpr=nvim_treesitter#foldexpr()
-    " au BufWinEnter *.* setlocal winbar=%{nvim_treesitter#statusline()}
-    " au BufWinEnter *.* setlocal winbar=%{v:lua.Global.current_treesitter_context()}
-    au TermOpen * setlocal winbar=""
   ]])
 	require("regexplainer").setup({
 		mode = "narrative",
