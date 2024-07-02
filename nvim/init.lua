@@ -35,7 +35,8 @@ now(function()
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
 	vim.o.conceallevel = 2
-	vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
+	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
+	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -357,7 +358,10 @@ now(function()
 			active = function()
 				local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
 				local git = MiniStatusline.section_git({ trunc_width = 75 })
-				local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+				local diagnostics = MiniStatusline.section_diagnostics({
+					trunc_width = 75,
+					-- signs = { ERROR = " ", WARN = " ", INFO = " ", HINT = " " },
+				})
 				local filename = MiniStatusline.section_filename({ trunc_width = 140 })
 				if filename:sub(1, 2) == "%F" or filename:sub(1, 2) == "%f" then
 					filename = filename:sub(1, 2) .. " " .. filename:sub(3, -1)
@@ -1004,6 +1008,7 @@ now(function()
 		title = false,
 		filter = { range = true },
 		format = "> {kind_icon}{symbol.name:Normal}",
+		hl_group = "WinBar",
 	})
 	vim.cmd([[
     au BufWinEnter *.* setlocal winbar=\ %{%v:lua.Global.symbols.get()%}
