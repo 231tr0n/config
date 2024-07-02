@@ -209,7 +209,6 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
-				{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
