@@ -437,6 +437,7 @@ now(function()
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
 	add("projekt0n/github-nvim-theme")
+	add("folke/tokyonight.nvim")
 	add({
 		source = "L3MON4D3/LuaSnip",
 		hooks = {
@@ -600,6 +601,27 @@ now(function()
 				text = { " " },
 				hl = "FoldColumn",
 			},
+		},
+	})
+	require("tokyonight").setup({
+		style = "storm",
+		light_style = "day",
+		transparent = true,
+		terminal_colors = true,
+		styles = {
+			comments = { italic = true },
+			keywords = {},
+			functions = {},
+			variables = {},
+			sidebars = "transparent",
+			floats = "transparent",
+		},
+		day_brightness = 0.3,
+		dim_inactive = true,
+		on_colors = function(colors) end,
+		cache = true,
+		plugins = {
+			all = true,
 		},
 	})
 	require("github-theme").setup({
