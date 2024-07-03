@@ -283,6 +283,8 @@ now(function()
 	-- 		winbar = true,
 	-- 	})
 	-- 	:apply()
+	require("mini.icons").setup()
+	MiniIcons.mock_nvim_web_devicons()
 	require("mini.indentscope").setup({
 		symbol = "│",
 		draw = {
@@ -428,7 +430,7 @@ now(function()
 	add("nvim-lua/plenary.nvim")
 	add("nvim-neotest/nvim-nio")
 	add("luukvbaal/statuscol.nvim")
-	add("nvim-tree/nvim-web-devicons")
+	-- add("nvim-tree/nvim-web-devicons")
 	add("neovim/nvim-lspconfig")
 	add("lukas-reineke/indent-blankline.nvim")
 	add("rafamadriz/friendly-snippets")
@@ -457,14 +459,14 @@ now(function()
 	add({
 		source = "ibhagwan/fzf-lua",
 		depends = {
-			"nvim-tree/nvim-web-devicons",
+			-- "nvim-tree/nvim-web-devicons",
 			"junegunn/fzf",
 		},
 	})
 	add({
 		source = "rcarriga/nvim-dap-ui",
 		depends = {
-			"nvim-tree/nvim-web-devicons",
+			-- "nvim-tree/nvim-web-devicons",
 			"nvim-neotest/nvim-nio",
 			"mfussenegger/nvim-dap",
 		},
@@ -552,7 +554,7 @@ now(function()
 	add({
 		source = "nvim-tree/nvim-tree.lua",
 		depends = {
-			"nvim-tree/nvim-web-devicons",
+			-- "nvim-tree/nvim-web-devicons",
 		},
 	})
 	add({
@@ -575,14 +577,14 @@ now(function()
 	add({
 		source = "folke/trouble.nvim",
 		depends = {
-			"nvim-tree/nvim-web-devicons",
+			-- "nvim-tree/nvim-web-devicons",
 			"ibhagwan/fzf-lua",
 		},
 	})
 	-- add("prichrd/netrw.nvim")
 
 	-- Utility libraries
-	require("nvim-web-devicons").setup()
+	-- require("nvim-web-devicons").setup()
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
 		bt_ignore = { "netrw", "NvimTree" },
