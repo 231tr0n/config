@@ -821,21 +821,21 @@ now(function()
 			},
 		},
 	})
-	lspconfig.pyright.setup({
-		capabilities = capabilities,
-	})
-	-- lspconfig.basedpyright.setup({
-	--  capabilities = capabilities,
-	--  settings = {
-	--    basedpyright = {
-	--      analysis = {
-	--        autoSearchPaths = true,
-	--        diagnosticMode = "openFilesOnly",
-	--        useLibraryCodeForTypes = true,
-	--      },
-	--    },
-	--  },
+	-- lspconfig.pyright.setup({
+	-- 	capabilities = capabilities,
 	-- })
+	lspconfig.basedpyright.setup({
+		capabilities = capabilities,
+		settings = {
+			basedpyright = {
+				analysis = {
+					autoSearchPaths = true,
+					diagnosticMode = "openFilesOnly",
+					useLibraryCodeForTypes = true,
+				},
+			},
+		},
+	})
 	lspconfig.rust_analyzer.setup({
 		capabilities = capabilities,
 		settings = {
@@ -875,35 +875,50 @@ now(function()
 			},
 		},
 	})
-	lspconfig.tsserver.setup({
+	lspconfig.vtsls.setup({
 		capabilities = capabilities,
 		settings = {
 			typescript = {
 				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-				},
-			},
-			javascript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
+					parameterNames = { enabled = "all" },
+					parameterTypes = { enabled = true },
+					variableTypes = { enabled = true },
+					propertyDeclarationTypes = { enabled = true },
+					functionLikeReturnTypes = { enabled = true },
+					enumMemberValues = { enabled = true },
 				},
 			},
 		},
 	})
+	-- lspconfig.tsserver.setup({
+	-- 	capabilities = capabilities,
+	-- 	settings = {
+	-- 		typescript = {
+	-- 			inlayHints = {
+	-- 				includeInlayParameterNameHints = "all",
+	-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+	-- 				includeInlayFunctionParameterTypeHints = true,
+	-- 				includeInlayVariableTypeHints = true,
+	-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+	-- 				includeInlayPropertyDeclarationTypeHints = true,
+	-- 				includeInlayFunctionLikeReturnTypeHints = true,
+	-- 				includeInlayEnumMemberValueHints = true,
+	-- 			},
+	-- 		},
+	-- 		javascript = {
+	-- 			inlayHints = {
+	-- 				includeInlayParameterNameHints = "all",
+	-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+	-- 				includeInlayFunctionParameterTypeHints = true,
+	-- 				includeInlayVariableTypeHints = true,
+	-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+	-- 				includeInlayPropertyDeclarationTypeHints = true,
+	-- 				includeInlayFunctionLikeReturnTypeHints = true,
+	-- 				includeInlayEnumMemberValueHints = true,
+	-- 			},
+	-- 		},
+	-- 	},
+	-- })
 	lspconfig.svelte.setup({
 		capabilities = capabilities,
 		settings = {
