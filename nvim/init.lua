@@ -666,7 +666,7 @@ now(function()
 		specs = {},
 		groups = {},
 	})
-	vim.cmd.colorscheme("github_dark_dimmed")
+	vim.cmd.colorscheme("tokyonight")
 	require("nvim-tree").setup()
 	require("spectre").setup()
 	require("fzf-lua").setup({
