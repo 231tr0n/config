@@ -53,6 +53,7 @@ now(function()
 	vim.o.updatetime = 500
 	vim.o.wildmode = "longest:full,full"
 	vim.o.wrap = true
+	vim.opt.scrolloff = 999
 	vim.opt.cursorcolumn = false
 	vim.opt.cursorline = true
 	vim.opt.expandtab = true
@@ -439,6 +440,7 @@ now(function()
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
 	add("projekt0n/github-nvim-theme")
+	add("scottmckendry/cyberdream.nvim")
 	add("folke/tokyonight.nvim")
 	add({
 		source = "L3MON4D3/LuaSnip",
@@ -602,6 +604,23 @@ now(function()
 			{
 				text = { " " },
 				hl = "FoldColumn",
+			},
+		},
+	})
+	require("cyberdream").setup({
+		transparent = true,
+		italic_comments = true,
+		hide_fillchars = false,
+		borderless_telescope = true,
+		terminal_colors = true,
+		theme = {
+			variant = "default",
+			highlights = {},
+			overrides = function(colors)
+				return {}
+			end,
+			colors = {
+				fg = "#c5c8c6",
 			},
 		},
 	})
