@@ -211,10 +211,11 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
+				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
-				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
@@ -583,6 +584,7 @@ now(function()
 			"ibhagwan/fzf-lua",
 		},
 	})
+	add("mistweaverco/kulala.nvim")
 	-- add("prichrd/netrw.nvim")
 
 	-- Utility libraries
@@ -707,6 +709,12 @@ now(function()
 	local fzf_config = require("fzf-lua.config")
 	local fzf_actions = require("trouble.sources.fzf").actions
 	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
+	require("kulala").setup({
+		default_view = "body",
+		default_env = "dev",
+		debug = false,
+		additional_curl_options = {},
+	})
 	-- require("netrw").setup()
 
 	-- Lsp, auto completion and snippet setup
@@ -1240,6 +1248,11 @@ now(function()
 		},
 	})
 	require("neogen").setup({ snippet_engine = "luasnip" })
+	vim.filetype.add({
+		extension = {
+			["http"] = "http",
+		},
+	})
 
 	-- Dap setup
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
@@ -1661,7 +1674,7 @@ now(function()
 	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	nmap("<leader>am", require("gen").select_model, "Select model")
-	nmap("<leader>ap", ":Gen<cr>", "Prompt Model")
+	nmap("<leader>ap", "<cmd>Gen<CR>", "Prompt Model")
 	nmap("<leader>bD", "<cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	nmap("<leader>bW", "<cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	nmap("<leader>ba", "<cmd>b#<CR>", "Alternate")
@@ -1742,6 +1755,9 @@ now(function()
 	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
+	nmap("<leader>rj", "<cmd>lua require('kulala').jump_next()<CR>", "Next request")
+	nmap("<leader>rk", "<cmd>lua require('kulala').jump_prev()<CR>", "Previous request")
+	nmap("<leader>rr", "<cmd>lua require('kulala').run()<CR>", "Run request")
 	nmap("<leader>tgm", "<cmd>lua require('dap-go').debug_test()<cr>", "Test method")
 	nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
