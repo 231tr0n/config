@@ -1077,7 +1077,7 @@ now(function()
 		hl_group = "WinBar",
 	})
 	vim.cmd([[
-    au BufWinEnter *.* setlocal winbar=\ %{%v:lua.Global.symbols.get()%}
+    au BufWinEnter *.* setlocal winbar=\ \ %{%v:lua.Global.symbols.get()%}
     au TermOpen * setlocal winbar=""
 	]])
 
