@@ -251,6 +251,7 @@ now(function()
 		},
 	})
 	require("mini.fuzzy").setup()
+	-- require("mini.git").setup()
 	require("mini.hipatterns").setup({
 		highlighters = {
 			fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
