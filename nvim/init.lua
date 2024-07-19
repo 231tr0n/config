@@ -1669,6 +1669,10 @@ now(function()
 		vim.opt.expandtab = true
 		vim.cmd("retab!")
 	end
+	Global.miniPickVisits = function(cwd, desc)
+		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
+		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
+	end
 	Global.diagnosticVirtualTextToggle = function()
 		if Global.virtual_text then
 			Global.virtual_text = false
@@ -1783,8 +1787,10 @@ now(function()
 	nmap("<leader>tpc", "<cmd>lua require('dap-python').test_class()<cr>", "Test class")
 	nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test method")
 	nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
+	nmap("<leader>vF", "<cmd>lua Global.miniPickVisits(nil, 'Core (cwd)')<cr>", "Core visits (cwd)")
 	nmap("<leader>vR", "<cmd>lua MiniVisits.remove_label()<cr>", "Remove label")
 	nmap("<leader>vV", "<cmd>lua MiniVisits.add_label()<cr>", "Add label")
+	nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core (all)')<cr>", "Core visits (all)")
 	nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
