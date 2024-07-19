@@ -433,6 +433,7 @@ now(function()
 	add("nvim-lua/plenary.nvim")
 	add("nvim-neotest/nvim-nio")
 	add("luukvbaal/statuscol.nvim")
+	add("jsongerber/thanks.nvim")
 	-- add("nvim-tree/nvim-web-devicons")
 	add("neovim/nvim-lspconfig")
 	add("lukas-reineke/indent-blankline.nvim")
@@ -590,6 +591,14 @@ now(function()
 
 	-- Utility libraries
 	-- require("nvim-web-devicons").setup()
+	require("thanks").setup({
+		star_on_install = false,
+		star_on_startup = false,
+		ignore_repos = {},
+		ignore_authors = {},
+		unstar_on_uninstall = false,
+		ask_before_unstarring = false,
+	})
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
 		bt_ignore = { "netrw", "NvimTree" },
@@ -678,7 +687,7 @@ now(function()
 			darken = {
 				floats = false,
 				sidebars = {
-					enabled = false,
+					enable = false,
 					list = {},
 				},
 			},
