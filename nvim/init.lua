@@ -216,6 +216,7 @@ now(function()
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
+				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
@@ -408,7 +409,7 @@ now(function()
 	require("mini.tabline").setup()
 	-- require("mini.test").setup()
 	require("mini.trailspace").setup()
-	-- require("mini.visits").setup()
+	require("mini.visits").setup()
 	-- defer setup
 	vim.notify = MiniNotify.make_notify()
 	vim.ui.select = MiniPick.ui_select
@@ -445,6 +446,13 @@ now(function()
 	add("projekt0n/github-nvim-theme")
 	add("scottmckendry/cyberdream.nvim")
 	add("folke/tokyonight.nvim")
+	add({
+		source = "MeanderingProgrammer/markdown.nvim",
+		depends = {
+			"mini.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
 	add({
 		source = "L3MON4D3/LuaSnip",
 		hooks = {
@@ -599,6 +607,7 @@ now(function()
 		unstar_on_uninstall = false,
 		ask_before_unstarring = false,
 	})
+	require("render-markdown").setup()
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
 		bt_ignore = { "netrw", "NvimTree" },
@@ -1774,6 +1783,10 @@ now(function()
 	nmap("<leader>tpc", "<cmd>lua require('dap-python').test_class()<cr>", "Test class")
 	nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test method")
 	nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
+	nmap("<leader>vR", "<cmd>lua MiniVisits.remove_label()<cr>", "Remove label")
+	nmap("<leader>vV", "<cmd>lua MiniVisits.add_label()<cr>", "Add label")
+	nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
+	nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
 	nmap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", "Toggle quickfix")
 	nmap("<leader>xr", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", "Toggle LSP Defs/refs")
