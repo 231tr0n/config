@@ -1173,7 +1173,7 @@ now(function()
 		ignore_install = {},
 		modules = {},
 		indent = {
-			enable = true,
+			enable = false,
 		},
 		highlight = {
 			enable = true,
@@ -1190,9 +1190,6 @@ now(function()
 			additional_vim_regex_highlighting = true,
 		},
 		endwise = {
-			enable = true,
-		},
-		autotag = {
 			enable = true,
 		},
 	})
@@ -1255,6 +1252,7 @@ now(function()
 		},
 	}
 	require("nvim-autopairs").setup()
+	require("nvim-ts-autotag").setup()
 	require("ibl").setup({
 		indent = {
 			char = "│",
