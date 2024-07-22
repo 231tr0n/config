@@ -417,6 +417,12 @@ now(function()
 	-- Plugin installation
 	-- Vimscript plugins
 	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
+		},
+	})
 	add("honza/vim-snippets")
 	add("mbbill/undotree")
 	add("itchyny/vim-qfedit")
