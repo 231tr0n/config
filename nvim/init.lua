@@ -756,6 +756,14 @@ now(function()
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end
 	cmp.setup({
+		formatting = {
+			format = function(_, item)
+				local icon, hl = MiniIcons.get("lsp", item.kind)
+				item.kind = icon .. " " .. item.kind
+				item.kind_hl_group = hl
+				return item
+			end,
+		},
 		snippet = {
 			expand = function(args)
 				require("luasnip").lsp_expand(args.body)
