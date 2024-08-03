@@ -1815,7 +1815,7 @@ now(function()
 	nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
 	nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
-	nmap("gl", "<cmd>lua MiniGit.show_at_cursor()<cr>", "Git line actions")
+	nmap("gl", "<cmd>lua MiniGit.show_at_cursor()<cr>", "Git line history")
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-c>", '"+y', "Copy to clipboard")
@@ -1864,6 +1864,12 @@ now(function()
 		pattern = "NvimTree,netrw",
 		callback = function()
 			vim.b.minicursorword_disable = true
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "diff,git",
+		callback = function()
+			vim.cmd("setlocal foldmethod=expr foldexpr=v:lua.MiniGit.diff_foldexpr()")
 		end,
 	})
 	vim.api.nvim_create_autocmd("VimEnter", {
