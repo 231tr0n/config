@@ -252,7 +252,7 @@ now(function()
 		},
 	})
 	require("mini.fuzzy").setup()
-	-- require("mini.git").setup()
+	require("mini.git").setup()
 	require("mini.hipatterns").setup({
 		highlighters = {
 			fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
@@ -416,13 +416,13 @@ now(function()
 
 	-- Plugin installation
 	-- Vimscript plugins
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
+	-- add("tpope/vim-fugitive")
+	-- add({
+	-- 	source = "rbong/vim-flog",
+	-- 	depends = {
+	-- 		"tpope/vim-fugitive",
+	-- 	},
+	-- })
 	add("honza/vim-snippets")
 	add("mbbill/undotree")
 	add("itchyny/vim-qfedit")
@@ -1815,6 +1815,7 @@ now(function()
 	nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
 	nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
+	nmap("gl", "<cmd>lua MiniGit.show_at_cursor()<cr>", "Git line actions")
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-c>", '"+y', "Copy to clipboard")
