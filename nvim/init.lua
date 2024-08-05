@@ -651,7 +651,7 @@ now(function()
 				return {}
 			end,
 			colors = {
-				fg = "#c5c8c6",
+				-- fg = "#c5c8c6",
 			},
 		},
 	})
