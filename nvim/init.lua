@@ -453,7 +453,7 @@ now(function()
 	add("scottmckendry/cyberdream.nvim")
 	add("folke/tokyonight.nvim")
 	add({
-		source = "MeanderingProgrammer/markdown.nvim",
+		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
 			"mini.nvim",
 			"nvim-treesitter/nvim-treesitter",
@@ -1168,6 +1168,7 @@ now(function()
 			"pug",
 			"python",
 			"regex",
+			"requirements",
 			"ruby",
 			"rust",
 			"scala",
