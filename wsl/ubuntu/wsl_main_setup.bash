@@ -113,9 +113,9 @@ sudo apt install -y clang-format jq libxml2-utils tidy
 pipx install black
 sudo npm install -g google-java-format@latest
 sudo npm install -g prettier@latest
-go install github.com/google/yamlfmt/cmd/yamlfmt@latest
-go install mvdan.cc/gofumpt@latest
-go install mvdan.cc/sh/v3/cmd/shfmt@latest
+go install -v github.com/google/yamlfmt/cmd/yamlfmt@latest
+go install -v mvdan.cc/gofumpt@latest
+go install -v mvdan.cc/sh/v3/cmd/shfmt@latest
 cargo install stylua
 cargo install stylua --features lua52
 cargo install stylua --features lua53
@@ -130,7 +130,7 @@ bob use nightly
 
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --all
-go install github.com/nao1215/gup@latest
+go install -v github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
 
 git config --global core.editor "nvim"
@@ -142,7 +142,10 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 sudo npm install -g browser-sync tree-sitter-cli n nodemon
 pipx install watchdog
-go install github.com/air-verse/air@latest
+go install -v github.com/air-verse/air@latest
+
+go install -v github.com/kubernetes/kompose@latest
+go install -v sigs.k8s.io/kind@latest
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
