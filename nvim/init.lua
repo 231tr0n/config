@@ -1261,8 +1261,8 @@ now(function()
 			-- lua = "rainbow-blocks",
 		},
 		highlight = {
-			-- "RainbowDelimiterRed",
-			"RainbowDelimiterYellow",
+			"RainbowDelimiterRed",
+			-- "RainbowDelimiterYellow",
 			-- "RainbowDelimiterBlue",
 			-- "RainbowDelimiterOrange",
 			-- "RainbowDelimiterGreen",
@@ -1580,6 +1580,7 @@ now(function()
 			rust = { "rustfmt" },
 			javascript = { "prettier" },
 			typescript = { "prettier" },
+			groovy = { "npm-groovy-lint" },
 		},
 		lsp_fallback = true,
 	})
@@ -1867,6 +1868,13 @@ now(function()
 		pattern = "NvimTree,netrw",
 		callback = function()
 			vim.b.minicursorword_disable = true
+		end,
+	})
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "MiniGitUpdated",
+		callback = function(data)
+			local summary = vim.b[data.buf].minigit_summary
+			vim.b[data.buf].minigit_summary_string = summary.head_name or ""
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {

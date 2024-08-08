@@ -108,6 +108,7 @@ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/insta
 pipx install pylint yamllint
 sudo npm install -g jsonlint@latest
 sudo npm install -g eslint@latest
+sudo npm install -g npm-groovy-lint@latest
 
 sudo apt install -y clang-format jq libxml2-utils tidy
 pipx install black
