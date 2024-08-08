@@ -1596,6 +1596,7 @@ now(function()
 		typescript = { "eslint" },
 		svelte = { "eslint" },
 		sh = { "shellcheck" },
+		groovy = { "npm-groovy-lint" },
 	}
 	require("conform").setup({
 		formatters_by_ft = {
@@ -1740,6 +1741,7 @@ now(function()
 			})
 		end
 	end
+
 	-- Keymaps
 	-- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 	imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
@@ -1822,7 +1824,6 @@ now(function()
 	nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
 	nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
 	nmap("<leader>ldt", "<cmd>lua Global.diagnosticVirtualTextToggle()<cr>", "Virtual text toggle")
-	nmap("<leader>lit", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>", "Inlay hints toggle")
 	nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
 	nmap("<leader>lgb", "<C-t>", "Previous tag")
@@ -1832,6 +1833,7 @@ now(function()
 	nmap("<leader>lgs", "<cmd>lua vim.lsp.buf.signature_help()<cr>", "Signature help")
 	nmap("<leader>lgtd", "<cmd>lua vim.lsp.buf.type_definition()<cr>", "Goto type definition")
 	nmap("<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", "Hover symbol")
+	nmap("<leader>lit", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>", "Inlay hints toggle")
 	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
