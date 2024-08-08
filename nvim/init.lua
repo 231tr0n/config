@@ -441,6 +441,7 @@ now(function()
 	add("nvim-neotest/nvim-nio")
 	add("luukvbaal/statuscol.nvim")
 	add("jsongerber/thanks.nvim")
+	add("otavioschwanck/arrow.nvim")
 	-- add("nvim-tree/nvim-web-devicons")
 	add("neovim/nvim-lspconfig")
 	add("lukas-reineke/indent-blankline.nvim")
@@ -577,12 +578,19 @@ now(function()
 		},
 	})
 	add({
+		source = "tzachar/cmp-ai",
+		depends = {
+			"nvim-lua/plenary.nvim",
+		},
+	})
+	add({
 		source = "hrsh7th/nvim-cmp",
 		depends = {
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-cmdline",
 			"hrsh7th/cmp-nvim-lsp",
+			"tzachar/cmp-ai",
 			"hrsh7th/cmp-nvim-lsp-signature-help",
 		},
 	})
@@ -605,6 +613,10 @@ now(function()
 
 	-- Utility libraries
 	-- require("nvim-web-devicons").setup()
+	require("arrow").setup({
+		show_icons = true,
+		leader_key = ";",
+	})
 	require("thanks").setup({
 		star_on_install = false,
 		star_on_startup = false,
@@ -749,6 +761,16 @@ now(function()
 	-- Lsp, auto completion and snippet setup
 	local cmp = require("cmp")
 	local luasnip = require("luasnip")
+	local cmp_ai = require("cmp_ai.config")
+	cmp_ai:setup({
+		max_lines = 100,
+		provider = "Ollama",
+		provider_options = {
+			model = "dolphin-llama3:latest",
+		},
+		run_on_every_keystroke = false,
+		ignored_file_types = {},
+	})
 	local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 	local has_words_before = function()
 		unpack = unpack or table.unpack
@@ -799,6 +821,16 @@ now(function()
 					fallback()
 				end
 			end, { "i", "s" }),
+			["<C-x>"] = cmp.mapping(
+				cmp.mapping.complete({
+					config = {
+						sources = cmp.config.sources({
+							{ name = "cmp_ai" },
+						}),
+					},
+				}),
+				{ "i" }
+			),
 		}),
 		sources = cmp.config.sources({
 			{ name = "nvim_lsp" },
