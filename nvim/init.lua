@@ -287,7 +287,11 @@ now(function()
 	-- 		winbar = true,
 	-- 	})
 	-- 	:apply()
-	require("mini.icons").setup()
+	require("mini.icons").setup({
+		lsp = {
+			ollama = { glyph = "", hl = "MiniIconsGreen" },
+		},
+	})
 	MiniIcons.mock_nvim_web_devicons()
 	require("mini.indentscope").setup({
 		symbol = "│",
@@ -1818,6 +1822,7 @@ now(function()
 	nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
 	nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
 	nmap("<leader>ldt", "<cmd>lua Global.diagnosticVirtualTextToggle()<cr>", "Virtual text toggle")
+	nmap("<leader>lit", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>", "Inlay hints toggle")
 	nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
 	nmap("<leader>lgb", "<C-t>", "Previous tag")
