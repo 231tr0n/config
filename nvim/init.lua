@@ -27,6 +27,7 @@ now(function()
 
 	-- Default settings
 	-- let g:python_recommended_style=0
+	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
@@ -35,7 +36,6 @@ now(function()
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
 	vim.o.conceallevel = 2
-	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
 	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
@@ -53,23 +53,23 @@ now(function()
 	vim.o.updatetime = 500
 	vim.o.wildmode = "longest:full,full"
 	vim.o.wrap = true
-	vim.opt.scrolloff = 999
 	vim.opt.cursorcolumn = false
 	vim.opt.cursorline = true
 	vim.opt.expandtab = true
 	vim.opt.hlsearch = true
 	vim.opt.incsearch = true
+	vim.opt.laststatus = 3
 	vim.opt.list = true
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.maxmempattern = 20000
 	vim.opt.number = true
 	vim.opt.relativenumber = true
+	vim.opt.scrolloff = 999
 	vim.opt.shiftwidth = 2
 	vim.opt.signcolumn = "auto"
 	vim.opt.tabstop = 2
 	vim.opt.undofile = false
 	vim.opt.wildmenu = true
-	vim.opt.laststatus = 3
 	vim.cmd([[
     set nocompatible
     filetype plugin on
@@ -457,6 +457,12 @@ now(function()
 	add("projekt0n/github-nvim-theme")
 	add("scottmckendry/cyberdream.nvim")
 	add("folke/tokyonight.nvim")
+	add({
+		source = "folke/ts-comments.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
@@ -1323,6 +1329,11 @@ now(function()
 	vim.filetype.add({
 		extension = {
 			["http"] = "http",
+		},
+	})
+	require("ts-comments").setup({
+		lang = {
+			text = "TODO: %s",
 		},
 	})
 
