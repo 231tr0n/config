@@ -145,8 +145,13 @@ sudo npm install -g browser-sync tree-sitter-cli n nodemon
 pipx install watchdog
 go install -v github.com/air-verse/air@latest
 
-go install -v github.com/kubernetes/kompose@latest
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
 go install -v sigs.k8s.io/kind@latest
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+go install -v github.com/kubernetes/kompose@latest
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
