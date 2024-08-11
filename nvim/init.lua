@@ -19,12 +19,12 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- add, now and later functions from mini.deps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
-now(function()
-	-- Globals declared and used
-	Global = {
-		virtual_text = false,
-	}
+-- Globals declared and used
+Global = {
+	virtual_text = false,
+}
 
+now(function()
 	-- Default settings
 	-- let g:python_recommended_style=0
 	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
@@ -70,45 +70,8 @@ now(function()
 	vim.opt.tabstop = 2
 	vim.opt.undofile = false
 	vim.opt.wildmenu = true
-	vim.cmd([[
-    set nocompatible
-    filetype plugin on
-    filetype plugin indent off
-    " Netrw config
-    " let g:netrw_banner=0
-    " let g:netrw_liststyle=3
-    " let g:netrw_browse_split=4
-    " let g:netrw_altv=1
-    " let g:netrw_winsize=40
-    " let g:netrw_preview=1
-    " au FileType netrw setl signcolumn=no
-    " au FileType netrw vertical resize 40
-    " function FileBrowserToggle()
-    "   if !exists("t:NetrwIsOpen")
-    "     let t:NetrwIsOpen=0
-    "   endif
-    "   if t:NetrwIsOpen
-    "     let i = bufnr("$")
-    "     while (i >= 1)
-    "       if (getbufvar(i, "&filetype") == "netrw")
-    "         silent exe "bwipeout " . i
-    "       endif
-    "       let i-=1
-    "     endwhile
-    "     let t:NetrwIsOpen=0
-    "   else
-    "     let t:NetrwIsOpen=1
-    "     silent Lexplore
-    "   endif
-    " endfunction
-    " Colorscheme related config
-    function SynGroup()
-      if !exists("*synstack")
-        return
-      endif
-      echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
-    endfun
-  ]])
+	vim.cmd("filetype plugin on")
+	vim.cmd("filetype plugin indent off")
 	local border = {
 		{ "╭", "FloatBorder" },
 		{ "─", "FloatBorder" },
@@ -423,17 +386,7 @@ now(function()
 
 	-- Plugin installation
 	-- Vimscript plugins
-	-- add("tpope/vim-fugitive")
-	-- add({
-	-- 	source = "rbong/vim-flog",
-	-- 	depends = {
-	-- 		"tpope/vim-fugitive",
-	-- 	},
-	-- })
-	add("honza/vim-snippets")
 	add("mbbill/undotree")
-	add("itchyny/vim-qfedit")
-	add("mg979/vim-visual-multi")
 	add({
 		source = "junegunn/fzf",
 		hooks = {
@@ -447,9 +400,6 @@ now(function()
 	add("nvim-lua/plenary.nvim")
 	add("nvim-neotest/nvim-nio")
 	add("luukvbaal/statuscol.nvim")
-	add("jsongerber/thanks.nvim")
-	add("otavioschwanck/arrow.nvim")
-	-- add("nvim-tree/nvim-web-devicons")
 	add("neovim/nvim-lspconfig")
 	add("lukas-reineke/indent-blankline.nvim")
 	add("rafamadriz/friendly-snippets")
@@ -457,9 +407,7 @@ now(function()
 	add("mfussenegger/nvim-lint")
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
-	add("projekt0n/github-nvim-theme")
 	add("scottmckendry/cyberdream.nvim")
-	add("folke/tokyonight.nvim")
 	add({
 		source = "folke/ts-comments.nvim",
 		depends = {
@@ -476,8 +424,11 @@ now(function()
 	add({
 		source = "L3MON4D3/LuaSnip",
 		hooks = {
-			post_checkout = function()
+			post_checkout = function(args)
+				local temp = vim.fn.getcwd()
+				vim.cmd(args.path)
 				vim.cmd("make install_jsregexp")
+				vim.cmd(temp)
 			end,
 		},
 	})
@@ -492,14 +443,14 @@ now(function()
 	add({
 		source = "ibhagwan/fzf-lua",
 		depends = {
-			-- "nvim-tree/nvim-web-devicons",
+			"mini.nvim",
 			"junegunn/fzf",
 		},
 	})
 	add({
 		source = "rcarriga/nvim-dap-ui",
 		depends = {
-			-- "nvim-tree/nvim-web-devicons",
+			"mini.nvim",
 			"nvim-neotest/nvim-nio",
 			"mfussenegger/nvim-dap",
 		},
@@ -587,7 +538,7 @@ now(function()
 	add({
 		source = "nvim-tree/nvim-tree.lua",
 		depends = {
-			-- "nvim-tree/nvim-web-devicons",
+			"mini.nvim",
 		},
 	})
 	add({
@@ -617,7 +568,7 @@ now(function()
 	add({
 		source = "folke/trouble.nvim",
 		depends = {
-			-- "nvim-tree/nvim-web-devicons",
+			"mini.nvim",
 			"ibhagwan/fzf-lua",
 		},
 	})
@@ -625,19 +576,6 @@ now(function()
 	-- add("prichrd/netrw.nvim")
 
 	-- Utility libraries
-	-- require("nvim-web-devicons").setup()
-	require("arrow").setup({
-		show_icons = true,
-		leader_key = ";",
-	})
-	require("thanks").setup({
-		star_on_install = false,
-		star_on_startup = false,
-		ignore_repos = {},
-		ignore_authors = {},
-		unstar_on_uninstall = false,
-		ask_before_unstarring = false,
-	})
 	require("render-markdown").setup()
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
@@ -673,75 +611,17 @@ now(function()
 			variant = "default",
 			highlights = {},
 			overrides = function(colors)
-				return {}
+				return {
+					["@variable.member"] = { fg = colors.pink },
+					["@lsp.type.property"] = { fg = colors.pink },
+				}
 			end,
 			colors = {
-				-- fg = "#c5c8c6",
+				fg = "#dce1dd",
 			},
 		},
 	})
-	require("tokyonight").setup({
-		style = "storm",
-		light_style = "day",
-		transparent = true,
-		terminal_colors = true,
-		styles = {
-			comments = { italic = true },
-			keywords = {},
-			functions = {},
-			variables = {},
-			sidebars = "transparent",
-			floats = "transparent",
-		},
-		day_brightness = 0.3,
-		dim_inactive = true,
-		on_colors = function(colors) end,
-		cache = true,
-		plugins = {
-			all = true,
-		},
-	})
-	require("github-theme").setup({
-		options = {
-			compile_path = vim.fn.stdpath("cache") .. "/github-theme",
-			compile_file_suffix = "_compiled",
-			hide_end_of_buffer = true,
-			hide_nc_statusline = true,
-			transparent = true,
-			terminal_colors = true,
-			dim_inactive = false,
-			module_default = true,
-			styles = {
-				comments = "italic",
-				functions = "NONE",
-				keywords = "NONE",
-				variables = "NONE",
-				conditionals = "NONE",
-				constants = "NONE",
-				numbers = "NONE",
-				operators = "NONE",
-				strings = "NONE",
-				types = "NONE",
-			},
-			inverse = {
-				match_paren = false,
-				visual = false,
-				search = false,
-			},
-			darken = {
-				floats = false,
-				sidebars = {
-					enable = false,
-					list = {},
-				},
-			},
-			modules = {},
-		},
-		palettes = {},
-		specs = {},
-		groups = {},
-	})
-	vim.cmd.colorscheme("tokyonight")
+	vim.cmd.colorscheme("cyberdream")
 	require("nvim-tree").setup()
 	require("spectre").setup()
 	require("fzf-lua").setup({
@@ -1158,10 +1038,6 @@ now(function()
 		format = "> {kind_icon}{symbol.name:Normal}",
 		hl_group = "WinBar",
 	})
-	vim.cmd([[
-    au BufWinEnter *.* setlocal winbar=\ \ %{%v:lua.Global.symbols.get()%}
-    au TermOpen * setlocal winbar=""
-	]])
 
 	-- Syntax highlighting setup
 	require("nvim-treesitter.configs").setup({
@@ -1251,17 +1127,15 @@ now(function()
 					return true
 				end
 			end,
-			additional_vim_regex_highlighting = true,
+			additional_vim_regex_highlighting = false,
 		},
 		endwise = {
 			enable = true,
 		},
 	})
+	vim.wo.foldmethod = "expr"
+	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	require("treesitter-context").setup()
-	vim.cmd([[
-    set foldmethod=expr
-    set foldexpr=nvim_treesitter#foldexpr()
-  ]])
 	require("regexplainer").setup({
 		mode = "narrative",
 		auto = false,
@@ -1762,8 +1636,7 @@ now(function()
 	nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<F2>", MiniNotify.clear, "Clear all notifications")
-	nmap("<F3>", "<cmd>call SynGroup()<cr>", "Echo highlight group")
-	nmap("<F4>", "<cmd>Inspect<cr>", "Echo syntax group")
+	nmap("<F3>", "<cmd>Inspect<cr>", "Echo syntax group")
 	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	nmap("<leader>am", require("gen").select_model, "Select model")
@@ -1889,8 +1762,8 @@ now(function()
 		callback = function(ev)
 			if vim.bo[ev.buf].buftype == "quickfix" then
 				vim.schedule(function()
-					vim.cmd([[cclose]])
-					vim.cmd([[Trouble qflist open]])
+					vim.cmd("cclose")
+					vim.cmd("Trouble qflist open")
 				end)
 			end
 		end,
@@ -1899,8 +1772,8 @@ now(function()
 		callback = function(ev)
 			if vim.bo[ev.buf].buftype == "loclist" then
 				vim.schedule(function()
-					vim.cmd([[lclose]])
-					vim.cmd([[Trouble loclist open]])
+					vim.cmd("lclose")
+					vim.cmd("Trouble loclist open")
 				end)
 			end
 		end,
@@ -1933,7 +1806,26 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "diff,git",
 		callback = function()
-			vim.cmd("setlocal foldmethod=expr foldexpr=v:lua.MiniGit.diff_foldexpr()")
+			vim.wo.foldmethod = "expr"
+			vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "*",
+		callback = function()
+			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "help",
+		callback = function()
+			vim.wo.winbar = ""
+		end,
+	})
+	vim.api.nvim_create_autocmd("TermOpen", {
+		pattern = "*",
+		callback = function()
+			vim.wo.winbar = ""
 		end,
 	})
 	vim.api.nvim_create_autocmd("VimEnter", {
