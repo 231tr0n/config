@@ -1556,6 +1556,11 @@ now(function()
 		vim.keymap.set("x", suffix, rhs, opts)
 	end
 	local function openGitGraph()
+		local git_root = vim.fn.system("git rev-parse --show-toplevel 2> /dev/null")
+		if git_root == "" then
+			vim.notify("Not a git repository")
+			return
+		end
 		vim.cmd("tabnew | terminal")
 		vim.cmd("startinsert")
 		vim.api.nvim_input(
