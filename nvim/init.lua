@@ -1766,7 +1766,11 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(ev)
-			if vim.bo.filetype == "diff" or vim.bo.filetype == "git" then
+			if vim.bo.filetype == "trouble" then
+				vim.wo.signcolumn = "no"
+				vim.wo.foldcolumn = "0"
+				vim.wo.statuscolumn = ""
+			elseif vim.bo.filetype == "diff" or vim.bo.filetype == "git" then
 				vim.wo.foldmethod = "expr"
 				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 			elseif vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" then
@@ -1810,10 +1814,12 @@ now(function()
 			vim.wo.number = false
 			vim.wo.relativenumber = false
 			vim.wo.signcolumn = "no"
+			vim.wo.foldcolumn = "0"
+			vim.wo.statuscolumn = ""
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWinEnter", {
-		pattern = { "\\[dap-repl-*\\]", "DAP *" },
+		pattern = { "\\[dap-repl-*\\]", "DAP *", "NvimTree_*" },
 		callback = function(args)
 			local win = vim.fn.bufwinid(args.buf)
 			vim.schedule(function()
