@@ -1525,8 +1525,6 @@ now(function()
 	end, { range = true })
 
 	-- Helper functions
-	local te_buf = nil
-	local te_win_id = nil
 	local function tmap(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
@@ -1557,6 +1555,15 @@ now(function()
 		opts.desc = desc
 		vim.keymap.set("x", suffix, rhs, opts)
 	end
+	local function openGitGraph()
+		vim.cmd("tabnew | terminal")
+		vim.cmd("startinsert")
+		vim.api.nvim_input(
+			'git log --all --graph --decorate --pretty="%C(blue) %h %C(yellow) %ad %C(red) %an %C(green) %s %C(reset)" --abbrev-commit --date=short<CR>'
+		)
+	end
+	local te_buf = nil
+	local te_win_id = nil
 	local function openTerminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
@@ -1721,6 +1728,7 @@ now(function()
 	nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	nmap("gl", "<cmd>lua MiniGit.show_at_cursor()<cr>", "Git line history")
+	nmap("gz", openGitGraph, "Git graph")
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-c>", '"+y', "Copy to clipboard")
