@@ -1,4 +1,4 @@
--- Mini.deps auto download and configure setup
+-- MiniDeps auto download and configure setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/start/mini.nvim"
 if not vim.loop.fs_stat(mini_path) then
@@ -16,7 +16,7 @@ if not vim.loop.fs_stat(mini_path) then
 end
 require("mini.deps").setup({ path = { package = path_package } })
 
--- add, now and later functions from mini.deps
+-- add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 -- Globals declared and used
@@ -27,7 +27,6 @@ Global = {
 now(function()
 	-- Default settings
 	-- let g:python_recommended_style=0
-	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
@@ -36,7 +35,8 @@ now(function()
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
 	vim.o.conceallevel = 2
-	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
+	vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
+	-- vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -294,6 +294,7 @@ now(function()
 			winblend = 0,
 		},
 	})
+	vim.notify = MiniNotify.make_notify()
 	require("mini.operators").setup()
 	-- require("mini.pairs").setup({
 	--  mappings = {
@@ -302,6 +303,7 @@ now(function()
 	--  },
 	-- })
 	require("mini.pick").setup()
+	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
@@ -376,13 +378,12 @@ now(function()
 		set_vim_settings = false,
 	})
 	require("mini.surround").setup()
-	require("mini.tabline").setup()
+	require("mini.tabline").setup({
+		tabpage_section = "right",
+	})
 	-- require("mini.test").setup()
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
-	-- defer setup
-	vim.notify = MiniNotify.make_notify()
-	vim.ui.select = MiniPick.ui_select
 
 	-- Plugin installation
 	-- Vimscript plugins
@@ -573,7 +574,6 @@ now(function()
 		},
 	})
 	add("mistweaverco/kulala.nvim")
-	-- add("prichrd/netrw.nvim")
 
 	-- Utility libraries
 	require("render-markdown").setup()
@@ -592,13 +592,9 @@ now(function()
 				click = "v:lua.ScFa",
 			},
 			{
-				text = { " " },
-				hl = "FoldColumn",
+				text = { "│" },
+				hl = "LineNr",
 			},
-			-- {
-			-- 	text = { "▏" },
-			-- 	hl = "FoldColumn",
-			-- },
 		},
 	})
 	require("cyberdream").setup({
@@ -649,7 +645,6 @@ now(function()
 		debug = false,
 		additional_curl_options = {},
 	})
-	-- require("netrw").setup()
 
 	-- Lsp, auto completion and snippet setup
 	local cmp = require("cmp")
@@ -948,86 +943,69 @@ now(function()
 	lspconfig.angularls.setup({
 		capabilities = capabilities,
 	})
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = { "java" },
-		callback = function()
-			local config = {
-				cmd = { "/usr/bin/jdtls" },
-				root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-				settings = {
-					java = {
-						references = {
-							includeDecompiledSources = true,
+	local function jdtlsConfig()
+		local config = {
+			cmd = { "/usr/bin/jdtls" },
+			root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+			settings = {
+				java = {
+					references = {
+						includeDecompiledSources = true,
+					},
+					eclipse = {
+						downloadSources = true,
+					},
+					maven = {
+						downloadSources = true,
+					},
+					format = {
+						enabled = false,
+						-- settings = {
+						--      url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
+						--      profile = "GoogleStyle",
+						-- },
+					},
+					inlayHints = {
+						parameterNames = {
+							enabled = "all",
+							exclusions = { "this" },
 						},
-						eclipse = {
-							downloadSources = true,
+					},
+					signatureHelp = { enabled = true },
+					contentProvider = { preferred = "fernflower" },
+					codeGeneration = {
+						toString = {
+							template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
 						},
-						maven = {
-							downloadSources = true,
-						},
-						format = {
-							enabled = false,
-							-- settings = {
-							--      url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
-							--      profile = "GoogleStyle",
-							-- },
-						},
-						inlayHints = {
-							parameterNames = {
-								enabled = "all",
-								exclusions = { "this" },
+						useBlocks = true,
+					},
+					configuration = {
+						runtimes = {
+							{
+								name = "JavaSE-11",
+								path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
 							},
-						},
-						signatureHelp = { enabled = true },
-						contentProvider = { preferred = "fernflower" },
-						codeGeneration = {
-							toString = {
-								template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-							},
-							useBlocks = true,
-						},
-						configuration = {
-							runtimes = {
-								{
-									name = "JavaSE-11",
-									path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-								},
-								{
-									name = "JavaSE-17",
-									path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-								},
+							{
+								name = "JavaSE-17",
+								path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
 							},
 						},
 					},
 				},
-			}
-			local bundles = {
-				vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-			}
-			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-			local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-			extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-			config["init_options"] = {
-				bundles = bundles,
-				extendedClientCapabilities = extendedClientCapabilities,
-			}
-			require("jdtls").start_or_attach(config)
-		end,
-	})
-	vim.api.nvim_create_autocmd("LspAttach", {
-		desc = "LSP actions",
-		callback = function(args)
-			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
-			-- client.server_capabilities.semanticTokensProvider = nil
-			vim.diagnostic.config({
-				virtual_text = true,
-				underline = false,
-			})
-			if vim.bo.filetype == "java" then
-				require("jdtls.dap").setup_dap_main_class_configs()
-			end
-		end,
-	})
+			},
+		}
+		local bundles = {
+			vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
+		}
+		vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+		local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+		extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+		config["init_options"] = {
+			bundles = bundles,
+			extendedClientCapabilities = extendedClientCapabilities,
+		}
+		return config
+	end
 	require("inlay-hints").setup()
 	require("trouble").setup()
 	Global.symbols = require("trouble").statusline({
@@ -1113,7 +1091,7 @@ now(function()
 		ignore_install = {},
 		modules = {},
 		indent = {
-			enable = false,
+			enable = true,
 		},
 		highlight = {
 			enable = true,
@@ -1546,10 +1524,9 @@ now(function()
 		require("conform").format({ async = true, range = range })
 	end, { range = true })
 
-	-- Keymap configuration
+	-- Helper functions
 	local te_buf = nil
 	local te_win_id = nil
-	-- defer setup
 	local function tmap(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
@@ -1582,19 +1559,18 @@ now(function()
 	end
 	local function openTerminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
-			vim.api.nvim_command("au TermOpen * setlocal nonumber norelativenumber signcolumn=no")
-			vim.api.nvim_command("sp | winc J | res 10 | te")
+			vim.cmd("split | wincmd J | resize 10 | terminal")
 			te_win_id = vim.fn.win_getid()
 			te_buf = vim.fn.bufnr("%")
 		elseif vim.fn.win_gotoid(te_win_id) ~= 1 then
-			vim.api.nvim_command("sb " .. te_buf .. "| winc J | res 10")
+			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
 			te_win_id = vim.fn.win_getid()
 		end
-		vim.api.nvim_command("startinsert")
+		vim.cmd("startinsert")
 	end
 	local function hideTerminal()
 		if vim.fn.win_gotoid(te_win_id) == 1 then
-			vim.api.nvim_command("hide")
+			vim.cmd("hide")
 		end
 	end
 	local function toggleTerminal()
@@ -1631,7 +1607,6 @@ now(function()
 	end
 
 	-- Keymaps
-	-- nmap("<leader>et", "<cmd>call FileBrowserToggle()<cr>", "Toggle tree")
 	imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
@@ -1761,16 +1736,13 @@ now(function()
 	vim.api.nvim_create_autocmd("BufRead", {
 		callback = function(ev)
 			if vim.bo[ev.buf].buftype == "quickfix" then
+				vim.wo.winbar = ""
 				vim.schedule(function()
 					vim.cmd("cclose")
 					vim.cmd("Trouble qflist open")
 				end)
-			end
-		end,
-	})
-	vim.api.nvim_create_autocmd("BufRead", {
-		callback = function(ev)
-			if vim.bo[ev.buf].buftype == "loclist" then
+			elseif vim.bo[ev.buf].buftype == "loclist" then
+				vim.wo.winbar = ""
 				vim.schedule(function()
 					vim.cmd("lclose")
 					vim.cmd("Trouble loclist open")
@@ -1784,18 +1756,6 @@ now(function()
 			vim.cmd("norm zR")
 		end,
 	})
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "svelte,jsx,html,xml,xsl,javascriptreact",
-		callback = function()
-			vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-		end,
-	})
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "NvimTree,netrw",
-		callback = function()
-			vim.b.minicursorword_disable = true
-		end,
-	})
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
 		callback = function(data)
@@ -1804,28 +1764,66 @@ now(function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "diff,git",
-		callback = function()
-			vim.wo.foldmethod = "expr"
-			vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-		end,
-	})
-	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
-		callback = function()
-			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
+		callback = function(ev)
+			if vim.bo.filetype == "diff" or vim.bo.filetype == "git" then
+				vim.wo.foldmethod = "expr"
+				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+			elseif vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" then
+				vim.b.minicursorword_disable = true
+			elseif
+				vim.bo.filetype == "svelte"
+				or vim.bo.filetype == "jsx"
+				or vim.bo.filetype == "html"
+				or vim.bo.filetype == "xml"
+				or vim.bo.filetype == "xsl"
+				or vim.bo.filetype == "javascriptreact"
+			then
+				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+			else
+				if vim.bo.filetype ~= "help" then
+					vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
+					if vim.bo.filetype == "java" then
+						require("jdtls").start_or_attach(jdtlsConfig())
+					end
+				end
+			end
 		end,
 	})
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "help",
-		callback = function()
-			vim.wo.winbar = ""
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
+			-- client.server_capabilities.semanticTokensProvider = nil
+			vim.diagnostic.config({
+				virtual_text = true,
+				underline = false,
+			})
+			if vim.bo.filetype == "java" then
+				require("jdtls.dap").setup_dap_main_class_configs()
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("TermOpen", {
 		pattern = "*",
 		callback = function()
 			vim.wo.winbar = ""
+			vim.wo.number = false
+			vim.wo.relativenumber = false
+			vim.wo.signcolumn = "no"
+		end,
+	})
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		pattern = { "\\[dap-repl-*\\]", "DAP *" },
+		callback = function(args)
+			local win = vim.fn.bufwinid(args.buf)
+			vim.schedule(function()
+				if not vim.api.nvim_win_is_valid(win) then
+					return
+				end
+				vim.api.nvim_set_option_value("foldcolumn", "0", { win = win })
+				vim.api.nvim_set_option_value("signcolumn", "no", { win = win })
+				vim.api.nvim_set_option_value("statuscolumn", "", { win = win })
+			end)
 		end,
 	})
 	vim.api.nvim_create_autocmd("VimEnter", {
@@ -1839,22 +1837,17 @@ now(function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-		callback = function()
-			require("lint").try_lint()
-		end,
-	})
 	vim.api.nvim_create_autocmd("BufWritePre", {
 		pattern = "*",
 		callback = function(args)
 			require("conform").format({ bufnr = args.buf })
-		end,
-	})
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		pattern = "*",
-		callback = function()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
+		end,
+	})
+	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+		callback = function()
+			require("lint").try_lint()
 		end,
 	})
 end)
