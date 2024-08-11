@@ -50,6 +50,9 @@ if status is-interactive
 	function fzfopen
 		fd --type f --hidden --exclude .git | fzf-tmux -p --reverse | xargs nvim
 	end
+	function gitgraph
+    git log --all --graph --decorate --pretty="%C(blue)%h %C(yellow)%ad %C(red)%an%C(green)%d%Creset%n%C(magenta)%s%Creset" --abbrev-commit --date=short
+	end
 	fish_vi_key_bindings
 end
 
@@ -60,6 +63,10 @@ set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /usr/local/go/bin
 set -x PATH $PATH $HOME/.local/share/bob/nvim-bin
 set -x PATH $PATH $HOME/.fzf/bin
+if test -z "$XDG_RUNTIME_DIR"
+  mkdir -p $HOME/.tmp/
+  set -x XDG_RUNTIME_DIR $HOME/.tmp/
+end
 
 if status is-interactive
 and not set -q TMUX
