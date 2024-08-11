@@ -1559,7 +1559,7 @@ now(function()
 		vim.cmd("tabnew | terminal")
 		vim.cmd("startinsert")
 		vim.api.nvim_input(
-			'git log --all --graph --decorate --pretty="%C(blue)%h %C(yellow)%ad %C(red)%an%C(green)%d%Creset%n%C(magenta)%s%Creset" --abbrev-commit --date=short'
+			'git log --all --graph --decorate --pretty="%C(blue)%h %C(yellow)%ad %C(red)%an%C(green)%d%Creset%n%C(magenta)%s%Creset" --abbrev-commit --date=short<CR>'
 		)
 	end
 	local te_buf = nil
