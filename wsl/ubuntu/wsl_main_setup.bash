@@ -30,6 +30,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/l
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/js/node-debug.bash -o ~/scripts/node-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/python/python-debug.bash -o ~/scripts/python-debug.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/kubernetes/kubernetes.bash -o ~/scripts/kubernetes.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
@@ -39,6 +40,7 @@ chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
 chmod +x ~/scripts/node-debug.bash
 chmod +x ~/scripts/python-debug.bash
+chmod +x ~/scripts/kubernetes.bash
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH=$PATH:$HOME/.cargo/bin
@@ -145,13 +147,9 @@ sudo npm install -g browser-sync tree-sitter-cli n nodemon
 pipx install watchdog
 go install -v github.com/air-verse/air@latest
 
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
-go install -v sigs.k8s.io/kind@latest
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-go install -v github.com/kubernetes/kompose@latest
+cd ~/scripts
+./kubernetes.bash
+cd ~
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
