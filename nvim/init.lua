@@ -1555,18 +1555,6 @@ now(function()
 		opts.desc = desc
 		vim.keymap.set("x", suffix, rhs, opts)
 	end
-	local function openGitGraph()
-		local git_root = vim.fn.system("git rev-parse --show-toplevel 2> /dev/null")
-		if git_root == "" then
-			vim.notify("Not a git repository")
-			return
-		end
-		vim.cmd("tabnew | terminal")
-		vim.cmd("startinsert")
-		vim.api.nvim_input(
-			'git log --all --graph --decorate --pretty="%C(blue)%h %C(yellow)%ad %C(red)%an%C(green)%d%Creset%n%C(magenta)%s%Creset" --abbrev-commit --date=short<CR>'
-		)
-	end
 	local te_buf = nil
 	local te_win_id = nil
 	local function openTerminal()
@@ -1733,7 +1721,6 @@ now(function()
 	nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	nmap("gl", "<cmd>lua MiniGit.show_at_cursor()<cr>", "Git line history")
-	nmap("gz", openGitGraph, "Git graph")
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-c>", '"+y', "Copy to clipboard")
