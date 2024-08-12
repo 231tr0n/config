@@ -610,6 +610,7 @@ now(function()
 				return {
 					["@variable.member"] = { fg = colors.pink },
 					["@lsp.type.property"] = { fg = colors.pink },
+					["Identifier"] = { fg = colors.pink },
 				}
 			end,
 			colors = {
