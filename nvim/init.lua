@@ -644,6 +644,7 @@ now(function()
 		default_env = "dev",
 		debug = false,
 		additional_curl_options = {},
+		winbar = true,
 	})
 
 	-- Lsp, auto completion and snippet setup
@@ -1181,14 +1182,14 @@ now(function()
 		},
 	})
 	require("neogen").setup({ snippet_engine = "luasnip" })
-	vim.filetype.add({
-		extension = {
-			["http"] = "http",
-		},
-	})
 	require("ts-comments").setup({
 		lang = {
 			text = "TODO: %s",
+		},
+	})
+	vim.filetype.add({
+		extension = {
+			["http"] = "http",
 		},
 	})
 
