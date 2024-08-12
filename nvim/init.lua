@@ -601,7 +601,7 @@ now(function()
 		transparent = true,
 		italic_comments = true,
 		hide_fillchars = false,
-		borderless_telescope = true,
+		borderless_telescope = false,
 		terminal_colors = true,
 		theme = {
 			variant = "default",
@@ -1784,13 +1784,8 @@ now(function()
 				or vim.bo.filetype == "javascriptreact"
 			then
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-			else
-				if vim.bo.filetype ~= "help" then
-					vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
-					if vim.bo.filetype == "java" then
-						require("jdtls").start_or_attach(jdtlsConfig())
-					end
-				end
+			elseif vim.bo.filetype == "java" then
+				require("jdtls").start_or_attach(jdtlsConfig())
 			end
 		end,
 	})
@@ -1802,6 +1797,7 @@ now(function()
 				virtual_text = true,
 				underline = false,
 			})
+			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
 			if vim.bo.filetype == "java" then
 				require("jdtls.dap").setup_dap_main_class_configs()
 			end
