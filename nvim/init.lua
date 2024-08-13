@@ -416,6 +416,13 @@ now(function()
 		},
 	})
 	add({
+		source = "OXY2DEV/helpview.nvim",
+		depends = {
+			"mini.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
 			"mini.nvim",
@@ -1188,6 +1195,7 @@ now(function()
 		},
 	})
 	require("render-markdown").setup()
+	require("helpview").setup()
 	vim.filetype.add({
 		extension = {
 			["http"] = "http",
@@ -1768,7 +1776,7 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(ev)
-			if vim.bo.filetype == "trouble" then
+			if vim.bo.filetype == "trouble" or vim.bo.filetype == "help" then
 				vim.wo.signcolumn = "no"
 				vim.wo.foldcolumn = "0"
 				vim.wo.statuscolumn = ""
