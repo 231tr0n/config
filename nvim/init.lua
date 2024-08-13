@@ -408,7 +408,7 @@ now(function()
 	add("mfussenegger/nvim-lint")
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
-	add("scottmckendry/cyberdream.nvim")
+	add("folke/tokyonight.nvim")
 	add({
 		source = "folke/ts-comments.nvim",
 		depends = {
@@ -598,33 +598,33 @@ now(function()
 				click = "v:lua.ScFa",
 			},
 			{
-				text = { "│" },
+				text = { "│ " },
 				hl = "LineNr",
 			},
 		},
 	})
-	require("cyberdream").setup({
+	require("tokyonight").setup({
+		style = "storm",
+		light_style = "day",
 		transparent = true,
-		italic_comments = true,
-		hide_fillchars = false,
-		borderless_telescope = false,
 		terminal_colors = true,
-		theme = {
-			variant = "default",
-			highlights = {},
-			overrides = function(colors)
-				return {
-					["@variable.member"] = { fg = colors.pink },
-					["@lsp.type.property"] = { fg = colors.pink },
-					["Identifier"] = { fg = colors.pink },
-				}
-			end,
-			colors = {
-				fg = "#dce1dd",
-			},
+		styles = {
+			comments = { italic = true },
+			keywords = {},
+			functions = {},
+			variables = {},
+			sidebars = "transparent",
+			floats = "transparent",
+		},
+		day_brightness = 0.3,
+		dim_inactive = true,
+		on_colors = function(colors) end,
+		cache = true,
+		plugins = {
+			all = true,
 		},
 	})
-	vim.cmd.colorscheme("cyberdream")
+	vim.cmd.colorscheme("tokyonight")
 	require("nvim-tree").setup()
 	require("spectre").setup()
 	require("fzf-lua").setup({
