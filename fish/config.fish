@@ -56,16 +56,16 @@ if status is-interactive
   fish_vi_key_bindings
 end
 
-set -x GOPATH $HOME/go
-set -x PATH $PATH $GOPATH/bin
-set -x PATH $PATH $HOME/.local/bin
-set -x PATH $PATH $HOME/.cargo/bin
-set -x PATH $PATH /usr/local/go/bin
-set -x PATH $PATH $HOME/.local/share/bob/nvim-bin
-set -x PATH $PATH $HOME/.fzf/bin
+set -gx GOPATH $HOME/go
+set -gx PATH $PATH $GOPATH/bin
+set -gx PATH $PATH $HOME/.local/bin
+set -gx PATH $PATH $HOME/.cargo/bin
+set -gx PATH $PATH /usr/local/go/bin
+set -gx PATH $PATH $HOME/.local/share/bob/nvim-bin
+set -gx PATH $PATH $HOME/.fzf/bin
 if not test -d "$XDG_RUNTIME_DIR"
-  set -x XDG_RUNTIME_DIR $HOME/.tmp/
   mkdir -p $HOME/.tmp/
+  set -gx XDG_RUNTIME_DIR $HOME/.tmp/
 end
 
 if status is-interactive
