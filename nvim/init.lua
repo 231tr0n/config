@@ -576,7 +576,6 @@ now(function()
 	add("mistweaverco/kulala.nvim")
 
 	-- Utility libraries
-	require("render-markdown").setup()
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
 		bt_ignore = { "netrw", "NvimTree" },
@@ -1188,6 +1187,7 @@ now(function()
 			text = "TODO: %s",
 		},
 	})
+	require("render-markdown").setup()
 	vim.filetype.add({
 		extension = {
 			["http"] = "http",
