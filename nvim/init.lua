@@ -409,6 +409,7 @@ now(function()
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
 	add("folke/tokyonight.nvim")
+	add("scottmckendry/cyberdream.nvim")
 	add({
 		source = "folke/ts-comments.nvim",
 		depends = {
@@ -600,6 +601,27 @@ now(function()
 			{
 				text = { "│ " },
 				hl = "LineNr",
+			},
+		},
+	})
+	require("cyberdream").setup({
+		transparent = true,
+		italic_comments = true,
+		hide_fillchars = false,
+		borderless_telescope = false,
+		terminal_colors = true,
+		theme = {
+			variant = "default",
+			highlights = {},
+			overrides = function(colors)
+				return {
+					["@variable.member"] = { fg = colors.pink },
+					["@lsp.type.property"] = { fg = colors.pink },
+					["Identifier"] = { fg = colors.pink },
+				}
+			end,
+			colors = {
+				fg = "#dce1dd",
 			},
 		},
 	})
