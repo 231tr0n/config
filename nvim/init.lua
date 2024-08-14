@@ -608,7 +608,7 @@ now(function()
 		transparent = true,
 		italic_comments = true,
 		hide_fillchars = false,
-		borderless_telescope = false,
+		borderless_telescope = true,
 		terminal_colors = true,
 		theme = {
 			variant = "default",
@@ -1674,6 +1674,7 @@ now(function()
 	nmap("<leader>eT", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
 	nmap("<leader>ef", "<cmd>NvimTreeFindFile<cr>", "Goto file in tree")
 	nmap("<leader>et", "<cmd>NvimTreeToggle<cr>", "Toggle file tree")
+	nmap("<leader>fC", "<cmd>FzfLua colorschemes<cr>", "Change colorschemes")
 	nmap("<leader>fF", "<cmd>FzfLua lsp_finder<cr>", "Search everything lsp")
 	nmap("<leader>fL", "<cmd>FzfLua lines<cr>", "Search lines")
 	nmap("<leader>fS", "<cmd>FzfLua live_grep_native<cr>", "Search content live")
