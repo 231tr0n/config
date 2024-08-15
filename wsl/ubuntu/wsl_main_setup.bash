@@ -67,7 +67,7 @@ sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch
 sudo apt update -y
 sudo apt install -y fastfetch
 
-sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-11-source openjdk-21-source openjdk-17-source openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk openjdk-11-doc openjdk-17-doc openjdk-21-doc luajit luarocks texlive texlive-base texlive-science texlive-science-doc universal-ctags pipx texlive-extra-utils texlive-latex-extra latexmk evince ffmpeg mpv zoxide
+sudo apt install -y python-is-python3 python3-pip python3-venv nodejs clang clang-tools gcc make cmake meson maven ninja-build openjdk-11-source openjdk-21-source openjdk-17-source openjdk-21-jdk openjdk-17-jdk openjdk-11-jdk openjdk-11-doc openjdk-17-doc openjdk-21-doc luajit luarocks texlive texlive-base texlive-science texlive-science-doc universal-ctags pipx texlive-extra-utils texlive-latex-extra latexmk evince ffmpeg mpv zoxide net-tools sysstat
 sudo update-java-alternatives -s java-1.21.0-openjdk-amd64
 sudo npm install -g npm@latest
 sudo npm install -g typescript@latest
