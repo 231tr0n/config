@@ -599,7 +599,7 @@ now(function()
 				click = "v:lua.ScFa",
 			},
 			{
-				text = { "│ " },
+				text = { "│" },
 				hl = "LineNr",
 			},
 		},
