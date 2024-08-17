@@ -1482,43 +1482,48 @@ now(function()
 
 	-- Formatting and linting setup
 	require("lint").linters_by_ft = {
-		json = { "jsonlint" },
-		jsonc = { "jsonlint" },
-		yaml = { "yamllint" },
-		java = { "checkstyle" },
-		go = { "golangcilint" },
 		-- lua = { "luacheck" },
 		-- python = { "pylint" },
+		-- yaml = { "yamllint" },
 		c = { "clangtidy" },
-		javascript = { "eslint" },
-		typescript = { "eslint" },
-		svelte = { "eslint" },
-		sh = { "shellcheck" },
+		go = { "golangcilint" },
 		groovy = { "npm-groovy-lint" },
+		java = { "checkstyle" },
+		javascript = { "eslint" },
+		json = { "jsonlint" },
+		jsonc = { "jsonlint" },
+		sh = { "shellcheck" },
+		svelte = { "eslint" },
+		typescript = { "eslint" },
 	}
 	require("conform").setup({
 		formatters_by_ft = {
-			lua = { "stylua" },
-			python = { "black" },
-			svelte = { "prettier" },
-			java = { "google-java-format" },
+			c = { "clang_format" },
+			css = { "prettier" },
 			go = { "gofmt" },
-			tex = { "latexindent" },
-			xml = { "xmllint" },
-			yaml = { "yamlfmt" },
+			groovy = { "npm-groovy-lint" },
+			html = { "prettier" },
+			java = { "google-java-format" },
+			javascript = { "prettier" },
 			json = { "jq", "prettier" },
 			jsonc = { "prettier" },
-			css = { "prettier" },
-			html = { "prettier" },
-			c = { "clang_format" },
-			sh = { "shfmt" },
+			lua = { "stylua" },
+			python = { "black" },
 			rust = { "rustfmt" },
-			javascript = { "prettier" },
+			sh = { "shfmt" },
+			svelte = { "prettier" },
+			tex = { "latexindent" },
 			typescript = { "prettier" },
-			groovy = { "npm-groovy-lint" },
+			xml = { "xmllint" },
+			yaml = { "yamlfmt" },
 		},
 		lsp_fallback = true,
 	})
+	require("conform").formatters.yamlfmt = {
+		prepend_args = function(self, ctx)
+			return { "-formatter", "include_document_start=true,indentless_arrays=true" }
+		end,
+	}
 	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
 	-- Ai setup
