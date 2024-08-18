@@ -20,9 +20,7 @@ require("mini.deps").setup({ path = { package = path_package } })
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 -- Globals declared and used
-Global = {
-	virtual_text = false,
-}
+Global = {}
 
 now(function()
 	-- Default settings
@@ -135,7 +133,7 @@ now(function()
 	-- })
 	require("mini.basics").setup({
 		-- options = {
-		-- extra_ui = true,
+		--   extra_ui = true,
 		-- },
 		mappings = {
 			windows = true,
@@ -171,13 +169,13 @@ now(function()
 			{
 				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
+				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<Leader>e", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
-				{ mode = "n", keys = "<Leader>r", desc = "+Rest" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
@@ -502,12 +500,6 @@ now(function()
 		},
 	})
 	add({
-		source = "MysticalDevil/inlay-hints.nvim",
-		depends = {
-			"neovim/nvim-lspconfig",
-		},
-	})
-	add({
 		source = "bennypowers/nvim-regexplainer",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -551,19 +543,12 @@ now(function()
 		},
 	})
 	add({
-		source = "tzachar/cmp-ai",
-		depends = {
-			"nvim-lua/plenary.nvim",
-		},
-	})
-	add({
 		source = "hrsh7th/nvim-cmp",
 		depends = {
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-cmdline",
 			"hrsh7th/cmp-nvim-lsp",
-			"tzachar/cmp-ai",
 			"hrsh7th/cmp-nvim-lsp-signature-help",
 		},
 	})
@@ -581,7 +566,6 @@ now(function()
 			"ibhagwan/fzf-lua",
 		},
 	})
-	add("mistweaverco/kulala.nvim")
 
 	-- Utility libraries
 	require("statuscol").setup({
@@ -668,27 +652,10 @@ now(function()
 	local fzf_config = require("fzf-lua.config")
 	local fzf_actions = require("trouble.sources.fzf").actions
 	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
-	require("kulala").setup({
-		default_view = "body",
-		default_env = "dev",
-		debug = false,
-		additional_curl_options = {},
-		winbar = true,
-	})
 
 	-- Lsp, auto completion and snippet setup
 	local cmp = require("cmp")
 	local luasnip = require("luasnip")
-	local cmp_ai = require("cmp_ai.config")
-	cmp_ai:setup({
-		max_lines = 100,
-		provider = "Ollama",
-		provider_options = {
-			model = "dolphin-llama3:latest",
-		},
-		run_on_every_keystroke = false,
-		ignored_file_types = {},
-	})
 	local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 	local has_words_before = function()
 		unpack = unpack or table.unpack
@@ -739,16 +706,6 @@ now(function()
 					fallback()
 				end
 			end, { "i", "s" }),
-			["<C-x>"] = cmp.mapping(
-				cmp.mapping.complete({
-					config = {
-						sources = cmp.config.sources({
-							{ name = "cmp_ai" },
-						}),
-					},
-				}),
-				{ "i" }
-			),
 		}),
 		sources = cmp.config.sources({
 			{ name = "nvim_lsp" },
@@ -1036,7 +993,6 @@ now(function()
 		}
 		return config
 	end
-	require("inlay-hints").setup()
 	require("trouble").setup()
 	Global.symbols = require("trouble").statusline({
 		mode = "lsp_document_symbols",
@@ -1625,22 +1581,14 @@ now(function()
 		vim.opt.expandtab = true
 		vim.cmd("retab!")
 	end
+	local function diagnosticVirtualTextToggle()
+		vim.diagnostic.config({
+			virtual_text = not vim.diagnostic.config().virtual_text,
+		})
+	end
 	Global.miniPickVisits = function(cwd, desc)
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
 		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
-	end
-	Global.diagnosticVirtualTextToggle = function()
-		if Global.virtual_text then
-			Global.virtual_text = false
-			vim.diagnostic.config({
-				virtual_text = false,
-			})
-		else
-			Global.virtual_text = true
-			vim.diagnostic.config({
-				virtual_text = true,
-			})
-		end
 	end
 
 	-- Keymaps
@@ -1660,6 +1608,7 @@ now(function()
 	nmap("<leader>bu", "<cmd>UndotreeToggle<CR>", "Undotree")
 	nmap("<leader>bw", "<cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	nmap("<leader>dC", "<cmd>lua require('dap').clear_breakpoints()<cr>", "Clear breakpoints")
+	nmap("<leader>dL", "<cmd>lua require('osv').launch({ port = 8086 })<cr>", "Lua debug launch")
 	nmap("<leader>db", "<cmd>lua require('dap').list_breakpoints()<cr>", "List breakpoints")
 	nmap("<leader>dc", "<cmd>lua require('dap').continue()<cr>", "Continue")
 	nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<cr>", "Frames")
@@ -1718,12 +1667,11 @@ now(function()
 	nmap("<leader>gt", "<cmd>lua require('neogen').generate({ type = 'type' })<cr>", "Generate type annotations")
 	nmap("<leader>lF", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", "Lsp Format")
 	nmap("<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code action")
-	nmap("<leader>ldd", "<cmd>lua require('osv').launch({ port = 8086 })<cr>", "Lua debug launch")
 	nmap("<leader>ldh", "<cmd>lua vim.diagnostic.open_float()<cr>", "Hover diagnostics")
 	nmap("<leader>ldn", "<cmd>lua vim.diagnostic.goto_next()<cr>", "Goto next diagnostic")
 	nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
 	nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
-	nmap("<leader>ldt", "<cmd>lua Global.diagnosticVirtualTextToggle()<cr>", "Virtual text toggle")
+	nmap("<leader>ldt", diagnosticVirtualTextToggle, "Virtual text toggle")
 	nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
 	nmap("<leader>lgb", "<C-t>", "Previous tag")
@@ -1733,23 +1681,17 @@ now(function()
 	nmap("<leader>lgs", "<cmd>lua vim.lsp.buf.signature_help()<cr>", "Signature help")
 	nmap("<leader>lgtd", "<cmd>lua vim.lsp.buf.type_definition()<cr>", "Goto type definition")
 	nmap("<leader>lh", "<cmd>lua vim.lsp.buf.hover()<cr>", "Hover symbol")
-	nmap("<leader>lit", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>", "Inlay hints toggle")
+	nmap("<leader>li", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>", "Inlay hints toggle")
 	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
-	nmap("<leader>rj", "<cmd>lua require('kulala').jump_next()<CR>", "Next request")
-	nmap("<leader>rk", "<cmd>lua require('kulala').jump_prev()<CR>", "Previous request")
-	nmap("<leader>rr", "<cmd>lua require('kulala').run()<CR>", "Run request")
 	nmap("<leader>tgm", "<cmd>lua require('dap-go').debug_test()<cr>", "Test method")
 	nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
 	nmap("<leader>tpc", "<cmd>lua require('dap-python').test_class()<cr>", "Test class")
 	nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test method")
 	nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
-	nmap("<leader>vF", "<cmd>lua Global.miniPickVisits(nil, 'Core (cwd)')<cr>", "Core visits (cwd)")
-	nmap("<leader>vR", "<cmd>lua MiniVisits.remove_label()<cr>", "Remove label")
-	nmap("<leader>vV", "<cmd>lua MiniVisits.add_label()<cr>", "Add label")
-	nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core (all)')<cr>", "Core visits (all)")
+	nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
@@ -1762,12 +1704,12 @@ now(function()
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
-	vmap("<leader>c", '"+y', "Copy to clipboard")
-	vmap("<leader>cc", '"+x', "Cut to clipboard")
+	vmap("<leader>cc", '"+y', "Copy to clipboard")
+	vmap("<leader>cp", '"+p', "Paste to clipboard")
+	vmap("<leader>cx", '"+x', "Cut to clipboard")
 	vmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
 	vmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
 	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
-	vmap("<leader>p", '"+p', "Paste to clipboard")
 	xmap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 
@@ -1837,6 +1779,7 @@ now(function()
 				underline = false,
 			})
 			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
+			vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 			if vim.bo.filetype == "java" then
 				require("jdtls.dap").setup_dap_main_class_configs()
 			end
