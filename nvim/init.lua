@@ -90,7 +90,7 @@ now(function()
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
 	require("mini.align").setup()
-	require("mini.animate").setup({ scroll = { enable = true } })
+	require("mini.animate").setup()
 	-- require("mini.base16").setup({
 	-- 	-- solarized dark color palette
 	-- 	palette = {
