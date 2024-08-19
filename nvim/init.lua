@@ -62,7 +62,7 @@ now(function()
 	vim.opt.maxmempattern = 20000
 	vim.opt.number = true
 	vim.opt.relativenumber = true
-	vim.opt.scrolloff = 1
+	vim.opt.scrolloff = 99
 	vim.opt.shiftwidth = 2
 	vim.opt.signcolumn = "auto"
 	vim.opt.tabstop = 2
@@ -90,7 +90,24 @@ now(function()
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
 	require("mini.align").setup()
-	require("mini.animate").setup()
+	-- local animate = require("mini.animate")
+	-- animate.setup({
+	-- 	cursor = {
+	-- 		enable = true,
+	-- 	},
+	-- 	scroll = {
+	-- 		enable = false,
+	-- 	},
+	-- 	resize = {
+	-- 		enable = false,
+	-- 	},
+	-- 	open = {
+	-- 		enable = false,
+	-- 	},
+	-- 	close = {
+	-- 		enable = false,
+	-- 	},
+	-- })
 	-- require("mini.base16").setup({
 	-- 	-- solarized dark color palette
 	-- 	palette = {
