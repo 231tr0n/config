@@ -193,6 +193,7 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>r", desc = "+Refactor" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
@@ -403,7 +404,6 @@ now(function()
 	-- Plugin installation
 	-- Vimscript plugins
 	add("mbbill/undotree")
-	add("dstein64/vim-startuptime")
 	add({
 		source = "junegunn/fzf",
 		hooks = {
@@ -427,26 +427,6 @@ now(function()
 	add("folke/tokyonight.nvim")
 	add("scottmckendry/cyberdream.nvim")
 	add({
-		source = "folke/ts-comments.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	add({
-		source = "OXY2DEV/helpview.nvim",
-		depends = {
-			"mini.nvim",
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	add({
-		source = "MeanderingProgrammer/render-markdown.nvim",
-		depends = {
-			"mini.nvim",
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	add({
 		source = "L3MON4D3/LuaSnip",
 		hooks = {
 			post_checkout = function(args)
@@ -463,6 +443,20 @@ now(function()
 			post_checkout = function()
 				vim.cmd("TSUpdate")
 			end,
+		},
+	})
+	add({
+		source = "OXY2DEV/helpview.nvim",
+		depends = {
+			"mini.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	add({
+		source = "MeanderingProgrammer/render-markdown.nvim",
+		depends = {
+			"mini.nvim",
+			"nvim-treesitter/nvim-treesitter",
 		},
 	})
 	add({
@@ -551,6 +545,13 @@ now(function()
 	add({
 		source = "RRethy/nvim-treesitter-endwise",
 		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	add({
+		source = "ThePrimeagen/refactoring.nvim",
+		depends = {
+			"nvim-lua/plenary.nvim",
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
@@ -1171,6 +1172,40 @@ now(function()
 			-- "RainbowDelimiterCyan",
 		},
 	}
+	require("refactoring").setup({
+		prompt_func_return_type = {
+			go = true,
+			java = true,
+			cpp = true,
+			c = true,
+			h = true,
+			hpp = true,
+			cxx = true,
+		},
+		prompt_func_param_type = {
+			go = true,
+			java = true,
+			cpp = true,
+			c = true,
+			h = true,
+			hpp = true,
+			cxx = true,
+		},
+		extract_var_statements = {
+			go = "%s := %s // poggers",
+		},
+		printf_statements = {
+			cpp = {
+				'std::cout << "%s" << std::endl;',
+			},
+		},
+		print_var_statements = {
+			cpp = {
+				'printf("a custom statement %%s %s", %s)',
+			},
+		},
+		show_success_message = true,
+	})
 	require("nvim-autopairs").setup()
 	require("nvim-ts-autotag").setup()
 	require("ibl").setup({
@@ -1185,11 +1220,6 @@ now(function()
 		},
 	})
 	require("neogen").setup({ snippet_engine = "luasnip" })
-	require("ts-comments").setup({
-		lang = {
-			text = "TODO: %s",
-		},
-	})
 	require("render-markdown").setup()
 	require("helpview").setup()
 	vim.filetype.add({
@@ -1709,6 +1739,14 @@ now(function()
 	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
+	nmap("<leader>rI", ":Refactor inline_func")
+	nmap("<leader>rV", ":lua require('refactoring').debug.print_var()")
+	nmap("<leader>rb", ":Refactor extract_block")
+	nmap("<leader>rbf", ":Refactor extract_block_to_file")
+	nmap("<leader>rc", ":lua require('refactoring').debug.cleanup({})<cr>")
+	nmap("<leader>ri", ":Refactor inline_var")
+	nmap("<leader>rp", ":lua require('refactoring').debug.printf({ below = false })")
+	nmap("<leader>rr", ":lua require('refactoring').select_refactor()<cr>")
 	nmap("<leader>tgm", "<cmd>lua require('dap-go').debug_test()<cr>", "Test method")
 	nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
@@ -1739,6 +1777,12 @@ now(function()
 	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 	xmap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
+	xmap("<leader>rV", ":lua require('refactoring').debug.print_var()")
+	xmap("<leader>re", ":Refactor extract ")
+	xmap("<leader>rf", ":Refactor extract_to_file ")
+	xmap("<leader>ri", ":Refactor inline_var")
+	xmap("<leader>rr", ":lua require('refactoring').select_refactor()<cr>")
+	xmap("<leader>rv", ":Refactor extract_var ")
 
 	-- Autocommand configuration
 	vim.api.nvim_create_autocmd("BufRead", {
