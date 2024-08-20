@@ -382,6 +382,7 @@ now(function()
 
 	-- Plugin installation
 	-- Vimscript plugins
+	add("dstein64/vim-startuptime")
 	add({
 		source = "junegunn/fzf",
 		hooks = {
