@@ -22,6 +22,9 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Globals declared and used
 Global = {
 	setBase16Colorscheme = function()
+		vim.api.nvim_set_hl(0, "IndentLine", {
+			link = "NonText",
+		})
 		require("mini.base16").setup({
 			palette = {
 				base00 = "#282C34",
@@ -43,16 +46,24 @@ Global = {
 			},
 		})
 	end,
+	getFolds = function(lnum)
+		if vim.fn.foldlevel(lnum) <= vim.fn.foldlevel(lnum - 1) then
+			return " "
+		end
+		return vim.fn.foldclosed(lnum) == -1 and vim.opt.fillchars:get().foldopen or vim.opt.fillchars:get().foldclose
+	end,
+	getStatusColumn = function()
+		return "%s%l" .. Global.getFolds(vim.v.lnum) .. "▕"
+	end,
 }
 
 now(function()
 	-- Default settings
 	-- let g:python_recommended_style=0
-	-- vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
-	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
-	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
-	vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
+	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
+	-- vim.o.relativenumber = true
+	vim.cmd("filetype plugin indent off")
+	vim.cmd("filetype plugin on")
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -60,7 +71,6 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
 	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
@@ -75,7 +85,7 @@ now(function()
 	vim.o.maxmempattern = 20000
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
-	vim.o.relativenumber = true
+	vim.o.pumblend = 0
 	vim.o.scrolloff = 1
 	vim.o.shiftwidth = 2
 	vim.o.showcmd = true
@@ -83,6 +93,7 @@ now(function()
 	vim.o.showmode = false
 	vim.o.signcolumn = "auto"
 	vim.o.smartcase = true
+	vim.o.statuscolumn = "%!v:lua.Global.getStatusColumn()"
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
 	vim.o.textwidth = 0
@@ -90,10 +101,9 @@ now(function()
 	vim.o.updatetime = 500
 	vim.o.wildmenu = true
 	vim.o.wildmode = "longest:full,full"
+	vim.o.winblend = 0
 	vim.o.wrap = true
 	vim.opt.matchpairs:append("<:>")
-	vim.cmd("filetype plugin on")
-	vim.cmd("filetype plugin indent off")
 	local border = {
 		{ "╭", "FloatBorder" },
 		{ "─", "FloatBorder" },
@@ -114,13 +124,35 @@ now(function()
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
 	require("mini.align").setup()
-	require("mini.animate").setup({ scroll = { enable = true } })
+	local animate = require("mini.animate")
+	animate.setup({
+		cursor = {
+			enable = true,
+		},
+		scroll = {
+			enable = false,
+		},
+		resize = {
+			enable = false,
+		},
+		open = {
+			enable = false,
+		},
+		close = {
+			enable = false,
+		},
+	})
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
+			win_borders = "single",
 		},
 		mappings = {
 			windows = true,
+			move_with_alt = true,
+		},
+		autocommands = {
+			relnum_in_visual_mode = true,
 		},
 	})
 	require("mini.bracketed").setup()
@@ -151,6 +183,7 @@ now(function()
 		},
 		clues = {
 			{
+				{ mode = "n", keys = "<Leader>R", desc = "+REST" },
 				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
@@ -160,6 +193,7 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>r", desc = "+Refactor" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
@@ -230,11 +264,13 @@ now(function()
 		},
 	})
 	MiniIcons.mock_nvim_web_devicons()
+	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
 		symbol = "│",
 		draw = {
 			delay = 0,
 			animation = require("mini.indentscope").gen_animation.none(),
+			priority = 10000,
 		},
 	})
 	require("mini.jump").setup()
@@ -356,8 +392,6 @@ now(function()
 	})
 	-- Lua plugins
 	add("nvim-neotest/nvim-nio")
-	add("dstein64/vim-startuptime")
-	add("luukvbaal/statuscol.nvim")
 	add("neovim/nvim-lspconfig")
 	add("nvimdev/indentmini.nvim")
 	add("rafamadriz/friendly-snippets")
@@ -365,6 +399,29 @@ now(function()
 	add("mfussenegger/nvim-lint")
 	add("stevearc/conform.nvim")
 	add("David-Kunz/gen.nvim")
+	add("mistweaverco/kulala.nvim")
+	add({
+		source = "L3MON4D3/LuaSnip",
+		hooks = {
+			post_checkout = function(args)
+				local temp = vim.fn.getcwd()
+				vim.cmd(args.path)
+				vim.cmd("make install_jsregexp")
+				vim.cmd(temp)
+			end,
+		},
+		depends = {
+			"rafamadriz/friendly-snippets",
+		},
+	})
+	add({
+		source = "nvim-treesitter/nvim-treesitter",
+		hooks = {
+			post_checkout = function()
+				vim.cmd("TSUpdate")
+			end,
+		},
+	})
 	add({
 		source = "OXY2DEV/helpview.nvim",
 		depends = {
@@ -377,25 +434,6 @@ now(function()
 		depends = {
 			"mini.nvim",
 			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	add({
-		source = "L3MON4D3/LuaSnip",
-		hooks = {
-			post_checkout = function(args)
-				local temp = vim.fn.getcwd()
-				vim.cmd(args.path)
-				vim.cmd("make install_jsregexp")
-				vim.cmd(temp)
-			end,
-		},
-	})
-	add({
-		source = "nvim-treesitter/nvim-treesitter",
-		hooks = {
-			post_checkout = function()
-				vim.cmd("TSUpdate")
-			end,
 		},
 	})
 	add({
@@ -457,6 +495,13 @@ now(function()
 		},
 	})
 	add({
+		source = "ThePrimeagen/refactoring.nvim",
+		depends = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	add({
 		source = "nvim-tree/nvim-tree.lua",
 		depends = {
 			"mini.nvim",
@@ -471,26 +516,7 @@ now(function()
 	})
 
 	-- Utility libraries
-	require("statuscol").setup({
-		ft_ignore = { "netrw", "NvimTree" },
-		bt_ignore = { "netrw", "NvimTree" },
-		relculright = false,
-		segments = {
-			{ text = { "%s" }, click = "v:lua.ScSa" },
-			{
-				text = { require("statuscol.builtin").lnumfunc },
-				click = "v:lua.ScLa",
-			},
-			{
-				text = { require("statuscol.builtin").foldfunc },
-				click = "v:lua.ScFa",
-			},
-			{
-				text = { " " },
-				hl = "FoldColumn",
-			},
-		},
-	})
+	require("kulala").setup()
 	require("nvim-tree").setup()
 	require("fzf-lua").setup({
 		"max-perf",
@@ -513,6 +539,10 @@ now(function()
 	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
 
 	-- Lsp, auto completion and snippet setup
+	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+	vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" })
 	local luasnip = require("luasnip")
 	require("luasnip.loaders.from_vscode").lazy_load()
 	require("luasnip.loaders.from_snipmate").lazy_load()
@@ -882,13 +912,44 @@ now(function()
 			end,
 			additional_vim_regex_highlighting = false,
 		},
-		endwise = {
-			enable = true,
-		},
 	})
 	vim.wo.foldmethod = "expr"
 	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	require("treesitter-context").setup()
+	require("refactoring").setup({
+		prompt_func_return_type = {
+			go = true,
+			java = true,
+			cpp = true,
+			c = true,
+			h = true,
+			hpp = true,
+			cxx = true,
+		},
+		prompt_func_param_type = {
+			go = true,
+			java = true,
+			cpp = true,
+			c = true,
+			h = true,
+			hpp = true,
+			cxx = true,
+		},
+		extract_var_statements = {
+			go = "%s := %s // poggers",
+		},
+		printf_statements = {
+			cpp = {
+				'std::cout << "%s" << std::endl;',
+			},
+		},
+		print_var_statements = {
+			cpp = {
+				'printf("a custom statement %%s %s", %s)',
+			},
+		},
+		show_success_message = true,
+	})
 	local rainbow_delimiters = require("rainbow-delimiters")
 	vim.g.rainbow_delimiters = {
 		strategy = {
@@ -910,20 +971,9 @@ now(function()
 		},
 	}
 	require("indentmini").setup()
-	-- require("ibl").setup({
-	-- 	indent = {
-	-- 		char = "│",
-	-- 		tab_char = "│",
-	-- 	},
-	-- 	scope = {
-	-- 		enabled = false,
-	-- 		show_start = false,
-	-- 		show_end = false,
-	-- 	},
-	-- })
 	require("neogen").setup({ snippet_engine = "luasnip" })
 	require("render-markdown").setup()
-	-- require("helpview").setup()
+	require("helpview").setup()
 	vim.filetype.add({
 		extension = {
 			["http"] = "http",
@@ -1362,18 +1412,20 @@ now(function()
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<F2>", MiniNotify.clear, "Clear all notifications")
 	nmap("<F3>", Global.setBase16Colorscheme, "Set base16 colorscheme")
-	nmap("<F4>", setRandomHuesColorscheme, "Set mini.hues colorscheme")
-	nmap("<F5>", generateRandomHuesColorscheme, "Set random colorscheme")
-	nmap("<F6>", "<cmd>Inspect<cr>", "Echo syntax group")
+	nmap("<F4>", "<cmd>Inspect<cr>", "Echo syntax group")
+	nmap("<F5>", setRandomHuesColorscheme, "Set mini.hues colorscheme")
+	nmap("<F6>", generateRandomHuesColorscheme, "Set random colorscheme")
 	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
+	nmap("<leader>Rj", ":lua require('kulala').jump_next()<CR>")
+	nmap("<leader>Rk", ":lua require('kulala').jump_prev()<CR>")
+	nmap("<leader>Rl", ":lua require('kulala').run()<CR>")
 	nmap("<leader>am", require("gen").select_model, "Select model")
 	nmap("<leader>ap", "<cmd>Gen<CR>", "Prompt Model")
 	nmap("<leader>bD", "<cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	nmap("<leader>bW", "<cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	nmap("<leader>ba", "<cmd>b#<CR>", "Alternate")
 	nmap("<leader>bd", "<cmd>lua MiniBufremove.delete()<CR>", "Delete")
-	nmap("<leader>bu", "<cmd>UndotreeToggle<CR>", "Undotree")
 	nmap("<leader>bw", "<cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	nmap("<leader>cC", '"+Y', "Copy to clipboard")
 	nmap("<leader>cP", '"+P', "Paste to clipboard")
@@ -1383,6 +1435,7 @@ now(function()
 	nmap("<leader>cx", '"+x', "Cut to clipboard")
 	nmap("<leader>dC", "<cmd>lua require('dap').clear_breakpoints()<cr>", "Clear breakpoints")
 	nmap("<leader>dL", "<cmd>lua require('osv').launch({ port = 8086 })<cr>", "Lua debug launch")
+	nmap("<leader>dLr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
 	nmap("<leader>db", "<cmd>lua require('dap').list_breakpoints()<cr>", "List breakpoints")
 	nmap("<leader>dc", "<cmd>lua require('dap').continue()<cr>", "Continue")
 	nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<cr>", "Frames")
@@ -1392,9 +1445,9 @@ now(function()
 	nmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
 	nmap("<leader>dr", "<cmd>lua require('dap').repl.open()<cr>", "Open Repl")
 	nmap("<leader>ds", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets'.scopes)<cr>", "Scopes")
+	nmap("<leader>dsO", "<cmd>lua require('dap').step_over()<cr>", "Step over")
 	nmap("<leader>dsi", "<cmd>lua require('dap').step_into()<cr>", "Step into")
 	nmap("<leader>dso", "<cmd>lua require('dap').step_out()<cr>", "Step out")
-	nmap("<leader>dso", "<cmd>lua require('dap').step_over()<cr>", "Step over")
 	nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle breakpoint")
 	nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 	nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
@@ -1443,7 +1496,6 @@ now(function()
 	nmap("<leader>ldh", "<cmd>lua vim.diagnostic.open_float()<cr>", "Hover diagnostics")
 	nmap("<leader>ldn", "<cmd>lua vim.diagnostic.goto_next()<cr>", "Goto next diagnostic")
 	nmap("<leader>ldp", "<cmd>lua vim.diagnostic.goto_prev()<cr>", "Goto prev diagnostic")
-	nmap("<leader>ldr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
 	nmap("<leader>ldt", diagnosticVirtualTextToggle, "Virtual text toggle")
 	nmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	nmap("<leader>lgD", "<cmd>lua vim.lsp.buf.declaration()<cr>", "Goto declaration")
@@ -1458,6 +1510,14 @@ now(function()
 	nmap("<leader>ljo", "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize imports")
 	nmap("<leader>ljv", "<cmd>lua require('jdtls').extract_variable()<cr>", "Extract variable")
 	nmap("<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", "Rename")
+	nmap("<leader>rI", ":Refactor inline_func")
+	nmap("<leader>rV", ":lua require('refactoring').debug.print_var()")
+	nmap("<leader>rb", ":Refactor extract_block")
+	nmap("<leader>rbf", ":Refactor extract_block_to_file")
+	nmap("<leader>rc", ":lua require('refactoring').debug.cleanup({})<cr>")
+	nmap("<leader>ri", ":Refactor inline_var")
+	nmap("<leader>rp", ":lua require('refactoring').debug.printf({ below = false })")
+	nmap("<leader>rr", ":lua require('refactoring').select_refactor()<cr>")
 	nmap("<leader>tgm", "<cmd>lua require('dap-go').debug_test()<cr>", "Test method")
 	nmap("<leader>tjc", "<cmd>lua require('jdtls').test_class()<cr>", "Test class")
 	nmap("<leader>tjm", "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test method")
@@ -1488,6 +1548,12 @@ now(function()
 	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 	xmap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
+	xmap("<leader>rV", ":lua require('refactoring').debug.print_var()")
+	xmap("<leader>re", ":Refactor extract ")
+	xmap("<leader>rf", ":Refactor extract_to_file ")
+	xmap("<leader>ri", ":Refactor inline_var")
+	xmap("<leader>rr", ":lua require('refactoring').select_refactor()<cr>")
+	xmap("<leader>rv", ":Refactor extract_var ")
 
 	-- Autocommand configuration
 	vim.api.nvim_create_autocmd("BufRead", {
