@@ -21,36 +21,30 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 -- Globals declared and used
 Global = {
-	setBase16Colorscheme = function()
-		vim.api.nvim_set_hl(0, "IndentLine", {
-			link = "NonText",
-		})
-		require("mini.base16").setup({
-			palette = {
-				base00 = "#282C34",
-				base01 = "#353B45",
-				base02 = "#3E4451",
-				base03 = "#545862",
-				base04 = "#565C64",
-				base05 = "#ABB2BF",
-				base06 = "#B6BDCA",
-				base07 = "#C8CCD4",
-				base08 = "#E06C75",
-				base09 = "#D19A66",
-				base0A = "#E5C07B",
-				base0B = "#98C379",
-				base0C = "#56B6C2",
-				base0D = "#61AFEF",
-				base0E = "#C678DD",
-				base0F = "#BE5046",
-			},
-		})
-	end,
+	palette = {
+		base00 = "#282C34",
+		base01 = "#353B45",
+		base02 = "#3E4451",
+		base03 = "#545862",
+		base04 = "#565C64",
+		base05 = "#ABB2BF",
+		base06 = "#B6BDCA",
+		base07 = "#C8CCD4",
+		base08 = "#E06C75",
+		base09 = "#D19A66",
+		base0A = "#E5C07B",
+		base0B = "#98C379",
+		base0C = "#56B6C2",
+		base0D = "#61AFEF",
+		base0E = "#C678DD",
+		base0F = "#BE5046",
+	},
 	getFolds = function(lnum)
+		local fillchars = vim.opt.fillchars:get()
 		if vim.fn.foldlevel(lnum) <= vim.fn.foldlevel(lnum - 1) then
 			return " "
 		end
-		return vim.fn.foldclosed(lnum) == -1 and vim.opt.fillchars:get().foldopen or vim.opt.fillchars:get().foldclose
+		return vim.fn.foldclosed(lnum) == -1 and fillchars.foldopen or fillchars.foldclose
 	end,
 	getStatusColumn = function()
 		return "%s%l" .. Global.getFolds(vim.v.lnum) .. "▕"
@@ -120,6 +114,7 @@ now(function()
 		opts.border = opts.border or border
 		return original_util_open_floating_preview(contents, syntax, opts, ...)
 	end
+	math.randomseed(vim.loop.hrtime())
 
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
@@ -479,12 +474,6 @@ now(function()
 	})
 	add({
 		source = "danymat/neogen",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	add({
-		source = "HiPhish/rainbow-delimiters.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
 		},
@@ -951,26 +940,6 @@ now(function()
 		},
 		show_success_message = true,
 	})
-	local rainbow_delimiters = require("rainbow-delimiters")
-	vim.g.rainbow_delimiters = {
-		strategy = {
-			[""] = rainbow_delimiters.strategy["global"],
-			commonlisp = rainbow_delimiters.strategy["local"],
-		},
-		query = {
-			[""] = "rainbow-delimiters",
-			-- lua = "rainbow-blocks",
-		},
-		highlight = {
-			-- "RainbowDelimiterRed",
-			-- "RainbowDelimiterYellow",
-			-- "RainbowDelimiterBlue",
-			"RainbowDelimiterOrange",
-			-- "RainbowDelimiterGreen",
-			-- "RainbowDelimiterViolet",
-			-- "RainbowDelimiterCyan",
-		},
-	}
 	require("indentmini").setup()
 	require("neogen").setup({ snippet_engine = "luasnip" })
 	require("render-markdown").setup()
@@ -1387,13 +1356,24 @@ now(function()
 			virtual_text = not vim.diagnostic.config().virtual_text,
 		})
 	end
+	local function setBase16Colorscheme()
+		require("mini.base16").setup({
+			palette = Global.palette,
+		})
+		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+	end
 	local function generateRandomHuesColorscheme()
-		math.randomseed(vim.loop.hrtime())
+		vim.cmd("highlight clear")
 		local colors = require("mini.hues").gen_random_base_colors()
 		colors.saturation = "high"
 		require("mini.hues").setup(colors)
+		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
 	end
 	local function setRandomHuesColorscheme()
+		vim.cmd("highlight clear")
 		require("mini.hues").setup({
 			background = "#11262D",
 			foreground = "#C0C8CC",
@@ -1401,6 +1381,9 @@ now(function()
 			accent = "bg",
 			saturation = "high",
 		})
+		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
 	end
 	Global.miniPickVisits = function(cwd, desc)
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
@@ -1412,8 +1395,8 @@ now(function()
 	nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<F2>", MiniNotify.clear, "Clear all notifications")
-	nmap("<F3>", Global.setBase16Colorscheme, "Set base16 colorscheme")
-	nmap("<F4>", "<cmd>Inspect<cr>", "Echo syntax group")
+	nmap("<F3>", "<cmd>Inspect<cr>", "Echo syntax group")
+	nmap("<F4>", setBase16Colorscheme, "Set base16 colorscheme")
 	nmap("<F5>", setRandomHuesColorscheme, "Set mini.hues colorscheme")
 	nmap("<F6>", generateRandomHuesColorscheme, "Set random colorscheme")
 	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
@@ -1686,5 +1669,5 @@ now(function()
 end)
 
 later(function()
-	Global.setBase16Colorscheme()
+	vim.cmd('call feedkeys("\\<F4>")')
 end)
