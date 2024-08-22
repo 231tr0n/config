@@ -19,45 +19,75 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
--- Globals declared and used
-Global = {
-	palette = {
-		base00 = "#282C34",
-		base01 = "#353B45",
-		base02 = "#3E4451",
-		base03 = "#545862",
-		base04 = "#565C64",
-		base05 = "#ABB2BF",
-		base06 = "#B6BDCA",
-		base07 = "#C8CCD4",
-		base08 = "#E06C75",
-		base09 = "#D19A66",
-		base0A = "#E5C07B",
-		base0B = "#98C379",
-		base0C = "#56B6C2",
-		base0D = "#61AFEF",
-		base0E = "#C678DD",
-		base0F = "#BE5046",
-	},
-	getFolds = function(lnum)
-		local fillchars = vim.opt.fillchars:get()
-		if vim.fn.foldlevel(lnum) <= vim.fn.foldlevel(lnum - 1) then
-			return " "
-		end
-		return vim.fn.foldclosed(lnum) == -1 and fillchars.foldopen or fillchars.foldclose
-	end,
-	getStatusColumn = function()
-		return "%s%l" .. Global.getFolds(vim.v.lnum) .. "▕"
-	end,
-}
-
 now(function()
+	-- Globals declared and used
+	Global = {
+		palette = {
+			base00 = "#282C34",
+			base01 = "#353B45",
+			base02 = "#3E4451",
+			base03 = "#545862",
+			base04 = "#565C64",
+			base05 = "#ABB2BF",
+			base06 = "#B6BDCA",
+			base07 = "#C8CCD4",
+			base08 = "#E06C75",
+			base09 = "#D19A66",
+			base0A = "#E5C07B",
+			base0B = "#98C379",
+			base0C = "#56B6C2",
+			base0D = "#61AFEF",
+			base0E = "#C678DD",
+			base0F = "#BE5046",
+		},
+		treesitterNamePattern = "[#~%*%w%._%->!@:]+%s*" .. string.rep("[#~%*%w%._%->!@:]*", 3, "%s*"),
+		treesitterTypePatterns = {
+			"function",
+			"array",
+			"boolean",
+			"class",
+			"constant",
+			"constructor",
+			"enum",
+			"enum_member",
+			"event",
+			"field",
+			"file",
+			"interface",
+			"keyword",
+			"method",
+			"module",
+			"namespace",
+			"null",
+			"number",
+			"object",
+			"operator",
+			"package",
+			"property",
+			"string",
+			"struct",
+			"type_parameter",
+			"variable",
+		},
+		getFolds = function(lnum)
+			local fillchars = vim.opt.fillchars:get()
+			if vim.fn.foldlevel(lnum) <= vim.fn.foldlevel(lnum - 1) then
+				return " "
+			end
+			return vim.fn.foldclosed(lnum) == -1 and fillchars.foldopen or fillchars.foldclose
+		end,
+		getStatusColumn = function()
+			return "%#SignColumn#%s%#LineNr#%l%#FoldColumn#" .. Global.getFolds(vim.v.lnum) .. " " -- "▕"
+		end,
+	}
+
 	-- Default settings
 	-- let g:python_recommended_style=0
-	-- vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]]
 	-- vim.o.relativenumber = true
+	math.randomseed(vim.loop.hrtime())
 	vim.cmd("filetype plugin indent off")
 	vim.cmd("filetype plugin on")
+	vim.cmd("packadd cfilter")
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -65,7 +95,7 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]]
+	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]] -- ▾,▸
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -85,7 +115,7 @@ now(function()
 	vim.o.showcmd = true
 	vim.o.showmatch = true
 	vim.o.showmode = false
-	vim.o.signcolumn = "auto"
+	vim.o.signcolumn = "auto:1"
 	vim.o.smartcase = true
 	vim.o.statuscolumn = "%!v:lua.Global.getStatusColumn()"
 	vim.o.tabstop = 2
@@ -98,23 +128,6 @@ now(function()
 	vim.o.winblend = 0
 	vim.o.wrap = true
 	vim.opt.matchpairs:append("<:>")
-	local border = {
-		{ "╭", "FloatBorder" },
-		{ "─", "FloatBorder" },
-		{ "╮", "FloatBorder" },
-		{ "│", "FloatBorder" },
-		{ "╯", "FloatBorder" },
-		{ "─", "FloatBorder" },
-		{ "╰", "FloatBorder" },
-		{ "│", "FloatBorder" },
-	}
-	local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
-	function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-		opts = opts or {}
-		opts.border = opts.border or border
-		return original_util_open_floating_preview(contents, syntax, opts, ...)
-	end
-	math.randomseed(vim.loop.hrtime())
 
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
@@ -140,7 +153,7 @@ now(function()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
-			win_borders = "single",
+			win_borders = "solid",
 		},
 		mappings = {
 			windows = true,
@@ -205,13 +218,16 @@ now(function()
 		},
 		window = {
 			delay = 0,
+			config = {
+				border = "solid",
+			},
 		},
 	})
 	require("mini.comment").setup()
 	require("mini.completion").setup({
 		window = {
-			info = { border = "single" },
-			signature = { border = "single" },
+			info = { border = "solid" },
+			signature = { border = "solid" },
 		},
 	})
 	require("mini.cursorword").setup()
@@ -225,7 +241,7 @@ now(function()
 		},
 		options = {
 			permanent_delete = true,
-			use_as_default_explorer = false,
+			use_as_default_explorer = true,
 		},
 	})
 	require("mini.fuzzy").setup()
@@ -261,10 +277,10 @@ now(function()
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
-		symbol = "│",
+		-- symbol = "│",
 		draw = {
-			delay = 0,
-			animation = require("mini.indentscope").gen_animation.none(),
+			-- delay = 0,
+			-- animation = require("mini.indentscope").gen_animation.none(),
 			priority = 10000,
 		},
 	})
@@ -295,6 +311,7 @@ now(function()
 		window = {
 			config = {
 				row = 2,
+				border = "solid",
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -308,7 +325,13 @@ now(function()
 			[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
 		},
 	})
-	require("mini.pick").setup()
+	require("mini.pick").setup({
+		window = {
+			config = {
+				border = "solid",
+			},
+		},
+	})
 	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
@@ -389,6 +412,7 @@ now(function()
 	-- Lua plugins
 	add("nvim-neotest/nvim-nio")
 	add("neovim/nvim-lspconfig")
+	add("jsongerber/thanks.nvim")
 	add("nvimdev/indentmini.nvim")
 	add("rafamadriz/friendly-snippets")
 	add("mfussenegger/nvim-dap")
@@ -401,9 +425,9 @@ now(function()
 		hooks = {
 			post_checkout = function(args)
 				local temp = vim.fn.getcwd()
-				vim.cmd(args.path)
+				vim.cmd("cd " .. args.path)
 				vim.cmd("make install_jsregexp")
-				vim.cmd(temp)
+				vim.cmd("cd " .. temp)
 			end,
 		},
 		depends = {
@@ -504,9 +528,20 @@ now(function()
 			"ibhagwan/fzf-lua",
 		},
 	})
+	add("stevearc/quicker.nvim")
 
 	-- Utility libraries
+	require("indentmini").setup()
+	require("thanks").setup({
+		star_on_install = false,
+		star_on_startup = false,
+		ignore_repos = {},
+		ignore_authors = {},
+		unstar_on_uninstall = false,
+		ask_before_unstarring = true,
+	})
 	require("kulala").setup()
+	require("quicker").setup()
 	require("nvim-tree").setup()
 	require("fzf-lua").setup({
 		"max-perf",
@@ -514,6 +549,7 @@ now(function()
 		winopts = {
 			width = 0.85,
 			height = 0.85,
+			border = "thicc",
 			preview = {
 				default = "bat",
 				vertical = "up:50%",
@@ -523,10 +559,19 @@ now(function()
 		fzf_opts = {
 			["--layout"] = "default",
 		},
+		previewers = {
+			bat = {
+				theme = "Solarized (dark)",
+			},
+		},
+		grep = {
+			multiline = 1,
+		},
 	})
-	local fzf_config = require("fzf-lua.config")
-	local fzf_actions = require("trouble.sources.fzf").actions
-	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
+	-- require("trouble").setup()
+	-- local fzf_config = require("fzf-lua.config")
+	-- local fzf_actions = require("trouble.sources.fzf").actions
+	-- fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
 
 	-- Lsp, auto completion and snippet setup
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
@@ -536,13 +581,7 @@ now(function()
 	local luasnip = require("luasnip")
 	require("luasnip.loaders.from_vscode").lazy_load()
 	require("luasnip.loaders.from_snipmate").lazy_load()
-	local capabilities = {
-		textDocument = {
-			completion = {
-				completionItem = {},
-			},
-		},
-	}
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
 	capabilities.textDocument.foldingRange = {
 		dynamicRegistration = false,
 		lineFoldingOnly = true,
@@ -802,15 +841,14 @@ now(function()
 		}
 		return config
 	end
-	require("trouble").setup()
-	Global.symbols = require("trouble").statusline({
-		mode = "lsp_document_symbols",
-		groups = {},
-		title = false,
-		filter = { range = true },
-		format = "> {kind_icon}{symbol.name:Normal}",
-		hl_group = "WinBar",
-	})
+	-- Global.symbols = require("trouble").statusline({
+	-- 	mode = "lsp_document_symbols",
+	-- 	groups = {},
+	-- 	title = false,
+	-- 	filter = { range = true },
+	-- 	format = "> {kind_icon}{symbol.name:Normal}",
+	-- 	hl_group = "WinBar",
+	-- })
 
 	-- Syntax highlighting setup
 	require("nvim-treesitter.configs").setup({
@@ -940,7 +978,6 @@ now(function()
 		},
 		show_success_message = true,
 	})
-	require("indentmini").setup()
 	require("neogen").setup({ snippet_engine = "luasnip" })
 	require("render-markdown").setup()
 	require("helpview").setup()
@@ -949,6 +986,31 @@ now(function()
 			["http"] = "http",
 		},
 	})
+	Global.winbarSymbols = function()
+		return "   > "
+			.. require("nvim-treesitter").statusline({
+				indicator_size = vim.o.columns - 7,
+				type_patterns = Global.treesitterTypePatterns,
+				transform_fn = function(line, node)
+					local correctIcon = "?"
+					local ts_type = node:type()
+					for _, type in ipairs(Global.treesitterTypePatterns) do
+						if ts_type:find(type, 1, true) then
+							correctIcon, _ = MiniIcons.get("lsp", type)
+							break
+						end
+					end
+					return correctIcon
+						.. " "
+						.. vim.trim(
+							vim.treesitter.get_node_text(node, 0):gsub("\n.*", ""):match(Global.treesitterNamePattern)
+								or ""
+						)
+				end,
+				separator = " > ",
+				allow_duplicates = false,
+			})
+	end
 
 	-- Dap setup
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
@@ -1287,6 +1349,7 @@ now(function()
 		require("conform").format({ async = true, range = range })
 	end, { range = true })
 
+	-- Keymaps
 	-- Helper functions
 	local function tmap(suffix, rhs, desc, opts)
 		opts = opts or {}
@@ -1361,7 +1424,16 @@ now(function()
 			palette = Global.palette,
 		})
 		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
+		vim.api.nvim_set_hl(0, "FoldColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "LineNr", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = Global.palette.base00 })
+		vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = Global.palette.base00, fg = Global.palette.base0F })
+		vim.api.nvim_set_hl(0, "DiagnosticSignHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
+		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
+		vim.api.nvim_set_hl(0, "CursorLineSign", { bg = Global.palette.base00 })
 	end
 	local function generateRandomHuesColorscheme()
 		vim.cmd("highlight clear")
@@ -1369,29 +1441,50 @@ now(function()
 		colors.saturation = "high"
 		require("mini.hues").setup(colors)
 		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
 		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
 	end
 	local function setRandomHuesColorscheme()
-		vim.cmd("highlight clear")
 		require("mini.hues").setup({
-			background = "#11262D",
-			foreground = "#C0C8CC",
+			background = Global.palette.base00,
+			foreground = Global.palette.base05,
 			n_hues = 8,
 			accent = "bg",
 			saturation = "high",
 		})
 		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
 		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
 	end
-	Global.miniPickVisits = function(cwd, desc)
+	local function miniPickVisits()
+		local cwd = ""
+		local desc = "Core Visits"
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
 		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
 	end
+	local keycode = vim.keycode or function(x)
+		return vim.api.nvim_replace_termcodes(x, true, true, true)
+	end
+	local keys = {
+		["cr"] = keycode("<CR>"),
+		["ctrl-y"] = keycode("<C-y>"),
+		["ctrl-y_cr"] = keycode("<C-y><CR>"),
+	}
+	local function crAction()
+		if vim.fn.pumvisible() ~= 0 then
+			local item_selected = vim.fn.complete_info()["selected"] ~= -1
+			return item_selected and keys["ctrl-y"] or keys["ctrl-y_cr"]
+		else
+			return require("mini.pairs").cr()
+			-- return keys["cr"]
+		end
+	end
 
-	-- Keymaps
+	-- Mappings
 	imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
+	imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
+	imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
+	imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
 	nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<F2>", MiniNotify.clear, "Clear all notifications")
@@ -1409,14 +1502,15 @@ now(function()
 	nmap("<leader>bD", "<cmd>lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	nmap("<leader>bW", "<cmd>lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	nmap("<leader>ba", "<cmd>b#<CR>", "Alternate")
+	nmap("<leader>bc", "<cmd>:close<CR>", "Close window")
 	nmap("<leader>bd", "<cmd>lua MiniBufremove.delete()<CR>", "Delete")
 	nmap("<leader>bw", "<cmd>lua MiniBufremove.wipeout()<CR>", "Wipeout")
-	nmap("<leader>cC", '"+Y', "Copy to clipboard")
 	nmap("<leader>cP", '"+P', "Paste to clipboard")
 	nmap("<leader>cX", '"+X', "Cut to clipboard")
-	nmap("<leader>cc", '"+y', "Copy to clipboard")
+	nmap("<leader>cY", '"+Y', "Copy to clipboard")
 	nmap("<leader>cp", '"+p', "Paste to clipboard")
 	nmap("<leader>cx", '"+x', "Cut to clipboard")
+	nmap("<leader>cy", '"+y', "Copy to clipboard")
 	nmap("<leader>dC", "<cmd>lua require('dap').clear_breakpoints()<cr>", "Clear breakpoints")
 	nmap("<leader>dL", "<cmd>lua require('osv').launch({ port = 8086 })<cr>", "Lua debug launch")
 	nmap("<leader>dLr", "<cmd>lua require('osv').run_this()<cr>", "Lua debug")
@@ -1508,7 +1602,7 @@ now(function()
 	nmap("<leader>tpc", "<cmd>lua require('dap-python').test_class()<cr>", "Test class")
 	nmap("<leader>tpm", "<cmd>lua require('dap-python').test_method()<cr>", "Test method")
 	nmap("<leader>tps", "<cmd>lua require('dap-python').debug_selection()<cr>", "Debug selection")
-	nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
+	nmap("<leader>vf", miniPickVisits, "Core visits")
 	nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
@@ -1521,12 +1615,12 @@ now(function()
 	smap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	tmap("<Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	vmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
-	vmap("<leader>cC", '"+Y', "Copy to clipboard")
 	vmap("<leader>cP", '"+P', "Paste to clipboard")
 	vmap("<leader>cX", '"+X', "Cut to clipboard")
-	vmap("<leader>cc", '"+y', "Copy to clipboard")
+	vmap("<leader>cY", '"+Y', "Copy to clipboard")
 	vmap("<leader>cp", '"+p', "Paste to clipboard")
 	vmap("<leader>cx", '"+x', "Cut to clipboard")
+	vmap("<leader>cy", '"+y', "Copy to clipboard")
 	vmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
 	vmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
 	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
@@ -1540,23 +1634,23 @@ now(function()
 	xmap("<leader>rv", ":Refactor extract_var ")
 
 	-- Autocommand configuration
-	vim.api.nvim_create_autocmd("BufRead", {
-		callback = function(ev)
-			if vim.bo[ev.buf].buftype == "quickfix" then
-				vim.wo.winbar = ""
-				vim.schedule(function()
-					vim.cmd("cclose")
-					vim.cmd("Trouble qflist open")
-				end)
-			elseif vim.bo[ev.buf].buftype == "loclist" then
-				vim.wo.winbar = ""
-				vim.schedule(function()
-					vim.cmd("lclose")
-					vim.cmd("Trouble loclist open")
-				end)
-			end
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("BufRead", {
+	-- 	callback = function(ev)
+	-- 		if vim.bo[ev.buf].buftype == "quickfix" then
+	-- 			vim.wo.winbar = ""
+	-- 			vim.schedule(function()
+	-- 				vim.cmd("cclose")
+	-- 				vim.cmd("Trouble qflist open")
+	-- 			end)
+	-- 		elseif vim.bo[ev.buf].buftype == "loclist" then
+	-- 			vim.wo.winbar = ""
+	-- 			vim.schedule(function()
+	-- 				vim.cmd("lclose")
+	-- 				vim.cmd("Trouble loclist open")
+	-- 			end)
+	-- 		end
+	-- 	end,
+	-- })
 	vim.api.nvim_create_autocmd("BufReadPost", {
 		callback = function()
 			vim.cmd("norm zx")
@@ -1600,6 +1694,7 @@ now(function()
 			elseif vim.bo.filetype == "java" then
 				require("jdtls").start_or_attach(jdtlsConfig())
 			end
+			vim.wo.winbar = "%{%v:lua.Global.winbarSymbols()%}"
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
@@ -1610,7 +1705,6 @@ now(function()
 				virtual_text = true,
 				underline = false,
 			})
-			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
 			vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 			if vim.bo.filetype == "java" then
 				require("jdtls.dap").setup_dap_main_class_configs()
@@ -1666,8 +1760,22 @@ now(function()
 			require("lint").try_lint()
 		end,
 	})
-end)
 
-later(function()
 	vim.cmd('call feedkeys("\\<F4>")')
+	local border = {
+		{ "╭", "FloatBorder" },
+		{ "─", "FloatBorder" },
+		{ "╮", "FloatBorder" },
+		{ "│", "FloatBorder" },
+		{ "╯", "FloatBorder" },
+		{ "─", "FloatBorder" },
+		{ "╰", "FloatBorder" },
+		{ "│", "FloatBorder" },
+	}
+	local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
+	function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+		opts = opts or {}
+		opts.border = opts.border or border
+		return original_util_open_floating_preview(contents, syntax, opts, ...)
+	end
 end)
