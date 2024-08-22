@@ -1687,7 +1687,7 @@ now(function()
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				MiniPairs.unmap("i", "<", "")
 				MiniPairs.unmap("i", ">", "")
-				vim.keymap.set("i", ">i", ">")
+				vim.keymap.set("i", "><Space>", ">")
 				vim.keymap.set("i", ">", "><Esc>A<CR><BS></<C-x><C-o><C-x><C-o><C-p><C-p><Esc>O")
 				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
 				vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
