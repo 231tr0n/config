@@ -88,6 +88,7 @@ now(function()
 	vim.cmd("filetype plugin indent off")
 	vim.cmd("filetype plugin on")
 	vim.cmd("packadd cfilter")
+	vim.cmd("set complete=.")
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -521,14 +522,14 @@ now(function()
 			"mini.nvim",
 		},
 	})
-	add({
-		source = "folke/trouble.nvim",
-		depends = {
-			"mini.nvim",
-			"ibhagwan/fzf-lua",
-		},
-	})
 	add("stevearc/quicker.nvim")
+	-- add({
+	-- 	source = "folke/trouble.nvim",
+	-- 	depends = {
+	-- 		"mini.nvim",
+	-- 		"ibhagwan/fzf-lua",
+	-- 	},
+	-- })
 
 	-- Utility libraries
 	require("indentmini").setup()
@@ -926,15 +927,15 @@ now(function()
 		indent = {
 			enable = true,
 		},
+		incremental_selection = {
+			enable = false,
+		},
 		highlight = {
 			enable = true,
 			disable = function(lang, buf)
-				local max_filesize = 2 * 1024 * 1024
+				local max_filesize = 1 * 1024 * 1024
 				local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
 				if ok and stats and stats.size > max_filesize then
-					if lang == "asm" or lang == "wasm" then
-						return false
-					end
 					return true
 				end
 			end,
@@ -1694,7 +1695,6 @@ now(function()
 			elseif vim.bo.filetype == "java" then
 				require("jdtls").start_or_attach(jdtlsConfig())
 			end
-			vim.wo.winbar = "%{%v:lua.Global.winbarSymbols()%}"
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
@@ -1705,6 +1705,7 @@ now(function()
 				virtual_text = true,
 				underline = false,
 			})
+			vim.wo.winbar = "%{%v:lua.Global.winbarSymbols()%}"
 			vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 			if vim.bo.filetype == "java" then
 				require("jdtls.dap").setup_dap_main_class_configs()
