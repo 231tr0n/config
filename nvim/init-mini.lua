@@ -1339,8 +1339,6 @@ now(function()
 		require("mini.base16").setup({
 			palette = Global.palette,
 		})
-		vim.api.nvim_set_hl(0, "CursorLineFold", { fg = Global.palette.base09 })
-		vim.api.nvim_set_hl(0, "CursorLineNr", { fg = Global.palette.base09 })
 		vim.api.nvim_set_hl(0, "CursorLineSign", { bg = Global.palette.base00 })
 		vim.api.nvim_set_hl(0, "DiagnosticError", { bg = Global.palette.base00, fg = Global.palette.base0F })
 		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
