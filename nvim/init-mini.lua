@@ -22,7 +22,7 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 now(function()
 	-- Globals declared and used
 	Global = {
-		palette = {
+		paletteOneDark = {
 			base00 = "#282C34",
 			base01 = "#353B45",
 			base02 = "#3E4451",
@@ -80,6 +80,7 @@ now(function()
 			return "%#SignColumn#%s%#LineNr#%l%#FoldColumn#" .. Global.getFolds(vim.v.lnum) .. " " -- "▕"
 		end,
 	}
+	Global.palette = Global.paletteOneDark
 
 	-- Default settings
 	-- let g:python_recommended_style=0
@@ -111,7 +112,7 @@ now(function()
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
 	vim.o.pumblend = 0
-	vim.o.scrolloff = 1
+	vim.o.scrolloff = 999
 	vim.o.shiftwidth = 2
 	vim.o.showcmd = true
 	vim.o.showmatch = true
@@ -133,28 +134,28 @@ now(function()
 	-- Mini plugins initialisation
 	require("mini.ai").setup()
 	require("mini.align").setup()
-	local animate = require("mini.animate")
-	animate.setup({
-		cursor = {
-			enable = true,
-		},
-		scroll = {
-			enable = false,
-		},
-		resize = {
-			enable = false,
-		},
-		open = {
-			enable = false,
-		},
-		close = {
-			enable = false,
-		},
-	})
+	-- local animate = require("mini.animate")
+	-- animate.setup({
+	-- 	cursor = {
+	-- 		enable = true,
+	-- 	},
+	-- 	scroll = {
+	-- 		enable = false,
+	-- 	},
+	-- 	resize = {
+	-- 		enable = true,
+	-- 	},
+	-- 	open = {
+	-- 		enable = true,
+	-- 	},
+	-- 	close = {
+	-- 		enable = true,
+	-- 	},
+	-- })
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
-			win_borders = "solid",
+			win_borders = "rounded",
 		},
 		mappings = {
 			windows = true,
@@ -208,7 +209,7 @@ now(function()
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
 				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
-				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
+				{ mode = "n", keys = "<Leader>q", desc = "+Quickfix" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
@@ -220,15 +221,15 @@ now(function()
 		window = {
 			delay = 0,
 			config = {
-				border = "solid",
+				border = "rounded",
 			},
 		},
 	})
 	require("mini.comment").setup()
 	require("mini.completion").setup({
 		window = {
-			info = { border = "solid" },
-			signature = { border = "solid" },
+			info = { border = "rounded" },
+			signature = { border = "rounded" },
 		},
 	})
 	require("mini.cursorword").setup()
@@ -254,10 +255,10 @@ now(function()
 			todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
 			note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
 			hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
-			-- hl_words = require("mini.extra").gen_highlighter.words({ "TEST: " }, "MiniHipatternsTodo"),
+			hl_words = require("mini.extra").gen_highlighter.words({ "TEST: " }, "MiniHipatternsTodo"),
 		},
 	})
-	require("mini.colors").setup()
+	-- require("mini.colors").setup()
 	-- local colors = require("mini.colors")
 	-- colors
 	-- 	.get_colorscheme()
@@ -278,10 +279,10 @@ now(function()
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
-		-- symbol = "│",
+		symbol = "│",
 		draw = {
-			-- delay = 0,
-			-- animation = require("mini.indentscope").gen_animation.none(),
+			delay = 0,
+			animation = require("mini.indentscope").gen_animation.none(),
 			priority = 10000,
 		},
 	})
@@ -312,7 +313,7 @@ now(function()
 		window = {
 			config = {
 				row = 2,
-				border = "solid",
+				border = "rounded",
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -329,7 +330,9 @@ now(function()
 	require("mini.pick").setup({
 		window = {
 			config = {
-				border = "solid",
+				border = "rounded",
+				height = math.floor(0.7 * vim.o.lines),
+				width = math.floor(0.8 * vim.o.columns),
 			},
 		},
 	})
@@ -401,7 +404,6 @@ now(function()
 
 	-- Plugin installation
 	-- Vimscript plugins
-	add("dstein64/vim-startuptime")
 	add({
 		source = "junegunn/fzf",
 		hooks = {
@@ -413,7 +415,6 @@ now(function()
 	-- Lua plugins
 	add("nvim-neotest/nvim-nio")
 	add("neovim/nvim-lspconfig")
-	add("jsongerber/thanks.nvim")
 	add("nvimdev/indentmini.nvim")
 	add("rafamadriz/friendly-snippets")
 	add("mfussenegger/nvim-dap")
@@ -523,26 +524,23 @@ now(function()
 		},
 	})
 	add("stevearc/quicker.nvim")
-	-- add({
-	-- 	source = "folke/trouble.nvim",
-	-- 	depends = {
-	-- 		"mini.nvim",
-	-- 		"ibhagwan/fzf-lua",
-	-- 	},
-	-- })
 
 	-- Utility libraries
 	require("indentmini").setup()
-	require("thanks").setup({
-		star_on_install = false,
-		star_on_startup = false,
-		ignore_repos = {},
-		ignore_authors = {},
-		unstar_on_uninstall = false,
-		ask_before_unstarring = true,
-	})
 	require("kulala").setup()
-	require("quicker").setup()
+	require("quicker").setup({
+		opts = {
+			signcolumn = "no",
+			foldcolumn = "0",
+			statuscolumn = "",
+		},
+		highlight = {
+			treesitter = true,
+			lsp = true,
+			load_buffers = false,
+		},
+		trim_leading_whitespace = false,
+	})
 	require("nvim-tree").setup()
 	require("fzf-lua").setup({
 		"max-perf",
@@ -569,10 +567,6 @@ now(function()
 			multiline = 1,
 		},
 	})
-	-- require("trouble").setup()
-	-- local fzf_config = require("fzf-lua.config")
-	-- local fzf_actions = require("trouble.sources.fzf").actions
-	-- fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
 
 	-- Lsp, auto completion and snippet setup
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
@@ -842,14 +836,6 @@ now(function()
 		}
 		return config
 	end
-	-- Global.symbols = require("trouble").statusline({
-	-- 	mode = "lsp_document_symbols",
-	-- 	groups = {},
-	-- 	title = false,
-	-- 	filter = { range = true },
-	-- 	format = "> {kind_icon}{symbol.name:Normal}",
-	-- 	hl_group = "WinBar",
-	-- })
 
 	-- Syntax highlighting setup
 	require("nvim-treesitter.configs").setup({
@@ -1135,37 +1121,6 @@ now(function()
 	dap.adapters.nlua = function(callback, config)
 		callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 	end
-	-- dap.adapters.nlua = function(callback, config)
-	--  local adapter = {
-	--    type = "server",
-	--    host = config.host or "127.0.0.1",
-	--    port = config.port or 8086,
-	--  }
-	--  if config.start_neovim then
-	--    local dap_run = dap.run
-	--    dap.run = function(c)
-	--      adapter.port = c.port
-	--      adapter.host = c.host
-	--    end
-	--    require("osv").run_this()
-	--    dap.run = dap_run
-	--  end
-	--  callback(adapter)
-	-- end
-	-- dap.configurations.lua = {
-	--  {
-	--    type = "nlua",
-	--    request = "attach",
-	--    name = "Run this file",
-	--    start_neovim = {},
-	--  },
-	--  {
-	--    type = "nlua",
-	--    request = "attach",
-	--    name = "Attach to running Neovim instance (port = 8086)",
-	--    port = 8086,
-	--  },
-	-- }
 	local function lldb_command()
 		if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
 			return "/usr/bin/lldb-dap-18"
@@ -1177,46 +1132,6 @@ now(function()
 		command = lldb_command(),
 		name = "lldb",
 	}
-	-- dap.configurations.c = {
-	--  {
-	--    name = "Run executable (GDB)",
-	--    type = "gdb",
-	--    request = "launch",
-	--    program = function()
-	--      local path = vim.fn.input({
-	--        prompt = "Path to executable: ",
-	--        default = vim.fn.getcwd() .. "/",
-	--        completion = "file",
-	--      })
-	--      return (path and path ~= "") and path or dap.ABORT
-	--    end,
-	--  },
-	--  {
-	--    name = "Run executable with arguments (GDB)",
-	--    type = "gdb",
-	--    request = "launch",
-	--    program = function()
-	--      local path = vim.fn.input({
-	--        prompt = "Path to executable: ",
-	--        default = vim.fn.getcwd() .. "/",
-	--        completion = "file",
-	--      })
-	--      return (path and path ~= "") and path or dap.ABORT
-	--    end,
-	--    args = function()
-	--      local args_str = vim.fn.input({
-	--        prompt = "Arguments: ",
-	--      })
-	--      return vim.split(args_str, " +")
-	--    end,
-	--  },
-	--  {
-	--    name = "Attach to process (GDB)",
-	--    type = "gdb",
-	--    request = "attach",
-	--    processId = require("dap.utils").pick_process,
-	--  },
-	-- }
 	dap.configurations.rust = {
 		{
 			name = "Launch file",
@@ -1424,25 +1339,56 @@ now(function()
 		require("mini.base16").setup({
 			palette = Global.palette,
 		})
-		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
-		vim.api.nvim_set_hl(0, "FoldColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		vim.api.nvim_set_hl(0, "LineNr", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		vim.api.nvim_set_hl(0, "SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = Global.palette.base00 })
-		vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = Global.palette.base00, fg = Global.palette.base0F })
-		vim.api.nvim_set_hl(0, "DiagnosticSignHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
-		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
-		vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
 		vim.api.nvim_set_hl(0, "CursorLineSign", { bg = Global.palette.base00 })
+		vim.api.nvim_set_hl(0, "CursorLineNr", { fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "CursorLineSign", { fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "CursorLineFold", { fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "DiagnosticError", { bg = Global.palette.base00, fg = Global.palette.base0F })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
+		vim.api.nvim_set_hl(0, "DiagnosticInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
+		vim.api.nvim_set_hl(0, "DiagnosticOk", { bg = Global.palette.base00, fg = Global.palette.base0D })
+		vim.api.nvim_set_hl(0, "DiagnosticSignError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "FoldColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "IndentLine", { link = "NonText" })
+		vim.api.nvim_set_hl(0, "LineNr", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		vim.api.nvim_set_hl(0, "WinSeparator", { link = "FloatBorder" })
 	end
 	local function generateRandomHuesColorscheme()
 		vim.cmd("highlight clear")
 		local colors = require("mini.hues").gen_random_base_colors()
 		colors.saturation = "high"
 		require("mini.hues").setup(colors)
-		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
+		vim.api.nvim_set_hl(0, "DiagnosticError", { bg = Global.palette.base00, fg = Global.palette.base0F })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
+		vim.api.nvim_set_hl(0, "DiagnosticInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
+		vim.api.nvim_set_hl(0, "DiagnosticOk", { bg = Global.palette.base00, fg = Global.palette.base0D })
+		vim.api.nvim_set_hl(0, "DiagnosticSignError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "IndentLine", { link = "NonText" })
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
 		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
 	end
 	local function setRandomHuesColorscheme()
@@ -1453,9 +1399,28 @@ now(function()
 			accent = "bg",
 			saturation = "high",
 		})
-		vim.api.nvim_set_hl(0, "IndentLine", { fg = Global.palette.base01 })
-		vim.api.nvim_set_hl(0, "IndentLineCurrent", { fg = Global.palette.base02 })
+		vim.api.nvim_set_hl(0, "DiagnosticError", { bg = Global.palette.base00, fg = Global.palette.base0F })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
+		vim.api.nvim_set_hl(0, "DiagnosticInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
+		vim.api.nvim_set_hl(0, "DiagnosticOk", { bg = Global.palette.base00, fg = Global.palette.base0D })
+		vim.api.nvim_set_hl(0, "DiagnosticSignError", { link = "DiagnosticError" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignHint", { link = "DiagnosticHint" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { link = "DiagnosticInfo" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignOk", { link = "DiagnosticOk" })
+		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { link = "DiagnosticWarn" })
+		vim.api.nvim_set_hl(0, "DiagnosticWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "IndentLine", { link = "NonText" })
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
 		vim.api.nvim_set_hl(0, "Statement", { fg = Global.palette.base0E })
+		vim.api.nvim_set_hl(0, "CursorLineNr", { fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "CursorLineSign", { fg = Global.palette.base09 })
+		vim.api.nvim_set_hl(0, "CursorLineFold", { fg = Global.palette.base09 })
 	end
 	local function miniPickVisits()
 		local cwd = ""
@@ -1635,23 +1600,6 @@ now(function()
 	xmap("<leader>rv", ":Refactor extract_var ")
 
 	-- Autocommand configuration
-	-- vim.api.nvim_create_autocmd("BufRead", {
-	-- 	callback = function(ev)
-	-- 		if vim.bo[ev.buf].buftype == "quickfix" then
-	-- 			vim.wo.winbar = ""
-	-- 			vim.schedule(function()
-	-- 				vim.cmd("cclose")
-	-- 				vim.cmd("Trouble qflist open")
-	-- 			end)
-	-- 		elseif vim.bo[ev.buf].buftype == "loclist" then
-	-- 			vim.wo.winbar = ""
-	-- 			vim.schedule(function()
-	-- 				vim.cmd("lclose")
-	-- 				vim.cmd("Trouble loclist open")
-	-- 			end)
-	-- 		end
-	-- 	end,
-	-- })
 	vim.api.nvim_create_autocmd("BufReadPost", {
 		callback = function()
 			vim.cmd("norm zx")
