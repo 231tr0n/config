@@ -77,7 +77,7 @@ now(function()
 			return vim.fn.foldclosed(lnum) == -1 and fillchars.foldopen or fillchars.foldclose
 		end,
 		getStatusColumn = function()
-			return "%#SignColumn#%s%#LineNr#%l%#FoldColumn#" .. Global.getFolds(vim.v.lnum) .. " " -- "▕"
+			return "%#SignColumn#%s%#LineNr#%l%#FoldColumn#" .. Global.getFolds(vim.v.lnum) .. "│"
 		end,
 	}
 	Global.palette = Global.paletteOneDark
@@ -97,7 +97,7 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]] -- ▾,▸
+	vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]] -- ,
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -107,7 +107,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "eol:¬,tab:│ ,trail:~,extends:>,precedes:<"
+	vim.o.listchars = "eol:¬,tab:> ,trail:~,extends:…,precedes:…"
 	vim.o.maxmempattern = 20000
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
@@ -336,7 +336,7 @@ now(function()
 			},
 		},
 	})
-	vim.ui.select = MiniPick.ui_select
+	-- vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
@@ -413,9 +413,7 @@ now(function()
 		},
 	})
 	-- Lua plugins
-	add("nvim-neotest/nvim-nio")
 	add("neovim/nvim-lspconfig")
-	add("nvimdev/indentmini.nvim")
 	add("rafamadriz/friendly-snippets")
 	add("mfussenegger/nvim-dap")
 	add("mfussenegger/nvim-lint")
@@ -463,14 +461,6 @@ now(function()
 		depends = {
 			"mini.nvim",
 			"junegunn/fzf",
-		},
-	})
-	add({
-		source = "rcarriga/nvim-dap-ui",
-		depends = {
-			"mini.nvim",
-			"nvim-neotest/nvim-nio",
-			"mfussenegger/nvim-dap",
 		},
 	})
 	add({
@@ -526,7 +516,6 @@ now(function()
 	add("stevearc/quicker.nvim")
 
 	-- Utility libraries
-	require("indentmini").setup()
 	require("kulala").setup()
 	require("quicker").setup({
 		opts = {
@@ -567,6 +556,7 @@ now(function()
 			multiline = 1,
 		},
 	})
+	vim.cmd("FzfLua register_ui_select")
 
 	-- Lsp, auto completion and snippet setup
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
@@ -1007,19 +997,12 @@ now(function()
 	)
 	vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-	require("dapui").setup()
-	local dap, dapui = require("dap"), require("dapui")
+	local dap = require("dap")
 	dap.listeners.before.attach.dapui_config = function()
-		dapui.open()
+		vim.cmd("DapToggleRepl")
 	end
 	dap.listeners.before.launch.dapui_config = function()
-		dapui.open()
-	end
-	dap.listeners.before.event_terminated.dapui_config = function()
-		dapui.close()
-	end
-	dap.listeners.before.event_exited.dapui_config = function()
-		dapui.close()
+		vim.cmd("DapToggleRepl")
 	end
 	dap.adapters.delve = {
 		type = "server",
@@ -1356,6 +1339,8 @@ now(function()
 		vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { link = "DiagnosticWarn" })
 		vim.api.nvim_set_hl(0, "DiagnosticWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
 		vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "FzfLuaBorder", { bg = Global.palette.base00, fg = Global.palette.base00 })
+		vim.api.nvim_set_hl(0, "FzfLuaFzfBorder", { link = "NonText" })
 		vim.api.nvim_set_hl(0, "FoldColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
 		vim.api.nvim_set_hl(0, "IndentLine", { link = "NonText" })
 		vim.api.nvim_set_hl(0, "IndentLineCurrent", { link = "NonText" })
@@ -1364,6 +1349,7 @@ now(function()
 		vim.api.nvim_set_hl(0, "SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
 		vim.api.nvim_set_hl(0, "TreesitterContext", { bg = Global.palette.base01 })
 		vim.api.nvim_set_hl(0, "WinSeparator", { link = "FloatBorder" })
+		vim.api.nvim_set_hl(0, "WinBar", { bg = Global.palette.base01, fg = Global.palette.base04 })
 	end
 	local function generateRandomHuesColorscheme()
 		vim.cmd("highlight clear")
@@ -1492,9 +1478,9 @@ now(function()
 	nmap("<leader>dsi", "<cmd>lua require('dap').step_into()<cr>", "Step into")
 	nmap("<leader>dso", "<cmd>lua require('dap').step_out()<cr>", "Step out")
 	nmap("<leader>dt", "<cmd>lua require('dap').toggle_breakpoint()<cr>", "Toggle breakpoint")
-	nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
-	nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
-	nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
+	-- nmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
+	-- nmap("<leader>duf", "<cmd>lua require('dapui').float_element()<cr>", "Toggle dap ui float")
+	-- nmap("<leader>dut", "<cmd>lua require('dapui').toggle()<cr>", "Toggle dap ui")
 	nmap("<leader>eT", "<cmd>lua if not MiniFiles.close() then MiniFiles.open() end<cr>", "Toggle file explorer")
 	nmap("<leader>ef", "<cmd>NvimTreeFindFile<cr>", "Goto file in tree")
 	nmap("<leader>et", "<cmd>NvimTreeToggle<cr>", "Toggle file tree")
@@ -1588,7 +1574,7 @@ now(function()
 	vmap("<leader>cy", '"+y', "Copy to clipboard")
 	vmap("<leader>dh", "<cmd>lua require('dap.ui.widgets').hover()<cr>", "Hover value")
 	vmap("<leader>dp", "<cmd>lua require('dap.ui.widgets').preview()<cr>", "Preview")
-	vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
+	-- vmap("<leader>due", "<cmd>lua require('dapui').eval()<cr>", "Toggle dap ui eval")
 	xmap("<leader>ap", ":Gen<cr>", "Prompt Model")
 	xmap("<leader>lf", "<cmd>Format<cr>", "Format code")
 	xmap("<leader>rV", ":lua require('refactoring').debug.print_var()")
