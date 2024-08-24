@@ -204,13 +204,28 @@ now(function()
 		hi("IndentLine", { link = "NonText" })
 		hi("IndentLineCurrent", { link = "NonText" })
 		hi("LineNr", { bg = Global.palette.base00, fg = Global.palette.base03 })
+		hi("LineNrBelow", { link = "LineNr" })
+		hi("LineNrAbove", { link = "LineNr" })
 		hi("NormalFloat", { bg = "NONE" })
 		hi("SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
 		hi("TreesitterContext", { bg = Global.palette.base01 })
 		hi("WinSeparator", { link = "FloatBorder" })
 		hi("WinBar", { bg = Global.palette.base01, fg = Global.palette.base04 })
 	end
-	Global.setBase16Colorscheme()
+	-- Global.setBase16Colorscheme()
+	add("231tr0n/onedarkpro.nvim")
+	require("onedarkpro").setup({
+		colors = {}, -- Override default colors or create your own
+		highlights = {}, -- Override default highlight groups or create your own
+		options = {
+			cursorline = false,
+			transparency = false,
+			terminal_colors = true,
+			lualine_transparency = false,
+			highlight_inactive_windows = false,
+		},
+	})
+	vim.cmd.colorscheme("onedark_vivid")
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		ft_ignore = { "netrw", "NvimTree" },
@@ -583,7 +598,7 @@ now(function()
 			enable = true,
 			disable = function(lang, buf)
 				local max_filesize = 2 * 1024 * 1024
-				local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 				if ok and stats and stats.size > max_filesize then
 					return true
 				end
