@@ -22,24 +22,6 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Globals declared and used
 now(function()
 	Global = {
-		paletteOneDark = {
-			base00 = "#282C34",
-			base01 = "#353B45",
-			base02 = "#3E4451",
-			base03 = "#545862",
-			base04 = "#565C64",
-			base05 = "#ABB2BF",
-			base06 = "#B6BDCA",
-			base07 = "#C8CCD4",
-			base08 = "#E06C75",
-			base09 = "#D19A66",
-			base0A = "#E5C07B",
-			base0B = "#98C379",
-			base0C = "#56B6C2",
-			base0D = "#61AFEF",
-			base0E = "#C678DD",
-			base0F = "#BE5046",
-		},
 		treesitterNamePattern = "[#~%*%w%._%->!@:]+%s*" .. string.rep("[#~%*%w%._%->!@:]*", 3, "%s*"),
 		treesitterTypePatterns = {
 			"function",
@@ -70,8 +52,6 @@ now(function()
 			"variable",
 		},
 	}
-	-- Set default palette
-	Global.palette = Global.paletteOneDark
 end)
 
 -- Default settings
@@ -172,53 +152,12 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	add("echasnovski/mini.base16")
-	Global.setBase16Colorscheme = function()
-		require("mini.base16").setup({
-			palette = Global.palette,
-		})
-		local function hi(highlight, options)
-			vim.api.nvim_set_hl(0, highlight, options)
-		end
-		hi("CursorLineSign", { bg = Global.palette.base00 })
-		hi("CursorLineFold", { fg = Global.palette.base03, bg = Global.palette.base01 })
-		hi("DiagnosticError", { bg = Global.palette.base00, fg = Global.palette.base0F })
-		hi("DiagnosticFloatingError", { link = "DiagnosticError" })
-		hi("DiagnosticFloatingHint", { link = "DiagnosticHint" })
-		hi("DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
-		hi("DiagnosticFloatingOk", { link = "DiagnosticOk" })
-		hi("DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
-		hi("DiagnosticHint", { bg = Global.palette.base00, fg = Global.palette.base0B })
-		hi("DiagnosticInfo", { bg = Global.palette.base00, fg = Global.palette.base0C })
-		hi("DiagnosticOk", { bg = Global.palette.base00, fg = Global.palette.base0D })
-		hi("DiagnosticSignError", { link = "DiagnosticError" })
-		hi("DiagnosticSignHint", { link = "DiagnosticHint" })
-		hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
-		hi("DiagnosticSignOk", { link = "DiagnosticOk" })
-		hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
-		hi("DiagnosticWarn", { bg = Global.palette.base00, fg = Global.palette.base09 })
-		hi("FloatBorder", { bg = "NONE" })
-		hi("FzfLuaBorder", { bg = Global.palette.base00, fg = Global.palette.base00 })
-		hi("FzfLuaFzfBorder", { link = "NonText" })
-		hi("FoldColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		hi("IndentLine", { link = "NonText" })
-		hi("IndentLineCurrent", { link = "NonText" })
-		hi("LineNr", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		hi("LineNrBelow", { link = "LineNr" })
-		hi("LineNrAbove", { link = "LineNr" })
-		hi("NormalFloat", { bg = "NONE" })
-		hi("SignColumn", { bg = Global.palette.base00, fg = Global.palette.base03 })
-		hi("TreesitterContext", { bg = Global.palette.base01 })
-		hi("WinSeparator", { link = "FloatBorder" })
-		hi("WinBar", { bg = Global.palette.base01, fg = Global.palette.base04 })
-	end
-	-- Global.setBase16Colorscheme()
 	add("231tr0n/onedarkpro.nvim")
 	require("onedarkpro").setup({
-		colors = {}, -- Override default colors or create your own
-		highlights = {}, -- Override default highlight groups or create your own
+		colors = {},
+		highlights = {},
 		options = {
-			cursorline = false,
+			cursorline = true,
 			transparency = false,
 			terminal_colors = true,
 			lualine_transparency = false,
@@ -826,32 +765,12 @@ now(function()
 			"mfussenegger/nvim-dap",
 		},
 	})
-	require("dap-go").setup({
-		dap_configurations = {
-			{
-				type = "go",
-				name = "Attach remote",
-				mode = "remote",
-				request = "attach",
-			},
-			{
-				type = "go",
-				name = "Attach remote(Substitute path)",
-				mode = "remote",
-				request = "attach",
-				substitutePath = {
-					{ from = "${workspaceFolder}", to = "${workspaceFolder}" },
-				},
-			},
-		},
-	})
 	add({
 		source = "mfussenegger/nvim-dap-python",
 		depends = {
 			"mfussenegger/nvim-dap",
 		},
 	})
-	require("dap-python").setup("~/.local/share/debugpy/bin/python")
 	add({
 		source = "jbyuki/one-small-step-for-vimkind",
 		depends = {
@@ -1040,7 +959,6 @@ now(function()
 	nmap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	nmap("<F2>", MiniNotify.clear, "Clear all notifications")
 	nmap("<F3>", "<cmd>Inspect<cr>", "Echo syntax group")
-	nmap("<F4>", setBase16Colorscheme, "Set base16 colorscheme")
 	nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	nmap("<leader>am", require("gen").select_model, "Select model")
