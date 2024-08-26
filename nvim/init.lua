@@ -967,7 +967,6 @@ now(function()
 				underline = false,
 			})
 			vim.wo.winbar = "%{%v:lua.Global.winbarSymbols()%}"
-			vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePre", {
