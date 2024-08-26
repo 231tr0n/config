@@ -1,6 +1,6 @@
 -- MiniDeps auto download and configure setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
-local mini_path = path_package .. "pack/deps/start/mini.deps"
+local mini_path = path_package .. "pack/deps/opt/mini.deps"
 if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installing `mini.deps`" | redraw')
 	local clone_cmd = {
@@ -12,12 +12,14 @@ if not vim.uv.fs_stat(mini_path) then
 	}
 	vim.fn.system(clone_cmd)
 	vim.cmd('echo "Installed `mini.deps`" | redraw')
-	vim.cmd("packadd mini.deps | helptags ALL")
 end
+vim.cmd("packadd mini.deps | helptags ALL")
 require("mini.deps").setup({ path = { package = path_package } })
 
 -- add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+-- Add mini.deps as dependency
+add("echasnovski/mini.deps")
 
 -- Globals declared and used
 now(function()
