@@ -584,7 +584,7 @@ now(function()
 	Global.winbarSymbols = function()
 		return "   > "
 			.. require("nvim-treesitter").statusline({
-				indicator_size = vim.o.columns - 7,
+				indicator_size = vim.o.columns - 10,
 				type_patterns = Global.treesitterTypePatterns,
 				transform_fn = function(line, node)
 					local correctIcon = "?"
@@ -595,12 +595,14 @@ now(function()
 							break
 						end
 					end
-					return correctIcon
-						.. " "
-						.. vim.trim(
-							vim.treesitter.get_node_text(node, 0):gsub("\n.*", ""):match(Global.treesitterNamePattern)
-								or ""
-						)
+					local statusline = correctIcon
+					local nodeString = vim.trim(
+						vim.treesitter.get_node_text(node, 0):gsub("\n.*", ""):match(Global.treesitterNamePattern) or ""
+					)
+					if nodeString ~= "" then
+						statusline = statusline .. " " .. nodeString
+					end
+					return statusline
 				end,
 				separator = " > ",
 				allow_duplicates = false,
@@ -894,67 +896,69 @@ now(function()
 				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
 				vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
 			elseif vim.bo.filetype == "java" then
-				local config = {
-					cmd = { "/usr/bin/jdtls" },
-					root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-					settings = {
-						java = {
-							references = {
-								includeDecompiledSources = true,
-							},
-							eclipse = {
-								downloadSources = true,
-							},
-							maven = {
-								downloadSources = true,
-							},
-							format = {
-								enabled = false,
-								-- settings = {
-								--      url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
-								--      profile = "GoogleStyle",
-								-- },
-							},
-							inlayHints = {
-								parameterNames = {
-									enabled = "all",
-									exclusions = { "this" },
+				require("jdtls").start_or_attach((function()
+					local config = {
+						cmd = { "/usr/bin/jdtls" },
+						root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+						settings = {
+							java = {
+								references = {
+									includeDecompiledSources = true,
 								},
-							},
-							signatureHelp = { enabled = true },
-							contentProvider = { preferred = "fernflower" },
-							codeGeneration = {
-								toString = {
-									template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+								eclipse = {
+									downloadSources = true,
 								},
-								useBlocks = true,
-							},
-							configuration = {
-								runtimes = {
-									{
-										name = "JavaSE-11",
-										path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+								maven = {
+									downloadSources = true,
+								},
+								format = {
+									enabled = false,
+									-- settings = {
+									--      url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
+									--      profile = "GoogleStyle",
+									-- },
+								},
+								inlayHints = {
+									parameterNames = {
+										enabled = "all",
+										exclusions = { "this" },
 									},
-									{
-										name = "JavaSE-17",
-										path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+								},
+								signatureHelp = { enabled = true },
+								contentProvider = { preferred = "fernflower" },
+								codeGeneration = {
+									toString = {
+										template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+									},
+									useBlocks = true,
+								},
+								configuration = {
+									runtimes = {
+										{
+											name = "JavaSE-11",
+											path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+										},
+										{
+											name = "JavaSE-17",
+											path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+										},
 									},
 								},
 							},
 						},
-					},
-				}
-				local bundles = {
-					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-				}
-				vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-				local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-				extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-				config["init_options"] = {
-					bundles = bundles,
-					extendedClientCapabilities = extendedClientCapabilities,
-				}
-				require("jdtls").start_or_attach(config)
+					}
+					local bundles = {
+						vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
+					}
+					vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+					local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+					extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+					config["init_options"] = {
+						bundles = bundles,
+						extendedClientCapabilities = extendedClientCapabilities,
+					}
+					return config
+				end)())
 			end
 		end,
 	})
@@ -1234,12 +1238,12 @@ later(function()
 	end
 	dap.adapters.lldb = {
 		type = "executable",
-		command = function()
+		command = (function()
 			if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
 				return "/usr/bin/lldb-dap-18"
 			end
 			return "/usr/bin/lldb-dap"
-		end,
+		end)(),
 		name = "lldb",
 	}
 	dap.configurations.rust = {
