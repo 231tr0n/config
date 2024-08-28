@@ -217,7 +217,7 @@ now(function()
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
-		bt_ignore = { "terminal", "nofile", "\\[dap-repl-*\\]" },
+		bt_ignore = { "terminal", "\\[dap-repl-*\\]" },
 		ft_ignore = { "ministarter", "help" },
 		segments = {
 			{ text = { "%s" }, click = "v:lua.ScSa" },
@@ -1074,10 +1074,10 @@ later(function()
 	}
 	add("David-Kunz/gen.nvim")
 	require("gen").setup({
-		model = "dolphin-llama3",
+		model = "llama3.1",
 		host = "localhost",
 		port = "11434",
-		display_mode = "float",
+		display_mode = "split",
 		show_prompt = true,
 		show_model = true,
 		no_auto_close = false,
