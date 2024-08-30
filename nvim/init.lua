@@ -131,7 +131,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "eol:¬,tab:  ,trail:~,extends:…,precedes:…"
+	vim.o.listchars = "tab:  ,trail:~,extends:…,precedes:…" -- ¬
 	vim.o.maxmempattern = 20000
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
