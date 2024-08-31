@@ -1510,7 +1510,7 @@ later(function()
 	vim.cmd("LspStart")
 end)
 
--- Lazy loaded custom config
+-- Lazy loaded custom configuration
 later(function()
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
