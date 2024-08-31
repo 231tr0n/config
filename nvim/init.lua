@@ -82,7 +82,7 @@ now(function()
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 	}
 	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
-	-- Keymap functions to map keys
+	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
@@ -113,6 +113,7 @@ now(function()
 		opts.desc = desc
 		vim.keymap.set("x", suffix, rhs, opts)
 	end
+	-- Highlight function to define or change highlights
 	Hi = function(name, opts)
 		vim.api.nvim_set_hl(0, name, opts)
 	end
