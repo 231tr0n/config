@@ -910,7 +910,7 @@ now(function()
 				MiniPairs.unmap("i", "<", "")
 				MiniPairs.unmap("i", ">", "")
 				vim.keymap.set("i", "><Space>", ">")
-				vim.keymap.set("i", ">", "><Esc>A<CR><BS></<C-x><C-o><C-x><C-o><C-p><C-p><Esc>O")
+				vim.keymap.set("i", ">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>")
 				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
 				vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
 			elseif vim.bo.filetype == "java" then
