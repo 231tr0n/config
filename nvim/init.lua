@@ -1,4 +1,4 @@
--- MiniDeps auto download and configure setup
+-- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/opt/mini.deps"
 if not vim.uv.fs_stat(mini_path) then
@@ -13,17 +13,22 @@ if not vim.uv.fs_stat(mini_path) then
 	vim.fn.system(clone_cmd)
 	vim.cmd('echo "Installed `mini.deps`" | redraw')
 end
+
+-- Add mini.deps as a plugin
 vim.cmd("packadd mini.deps | helptags ALL")
+
+-- Setup mini.deps
 require("mini.deps").setup({ path = { package = path_package } })
 
--- add, now and later functions from MiniDeps
+-- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Add mini.deps as dependency
 add("echasnovski/mini.deps")
 
--- Globals declared and used
+-- Globals variables and functions declared and used
 now(function()
 	Global = {
+		-- Base 16 color palette used for colorscheme generation
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -42,7 +47,9 @@ now(function()
 			base0E = "#C678DD",
 			base0F = "#BE5046",
 		},
+		-- Treesitter regex used
 		treesitterNamePattern = "[#~%*%w%._%->!@:]+%s*" .. string.rep("[#~%*%w%._%->!@:]*", 3, "%s*"),
+		-- Treesitter types captured
 		treesitterTypePatterns = {
 			"function",
 			"array",
@@ -71,7 +78,11 @@ now(function()
 			"type_parameter",
 			"variable",
 		},
+		-- Lsp capabilities used
+		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 	}
+	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
+	-- Keymap functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
 		opts.desc = desc
@@ -131,7 +142,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:  ,trail:~,extends:…,precedes:…" -- ¬
+	vim.o.listchars = "tab:  ,trail: ,extends:…,precedes:…" -- ¬
 	vim.o.maxmempattern = 20000
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
@@ -155,7 +166,7 @@ now(function()
 	vim.opt.matchpairs:append("<:>")
 end)
 
--- Initial ui setup
+-- Initial UI setup
 now(function()
 	add("echasnovski/mini.notify")
 	require("mini.notify").setup({
@@ -233,6 +244,7 @@ now(function()
 	})
 end)
 
+-- Mini plugins setup
 now(function()
 	add("echasnovski/mini.ai")
 	require("mini.ai").setup()
@@ -479,10 +491,9 @@ now(function()
 	require("mini.trailspace").setup()
 end)
 
+-- Non lazy plugins registration
 now(function()
 	add("neovim/nvim-lspconfig")
-	Global.lspCapabilities = vim.lsp.protocol.make_client_capabilities()
-	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
@@ -714,7 +725,7 @@ now(function()
 	})
 end)
 
--- New commands
+-- New commands registration
 now(function()
 	vim.api.nvim_create_user_command("Format", function(args)
 		local range = nil
@@ -729,7 +740,7 @@ now(function()
 	end, { range = true })
 end)
 
--- Keymaps
+-- Non lazy keymaps registration
 now(function()
 	local te_buf = nil
 	local te_win_id = nil
@@ -870,7 +881,7 @@ now(function()
 	Xmap("<leader>lf", ":Format<CR>", "Format code")
 end)
 
--- Autocommands
+-- Autocommands registration
 now(function()
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
@@ -895,6 +906,7 @@ now(function()
 				or vim.bo.filetype == "xsl"
 				or vim.bo.filetype == "javascriptreact"
 			then
+				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				MiniPairs.unmap("i", "<", "")
 				MiniPairs.unmap("i", ">", "")
@@ -919,11 +931,7 @@ now(function()
 									downloadSources = true,
 								},
 								format = {
-									enabled = false,
-									-- settings = {
-									--      url = vim.fn.stdpath("config") .. "/lang_servers/intellij-java-google-style.xml",
-									--      profile = "GoogleStyle",
-									-- },
+									enabled = true,
 								},
 								inlayHints = {
 									parameterNames = {
@@ -953,6 +961,7 @@ now(function()
 								},
 							},
 						},
+						capabilities = Global.lspCapabilities,
 					}
 					local bundles = {
 						vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
@@ -995,7 +1004,7 @@ now(function()
 	})
 end)
 
--- Lazy loaded plugins
+-- Lazy loaded plugins registration
 later(function()
 	add({
 		source = "junegunn/fzf",
@@ -1096,7 +1105,7 @@ later(function()
 	add("mbbill/undotree")
 end)
 
--- Lazy keymaps
+-- Lazy loaded keymaps registration
 later(function()
 	Imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
@@ -1140,7 +1149,7 @@ later(function()
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
 
--- Dap configuration setup
+-- Lazy loaded dap configurations setup
 later(function()
 	local dap = require("dap")
 	dap.adapters.delve = {
@@ -1306,7 +1315,7 @@ later(function()
 	}
 end)
 
--- Lsp configuration configuration
+-- Lazy loaded lsp configurations setup
 later(function()
 	local lspconfig = require("lspconfig")
 	lspconfig.lua_ls.setup({
@@ -1502,7 +1511,7 @@ later(function()
 	vim.cmd("LspStart")
 end)
 
--- Lazy custom config
+-- Lazy loaded custom config
 later(function()
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
