@@ -23,37 +23,6 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		-- Treesitter regex used
-		treesitterNamePattern = "[#~%*%w%._%->!@:]+%s*" .. string.rep("[#~%*%w%._%->!@:]*", 3, "%s*"),
-		-- Treesitter types captured
-		treesitterTypePatterns = {
-			"function",
-			"array",
-			"boolean",
-			"class",
-			"constant",
-			"constructor",
-			"enum",
-			"enum_member",
-			"event",
-			"field",
-			"file",
-			"interface",
-			"keyword",
-			"method",
-			"module",
-			"namespace",
-			"null",
-			"number",
-			"object",
-			"operator",
-			"package",
-			"property",
-			"string",
-			"struct",
-			"type_parameter",
-			"variable",
-		},
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 	}
@@ -98,13 +67,12 @@ end)
 -- Default settings
 now(function()
 	-- let g:python_recommended_style=0
+	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
-	math.randomseed(vim.uv.hrtime())
 	vim.cmd("packadd cfilter")
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
-	vim.o.colorcolumn = "150"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
@@ -251,11 +219,12 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>q", desc = "+Quickfix" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
-				{ mode = "n", keys = "<Leader>q", desc = "+Quickfix" },
+				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
@@ -525,33 +494,6 @@ now(function()
 			additional_vim_regex_highlighting = false,
 		},
 	})
-	Global.winbarSymbols = function()
-		return "   > "
-			.. require("nvim-treesitter").statusline({
-				indicator_size = vim.o.columns - 10,
-				type_patterns = Global.treesitterTypePatterns,
-				transform_fn = function(line, node)
-					local correctIcon = "?"
-					local ts_type = node:type()
-					for _, type in ipairs(Global.treesitterTypePatterns) do
-						if ts_type:find(type, 1, true) then
-							correctIcon, _ = MiniIcons.get("lsp", type)
-							break
-						end
-					end
-					local statusline = correctIcon
-					local nodeString = vim.trim(
-						vim.treesitter.get_node_text(node, 0):gsub("\n.*", ""):match(Global.treesitterNamePattern) or ""
-					)
-					if nodeString ~= "" then
-						statusline = statusline .. " " .. nodeString
-					end
-					return statusline
-				end,
-				separator = " > ",
-				allow_duplicates = false,
-			})
-	end
 	vim.wo.foldmethod = "expr"
 	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	add("mfussenegger/nvim-dap")
@@ -590,21 +532,6 @@ now(function()
 		prepend_args = { "-s" },
 	}
 	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-	add("stevearc/quicker.nvim")
-	require("quicker").setup({
-		opts = {
-			number = false,
-			signcolumn = "no",
-			foldcolumn = "0",
-			statuscolumn = "",
-		},
-		highlight = {
-			treesitter = true,
-			lsp = true,
-			load_buffers = false,
-		},
-		trim_leading_whitespace = false,
-	})
 	add({
 		source = "nvim-treesitter/nvim-treesitter-context",
 		depends = {
@@ -786,10 +713,8 @@ now(function()
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
 	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
-	Nmap("<leader>qc", ":lua require('quicker').collapse()<CR>", "Collapse")
-	Nmap("<leader>qe", ":lua require('quicker').expand({before = 2, after = 2, add_to_existing = true})<CR>", "Expand")
-	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
-	Nmap("<leader>qq", ":lua require('quicker').toggle()<CR>", "Toggle quickfix")
+	Nmap("<leader>ql", ":lopen<CR>", "Toggle loclist")
+	Nmap("<leader>qq", ":copen<CR>", "Toggle quickfix")
 	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
 	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
@@ -914,7 +839,7 @@ now(function()
 				virtual_text = true,
 				underline = false,
 			})
-			vim.wo.winbar = "%{%v:lua.Global.winbarSymbols()%}"
+			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePre", {
@@ -975,6 +900,26 @@ later(function()
 		},
 	})
 	vim.cmd("FzfLua register_ui_select")
+	add({
+		source = "folke/trouble.nvim",
+		depends = {
+			"mini.nvim",
+			"neovim/nvim-lspconfig",
+			"ibhagwan/fzf-lua",
+		},
+	})
+	local fzf_config = require("fzf-lua.config")
+	local fzf_actions = require("trouble.sources.fzf").actions
+	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
+	require("trouble").setup()
+	Global.symbols = require("trouble").statusline({
+		mode = "lsp_document_symbols",
+		groups = {},
+		title = false,
+		filter = { range = true },
+		format = "> {kind_icon}{symbol.name:Normal}",
+		hl_group = "WinBar",
+	})
 	add("mfussenegger/nvim-lint")
 	add({
 		source = "leoluz/nvim-dap-go",
@@ -1033,6 +978,25 @@ later(function()
 	add("mbbill/undotree")
 end)
 
+-- Lazy autocommands registration
+later(function()
+	vim.api.nvim_create_autocmd("BufRead", {
+		callback = function(ev)
+			if vim.bo[ev.buf].buftype == "quickfix" then
+				vim.schedule(function()
+					vim.cmd("cclose")
+					vim.cmd("Trouble qflist open")
+				end)
+			elseif vim.bo[ev.buf].buftype == "loclist" then
+				vim.schedule(function()
+					vim.cmd("lclose")
+					vim.cmd("Trouble loclist open")
+				end)
+			end
+		end,
+	})
+end)
+
 -- Lazy loaded keymaps registration
 later(function()
 	Imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
@@ -1073,6 +1037,12 @@ later(function()
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
+	Nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
+	Nmap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", "Toggle quickfix")
+	Nmap("<leader>xr", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", "Toggle LSP Defs/refs")
+	Nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
+	Nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
+	Nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
