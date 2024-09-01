@@ -165,7 +165,6 @@ end)
 
 -- Initial UI setup
 now(function()
-	add("echasnovski/mini.notify")
 	require("mini.notify").setup({
 		window = {
 			config = {
@@ -177,7 +176,6 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	add("echasnovski/mini.base16")
 	Global.setBase16Colorscheme = function()
 		require("mini.base16").setup({
 			palette = Global.palette,
@@ -243,11 +241,8 @@ end)
 
 -- Mini plugins setup
 now(function()
-	add("echasnovski/mini.ai")
 	require("mini.ai").setup()
-	add("echasnovski/mini.align")
 	require("mini.align").setup()
-	add("echasnovski/mini.basics")
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
@@ -261,11 +256,8 @@ now(function()
 			relnum_in_visual_mode = true,
 		},
 	})
-	add("echasnovski/mini.bracketed")
 	require("mini.bracketed").setup()
-	add("echasnovski/mini.bufremove")
 	require("mini.bufremove").setup()
-	add("echasnovski/mini.clue")
 	require("mini.clue").setup({
 		triggers = {
 			{ mode = "c", keys = "<C-r>" },
@@ -321,9 +313,7 @@ now(function()
 			},
 		},
 	})
-	add("echasnovski/mini.comment")
 	require("mini.comment").setup()
-	add("echasnovski/mini.completion")
 	require("mini.completion").setup({
 		window = {
 			info = { border = "rounded" },
@@ -332,13 +322,9 @@ now(function()
 	})
 	-- This makes completion faster by suggesting words from current buffer only
 	vim.cmd("set complete=.")
-	add("echasnovski/mini.cursorword")
 	require("mini.cursorword").setup()
-	add("echasnovski/mini.diff")
 	require("mini.diff").setup()
-	add("echasnovski/mini.extra")
 	require("mini.extra").setup()
-	add("echasnovski/mini.files")
 	require("mini.files").setup({
 		windows = {
 			preview = true,
@@ -355,9 +341,7 @@ now(function()
 			use_as_default_explorer = true,
 		},
 	})
-	add("echasnovski/mini-git")
 	require("mini.git").setup()
-	add("echasnovski/mini.hipatterns")
 	require("mini.hipatterns").setup({
 		highlighters = {
 			fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
@@ -368,7 +352,6 @@ now(function()
 			hl_words = require("mini.extra").gen_highlighter.words({ "TEST: " }, "MiniHipatternsTodo"),
 		},
 	})
-	add("echasnovski/mini.icons")
 	require("mini.icons").setup({
 		lsp = {
 			ollama = { glyph = "", hl = "MiniIconsGreen" },
@@ -376,7 +359,6 @@ now(function()
 	})
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
-	add("echasnovski/mini.indentscope")
 	require("mini.indentscope").setup({
 		symbol = "│",
 		draw = {
@@ -385,14 +367,10 @@ now(function()
 			priority = 10000,
 		},
 	})
-	add("echasnovski/mini.jump")
 	require("mini.jump").setup()
-	add("echasnovski/mini.jump2d")
 	require("mini.jump2d").setup()
-	add("echasnovski/mini.misc")
 	require("mini.misc").setup()
 	MiniMisc.setup_auto_root({ ".git", "Makefile", "go.mod", "package.json", "pom.xml" })
-	add("echasnovski/mini.move")
 	require("mini.move").setup({
 		mappings = {
 			left = "<C-S-left>",
@@ -408,18 +386,14 @@ now(function()
 			reindent_linewise = true,
 		},
 	})
-	add("echasnovski/mini.operators")
 	require("mini.operators").setup()
-	add("echasnovski/mini.pairs")
 	require("mini.pairs").setup({
 		mappings = {
 			["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
 			[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
 		},
 	})
-	add("echasnovski/mini.splitjoin")
 	require("mini.splitjoin").setup()
-	add("echasnovski/mini.starter")
 	require("mini.starter").setup({
 		header = table.concat({
 			"██████╗░██████╗░░░███╗░░████████╗██████╗░░█████╗░███╗░░██╗",
@@ -446,7 +420,6 @@ now(function()
 			"╚═╝░░╚══╝╚══════╝░╚════╝░░░░╚═╝░░░╚═╝╚═╝░░░░░╚═╝",
 		}, "\n"),
 	})
-	add("echasnovski/mini.statusline")
 	require("mini.statusline").setup({
 		content = {
 			active = function()
@@ -477,13 +450,10 @@ now(function()
 		},
 		set_vim_settings = false,
 	})
-	add("echasnovski/mini.surround")
 	require("mini.surround").setup()
-	add("echasnovski/mini.tabline")
 	require("mini.tabline").setup({
 		tabpage_section = "right",
 	})
-	add("echasnovski/mini.trailspace")
 	require("mini.trailspace").setup()
 end)
 
@@ -694,7 +664,7 @@ now(function()
 	add({
 		source = "OXY2DEV/helpview.nvim",
 		depends = {
-			"echasnovski/mini.icons",
+			"mini.nvim",
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
@@ -702,7 +672,7 @@ now(function()
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
-			"echasnovski/mini.icons",
+			"mini.nvim",
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
@@ -1018,7 +988,7 @@ later(function()
 	add({
 		source = "ibhagwan/fzf-lua",
 		depends = {
-			"echasnovski/mini.icons",
+			"mini.nvim",
 			"junegunn/fzf",
 		},
 	})
