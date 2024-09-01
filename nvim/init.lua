@@ -23,25 +23,6 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		-- Base 16 color palette used for colorscheme generation
-		palette = {
-			base00 = "#282C34",
-			base01 = "#353B45",
-			base02 = "#3E4451",
-			base03 = "#545862",
-			base04 = "#565C64",
-			base05 = "#ABB2BF",
-			base06 = "#B6BDCA",
-			base07 = "#C8CCD4",
-			base08 = "#E06C75",
-			base09 = "#D19A66",
-			base0A = "#E5C07B",
-			base0B = "#98C379",
-			base0C = "#56B6C2",
-			base0D = "#61AFEF",
-			base0E = "#C678DD",
-			base0F = "#BE5046",
-		},
 		-- Treesitter regex used
 		treesitterNamePattern = "[#~%*%w%._%->!@:]+%s*" .. string.rep("[#~%*%w%._%->!@:]*", 3, "%s*"),
 		-- Treesitter types captured
@@ -175,50 +156,28 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	Global.setBase16Colorscheme = function()
-		require("mini.base16").setup({
-			palette = Global.palette,
-		})
-		Hi("Changed", { bg = "NONE", fg = Global.palette.base0A })
-		Hi("CursorLineFold", { bg = "NONE", fg = Global.palette.base0E })
-		Hi("CursorLineNr", { bg = "NONE", fg = Global.palette.base0E })
-		Hi("CursorLineSign", { bg = "NONE" })
-		Hi("DiagnosticError", { bg = "NONE", fg = Global.palette.base0F })
-		Hi("DiagnosticFloatingError", { link = "DiagnosticError" })
-		Hi("DiagnosticFloatingHint", { link = "DiagnosticHint" })
-		Hi("DiagnosticFloatingInfo", { link = "DiagnosticInfo" })
-		Hi("DiagnosticFloatingOk", { link = "DiagnosticOk" })
-		Hi("DiagnosticFloatingWarn", { link = "DiagnosticWarn" })
-		Hi("DiagnosticHint", { bg = "NONE", fg = Global.palette.base0B })
-		Hi("DiagnosticInfo", { bg = "NONE", fg = Global.palette.base0C })
-		Hi("DiagnosticOk", { bg = "NONE", fg = Global.palette.base0D })
-		Hi("DiagnosticSignError", { link = "DiagnosticError" })
-		Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
-		Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
-		Hi("DiagnosticSignOk", { link = "DiagnosticOk" })
-		Hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
-		Hi("DiagnosticWarn", { bg = "NONE", fg = Global.palette.base09 })
-		Hi("DiffChange", { bg = Global.palette.base01, fg = Global.palette.base0A })
-		Hi("DiffChanged", { bg = "NONE", fg = Global.palette.base0A })
-		Hi("FloatBorder", { bg = "NONE" })
-		Hi("FoldColumn", { bg = "NONE", fg = Global.palette.base03 })
-		Hi("FzfLuaBorder", { bg = "NONE", fg = Global.palette.base00 })
-		Hi("FzfLuaFzfBorder", { link = "NonText" })
-		Hi("IndentLine", { link = "NonText" })
-		Hi("IndentLineCurrent", { link = "NonText" })
-		Hi("LineNr", { bg = "NONE", fg = Global.palette.base03 })
-		Hi("LineNrAbove", { bg = "NONE", fg = Global.palette.base03 })
-		Hi("LineNrBelow", { bg = "NONE", fg = Global.palette.base03 })
-		Hi("MiniDiffSignAdd", { bg = "NONE" })
-		Hi("MiniDiffSignChange", { bg = "NONE" })
-		Hi("MiniDiffSignDelete", { bg = "NONE" })
-		Hi("NormalFloat", { bg = "NONE" })
-		Hi("SignColumn", { bg = "NONE", fg = Global.palette.base03 })
-		Hi("TreesitterContext", { bg = Global.palette.base01 })
-		Hi("WinBar", { bg = Global.palette.base01, fg = Global.palette.base04 })
-		Hi("WinSeparator", { link = "FloatBorder" })
-	end
-	Global.setBase16Colorscheme()
+	add("folke/tokyonight.nvim")
+	require("tokyonight").setup({
+		style = "storm",
+		light_style = "day",
+		transparent = false,
+		terminal_colors = true,
+		styles = {
+			comments = { italic = true },
+			keywords = {},
+			functions = {},
+			variables = {},
+			sidebars = "transparent",
+			floats = "transparent",
+		},
+		day_brightness = 0.3,
+		dim_inactive = false,
+		cache = true,
+		plugins = {
+			all = true,
+		},
+	})
+	vim.cmd.colorscheme("tokyonight")
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
@@ -426,7 +385,7 @@ now(function()
 				local git = MiniStatusline.section_git({ trunc_width = 75 })
 				local diagnostics = MiniStatusline.section_diagnostics({
 					trunc_width = 75,
-					-- signs = { ERROR = " ", WARN = " ", INFO = " ", HINT = " " },
+					signs = { ERROR = " ", WARN = " ", INFO = " ", HINT = " " },
 				})
 				local filename = MiniStatusline.section_filename({ trunc_width = 140 })
 				if filename:sub(1, 2) == "%F" or filename:sub(1, 2) == "%f" then
@@ -771,7 +730,6 @@ now(function()
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", Global.setBase16Colorscheme, "Set base16 colorscheme")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
