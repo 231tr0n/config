@@ -16,7 +16,6 @@ if not vim.uv.fs_stat(mini_path) then
 end
 
 -- Setup MiniDeps
--- Call MiniDeps setup function
 require("mini.deps").setup({ path = { package = path_package } })
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
