@@ -14,16 +14,13 @@ if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installed `mini.deps`" | redraw')
 end
 
--- Add mini.deps as a plugin
+-- Setup MiniDeps
+-- Add MiniDeps to runtime
 vim.cmd("packadd mini.deps | helptags ALL")
-
--- Setup mini.deps
+-- Call MiniDeps setup function
 require("mini.deps").setup({ path = { package = path_package } })
-
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
--- Add mini.deps as dependency
-add("echasnovski/mini.deps")
 
 -- Globals variables and functions declared and used
 now(function()
@@ -169,6 +166,8 @@ end)
 
 -- Initial UI setup
 now(function()
+	-- Make MiniDeps track itself
+	add("echasnovski/mini.deps")
 	add("echasnovski/mini.notify")
 	require("mini.notify").setup({
 		window = {
@@ -334,6 +333,7 @@ now(function()
 			signature = { border = "rounded" },
 		},
 	})
+	-- This makes completion faster by suggesting words from current buffer only
 	vim.cmd("set complete=.")
 	add("echasnovski/mini.cursorword")
 	require("mini.cursorword").setup()
@@ -573,6 +573,7 @@ now(function()
 		auto_install = true,
 		ignore_install = {},
 		modules = {},
+		-- Disable indent module if file size is greater than 2MB
 		indent = {
 			enable = true,
 			disable = function(lang, buf)
@@ -586,6 +587,7 @@ now(function()
 		incremental_selection = {
 			enable = false,
 		},
+		-- Disable highlight module if file size is greater than 2MB
 		highlight = {
 			enable = true,
 			disable = function(lang, buf)
@@ -895,6 +897,7 @@ now(function()
 			if vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" then
 				vim.b.minicursorword_disable = true
 			elseif vim.bo.filetype == "dap-repl" then
+				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
 				vim.b.miniindentscope_disable = true
 			elseif
@@ -914,6 +917,7 @@ now(function()
 				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
 				vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
 			elseif vim.bo.filetype == "java" then
+				-- Java lsp lazy loading setup
 				require("jdtls").start_or_attach((function()
 					local config = {
 						cmd = { "/usr/bin/jdtls" },
@@ -979,6 +983,7 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
+			-- Disable semantic highlighting
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
 			client.server_capabilities.semanticTokensProvider = nil
 			vim.diagnostic.config({
