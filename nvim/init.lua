@@ -890,7 +890,7 @@ later(function()
 	require("quicker").setup({
 		opts = {
 			number = false,
-			signcolumn = "no",
+			signcolumn = "auto:1",
 			foldcolumn = "0",
 			statuscolumn = "",
 		},
@@ -1003,25 +1003,6 @@ later(function()
 		debug = false,
 	})
 	add("mbbill/undotree")
-end)
-
--- Lazy autocommands registration
-later(function()
-	-- vim.api.nvim_create_autocmd("BufRead", {
-	-- 	callback = function(ev)
-	-- 		if vim.bo[ev.buf].buftype == "quickfix" then
-	-- 			vim.schedule(function()
-	-- 				vim.cmd("cclose")
-	-- 				vim.cmd("Trouble qflist open")
-	-- 			end)
-	-- 		elseif vim.bo[ev.buf].buftype == "loclist" then
-	-- 			vim.schedule(function()
-	-- 				vim.cmd("lclose")
-	-- 				vim.cmd("Trouble loclist open")
-	-- 			end)
-	-- 		end
-	-- 	end,
-	-- })
 end)
 
 -- Lazy loaded keymaps registration
