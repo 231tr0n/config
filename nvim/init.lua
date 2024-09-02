@@ -107,6 +107,7 @@ now(function()
 	vim.o.showmode = false
 	vim.o.signcolumn = "auto:1"
 	vim.o.smartcase = true
+	vim.o.softtabstop = 2
 	vim.o.splitbelow = true
 	vim.o.splitright = true
 	vim.o.synmaxcol = 100
@@ -900,6 +901,15 @@ later(function()
 			load_buffers = false,
 		},
 		trim_leading_whitespace = false,
+		borders = {
+			vert = "│",
+			strong_header = "-",
+			strong_cross = "┼",
+			strong_end = "┤",
+			soft_header = "-",
+			soft_cross = "┼",
+			soft_end = "┤",
+		},
 	})
 	require("fzf-lua").setup({
 		"max-perf",
