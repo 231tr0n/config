@@ -1038,6 +1038,8 @@ later(function()
 		debug = false,
 	})
 	add("mbbill/undotree")
+	add("tpope/vim-fugitive")
+	add("rbong/vim-flog")
 end)
 
 -- Lazy loaded keymaps registration
