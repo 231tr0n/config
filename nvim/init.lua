@@ -1,6 +1,6 @@
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
-local mini_path = path_package .. "pack/deps/start/mini.nvim"
+local mini_path = path_package .. "pack/deps/opt/mini.nvim"
 if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installing `mini.nvim`" | redraw')
 	local clone_cmd = {
@@ -11,14 +11,17 @@ if not vim.uv.fs_stat(mini_path) then
 		mini_path,
 	}
 	vim.fn.system(clone_cmd)
-	vim.cmd("packadd mini.nvim | helptags ALL")
 	vim.cmd('echo "Installed `mini.nvim`" | redraw')
 end
+-- Add mini.nvim to runtime
+vim.cmd("packadd mini.nvim | helptags ALL")
 
 -- Setup MiniDeps
 require("mini.deps").setup({ path = { package = path_package } })
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+-- Track and update self
+add("echasnovski/mini.nvim")
 
 -- Globals variables and functions declared and used
 now(function()
