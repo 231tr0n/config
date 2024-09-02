@@ -155,6 +155,28 @@ now(function()
 		},
 		day_brightness = 0.3,
 		dim_inactive = false,
+		on_highlights = function(highlights, colors)
+			highlights.FzfLuaBorder = {
+				bg = colors.bg,
+				fg = colors.bg,
+			}
+			highlights.FzfLuaFzfBorder = {
+				bg = colors.bg,
+				fg = colors.border_highlight,
+			}
+			highlights.FzfLuaFzfGutter = {
+				bg = colors.bg,
+				fg = colors.bg,
+			}
+			highlights["@punctuation.bracket"] = {
+				bg = colors.none,
+				fg = colors.red,
+			}
+			highlights.MatchParen = {
+				bg = colors.fg_gutter,
+				fg = colors.none,
+			}
+		end,
 		cache = true,
 		plugins = {
 			all = true,
