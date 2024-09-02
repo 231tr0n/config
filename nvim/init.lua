@@ -73,6 +73,10 @@ now(function()
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
+	vim.g.maplocalleader = " "
+	vim.g.nerd_font = true
+	vim.o.breakindent = true
+	vim.o.completeopt = "menu,menuone,noselect"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
@@ -82,15 +86,19 @@ now(function()
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
 	vim.o.foldlevelstart = 99
+	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+	vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 	vim.o.hlsearch = true
 	vim.o.ignorecase = true
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:  ,trail: ,extends:…,precedes:…" -- ¬
-	vim.o.maxmempattern = 20000
+	vim.o.listchars = "tab:  ,trail: ,extends:»,precedes:«,nbsp:⦸" -- ¬
+	vim.o.maxmempattern = 10000
+	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:5,hor:5"
 	vim.o.number = true
+	vim.o.path = "**"
 	vim.o.pumblend = 0
 	vim.o.scrolloff = 999
 	vim.o.shiftwidth = 2
@@ -99,6 +107,9 @@ now(function()
 	vim.o.showmode = false
 	vim.o.signcolumn = "auto:1"
 	vim.o.smartcase = true
+	vim.o.splitbelow = true
+	vim.o.splitright = true
+	vim.o.synmaxcol = 100
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
 	vim.o.textwidth = 0
@@ -109,6 +120,9 @@ now(function()
 	vim.o.winblend = 0
 	vim.o.wrap = true
 	vim.opt.matchpairs:append("<:>")
+	vim.opt.wildignore:append(
+		"*.png,*.jpg,*.jpeg,*.gif,*.wav,*.aiff,*.dll,*.pdb,*.mdb,*.so,*.swp,*.zip,*.gz,*.bz2,*.meta,*.svg,*.cache,*/.git/*"
+	)
 end)
 
 -- Initial UI setup
@@ -713,8 +727,6 @@ now(function()
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
 	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
-	Nmap("<leader>ql", ":lopen<CR>", "Toggle loclist")
-	Nmap("<leader>qq", ":copen<CR>", "Toggle quickfix")
 	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
 	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
@@ -874,6 +886,21 @@ later(function()
 			"junegunn/fzf",
 		},
 	})
+	add("stevearc/quicker.nvim")
+	require("quicker").setup({
+		opts = {
+			number = false,
+			signcolumn = "no",
+			foldcolumn = "0",
+			statuscolumn = "",
+		},
+		highlight = {
+			treesitter = true,
+			lsp = true,
+			load_buffers = false,
+		},
+		trim_leading_whitespace = false,
+	})
 	require("fzf-lua").setup({
 		"max-perf",
 		fzf_colors = true,
@@ -980,21 +1007,21 @@ end)
 
 -- Lazy autocommands registration
 later(function()
-	vim.api.nvim_create_autocmd("BufRead", {
-		callback = function(ev)
-			if vim.bo[ev.buf].buftype == "quickfix" then
-				vim.schedule(function()
-					vim.cmd("cclose")
-					vim.cmd("Trouble qflist open")
-				end)
-			elseif vim.bo[ev.buf].buftype == "loclist" then
-				vim.schedule(function()
-					vim.cmd("lclose")
-					vim.cmd("Trouble loclist open")
-				end)
-			end
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("BufRead", {
+	-- 	callback = function(ev)
+	-- 		if vim.bo[ev.buf].buftype == "quickfix" then
+	-- 			vim.schedule(function()
+	-- 				vim.cmd("cclose")
+	-- 				vim.cmd("Trouble qflist open")
+	-- 			end)
+	-- 		elseif vim.bo[ev.buf].buftype == "loclist" then
+	-- 			vim.schedule(function()
+	-- 				vim.cmd("lclose")
+	-- 				vim.cmd("Trouble loclist open")
+	-- 			end)
+	-- 		end
+	-- 	end,
+	-- })
 end)
 
 -- Lazy loaded keymaps registration
@@ -1033,6 +1060,10 @@ later(function()
 	Nmap("<leader>ft", ":FzfLua btags<CR>", "Search buffer tags")
 	Nmap("<leader>fx", ":FzfLua diagnostics_document<CR>", "Search document diagnostics")
 	Nmap("<leader>fy", ":FzfLua lsp_document_symbols<CR>", "Search document symbols")
+	Nmap("<leader>qc", ":lua require('quicker').collapse()<CR>", "Collapse")
+	Nmap("<leader>qe", ":lua require('quicker').expand({before = 2, after = 2, add_to_existing = true})<CR>", "Expand")
+	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
+	Nmap("<leader>qq", ":lua require('quicker').toggle()<CR>", "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
