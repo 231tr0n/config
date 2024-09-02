@@ -1279,14 +1279,16 @@ later(function()
 	lspconfig.gopls.setup({
 		capabilities = Global.lspCapabilities,
 		settings = {
-			hints = {
-				rangeVariableTypes = true,
-				parameterNames = true,
-				constantValues = true,
-				assignVariableTypes = true,
-				compositeLiteralFields = true,
-				compositeLiteralTypes = true,
-				functionTypeParameters = true,
+			gopls = {
+				hints = {
+					rangeVariableTypes = true,
+					parameterNames = true,
+					constantValues = true,
+					assignVariableTypes = true,
+					compositeLiteralFields = true,
+					compositeLiteralTypes = true,
+					functionTypeParameters = true,
+				},
 			},
 		},
 	})
