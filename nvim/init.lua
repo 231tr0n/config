@@ -903,10 +903,10 @@ later(function()
 		trim_leading_whitespace = false,
 		borders = {
 			vert = "│",
-			strong_header = "-",
+			strong_header = "─",
 			strong_cross = "┼",
 			strong_end = "┤",
-			soft_header = "-",
+			soft_header = "─",
 			soft_cross = "┼",
 			soft_end = "┤",
 		},
