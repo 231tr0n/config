@@ -1003,8 +1003,7 @@ later(function()
 	})
 	require("lint").linters_by_ft = {
 		-- lua = { "luacheck" },
-		python = { "pylint" },
-		yaml = { "yamllint" },
+		-- yaml = { "yamllint" },
 		c = { "clangtidy" },
 		go = { "golangcilint" },
 		groovy = { "npm-groovy-lint" },
@@ -1012,6 +1011,7 @@ later(function()
 		javascript = { "eslint" },
 		json = { "jsonlint" },
 		jsonc = { "jsonlint" },
+		python = { "pylint" },
 		sh = { "shellcheck" },
 		svelte = { "eslint" },
 		typescript = { "eslint" },
