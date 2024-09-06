@@ -25,6 +25,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_m
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-test.bash -o ~/scripts/java-test.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-format.bash -o ~/scripts/java-format.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/go/go-install.bash -o ~/scripts/go-install.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/lua-lsp.bash -o ~/scripts/lua-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
@@ -35,6 +36,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/kubernetes/kubernetes
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
 chmod +x ~/scripts/java-test.bash
+chmod +x ~/scripts/java-format.bash
 chmod +x ~/scripts/go-install.bash
 chmod +x ~/scripts/lua-lsp.bash
 chmod +x ~/scripts/xml-lsp.bash
@@ -114,7 +116,6 @@ sudo npm install -g npm-groovy-lint@latest
 
 sudo apt install -y clang-format jq libxml2-utils tidy
 pipx install black
-sudo npm install -g google-java-format@latest
 sudo npm install -g prettier@latest
 go install -v github.com/google/yamlfmt/cmd/yamlfmt@latest
 go install -v mvdan.cc/gofumpt@latest
@@ -125,6 +126,9 @@ cargo install stylua --features lua53
 cargo install stylua --features lua54
 cargo install stylua --features luau
 pipx install yamlfix
+cd ~/scripts
+./java-format.bash
+cd ~
 
 cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
 
