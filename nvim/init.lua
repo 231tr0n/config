@@ -33,31 +33,37 @@ now(function()
 	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("t", suffix, rhs, opts)
 	end
 	Nmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("n", suffix, rhs, opts)
 	end
 	Vmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("v", suffix, rhs, opts)
 	end
 	Imap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("i", suffix, rhs, opts)
 	end
 	Smap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("s", suffix, rhs, opts)
 	end
 	Xmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
+		opts.silent = true
 		opts.desc = desc
 		vim.keymap.set("x", suffix, rhs, opts)
 	end
@@ -264,6 +270,7 @@ now(function()
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
+				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
@@ -360,6 +367,7 @@ now(function()
 			[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
 		},
 	})
+	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
 		header = table.concat({
@@ -377,6 +385,7 @@ now(function()
 			require("mini.starter").sections.builtin_actions(),
 			require("mini.starter").sections.recent_files(5, false),
 			require("mini.starter").sections.recent_files(5, true),
+			require("mini.starter").sections.sessions(5, true),
 		},
 		footer = table.concat({
 			"███╗░░██╗███████╗░█████╗░██╗░░░██╗██╗███╗░░░███╗",
@@ -422,6 +431,7 @@ now(function()
 		tabpage_section = "right",
 	})
 	require("mini.trailspace").setup()
+	require("mini.visits").setup()
 end)
 
 -- Non lazy plugins registration
@@ -580,13 +590,6 @@ now(function()
 	})
 	require("treesitter-context").setup()
 	add({
-		source = "RRethy/nvim-treesitter-endwise",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	vim.cmd("TSEnable endwise")
-	add({
 		source = "OXY2DEV/helpview.nvim",
 		depends = {
 			"mini.nvim",
@@ -690,6 +693,10 @@ now(function()
 			-- return keys["cr"]
 		end
 	end
+	Global.miniPickVisits = function(cwd, desc)
+		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
+		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
+	end
 	Imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
@@ -755,6 +762,9 @@ now(function()
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
 	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
 	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
+	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
+	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
+	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
 	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gl", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
@@ -877,7 +887,7 @@ now(function()
 				virtual_text = true,
 				underline = false,
 			})
-			vim.wo.winbar = "  %{%v:lua.Global.symbols.get()%}"
+			vim.wo.winbar = " %{%v:lua.Global.symbols.get()%}"
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePre", {
@@ -1091,11 +1101,11 @@ later(function()
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
+	Nmap("<leader>xX", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	Nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
 	Nmap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", "Toggle quickfix")
 	Nmap("<leader>xr", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", "Toggle LSP Defs/refs")
 	Nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
-	Nmap("<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
 	Nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
@@ -1393,35 +1403,6 @@ later(function()
 			},
 		},
 	})
-	-- lspconfig.tsserver.setup({
-	-- 	capabilities = Global.lspCapabilities,
-	-- 	settings = {
-	-- 		typescript = {
-	-- 			inlayHints = {
-	-- 				includeInlayParameterNameHints = "all",
-	-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-	-- 				includeInlayFunctionParameterTypeHints = true,
-	-- 				includeInlayVariableTypeHints = true,
-	-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-	-- 				includeInlayPropertyDeclarationTypeHints = true,
-	-- 				includeInlayFunctionLikeReturnTypeHints = true,
-	-- 				includeInlayEnumMemberValueHints = true,
-	-- 			},
-	-- 		},
-	-- 		javascript = {
-	-- 			inlayHints = {
-	-- 				includeInlayParameterNameHints = "all",
-	-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-	-- 				includeInlayFunctionParameterTypeHints = true,
-	-- 				includeInlayVariableTypeHints = true,
-	-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-	-- 				includeInlayPropertyDeclarationTypeHints = true,
-	-- 				includeInlayFunctionLikeReturnTypeHints = true,
-	-- 				includeInlayEnumMemberValueHints = true,
-	-- 			},
-	-- 		},
-	-- 	},
-	-- })
 	lspconfig.svelte.setup({
 		capabilities = Global.lspCapabilities,
 		settings = {
