@@ -1047,14 +1047,6 @@ later(function()
 		end,
 		debug = false,
 	})
-	add("mbbill/undotree")
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
 end)
 
 -- Lazy loaded keymaps registration
