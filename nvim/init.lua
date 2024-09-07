@@ -168,7 +168,7 @@ now(function()
 			floats = "transparent",
 		},
 		day_brightness = 0.3,
-		dim_inactive = false,
+		dim_inactive = true,
 		on_highlights = function(highlights, colors)
 			highlights.FzfLuaBorder = {
 				bg = colors.bg,
@@ -190,6 +190,10 @@ now(function()
 				bg = colors.fg_gutter,
 				fg = colors.none,
 			}
+			highlights.FoldColumn = { fg = colors.comment }
+			highlights.CursorLineFold = { fg = colors.orange, bold = true }
+			highlights.SignColumn = { fg = colors.fg_gutter }
+			highlights.CursorLineSign = { fg = colors.orange, bold = true }
 		end,
 		cache = true,
 		plugins = {
