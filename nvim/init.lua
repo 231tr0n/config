@@ -168,7 +168,7 @@ now(function()
 			floats = "transparent",
 		},
 		day_brightness = 0.3,
-		dim_inactive = true,
+		dim_inactive = false,
 		on_highlights = function(highlights, colors)
 			highlights.FzfLuaBorder = {
 				bg = colors.bg,
