@@ -129,6 +129,11 @@ now(function()
 	vim.o.wildmode = "longest:full,full"
 	vim.o.winblend = 0
 	vim.o.wrap = true
+	vim.diagnostic.config({
+		virtual_text = true,
+		underline = false,
+		severity_sort = true,
+	})
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append(
 		"*.png,*.jpg,*.jpeg,*.gif,*.wav,*.aiff,*.dll,*.pdb,*.mdb,*.so,*.swp,*.zip,*.gz,*.bz2,*.meta,*.svg,*.cache,*/.git/*"
@@ -883,10 +888,6 @@ now(function()
 			-- Disable semantic highlighting
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
 			client.server_capabilities.semanticTokensProvider = nil
-			vim.diagnostic.config({
-				virtual_text = true,
-				underline = false,
-			})
 			vim.wo.winbar = " %{%v:lua.Global.symbols.get()%}"
 		end,
 	})
