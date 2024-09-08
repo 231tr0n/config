@@ -161,26 +161,21 @@ now(function()
 		terminal_colors = true,
 		styles = {
 			comments = { italic = true },
-			keywords = {},
-			functions = {},
-			variables = {},
-			sidebars = "transparent",
-			floats = "transparent",
 		},
 		day_brightness = 0.3,
-		dim_inactive = false,
+		dim_inactive = true,
 		on_highlights = function(highlights, colors)
 			highlights.FzfLuaBorder = {
-				bg = colors.bg,
-				fg = colors.bg,
+				bg = colors.bg_float,
+				fg = colors.bg_float,
 			}
 			highlights.FzfLuaFzfBorder = {
-				bg = colors.bg,
+				bg = colors.bg_float,
 				fg = colors.border_highlight,
 			}
 			highlights.FzfLuaFzfGutter = {
-				bg = colors.bg,
-				fg = colors.bg,
+				bg = colors.bg_float,
+				fg = colors.bg_float,
 			}
 			highlights["@punctuation.bracket"] = {
 				bg = colors.none,
@@ -865,6 +860,10 @@ now(function()
 											name = "JavaSE-17",
 											path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
 										},
+										{
+											name = "JavaSE-21",
+											path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+										},
 									},
 								},
 							},
@@ -1039,9 +1038,6 @@ later(function()
 		show_prompt = true,
 		show_model = true,
 		no_auto_close = false,
-		-- init = function(options)
-		--  pcall(io.popen, "ollama serve > /dev/null 2>&1 &")
-		-- end,
 		command = function(options)
 			return "curl --silent --no-buffer -X POST http://"
 				.. options.host
