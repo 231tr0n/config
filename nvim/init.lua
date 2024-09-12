@@ -1135,6 +1135,7 @@ later(function()
 	Nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
 	Nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Vmap("<leader>fgc", ":FzfLua git_bcommits<CR>", "Search buffer commits")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
 
