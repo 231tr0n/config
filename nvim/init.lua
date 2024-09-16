@@ -925,7 +925,13 @@ now(function()
 			-- Disable semantic highlighting
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
 			client.server_capabilities.semanticTokensProvider = nil
-			vim.wo.winbar = " %{%v:lua.Global.symbols.get()%}"
+			local win_ids = vim.api.nvim_list_wins()
+			for _, win_id in ipairs(win_ids) do
+				local buf_id = vim.api.nvim_win_get_buf(win_id)
+				if buf_id == args.buf then
+					vim.wo[win_id].winbar = " %{%v:lua.Global.symbols.get()%}"
+				end
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePre", {
