@@ -264,7 +264,8 @@ now(function()
 				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
-				{ mode = "n", keys = "<Leader>e", desc = "+Explorer" },
+				{ mode = "n", keys = "<Leader>e", desc = "+FileTree" },
+				{ mode = "n", keys = "<Leader>E", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
@@ -440,6 +441,12 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("nvim-tree/nvim-tree.lua")
+	require("nvim-tree").setup({
+		view = {
+			width = 40,
+		},
+	})
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -743,6 +750,8 @@ now(function()
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
+	Nmap("<leader>Ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
+	Nmap("<leader>Et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -771,8 +780,11 @@ now(function()
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
 	Nmap("<leader>dt", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
-	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
-	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
+	Nmap("<leader>eC", ":lua require('nvim-tree.api').tree.collapse_all(false)<CR>", "Collapse tree")
+	Nmap("<leader>ec", ":lua require('nvim-tree.api').tree.collapse_all(true)<CR>", "Collapse tree without buffers")
+	Nmap("<leader>ef", ":lua require('nvim-tree.api').tree.find_file()<CR>", "Find file")
+	Nmap("<leader>er", ":lua require('nvim-tree.api').tree.refresh()<CR>", "Refresh tree")
+	Nmap("<leader>et", ":lua require('nvim-tree.api').tree.toggle()<CR>", "Toggle file tree")
 	Nmap("<leader>gc", ":lua require('neogen').generate({ type = 'class' })<CR>", "Generate class annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'file' })<CR>", "Generate file annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
@@ -803,9 +815,9 @@ now(function()
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
+	Nmap("gL", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gl", edit_path_at_cursor, "Go to file in diff")
-	Nmap("gL", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	Vmap("<leader>cP", '"+P', "Paste to clipboard")
@@ -1087,6 +1099,13 @@ later(function()
 				.. "/api/chat -d $body"
 		end,
 		debug = false,
+	})
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
+		},
 	})
 end)
 
