@@ -442,11 +442,7 @@ end)
 -- Non lazy plugins registration
 now(function()
 	add("nvim-tree/nvim-tree.lua")
-	require("nvim-tree").setup({
-		view = {
-			width = 40,
-		},
-	})
+	require("nvim-tree").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -941,7 +937,7 @@ now(function()
 			for _, win_id in ipairs(win_ids) do
 				local buf_id = vim.api.nvim_win_get_buf(win_id)
 				if buf_id == args.buf then
-					vim.wo[win_id].winbar = " %{%v:lua.Global.symbols.get()%}"
+					vim.wo[win_id].winbar = "  %{%v:lua.Global.symbols.get()%}"
 				end
 			end
 		end,
