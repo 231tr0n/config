@@ -199,8 +199,8 @@ now(function()
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
-		bt_ignore = { "terminal", "\\[dap-repl-*\\]" },
-		ft_ignore = { "ministarter", "help" },
+		bt_ignore = { "terminal", "\\[dap-repl-*\\]", "nofile" },
+		ft_ignore = { "ministarter", "help", "NvimTree" },
 		segments = {
 			{ text = { "%s" }, click = "v:lua.ScSa" },
 			{
