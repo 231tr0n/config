@@ -620,6 +620,13 @@ now(function()
 	})
 	require("neogen").setup()
 	add({
+		source = "midoBB/nvim-quicktype",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("nvim-quicktype").setup()
+	add({
 		source = "mfussenegger/nvim-jdtls",
 		depends = {
 			"mfussenegger/nvim-dap",
