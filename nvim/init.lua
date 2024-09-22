@@ -337,7 +337,7 @@ now(function()
 		},
 	})
 	MiniIcons.mock_nvim_web_devicons()
-	MiniIcons.tweak_lsp_kind()
+	-- MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
 		symbol = "│",
 		draw = {
