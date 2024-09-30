@@ -161,6 +161,8 @@ now(function()
 		terminal_colors = true,
 		styles = {
 			comments = { italic = true },
+			sidebars = "dark",
+			floats = "dark",
 		},
 		day_brightness = 0.3,
 		dim_inactive = true,
@@ -184,6 +186,10 @@ now(function()
 			highlights.MatchParen = {
 				bg = colors.fg_gutter,
 				fg = colors.none,
+			}
+			highlights.WinSeparator = {
+				bg = colors.bg_dark,
+				fg = colors.fg_gutter,
 			}
 			highlights.FoldColumn = { fg = colors.comment }
 			highlights.CursorLineFold = { fg = colors.orange, bold = true }
