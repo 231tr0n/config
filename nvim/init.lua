@@ -28,6 +28,8 @@ now(function()
 	Global = {
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
+		background = "#CCCCCC",
+		foreground = "#444444",
 	}
 	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
 	-- Mapping functions to map keys
@@ -75,7 +77,7 @@ end)
 
 -- Default settings
 now(function()
-	-- let g:python_recommended_style=0
+	-- vim.cmd("let g:python_recommended_style=0")
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
@@ -153,6 +155,26 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
+	Global.palette = require("mini.hues").make_palette({
+		foreground = Global.foreground,
+		background = Global.background,
+		n_hues = 8,
+		accent = "bg",
+		saturation = "high",
+	})
+	Global.apply_colorscheme = function()
+		require("mini.hues").apply_palette(Global.palette, {
+			default = true,
+		})
+		Hi("FzfLuaBorder", { bg = Global.background, fg = Global.background })
+		Hi("FzfLuaFzfBorder", { bg = Global.background, fg = Global.foreground })
+		Hi("Statement", { bg = "NONE", fg = Global.palette.orange, bold = true })
+		Hi("Delimiter", { bold = true })
+		Hi("@constructor.lua", { bold = true })
+		Hi("Type", { bold = true })
+		Hi("Operator", { bold = true })
+		Hi("@keyword.storage", { fg = Global.palette.red })
+	end
 	add("folke/tokyonight.nvim")
 	require("tokyonight").setup({
 		style = "storm",
@@ -749,11 +771,10 @@ now(function()
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F4>", Global.apply_colorscheme, "Set colorscheme")
+	Nmap("<F5>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
-	Nmap("<leader>Ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
-	Nmap("<leader>Et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -783,6 +804,8 @@ now(function()
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
 	Nmap("<leader>dt", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
 	Nmap("<leader>eC", ":lua require('nvim-tree.api').tree.collapse_all(false)<CR>", "Collapse tree")
+	Nmap("<leader>eF", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
+	Nmap("<leader>eT", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>ec", ":lua require('nvim-tree.api').tree.collapse_all(true)<CR>", "Collapse tree without buffers")
 	Nmap("<leader>ef", ":lua require('nvim-tree.api').tree.find_file()<CR>", "Find file")
 	Nmap("<leader>er", ":lua require('nvim-tree.api').tree.refresh()<CR>", "Refresh tree")
@@ -943,7 +966,8 @@ now(function()
 			for _, win_id in ipairs(win_ids) do
 				local buf_id = vim.api.nvim_win_get_buf(win_id)
 				if buf_id == args.buf then
-					vim.wo[win_id].winbar = "  %{%v:lua.Global.symbols.get()%}"
+					vim.wo[win_id].winbar =
+						"⠀⠀%{% g:actual_curwin == win_getid() ? v:lua.Global.symbols.get() : expand('%:p') ==# '/' ? '🢥 /' : '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				end
 			end
 		end,
@@ -980,6 +1004,33 @@ later(function()
 			"junegunn/fzf",
 		},
 	})
+	require("fzf-lua").setup({
+		"max-perf",
+		fzf_colors = true,
+		winopts = {
+			width = 0.85,
+			height = 0.85,
+			border = "thicc",
+			preview = {
+				default = "bat",
+				vertical = "up:50%",
+				layout = "vertical",
+			},
+		},
+		fzf_opts = {
+			["--layout"] = "default",
+		},
+		previewers = {
+			bat = {
+				theme = "Solarized (dark)",
+				-- theme = "Coldark-Cold",
+			},
+		},
+		grep = {
+			multiline = 1,
+		},
+	})
+	vim.cmd("FzfLua register_ui_select")
 	add("stevearc/quicker.nvim")
 	require("quicker").setup({
 		opts = {
@@ -1004,32 +1055,6 @@ later(function()
 			soft_end = "┤",
 		},
 	})
-	require("fzf-lua").setup({
-		"max-perf",
-		fzf_colors = true,
-		winopts = {
-			width = 0.85,
-			height = 0.85,
-			border = "thicc",
-			preview = {
-				default = "bat",
-				vertical = "up:50%",
-				layout = "vertical",
-			},
-		},
-		fzf_opts = {
-			["--layout"] = "default",
-		},
-		previewers = {
-			bat = {
-				theme = "Solarized (dark)",
-			},
-		},
-		grep = {
-			multiline = 1,
-		},
-	})
-	vim.cmd("FzfLua register_ui_select")
 	add({
 		source = "folke/trouble.nvim",
 		depends = {
@@ -1047,7 +1072,7 @@ later(function()
 		groups = {},
 		title = false,
 		filter = { range = true },
-		format = "> {kind_icon}{symbol.name:Normal}",
+		format = "🢥 {kind_icon}{symbol.name:Normal}",
 		hl_group = "WinBar",
 	})
 	add("mfussenegger/nvim-lint")
