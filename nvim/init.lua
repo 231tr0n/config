@@ -166,8 +166,8 @@ now(function()
 		require("mini.hues").apply_palette(Global.palette, {
 			default = true,
 		})
-		Hi("FzfLuaBorder", { bg = Global.background, fg = Global.background })
-		Hi("FzfLuaFzfBorder", { bg = Global.background, fg = Global.foreground })
+		Hi("FzfLuaBorder", { bg = Global.palette.bg, fg = Global.palette.bg })
+		Hi("FzfLuaFzfBorder", { bg = Global.palette.bg, fg = Global.palette.fg })
 		Hi("Statement", { bg = "NONE", fg = Global.palette.orange, bold = true })
 		Hi("Delimiter", { bold = true })
 		Hi("@constructor.lua", { bold = true })
