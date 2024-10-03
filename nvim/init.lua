@@ -28,8 +28,6 @@ now(function()
 	Global = {
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
-		background = "#CCCCCC",
-		foreground = "#444444",
 	}
 	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
 	-- Mapping functions to map keys
@@ -155,75 +153,31 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	Global.palette = require("mini.hues").make_palette({
-		foreground = Global.foreground,
-		background = Global.background,
-		n_hues = 8,
-		accent = "bg",
-		saturation = "high",
-	})
-	Global.apply_colorscheme = function()
-		require("mini.hues").apply_palette(Global.palette, {
-			default = true,
-		})
-		Hi("FzfLuaBorder", { bg = Global.palette.bg, fg = Global.palette.bg })
-		Hi("FzfLuaFzfBorder", { bg = Global.palette.bg, fg = Global.palette.fg })
-		Hi("Statement", { bg = "NONE", fg = Global.palette.orange, bold = true })
-		Hi("Delimiter", { bold = true })
-		Hi("@constructor.lua", { bold = true })
-		Hi("Type", { bold = true })
-		Hi("Operator", { bold = true })
-		Hi("@keyword.storage", { fg = Global.palette.red })
-	end
-	add("folke/tokyonight.nvim")
-	require("tokyonight").setup({
-		style = "storm",
-		light_style = "day",
-		transparent = false,
-		terminal_colors = true,
-		styles = {
-			comments = { italic = true },
-			sidebars = "dark",
-			floats = "dark",
-		},
-		day_brightness = 0.3,
-		dim_inactive = true,
-		on_highlights = function(highlights, colors)
-			highlights.FzfLuaBorder = {
-				bg = colors.bg_float,
-				fg = colors.bg_float,
-			}
-			highlights.FzfLuaFzfBorder = {
-				bg = colors.bg_float,
-				fg = colors.border_highlight,
-			}
-			highlights.FzfLuaFzfGutter = {
-				bg = colors.bg_float,
-				fg = colors.bg_float,
-			}
-			highlights["@punctuation.bracket"] = {
-				bg = colors.none,
-				fg = colors.red,
-			}
-			highlights.MatchParen = {
-				bg = colors.fg_gutter,
-				fg = colors.none,
-			}
-			highlights.WinSeparator = {
-				bg = colors.bg_dark,
-				fg = colors.fg_gutter,
-			}
-			highlights.FoldColumn = { fg = colors.comment }
-			highlights.CursorLineFold = { fg = colors.orange, bold = true }
-			highlights.SignColumn = { fg = colors.fg_gutter }
-			highlights.CursorLineSign = { fg = colors.orange, bold = true }
+	add("sainnhe/everforest")
+	vim.g.everforest_background = "medium"
+	vim.g.everforest_ui_contrast = "low"
+	vim.g.everforest_float_style = "dim"
+	vim.g.everforest_better_performance = 1
+	vim.g.everforest_enable_italic = 1
+	vim.g.everforest_disable_italic_comment = 0
+	vim.g.everforest_transparent_background = 0
+	vim.g.everforest_dim_inactive_windows = 1
+	vim.g.everforest_diagnostic_virtual_text = 0
+	vim.g.everforest_current_word = "underline"
+	-- This is a special autocommand related to colorscheme highlighting and hence not put in autocommands section
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		pattern = "everforest",
+		callback = function()
+			local config = vim.fn["everforest#get_configuration"]()
+			local palette = vim.fn["everforest#get_palette"](config.background, config.colors_override)
+			local set_hl = vim.fn["everforest#highlight"]
+			set_hl("@punctuation.bracket", palette.orange, palette.none)
+			set_hl("@constructor.lua", palette.orange, palette.none)
+			set_hl("FzfLuaBorder", palette.bg0, palette.bg0)
+			set_hl("FzfLuaFzfBorder", palette.grey1, palette.bg0)
 		end,
-		cache = true,
-		plugins = {
-			all = true,
-		},
 	})
-	vim.cmd.colorscheme("tokyonight")
+	vim.cmd.colorscheme("everforest")
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
@@ -771,8 +725,7 @@ now(function()
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F4>", Global.apply_colorscheme, "Set colorscheme")
-	Nmap("<F5>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
