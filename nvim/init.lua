@@ -348,12 +348,7 @@ now(function()
 		},
 	})
 	require("mini.operators").setup()
-	require("mini.pairs").setup({
-		mappings = {
-			["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
-			[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
-		},
-	})
+	require("mini.pairs").setup()
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
@@ -679,7 +674,6 @@ now(function()
 			return item_selected and keys["ctrl-y"] or keys["ctrl-y_cr"]
 		else
 			return require("mini.pairs").cr()
-			-- return keys["cr"]
 		end
 	end
 	local compute_diff_path = function()
@@ -835,8 +829,6 @@ now(function()
 			then
 				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-				MiniPairs.unmap("i", "<", "")
-				MiniPairs.unmap("i", ">", "")
 				vim.keymap.set("i", "><Space>", ">")
 				vim.keymap.set("i", ">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>")
 				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
