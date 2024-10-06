@@ -95,8 +95,6 @@ now(function()
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
 	vim.o.foldlevelstart = 99
-	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
-	vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 	vim.o.hlsearch = true
 	vim.o.ignorecase = true
 	vim.o.incsearch = true
@@ -252,7 +250,6 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
-				{ mode = "n", keys = "<Leader>q", desc = "+Quickfix" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
@@ -930,6 +927,23 @@ now(function()
 			require("lint").try_lint()
 		end,
 	})
+	vim.api.nvim_create_autocmd("BufRead", {
+		callback = function(ev)
+			if vim.bo[ev.buf].buftype == "quickfix" then
+				if vim.fn.win_gettype() == "quickfix" then
+					vim.schedule(function()
+						vim.cmd("cclose")
+						vim.cmd("Trouble qflist open")
+					end)
+				else
+					vim.schedule(function()
+						vim.cmd("lclose")
+						vim.cmd("Trouble loclist open")
+					end)
+				end
+			end
+		end,
+	})
 end)
 
 -- Lazy loaded plugins registration
@@ -976,30 +990,6 @@ later(function()
 		},
 	})
 	vim.cmd("FzfLua register_ui_select")
-	add("stevearc/quicker.nvim")
-	require("quicker").setup({
-		opts = {
-			number = false,
-			signcolumn = "auto:1",
-			foldcolumn = "0",
-			statuscolumn = "",
-		},
-		highlight = {
-			treesitter = true,
-			lsp = true,
-			load_buffers = false,
-		},
-		trim_leading_whitespace = false,
-		borders = {
-			vert = "│",
-			strong_header = "─",
-			strong_cross = "┼",
-			strong_end = "┤",
-			soft_header = "─",
-			soft_cross = "┼",
-			soft_end = "┤",
-		},
-	})
 	add({
 		source = "folke/trouble.nvim",
 		depends = {
@@ -1112,10 +1102,6 @@ later(function()
 	Nmap("<leader>ft", ":FzfLua btags<CR>", "Search buffer tags")
 	Nmap("<leader>fx", ":FzfLua diagnostics_document<CR>", "Search document diagnostics")
 	Nmap("<leader>fy", ":FzfLua lsp_document_symbols<CR>", "Search document symbols")
-	Nmap("<leader>qc", ":lua require('quicker').collapse()<CR>", "Collapse")
-	Nmap("<leader>qe", ":lua require('quicker').expand({before = 2, after = 2, add_to_existing = true})<CR>", "Expand")
-	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
-	Nmap("<leader>qq", ":lua require('quicker').toggle()<CR>", "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
