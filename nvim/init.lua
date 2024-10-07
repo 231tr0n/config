@@ -902,8 +902,8 @@ now(function()
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
 			-- Disable semantic highlighting
-			local client = vim.lsp.get_client_by_id(args.data.client_id)
-			client.server_capabilities.semanticTokensProvider = nil
+			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
+			-- client.server_capabilities.semanticTokensProvider = nil
 			local win_ids = vim.api.nvim_list_wins()
 			for _, win_id in ipairs(win_ids) do
 				local buf_id = vim.api.nvim_win_get_buf(win_id)
@@ -949,18 +949,9 @@ end)
 -- Lazy loaded plugins registration
 later(function()
 	add({
-		source = "junegunn/fzf",
-		hooks = {
-			post_checkout = function()
-				vim.cmd("call fzf#install()")
-			end,
-		},
-	})
-	add({
 		source = "ibhagwan/fzf-lua",
 		depends = {
 			"mini.nvim",
-			"junegunn/fzf",
 		},
 	})
 	require("fzf-lua").setup({
