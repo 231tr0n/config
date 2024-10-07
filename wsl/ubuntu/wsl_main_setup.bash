@@ -135,8 +135,7 @@ cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
 # bob use latest
 bob use nightly
 
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install --all
+go install -v github.com/junegunn/fzf@latest
 go install -v github.com/nao1215/gup@latest
 go install -v github.com/jesseduffield/lazygit@latest
 
