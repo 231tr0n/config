@@ -21,6 +21,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o ~/.
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o ~/.config/fish/config.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/fish_variables -o ~/.config/fish/fish_variables
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o ~/.config/fish/functions/fish_prompt.fish
+curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o ~/.config/fish/functions/fish_user_key_bindings.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-debug.bash -o ~/scripts/java-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/java/java-lsp.bash -o ~/scripts/java-lsp.bash
