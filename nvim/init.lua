@@ -29,7 +29,6 @@ now(function()
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 	}
-	Global.lspCapabilities.textDocument.completion.completionItem.snippetSupport = true
 	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
