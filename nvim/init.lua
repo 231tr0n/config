@@ -28,6 +28,7 @@ now(function()
 	Global = {
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
+		floatMultiplier = 0.8,
 	}
 	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
@@ -187,7 +188,7 @@ now(function()
 				click = "v:lua.ScLa",
 			},
 			{
-				text = { require("statuscol.builtin").foldfunc, "│" },
+				text = { require("statuscol.builtin").foldfunc, " " }, -- "│"
 				click = "v:lua.ScFa",
 			},
 		},
@@ -196,7 +197,15 @@ end)
 
 -- Mini plugins setup
 now(function()
-	require("mini.ai").setup()
+	require("mini.ai").setup({
+		custom_textobjects = {
+			B = require("mini.extra").gen_ai_spec.buffer(),
+			D = require("mini.extra").gen_ai_spec.diagnostic(),
+			I = require("mini.extra").gen_ai_spec.indent(),
+			L = require("mini.extra").gen_ai_spec.line(),
+			N = require("mini.extra").gen_ai_spec.number(),
+		},
+	})
 	require("mini.align").setup()
 	require("mini.basics").setup({
 		options = {
@@ -239,12 +248,12 @@ now(function()
 		},
 		clues = {
 			{
+				{ mode = "n", keys = "<Leader>E", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<Leader>e", desc = "+FileTree" },
-				{ mode = "n", keys = "<Leader>E", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
@@ -306,7 +315,7 @@ now(function()
 			todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
 			note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
 			hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
-			hl_words = require("mini.extra").gen_highlighter.words({ "TEST: " }, "MiniHipatternsTodo"),
+			test = require("mini.extra").gen_highlighter.words({ "TEST" }, "MiniHipatternsNote"),
 		},
 	})
 	require("mini.icons").setup({
@@ -414,8 +423,49 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("tpope/vim-sleuth")
 	add("nvim-tree/nvim-tree.lua")
-	require("nvim-tree").setup()
+	require("nvim-tree").setup({
+		hijack_cursor = true,
+		disable_netrw = true,
+		select_prompts = true,
+		reload_on_bufenter = true,
+		view = {
+			float = {
+				enable = true,
+				open_win_config = {
+					anchor = "NW",
+					height = math.floor(Global.floatMultiplier * vim.o.lines),
+					width = math.floor(Global.floatMultiplier * vim.o.columns),
+					row = math.floor(0.5 * (vim.o.lines - math.floor(Global.floatMultiplier * vim.o.lines))),
+					col = math.floor(0.5 * (vim.o.columns - math.floor(Global.floatMultiplier * vim.o.columns))),
+				},
+			},
+		},
+		renderer = {
+			group_empty = true,
+			add_trailing = true,
+			icons = {
+				web_devicons = {
+					folder = {
+						enable = true,
+					},
+				},
+				show = {
+					git = false,
+					modified = false,
+					diagnostics = false,
+				},
+			},
+			indent_markers = {
+				enable = true,
+				inline_arrows = true,
+			},
+		},
+		update_focused_file = {
+			enable = true,
+		},
+	})
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -778,6 +828,7 @@ now(function()
 		callback = function(ev)
 			if vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" then
 				vim.b.minicursorword_disable = true
+				vim.b.miniindentscope_disable = true
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
@@ -924,8 +975,8 @@ later(function()
 		"max-perf",
 		fzf_colors = true,
 		winopts = {
-			width = 0.85,
-			height = 0.85,
+			width = Global.floatMultiplier,
+			height = Global.floatMultiplier,
 			border = "thicc",
 			preview = {
 				default = "bat",
