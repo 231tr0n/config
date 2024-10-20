@@ -1318,6 +1318,9 @@ later(function()
 			},
 		},
 	})
+	lspconfig.r_language_server.setup({
+		capabilities = Global.lspCapabilities,
+	})
 	lspconfig.texlab.setup({
 		capabilities = Global.lspCapabilities,
 	})
