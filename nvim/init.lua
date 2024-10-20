@@ -146,7 +146,6 @@ now(function()
 		window = {
 			config = {
 				row = 3,
-				col = vim.o.columns - 2,
 				border = "rounded",
 			},
 			max_width_share = 0.5,
@@ -279,8 +278,6 @@ now(function()
 			delay = 0,
 			config = {
 				border = "rounded",
-				col = vim.o.columns - 2,
-				row = vim.o.lines - 3,
 			},
 		},
 	})
