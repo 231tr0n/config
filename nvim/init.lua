@@ -190,7 +190,7 @@ now(function()
 				click = "v:lua.ScLa",
 			},
 			{
-				text = { require("statuscol.builtin").foldfunc, " " }, -- "│"
+				text = { require("statuscol.builtin").foldfunc, "│" },
 				click = "v:lua.ScFa",
 			},
 		},
@@ -832,7 +832,12 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
-			if vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" or vim.bo.filetype == "help" then
+			if
+				vim.bo.filetype == "NvimTree"
+				or vim.bo.filetype == "netrw"
+				or vim.bo.filetype == "help"
+				or vim.bo.buftype == "terminal"
+			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
 			elseif vim.bo.filetype == "dap-repl" then
