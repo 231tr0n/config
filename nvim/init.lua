@@ -29,7 +29,16 @@ now(function()
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
+		leadSpace = "›",
+		nextSpace = " ",
 	}
+	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
+	Global.leadMultiSpaceCalculator = function()
+		vim.opt_local.listchars:remove("leadmultispace")
+		vim.opt_local.listchars:append({
+			leadmultispace = Global.leadSpace .. string.rep(Global.nextSpace, (vim.bo.shiftwidth - 1)),
+		})
+	end
 	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
@@ -79,6 +88,7 @@ now(function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
+	vim.diagnostic.config({ virtual_text = true, underline = false, severity_sort = true })
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -100,7 +110,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "leadmultispace:› ,tab:› ,trail: ,extends:»,precedes:«,nbsp:⦸" -- ¬
+	vim.o.listchars = "tab:" .. Global.leadMultiSpace .. ",trail: ,extends:»,precedes:«,nbsp:⦸,eol:-"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:5,hor:5"
@@ -114,7 +124,6 @@ now(function()
 	vim.o.showmode = false
 	vim.o.signcolumn = "auto:1"
 	vim.o.smartcase = true
-	vim.o.softtabstop = 2
 	vim.o.splitbelow = true
 	vim.o.splitright = true
 	vim.o.synmaxcol = 100
@@ -127,15 +136,8 @@ now(function()
 	vim.o.wildmode = "longest:full,full"
 	vim.o.winblend = 0
 	vim.o.wrap = false
-	vim.diagnostic.config({
-		virtual_text = true,
-		underline = false,
-		severity_sort = true,
-	})
 	vim.opt.matchpairs:append("<:>")
-	vim.opt.wildignore:append(
-		"*.png,*.jpg,*.jpeg,*.gif,*.wav,*.aiff,*.dll,*.pdb,*.mdb,*.so,*.swp,*.zip,*.gz,*.bz2,*.meta,*.svg,*.cache,*/.git/*"
-	)
+	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
 end)
 
 -- Initial UI setup
@@ -816,6 +818,10 @@ end)
 
 -- Autocommands registration
 now(function()
+	vim.api.nvim_create_autocmd("OptionSet", {
+		pattern = "shiftwidth",
+		callback = Global.leadMultiSpaceCalculator,
+	})
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
 		callback = function(data)
@@ -825,94 +831,100 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
-		callback = function(ev)
-			if vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" then
+		callback = function()
+			if vim.bo.filetype == "NvimTree" or vim.bo.filetype == "netrw" or vim.bo.filetype == "help" then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
 				vim.b.miniindentscope_disable = true
-			elseif
-				vim.bo.filetype == "svelte"
-				or vim.bo.filetype == "jsx"
-				or vim.bo.filetype == "html"
-				or vim.bo.filetype == "xml"
-				or vim.bo.filetype == "xsl"
-				or vim.bo.filetype == "javascriptreact"
-			then
-				-- HTML tag completion with >, >> and >>>
-				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-				vim.keymap.set("i", "><Space>", ">")
-				vim.keymap.set("i", ">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>")
-				vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
-				vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
-			elseif vim.bo.filetype == "java" then
-				-- Java lsp lazy loading setup
-				require("jdtls").start_or_attach((function()
-					local config = {
-						cmd = { "/usr/bin/jdtls" },
-						root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-						settings = {
-							java = {
-								references = {
-									includeDecompiledSources = true,
-								},
-								eclipse = {
-									downloadSources = true,
-								},
-								maven = {
-									downloadSources = true,
-								},
-								format = {
-									enabled = true,
-								},
-								inlayHints = {
-									parameterNames = {
-										enabled = "all",
-										exclusions = { "this" },
+			else
+				vim.cmd("Sleuth")
+				Global.leadMultiSpaceCalculator()
+				if
+					vim.bo.filetype == "svelte"
+					or vim.bo.filetype == "jsx"
+					or vim.bo.filetype == "tsx"
+					or vim.bo.filetype == "html"
+					or vim.bo.filetype == "xml"
+					or vim.bo.filetype == "xsl"
+					or vim.bo.filetype == "javascriptreact"
+					or vim.bo.filetype == "typescriptreact"
+				then
+					-- HTML tag completion with >, >> and >>>
+					vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+					vim.keymap.set("i", "><Space>", ">")
+					vim.keymap.set("i", ">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>")
+					vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
+					vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
+				elseif vim.bo.filetype == "java" then
+					-- Java lsp lazy loading setup
+					require("jdtls").start_or_attach((function()
+						local config = {
+							cmd = { "/usr/bin/jdtls" },
+							root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+							settings = {
+								java = {
+									references = {
+										includeDecompiledSources = true,
 									},
-								},
-								signatureHelp = { enabled = true },
-								contentProvider = { preferred = "fernflower" },
-								codeGeneration = {
-									toString = {
-										template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+									eclipse = {
+										downloadSources = true,
 									},
-									useBlocks = true,
-								},
-								configuration = {
-									runtimes = {
-										{
-											name = "JavaSE-11",
-											path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+									maven = {
+										downloadSources = true,
+									},
+									format = {
+										enabled = true,
+									},
+									inlayHints = {
+										parameterNames = {
+											enabled = "all",
+											exclusions = { "this" },
 										},
-										{
-											name = "JavaSE-17",
-											path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+									},
+									signatureHelp = { enabled = true },
+									contentProvider = { preferred = "fernflower" },
+									codeGeneration = {
+										toString = {
+											template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
 										},
-										{
-											name = "JavaSE-21",
-											path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+										useBlocks = true,
+									},
+									configuration = {
+										runtimes = {
+											{
+												name = "JavaSE-11",
+												path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+											},
+											{
+												name = "JavaSE-17",
+												path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+											},
+											{
+												name = "JavaSE-21",
+												path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+											},
 										},
 									},
 								},
 							},
-						},
-						capabilities = Global.lspCapabilities,
-					}
-					local bundles = {
-						vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-					}
-					vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-					local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-					extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-					config["init_options"] = {
-						bundles = bundles,
-						extendedClientCapabilities = extendedClientCapabilities,
-					}
-					return config
-				end)())
+							capabilities = Global.lspCapabilities,
+						}
+						local bundles = {
+							vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
+						}
+						vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+						local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+						extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+						config["init_options"] = {
+							bundles = bundles,
+							extendedClientCapabilities = extendedClientCapabilities,
+						}
+						return config
+					end)())
+				end
 			end
 		end,
 	})
