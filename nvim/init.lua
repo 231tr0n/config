@@ -586,6 +586,7 @@ now(function()
 		formatters_by_ft = {
 			c = { "clang_format" },
 			css = { "prettier" },
+			fish = { "fish_indent" },
 			go = { "gofmt" },
 			groovy = { "npm-groovy-lint" },
 			html = { "prettier" },
