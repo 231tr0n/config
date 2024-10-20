@@ -434,7 +434,6 @@ now(function()
 			float = {
 				enable = true,
 				open_win_config = {
-					anchor = "NW",
 					height = math.floor(Global.floatMultiplier * vim.o.lines),
 					width = math.floor(Global.floatMultiplier * vim.o.columns),
 					row = math.floor(0.5 * (vim.o.lines - math.floor(Global.floatMultiplier * vim.o.lines))),
