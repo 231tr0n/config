@@ -606,7 +606,9 @@ now(function()
 			xml = { "xmllint" },
 			yaml = { "yamlfmt" },
 		},
-		lsp_fallback = true,
+		default_format_opts = {
+			lsp_format = "fallback",
+		},
 	})
 	conform.formatters.yamlfmt = {
 		prepend_args = { "-formatter", "include_document_start=true,indentless_arrays=true" },
