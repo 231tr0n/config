@@ -110,7 +110,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:" .. Global.leadMultiSpace .. ",trail: ,extends:»,precedes:«,nbsp:⦸,eol:-"
+	vim.o.listchars = "tab:" .. Global.leadMultiSpace .. ",trail: ,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:5,hor:5"
