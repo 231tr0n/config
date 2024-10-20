@@ -696,6 +696,7 @@ now(function()
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F5>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -773,9 +774,8 @@ end)
 
 -- Autocommands registration
 now(function()
-	vim.cmd(
-		"autocmd BufNewFile,BufReadPost,BufFilePost,FileType,BufWritePost * silent Sleuth | call v:lua.Global.leadMultiSpaceCalc()"
-	)
+	vim.cmd("autocmd VimEnter * call v:lua.Global.leadMultiSpaceCalc()")
+	vim.cmd("autocmd BufNewFile,BufRead,BufWritePost * silent Sleuth")
 	vim.cmd("autocmd OptionSet shiftwidth call v:lua.Global.leadMultiSpaceCalc()")
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
@@ -918,7 +918,7 @@ now(function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd("BufWritePre", {
+	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function(args)
 			require("conform").format({ bufnr = args.buf })
