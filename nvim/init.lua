@@ -33,7 +33,7 @@ now(function()
 		nextSpace = " ",
 	}
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
-	Global.leadMultiSpaceCalculator = function()
+	Global.leadMultiSpaceCalc = function()
 		vim.opt_local.listchars:remove("leadmultispace")
 		vim.opt_local.listchars:append({
 			leadmultispace = Global.leadSpace .. string.rep(Global.nextSpace, (vim.bo.shiftwidth - 1)),
@@ -250,12 +250,11 @@ now(function()
 		},
 		clues = {
 			{
-				{ mode = "n", keys = "<Leader>E", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
-				{ mode = "n", keys = "<Leader>e", desc = "+FileTree" },
+				{ mode = "n", keys = "<Leader>e", desc = "+Explorer" },
 				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
@@ -426,47 +425,6 @@ end)
 -- Non lazy plugins registration
 now(function()
 	add("tpope/vim-sleuth")
-	add("nvim-tree/nvim-tree.lua")
-	require("nvim-tree").setup({
-		hijack_cursor = true,
-		disable_netrw = true,
-		select_prompts = true,
-		reload_on_bufenter = true,
-		view = {
-			float = {
-				enable = true,
-				open_win_config = {
-					height = math.floor(Global.floatMultiplier * vim.o.lines),
-					width = math.floor(Global.floatMultiplier * vim.o.columns),
-					row = math.floor(0.5 * (vim.o.lines - math.floor(Global.floatMultiplier * vim.o.lines))),
-					col = math.floor(0.5 * (vim.o.columns - math.floor(Global.floatMultiplier * vim.o.columns))),
-				},
-			},
-		},
-		renderer = {
-			group_empty = true,
-			add_trailing = true,
-			icons = {
-				web_devicons = {
-					folder = {
-						enable = true,
-					},
-				},
-				show = {
-					git = false,
-					modified = false,
-					diagnostics = false,
-				},
-			},
-			indent_markers = {
-				enable = true,
-				inline_arrows = true,
-			},
-		},
-		update_focused_file = {
-			enable = true,
-		},
-	})
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -768,13 +726,8 @@ now(function()
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
 	Nmap("<leader>dt", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
-	Nmap("<leader>eC", ":lua require('nvim-tree.api').tree.collapse_all(false)<CR>", "Collapse tree")
-	Nmap("<leader>eF", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
-	Nmap("<leader>eT", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
-	Nmap("<leader>ec", ":lua require('nvim-tree.api').tree.collapse_all(true)<CR>", "Collapse tree without buffers")
-	Nmap("<leader>ef", ":lua require('nvim-tree.api').tree.find_file()<CR>", "Find file")
-	Nmap("<leader>er", ":lua require('nvim-tree.api').tree.refresh()<CR>", "Refresh tree")
-	Nmap("<leader>et", ":lua require('nvim-tree.api').tree.toggle()<CR>", "Toggle file tree")
+	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
+	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>gc", ":lua require('neogen').generate({ type = 'class' })<CR>", "Generate class annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'file' })<CR>", "Generate file annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
@@ -820,10 +773,10 @@ end)
 
 -- Autocommands registration
 now(function()
-	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "shiftwidth",
-		callback = Global.leadMultiSpaceCalculator,
-	})
+	vim.cmd(
+		"autocmd BufNewFile,BufReadPost,BufFilePost,FileType,BufWritePost * silent Sleuth | call v:lua.Global.leadMultiSpaceCalc()"
+	)
+	vim.cmd("autocmd OptionSet shiftwidth call v:lua.Global.leadMultiSpaceCalc()")
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
 		callback = function(data)
@@ -839,6 +792,7 @@ now(function()
 				or vim.bo.filetype == "netrw"
 				or vim.bo.filetype == "help"
 				or vim.bo.buftype == "terminal"
+				or vim.bo.buftype == "nofile"
 			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
@@ -847,8 +801,6 @@ now(function()
 				require("dap.ext.autocompl").attach()
 				vim.b.miniindentscope_disable = true
 			else
-				vim.cmd("Sleuth")
-				Global.leadMultiSpaceCalculator()
 				if
 					vim.bo.filetype == "svelte"
 					or vim.bo.filetype == "jsx"
@@ -861,10 +813,26 @@ now(function()
 				then
 					-- HTML tag completion with >, >> and >>>
 					vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-					vim.keymap.set("i", "><Space>", ">")
-					vim.keymap.set("i", ">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>")
-					vim.keymap.set("i", ">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i")
-					vim.keymap.set("i", ">>>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>")
+					Imap("><Space>", ">", "Cancel html pairs")
+					Imap(
+						">",
+						"><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>",
+						"Html pairs in newline",
+						{
+							buffer = true,
+						}
+					)
+					Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
+						buffer = true,
+					})
+					Imap(
+						">>>",
+						"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
+						"Html pairs in sameline with cursor at end",
+						{
+							buffer = true,
+						}
+					)
 				elseif vim.bo.filetype == "java" then
 					-- Java lsp lazy loading setup
 					require("jdtls").start_or_attach((function()
