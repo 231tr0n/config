@@ -31,6 +31,8 @@ now(function()
 		floatMultiplier = 0.8,
 		leadSpace = "›",
 		nextSpace = " ",
+		background = "#002B36",
+		foreground = "#839496",
 	}
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
 	Global.leadMultiSpaceCalc = function()
@@ -153,31 +155,27 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	add("sainnhe/everforest")
-	vim.g.everforest_background = "medium"
-	vim.g.everforest_ui_contrast = "low"
-	vim.g.everforest_float_style = "dim"
-	vim.g.everforest_better_performance = 1
-	vim.g.everforest_enable_italic = 0
-	vim.g.everforest_disable_italic_comment = 0
-	vim.g.everforest_transparent_background = 0
-	vim.g.everforest_dim_inactive_windows = 1
-	vim.g.everforest_diagnostic_virtual_text = 0
-	vim.g.everforest_current_word = "underline"
-	-- This is a special autocommand related to colorscheme highlighting and hence not put in autocommands section
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		pattern = "everforest",
-		callback = function()
-			local config = vim.fn["everforest#get_configuration"]()
-			local palette = vim.fn["everforest#get_palette"](config.background, config.colors_override)
-			local set_hl = vim.fn["everforest#highlight"]
-			set_hl("@punctuation.bracket", palette.orange, palette.none)
-			set_hl("@constructor.lua", palette.orange, palette.none)
-			set_hl("FzfLuaBorder", palette.bg0, palette.bg0)
-			set_hl("FzfLuaFzfBorder", palette.grey1, palette.bg0)
-		end,
+	Global.palette = require("mini.hues").make_palette({
+		foreground = Global.foreground,
+		background = Global.background,
+		n_hues = 8,
+		accent = "bg",
+		saturation = "mediumhigh",
 	})
-	vim.cmd.colorscheme("everforest")
+	Global.apply_colorscheme = function()
+		require("mini.hues").apply_palette(Global.palette, {
+			default = true,
+		})
+		Hi("FzfLuaBorder", { bg = Global.background, fg = Global.background })
+		Hi("FzfLuaFzfBorder", { bg = Global.background, fg = Global.foreground })
+		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
+		Hi("Delimiter", { bold = true })
+		Hi("@constructor.lua", { bold = true })
+		Hi("Type", { bold = true })
+		Hi("Operator", { bold = true })
+		Hi("@keyword.storage", { fg = Global.palette.red })
+	end
+	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
@@ -424,6 +422,7 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	vim.g.sleuth_automatic = 1
 	add("tpope/vim-sleuth")
 	add("neovim/nvim-lspconfig")
 	add({
@@ -605,6 +604,22 @@ now(function()
 		},
 	})
 	require("neogen").setup()
+	add("mfussenegger/nvim-lint")
+	require("lint").linters_by_ft = {
+		-- lua = { "luacheck" },
+		-- yaml = { "yamllint" },
+		c = { "clangtidy" },
+		go = { "golangcilint" },
+		groovy = { "npm-groovy-lint" },
+		java = { "checkstyle" },
+		javascript = { "eslint" },
+		json = { "jsonlint" },
+		jsonc = { "jsonlint" },
+		python = { "pylint" },
+		sh = { "shellcheck" },
+		svelte = { "eslint" },
+		typescript = { "eslint" },
+	}
 	add({
 		source = "mfussenegger/nvim-jdtls",
 		depends = {
@@ -695,8 +710,9 @@ now(function()
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F4>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
 	Nmap("<F5>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
+	Nmap("<F6>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -774,9 +790,12 @@ end)
 
 -- Autocommands registration
 now(function()
-	vim.cmd("autocmd VimEnter * call v:lua.Global.leadMultiSpaceCalc()")
-	vim.cmd("autocmd BufNewFile,BufRead,BufWritePost * silent Sleuth")
-	vim.cmd("autocmd OptionSet shiftwidth call v:lua.Global.leadMultiSpaceCalc()")
+	vim.api.nvim_create_autocmd("OptionSet", {
+		pattern = "shiftwidth",
+		callback = function()
+			Global.leadMultiSpaceCalc()
+		end,
+	})
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniGitUpdated",
 		callback = function(data)
@@ -906,8 +925,8 @@ now(function()
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
 			-- Disable semantic highlighting
-			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
-			-- client.server_capabilities.semanticTokensProvider = nil
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			client.server_capabilities.semanticTokensProvider = nil
 			local win_ids = vim.api.nvim_list_wins()
 			for _, win_id in ipairs(win_ids) do
 				local buf_id = vim.api.nvim_win_get_buf(win_id)
@@ -928,6 +947,7 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 		callback = function()
+			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
 		end,
 	})
@@ -1005,7 +1025,6 @@ later(function()
 		format = "🢥 {kind_icon}{symbol.name:Normal}",
 		hl_group = "WinBar",
 	})
-	add("mfussenegger/nvim-lint")
 	add({
 		source = "leoluz/nvim-dap-go",
 		depends = {
@@ -1024,21 +1043,6 @@ later(function()
 			"mfussenegger/nvim-dap",
 		},
 	})
-	require("lint").linters_by_ft = {
-		-- lua = { "luacheck" },
-		-- yaml = { "yamllint" },
-		c = { "clangtidy" },
-		go = { "golangcilint" },
-		groovy = { "npm-groovy-lint" },
-		java = { "checkstyle" },
-		javascript = { "eslint" },
-		json = { "jsonlint" },
-		jsonc = { "jsonlint" },
-		python = { "pylint" },
-		sh = { "shellcheck" },
-		svelte = { "eslint" },
-		typescript = { "eslint" },
-	}
 	add("David-Kunz/gen.nvim")
 	require("gen").setup({
 		model = "llama3.1",
@@ -1486,4 +1490,5 @@ later(function()
 		opts.border = opts.border or border
 		return original_util_open_floating_preview(contents, syntax, opts, ...)
 	end
+	Global.leadMultiSpaceCalc()
 end)
