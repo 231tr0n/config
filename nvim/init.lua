@@ -166,13 +166,14 @@ now(function()
 		require("mini.hues").apply_palette(Global.palette, {
 			default = true,
 		})
-		Hi("FzfLuaBorder", { bg = Global.background, fg = Global.background })
-		Hi("FzfLuaFzfBorder", { bg = Global.background, fg = Global.foreground })
-		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
-		Hi("Delimiter", { fg = Global.palette.cyan_bg, bold = true })
 		Hi("@constructor.lua", { fg = Global.palette.cyan_bg, bold = true })
-		Hi("Type", { fg = Global.palette.fg_edge })
+		Hi("@none", { fg = Global.palette.fg })
+		Hi("Delimiter", { fg = Global.palette.cyan_bg, bold = true })
+		Hi("FzfLuaBorder", { bg = Global.palette.bg, fg = Global.palette.bg })
+		Hi("FzfLuaFzfBorder", { bg = Global.palette.bg, fg = Global.palette.fg })
 		Hi("Operator", { fg = Global.palette.cyan_bg, bold = true })
+		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
+		Hi("Type", { fg = Global.palette.fg_edge })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -368,9 +369,9 @@ now(function()
 		query_updaters = "abcdefghijklmnopqrstuvwxyz0123456789_-.+",
 		items = {
 			require("mini.starter").sections.builtin_actions(),
-			require("mini.starter").sections.recent_files(5, false),
-			require("mini.starter").sections.recent_files(5, true),
-			require("mini.starter").sections.sessions(5, true),
+			require("mini.starter").sections.recent_files(3, false),
+			require("mini.starter").sections.recent_files(3, true),
+			require("mini.starter").sections.sessions(3, true),
 		},
 		footer = table.concat({
 			"███╗░░██╗███████╗░█████╗░██╗░░░██╗██╗███╗░░░███╗",
@@ -996,7 +997,6 @@ later(function()
 		previewers = {
 			bat = {
 				theme = "Solarized (dark)",
-				-- theme = "Coldark-Cold",
 			},
 		},
 		grep = {
