@@ -639,7 +639,7 @@ now(function()
 				["end"] = { args.line2, end_line:len() },
 			}
 		end
-		require("conform").format({ async = true, range = range })
+		require("conform").format({ range = range })
 	end, { range = true })
 end)
 
