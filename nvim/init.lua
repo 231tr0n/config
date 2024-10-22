@@ -938,7 +938,7 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
-		callback = function(args)
+		callback = function()
 			require("conform").format()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
