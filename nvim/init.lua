@@ -160,7 +160,7 @@ now(function()
 		background = Global.background,
 		n_hues = 8,
 		accent = "bg",
-		saturation = "high",
+		saturation = "mediumhigh",
 	})
 	Global.apply_colorscheme = function()
 		require("mini.hues").apply_palette(Global.palette, {
