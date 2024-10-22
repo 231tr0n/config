@@ -169,10 +169,10 @@ now(function()
 		Hi("FzfLuaBorder", { bg = Global.background, fg = Global.background })
 		Hi("FzfLuaFzfBorder", { bg = Global.background, fg = Global.foreground })
 		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
-		Hi("Delimiter", { bold = true })
-		Hi("@constructor.lua", { bold = true })
-		Hi("Type", { bold = true })
-		Hi("Operator", { bold = true })
+		Hi("Delimiter", { fg = Global.palette.cyan_bg, bold = true })
+		Hi("@constructor.lua", { fg = Global.palette.cyan_bg, bold = true })
+		Hi("Type", { fg = Global.palette.fg_edge })
+		Hi("Operator", { fg = Global.palette.cyan_bg, bold = true })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -639,7 +639,7 @@ now(function()
 				["end"] = { args.line2, end_line:len() },
 			}
 		end
-		require("conform").format({ range = range })
+		require("conform").format({ async = true, range = range })
 	end, { range = true })
 end)
 
