@@ -173,7 +173,6 @@ now(function()
 		Hi("@constructor.lua", { bold = true })
 		Hi("Type", { bold = true })
 		Hi("Operator", { bold = true })
-		Hi("@keyword.storage", { fg = Global.palette.red })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -940,7 +939,7 @@ now(function()
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function(args)
-			require("conform").format({ bufnr = args.buf })
+			require("conform").format()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
 		end,
