@@ -160,7 +160,7 @@ now(function()
 		background = Global.background,
 		n_hues = 8,
 		accent = "bg",
-		saturation = "mediumhigh",
+		saturation = "high",
 	})
 	Global.apply_colorscheme = function()
 		require("mini.hues").apply_palette(Global.palette, {
@@ -174,6 +174,11 @@ now(function()
 		Hi("Operator", { fg = Global.palette.cyan_bg, bold = true })
 		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
 		Hi("Type", { fg = Global.palette.fg_edge })
+		Hi("@keyword.return", { fg = Global.palette.orange })
+		Hi("@keyword.import", { fg = Global.palette.blue })
+		Hi("@keyword.storage", { fg = Global.palette.fg })
+		Hi("@keyword.debug", { fg = Global.palette.cyan })
+		Hi("@keyword.directive", { fg = Global.palette.blue })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
