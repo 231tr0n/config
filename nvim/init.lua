@@ -147,7 +147,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 3,
+				row = 2,
 				border = "rounded",
 			},
 			max_width_share = 0.5,
@@ -328,7 +328,7 @@ now(function()
 		},
 	})
 	MiniIcons.mock_nvim_web_devicons()
-	-- MiniIcons.tweak_lsp_kind()
+	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
 		symbol = "│",
 		draw = {
