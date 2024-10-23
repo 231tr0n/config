@@ -883,7 +883,7 @@ now(function()
 											exclusions = { "this" },
 										},
 									},
-									signatureHelp = { enabled = true },
+									signatureHelp = { enabled = true, description = { enabled = true } },
 									contentProvider = { preferred = "fernflower" },
 									codeGeneration = {
 										toString = {
