@@ -34,6 +34,18 @@ now(function()
 		background = "#002B36",
 		foreground = "#839496",
 	}
+	Global.lspCapabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties = {
+		"documentation",
+		"detail",
+		"additionalTextEdits",
+		"sortText",
+		"filterText",
+		"insertText",
+		"textEdit",
+		"insertTextFormat",
+		"insertTextMode",
+	}
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
 	Global.leadMultiSpaceCalc = function()
 		vim.opt_local.listchars:remove("leadmultispace")
