@@ -1061,7 +1061,7 @@ later(function()
 	})
 	add("David-Kunz/gen.nvim")
 	require("gen").setup({
-		model = "llama3.1",
+		model = "llama3.2",
 		host = "localhost",
 		port = "11434",
 		display_mode = "split",
