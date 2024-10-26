@@ -274,12 +274,12 @@ now(function()
 				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<Leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
 				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
-				{ mode = "n", keys = "<Leader>x", desc = "+Trouble" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
@@ -949,7 +949,7 @@ now(function()
 				local buf_id = vim.api.nvim_win_get_buf(win_id)
 				if buf_id == args.buf then
 					vim.wo[win_id].winbar =
-						"⠀⠀%{% g:actual_curwin == win_getid() ? v:lua.Global.symbols.get() : expand('%:p') ==# '/' ? '🢥 /' : '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+						"⠀⠀%{% g:actual_curwin == win_getid() ? nvim_treesitter#statusline() : expand('%:p') ==# '/' ? '🢥 /' : '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				end
 			end
 		end,
@@ -966,23 +966,6 @@ now(function()
 		callback = function()
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
-		end,
-	})
-	vim.api.nvim_create_autocmd("BufRead", {
-		callback = function(ev)
-			if vim.bo[ev.buf].buftype == "quickfix" then
-				if vim.fn.win_gettype() == "quickfix" then
-					vim.schedule(function()
-						vim.cmd("cclose")
-						vim.cmd("Trouble qflist open")
-					end)
-				else
-					vim.schedule(function()
-						vim.cmd("lclose")
-						vim.cmd("Trouble loclist open")
-					end)
-				end
-			end
 		end,
 	})
 end)
@@ -1021,26 +1004,6 @@ later(function()
 		},
 	})
 	vim.cmd("FzfLua register_ui_select")
-	add({
-		source = "folke/trouble.nvim",
-		depends = {
-			"mini.nvim",
-			"neovim/nvim-lspconfig",
-			"ibhagwan/fzf-lua",
-		},
-	})
-	local fzf_config = require("fzf-lua.config")
-	local fzf_actions = require("trouble.sources.fzf").actions
-	fzf_config.defaults.actions.files["ctrl-t"] = fzf_actions.open
-	require("trouble").setup()
-	Global.symbols = require("trouble").statusline({
-		mode = "lsp_document_symbols",
-		groups = {},
-		title = false,
-		filter = { range = true },
-		format = "🢥 {kind_icon}{symbol.name:Normal}",
-		hl_group = "WinBar",
-	})
 	add({
 		source = "leoluz/nvim-dap-go",
 		depends = {
@@ -1081,6 +1044,36 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
+	local function toggleQuickFix()
+		local qf_exists = false
+		for _, win in pairs(vim.fn.getwininfo()) do
+			if win["quickfix"] == 1 then
+				qf_exists = true
+			end
+		end
+		if qf_exists == true then
+			vim.cmd("cclose")
+			return
+		end
+		if not vim.tbl_isempty(vim.fn.getqflist()) then
+			vim.cmd("copen")
+		end
+	end
+	local function toggleLocList()
+		local ll_exists = false
+		for _, win in pairs(vim.fn.getwininfo()) do
+			if win["loclist"] == 1 then
+				ll_exists = true
+			end
+		end
+		if ll_exists == true then
+			vim.cmd("lclose")
+			return
+		end
+		if not vim.tbl_isempty(vim.fn.getloclist(0)) then
+			vim.cmd("lopen")
+		end
+	end
 	Imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
@@ -1118,16 +1111,12 @@ later(function()
 	Nmap("<leader>ft", ":FzfLua btags<CR>", "Search buffer tags")
 	Nmap("<leader>fx", ":FzfLua diagnostics_document<CR>", "Search document diagnostics")
 	Nmap("<leader>fy", ":FzfLua lsp_document_symbols<CR>", "Search document symbols")
+	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
+	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
-	Nmap("<leader>xX", "<cmd>Trouble diagnostics toggle<cr>", "Toggle diagnostics")
-	Nmap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", "Toggle loclist")
-	Nmap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", "Toggle quickfix")
-	Nmap("<leader>xr", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", "Toggle LSP Defs/refs")
-	Nmap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", "Toggle symbols")
-	Nmap("<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Toggle buffer diagnostics")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Vmap("<leader>fgb", ":FzfLua git_blame<CR>", "Search buffer blame")
 	Vmap("<leader>fgc", ":FzfLua git_bcommits<CR>", "Search buffer commits")
