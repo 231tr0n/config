@@ -208,7 +208,7 @@ now(function()
 				click = "v:lua.ScLa",
 			},
 			{
-				text = { require("statuscol.builtin").foldfunc, "│" },
+				text = { require("statuscol.builtin").foldfunc, " " },
 				click = "v:lua.ScFa",
 			},
 		},
@@ -337,11 +337,7 @@ now(function()
 			test = require("mini.extra").gen_highlighter.words({ "TEST" }, "MiniHipatternsNote"),
 		},
 	})
-	require("mini.icons").setup({
-		lsp = {
-			ollama = { glyph = "", hl = "MiniIconsGreen" },
-		},
-	})
+	require("mini.icons").setup()
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup({
