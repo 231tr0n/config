@@ -602,22 +602,6 @@ now(function()
 	})
 	require("treesitter-context").setup()
 	add({
-		source = "OXY2DEV/helpview.nvim",
-		depends = {
-			"mini.nvim",
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("helpview").setup()
-	add({
-		source = "MeanderingProgrammer/render-markdown.nvim",
-		depends = {
-			"mini.nvim",
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("render-markdown").setup()
-	add({
 		source = "danymat/neogen",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -1317,6 +1301,9 @@ later(function()
 				},
 			},
 		},
+	})
+	lspconfig.remark_ls.setup({
+		capabilities = Global.lspCapabilities,
 	})
 	lspconfig.r_language_server.setup({
 		capabilities = Global.lspCapabilities,
