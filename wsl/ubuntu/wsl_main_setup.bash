@@ -94,6 +94,7 @@ sudo npm install -g @angular/language-server@latest @angular/language-service@la
 sudo npm install -g svelte-language-server@latest
 sudo npm install -g remark-language-server@latest
 cargo install --git https://github.com/latex-lsp/texlab
+sudo snap install marksman
 cd ~/scripts
 ./java-lsp.bash
 ./lua-lsp.bash
