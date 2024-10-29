@@ -1,33 +1,14 @@
 [core]
-	pager = delta
+	pager = diff-so-fancy | less --tabs=4 -RF
 	editor = nvim
-
 [interactive]
-	diffFilter = delta --color-only --features=interactive
-
-[delta]
-	features = decorations
-	line-numbers = false
-	side-by-side = false
-	navigate = true
-
-[delta "interactive"]
-	keep-plus-minus-markers = true
-
+	diffFilter = diff-so-fancy --patch
 [merge]
-	conflictstyle = diff3
-
-[delta "decorations"]
-	commit-decoration-style = blue ol
-	commit-style = raw
-	file-style = omit
-	hunk-header-decoration-style = blue box
-	hunk-header-file-style = red
-	hunk-header-line-number-style = "#067a00"
-	hunk-header-style = file line-number syntax
-
+	conflictStyle = zdiff3
 [user]
 	email = zeltronsrikar@gmail.com
 	name = 231tr0n
 [init]
 	defaultBranch = main
+[pull]
+	rebase = false
