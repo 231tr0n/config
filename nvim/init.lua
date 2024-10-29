@@ -1298,7 +1298,7 @@ later(function()
 			},
 		},
 	})
-	lspconfig.remark_ls.setup({
+	lspconfig.marksman.setup({
 		capabilities = Global.lspCapabilities,
 	})
 	lspconfig.r_language_server.setup({
