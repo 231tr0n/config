@@ -29,9 +29,9 @@ now(function()
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
-		leadSpace = "›",
+		leadSpace = "│",
 		nextSpace = " ",
-		background = "#002B36",
+		background = "#002B30",
 		foreground = "#839496",
 	}
 	Global.lspCapabilities.textDocument.completion.completionItem.commitCharactersSupport = true
@@ -194,6 +194,7 @@ now(function()
 		Hi("Type", { fg = Global.palette.fg_edge })
 		Hi("WinBar", { link = "StatusLineNC" })
 		Hi("WinBarNC", { link = "StatusLine" })
+		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -340,14 +341,7 @@ now(function()
 	require("mini.icons").setup()
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
-	require("mini.indentscope").setup({
-		symbol = "│",
-		draw = {
-			delay = 0,
-			animation = require("mini.indentscope").gen_animation.none(),
-			priority = 10000,
-		},
-	})
+	require("mini.indentscope").setup()
 	require("mini.jump").setup()
 	require("mini.jump2d").setup()
 	require("mini.misc").setup()
@@ -403,14 +397,8 @@ now(function()
 			active = function()
 				local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
 				local git = MiniStatusline.section_git({ trunc_width = 75 })
-				local diagnostics = MiniStatusline.section_diagnostics({
-					trunc_width = 75,
-					signs = { ERROR = " ", WARN = " ", INFO = " ", HINT = " " },
-				})
-				local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-				if filename:sub(1, 2) == "%F" or filename:sub(1, 2) == "%f" then
-					filename = filename:sub(1, 2) .. " " .. filename:sub(3, -1)
-				end
+				local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+				local filename = MiniStatusline.section_filename({ trunc_width = 1000 })
 				local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
 				local location = MiniStatusline.section_location({ trunc_width = 75 })
 				local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
@@ -438,8 +426,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	vim.g.sleuth_automatic = 1
-	add("tpope/vim-sleuth")
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -520,29 +506,14 @@ now(function()
 		sync_install = false,
 		auto_install = true,
 		ignore_install = {},
-		modules = {},
-		-- Disable indent module if file size is greater than 2MB
-		indent = {
-			enable = true,
-			disable = function(lang, buf)
-				local max_filesize = 1 * 1024 * 1024
-				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-				if ok and stats and stats.size > max_filesize then
-					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
-					return true
-				end
-			end,
-		},
-		incremental_selection = {
-			enable = false,
-		},
-		-- Disable highlight module if file size is greater than 2MB
+		-- Disable highlighting if file size is greater than 2MB
 		highlight = {
 			enable = true,
 			disable = function(lang, buf)
 				local max_filesize = 2 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 				if ok and stats and stats.size > max_filesize then
+					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
 					return true
 				end
 			end,
@@ -709,10 +680,10 @@ now(function()
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
-	Nmap("<F3>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F4>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
-	Nmap("<F5>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
-	Nmap("<F6>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
+	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
+	Nmap("<F6>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -820,8 +791,8 @@ now(function()
 				require("dap.ext.autocompl").attach()
 				vim.b.miniindentscope_disable = true
 			else
-				vim.wo.winbar =
-					"⠀⠀%{% g:actual_curwin == win_getid() ? nvim_treesitter#statusline() : expand('%:p') ==# '/' ? '🢥 /' : '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+				Global.leadMultiSpaceCalc()
 				if
 					vim.bo.filetype == "svelte"
 					or vim.bo.filetype == "jsx"
@@ -1475,5 +1446,4 @@ later(function()
 		opts.border = opts.border or border
 		return original_util_open_floating_preview(contents, syntax, opts, ...)
 	end
-	Global.leadMultiSpaceCalc()
 end)
