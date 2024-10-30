@@ -912,8 +912,8 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 		callback = function()
-			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
+			Global.leadMultiSpaceCalc()
 		end,
 	})
 end)
