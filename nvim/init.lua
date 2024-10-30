@@ -681,9 +681,10 @@ now(function()
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
-	Nmap("<F6>", MiniNotify.clear, "Clear all notifications")
+	Nmap("<F4>", ":TSContextToggle<CR>", "Toggle treesitter context")
+	Nmap("<F5>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
+	Nmap("<F7>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -765,13 +766,6 @@ now(function()
 		pattern = "shiftwidth",
 		callback = function()
 			Global.leadMultiSpaceCalc()
-		end,
-	})
-	vim.api.nvim_create_autocmd("User", {
-		pattern = "MiniGitUpdated",
-		callback = function(data)
-			local summary = vim.b[data.buf].minigit_summary
-			vim.b[data.buf].minigit_summary_string = summary.head_name or ""
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
