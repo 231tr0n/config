@@ -323,7 +323,7 @@ now(function()
 		},
 		options = {
 			permanent_delete = true,
-			use_as_default_explorer = false,
+			use_as_default_explorer = true,
 		},
 	})
 	require("mini.git").setup()
