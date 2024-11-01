@@ -31,8 +31,10 @@ now(function()
 		floatMultiplier = 0.8,
 		leadSpace = "│",
 		nextSpace = " ",
-		background = "#002B30",
-		foreground = "#839496",
+		background_dark = "#002B30",
+		foreground_dark = "#839496",
+		background_light = "#bbbbbb",
+		foreground_light = "#444444",
 	}
 	Global.lspCapabilities.textDocument.completion.completionItem.commitCharactersSupport = true
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties = {
@@ -167,33 +169,53 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	Global.palette = require("mini.hues").make_palette({
-		foreground = Global.foreground,
-		background = Global.background,
+	Global.palette_dark = require("mini.hues").make_palette({
+		foreground = Global.foreground_dark,
+		background = Global.background_dark,
 		n_hues = 8,
 		accent = "bg",
 		saturation = "mediumhigh",
 	})
+	Global.palette_light = require("mini.hues").make_palette({
+		foreground = Global.foreground_light,
+		background = Global.background_light,
+		n_hues = 8,
+		accent = "bg",
+		saturation = "high",
+	})
 	Global.apply_colorscheme = function()
+		if vim.o.background == "dark" then
+			Global.palette = Global.palette_dark
+		else
+			Global.palette = Global.palette_light
+		end
 		require("mini.hues").apply_palette(Global.palette, {
 			default = true,
 		})
-		Hi("@constructor.lua", { fg = Global.palette.cyan_bg, bold = true })
+		if vim.o.background == "dark" then
+			Hi("@constructor.lua", { fg = Global.palette.cyan_bg, bold = true })
+			Hi("@tag.attribute", { fg = Global.palette.fg_edge })
+			Hi("Delimiter", { fg = Global.palette.cyan_bg, bold = true })
+			Hi("Operator", { fg = Global.palette.cyan_bg, bold = true })
+			Hi("Type", { fg = Global.palette.fg_edge })
+		else
+			Hi("@constructor.lua", { fg = Global.palette.fg_edge, bold = true })
+			Hi("@tag.attribute", { fg = Global.palette.fg_edge2 })
+			Hi("Delimiter", { fg = Global.palette.fg_edge, bold = true })
+			Hi("Operator", { fg = Global.palette.fg_edge, bold = true })
+			Hi("Type", { fg = Global.palette.fg_edge2 })
+		end
 		Hi("@keyword.debug", { fg = Global.palette.cyan })
 		Hi("@keyword.directive", { fg = Global.palette.blue })
 		Hi("@keyword.import", { fg = Global.palette.blue })
 		Hi("@keyword.return", { fg = Global.palette.orange })
 		Hi("@keyword.storage", { fg = Global.palette.fg })
 		Hi("@none", { fg = Global.palette.fg })
-		Hi("@tag.attribute", { fg = Global.palette.fg_edge })
-		Hi("Delimiter", { fg = Global.palette.cyan_bg, bold = true })
 		Hi("FzfLuaBorder", { bg = Global.palette.bg, fg = Global.palette.bg })
 		Hi("FzfLuaFzfBorder", { bg = Global.palette.bg, fg = Global.palette.fg })
 		Hi("FzfLuaFzfMatch", { fg = Global.palette.green })
 		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-		Hi("Operator", { fg = Global.palette.cyan_bg, bold = true })
 		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
-		Hi("Type", { fg = Global.palette.fg_edge })
 		Hi("WinBar", { link = "StatusLineNC" })
 		Hi("WinBarNC", { link = "StatusLine" })
 	end
@@ -643,6 +665,13 @@ now(function()
 			openTerminal()
 		end
 	end
+	local function toggleBackground()
+		if vim.o.background == "dark" then
+			vim.o.background = "light"
+		else
+			vim.o.background = "dark"
+		end
+	end
 	local function toggleTabs()
 		vim.opt.expandtab = false
 		vim.cmd("retab!")
@@ -683,9 +712,10 @@ now(function()
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", ":TSContextToggle<CR>", "Toggle treesitter context")
-	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
-	Nmap("<F7>", MiniNotify.clear, "Clear all notifications")
+	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
+	Nmap("<F6>", toggleBackground, "Apply mini.hues colorscheme")
+	Nmap("<F7>", ":TSContextToggle<CR>", "Toggle treesitter context")
+	Nmap("<F8>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -764,6 +794,12 @@ end)
 
 -- Autocommands registration
 now(function()
+	vim.api.nvim_create_autocmd("OptionSet", {
+		pattern = "background",
+		callback = function()
+			Global.apply_colorscheme()
+		end,
+	})
 	vim.api.nvim_create_autocmd("OptionSet", {
 		pattern = "shiftwidth",
 		callback = function()
