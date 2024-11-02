@@ -1470,4 +1470,9 @@ later(function()
 		opts.border = opts.border or border
 		return original_util_open_floating_preview(contents, syntax, opts, ...)
 	end
+	if tonumber(vim.fn.strftime("%H")) > 18 then
+		vim.o.background = "dark"
+	else
+		vim.o.background = "light"
+	end
 end)
