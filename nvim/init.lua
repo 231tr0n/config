@@ -169,7 +169,8 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	if tonumber(vim.fn.strftime("%H")) > 18 then
+	local currentTime = tonumber(vim.fn.strftime("%H"))
+	if currentTime > 18 and currentTime < 6 then
 		vim.o.background = "dark"
 	else
 		vim.o.background = "light"
