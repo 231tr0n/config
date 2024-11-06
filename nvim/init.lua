@@ -958,6 +958,9 @@ later(function()
 	})
 	require("fzf-lua").setup({
 		"max-perf",
+		defaults = {
+			preview_pager = "delta --diff-so-fancy --width=$FZF_PREVIEW_COLUMNS",
+		},
 		fzf_colors = true,
 		winopts = {
 			width = Global.floatMultiplier,
