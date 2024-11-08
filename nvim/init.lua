@@ -169,12 +169,13 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	local currentTime = tonumber(vim.fn.strftime("%H"))
-	if currentTime > 18 and currentTime < 6 then
-		vim.o.background = "dark"
-	else
-		vim.o.background = "light"
-	end
+	-- local currentTime = tonumber(vim.fn.strftime("%H"))
+	-- if currentTime > 18 and currentTime < 6 then
+	-- 	vim.o.background = "dark"
+	-- else
+	-- 	vim.o.background = "light"
+	-- end
+	vim.o.background = "dark"
 	Global.palette_dark = require("mini.hues").make_palette({
 		foreground = Global.foreground_dark,
 		background = Global.background_dark,
