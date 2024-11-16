@@ -1,3 +1,3 @@
-module github.com/231tr0n/config/archinstall
+module archinstall
 
-go 1.21.0
+go 1.23.3
