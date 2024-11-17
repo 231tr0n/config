@@ -732,8 +732,6 @@ now(function()
 	Nmap("<leader>cx", '"+x', "Cut to clipboard")
 	Nmap("<leader>cy", '"+y', "Copy to clipboard")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
-	Nmap("<leader>dL", ":lua require('osv').launch({ port = 8086 })<CR>", "Lua debug launch")
-	Nmap("<leader>dLr", ":lua require('osv').run_this()<CR>", "Lua debug")
 	Nmap("<leader>db", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dc", ":lua require('dap').continue()<CR>", "Continue")
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
@@ -995,12 +993,6 @@ later(function()
 	})
 	add({
 		source = "mfussenegger/nvim-dap-python",
-		depends = {
-			"mfussenegger/nvim-dap",
-		},
-	})
-	add({
-		source = "jbyuki/one-small-step-for-vimkind",
 		depends = {
 			"mfussenegger/nvim-dap",
 		},
