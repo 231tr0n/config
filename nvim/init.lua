@@ -368,7 +368,15 @@ now(function()
 	require("mini.jump").setup()
 	require("mini.jump2d").setup()
 	require("mini.misc").setup()
-	MiniMisc.setup_auto_root({ ".git", "Makefile", "go.mod", "package.json", "pom.xml" })
+	MiniMisc.setup_auto_root({
+		"meson.build",
+		"CMakeLists.txt",
+		"Makefile",
+		"go.mod",
+		"package.json",
+		"pom.xml",
+		".git",
+	})
 	require("mini.move").setup({
 		mappings = {
 			left = "<C-S-left>",
