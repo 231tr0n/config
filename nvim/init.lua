@@ -169,12 +169,6 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	-- local currentTime = tonumber(vim.fn.strftime("%H"))
-	-- if currentTime > 18 and currentTime < 6 then
-	-- 	vim.o.background = "dark"
-	-- else
-	-- 	vim.o.background = "light"
-	-- end
 	vim.o.background = "dark"
 	Global.palette_dark = require("mini.hues").make_palette({
 		foreground = Global.foreground_dark,
@@ -741,8 +735,9 @@ now(function()
 	Nmap("<leader>cp", '"+p', "Paste to clipboard")
 	Nmap("<leader>cx", '"+x', "Cut to clipboard")
 	Nmap("<leader>cy", '"+y', "Copy to clipboard")
+	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
-	Nmap("<leader>db", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
+	Nmap("<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
 	Nmap("<leader>dc", ":lua require('dap').continue()<CR>", "Continue")
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
 	Nmap("<leader>dh", ":lua require('dap.ui.widgets').hover()<CR>", "Hover value")
@@ -754,7 +749,6 @@ now(function()
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
-	Nmap("<leader>dt", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
 	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>gc", ":lua require('neogen').generate({ type = 'class' })<CR>", "Generate class annotations")
@@ -823,6 +817,7 @@ now(function()
 				or vim.bo.filetype == "help"
 				or vim.bo.buftype == "terminal"
 				or vim.bo.buftype == "nofile"
+				or vim.bo.filetype == "qf"
 			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
