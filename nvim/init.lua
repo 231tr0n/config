@@ -29,7 +29,7 @@ now(function()
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
-		leadSpace = "│",
+		leadSpace = "›", -- │
 		nextSpace = " ",
 		background_dark = "#002B30",
 		foreground_dark = "#839496",
