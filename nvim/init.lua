@@ -36,17 +36,11 @@ now(function()
 		background_light = "#bbbbbb",
 		foreground_light = "#444444",
 	}
-	Global.lspCapabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport = Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport
+		or {}
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties = {
 		"documentation",
 		"detail",
-		"additionalTextEdits",
-		"sortText",
-		"filterText",
-		"insertText",
-		"textEdit",
-		"insertTextFormat",
-		"insertTextMode",
 	}
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
 	Global.leadMultiSpaceCalc = function()
