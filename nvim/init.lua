@@ -116,7 +116,7 @@ now(function()
 	vim.o.foldlevel = 99
 	vim.o.foldlevelstart = 99
 	vim.o.hlsearch = true
-	vim.o.ignorecase = true
+	vim.o.ignorecase = false
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
@@ -133,7 +133,7 @@ now(function()
 	vim.o.showmatch = true
 	vim.o.showmode = false
 	vim.o.signcolumn = "auto:1"
-	vim.o.smartcase = true
+	vim.o.smartcase = false
 	vim.o.splitbelow = true
 	vim.o.splitright = true
 	vim.o.synmaxcol = 100
@@ -280,21 +280,21 @@ now(function()
 		},
 		clues = {
 			{
-				{ mode = "n", keys = "<Leader>a", desc = "+Ai" },
-				{ mode = "n", keys = "<Leader>b", desc = "+Buffer" },
-				{ mode = "n", keys = "<Leader>c", desc = "+Clipboard" },
-				{ mode = "n", keys = "<Leader>d", desc = "+Debug" },
-				{ mode = "n", keys = "<Leader>e", desc = "+Explorer" },
-				{ mode = "n", keys = "<Leader>f", desc = "+Find" },
-				{ mode = "n", keys = "<Leader>g", desc = "+Generate" },
-				{ mode = "n", keys = "<Leader>l", desc = "+Lsp" },
-				{ mode = "n", keys = "<Leader>lj", desc = "+Java" },
-				{ mode = "n", keys = "<Leader>q", desc = "+QuickFix" },
-				{ mode = "n", keys = "<Leader>t", desc = "+Test" },
-				{ mode = "n", keys = "<Leader>tg", desc = "+Go" },
-				{ mode = "n", keys = "<Leader>tj", desc = "+Java" },
-				{ mode = "n", keys = "<Leader>tp", desc = "+Python" },
-				{ mode = "n", keys = "<Leader>v", desc = "+Visits" },
+				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
+				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
+				{ mode = "n", keys = "<leader>c", desc = "+Clipboard" },
+				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
+				{ mode = "n", keys = "<leader>e", desc = "+Explorer" },
+				{ mode = "n", keys = "<leader>f", desc = "+Find" },
+				{ mode = "n", keys = "<leader>g", desc = "+Generate" },
+				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
+				{ mode = "n", keys = "<leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
+				{ mode = "n", keys = "<leader>t", desc = "+Test" },
+				{ mode = "n", keys = "<leader>tg", desc = "+Go" },
+				{ mode = "n", keys = "<leader>tj", desc = "+Java" },
+				{ mode = "n", keys = "<leader>tp", desc = "+Python" },
+				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
@@ -382,6 +382,22 @@ now(function()
 	})
 	require("mini.operators").setup()
 	require("mini.pairs").setup()
+	require("mini.pick").setup({
+		window = {
+			config = function()
+				local height = math.floor(0.6 * vim.o.lines)
+				local width = math.floor(0.6 * vim.o.columns)
+				return {
+					anchor = "NW",
+					height = height,
+					width = width,
+					row = math.floor(0.5 * (vim.o.lines - height)),
+					col = math.floor(0.5 * (vim.o.columns - width)),
+				}
+			end,
+		},
+	})
+	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
@@ -445,7 +461,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	add("yorickpeterse/nvim-window")
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -523,6 +538,7 @@ now(function()
 			"yuck",
 			"zig",
 		},
+		modules = {},
 		sync_install = false,
 		auto_install = true,
 		ignore_install = {},
@@ -532,7 +548,7 @@ now(function()
 			disable = function(lang, buf)
 				local max_filesize = 2 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-				if ok and stats and stats.size > max_filesize then
+				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
 					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
 					return true
 				end
@@ -594,7 +610,7 @@ now(function()
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
-	require("neogen").setup()
+	require("neogen").setup({ snippet_engine = "nvim" })
 	add("mfussenegger/nvim-lint")
 	require("lint").linters_by_ft = {
 		-- lua = { "luacheck" },
@@ -637,31 +653,6 @@ end)
 
 -- Non lazy keymaps registration
 now(function()
-	local te_buf = nil
-	local te_win_id = nil
-	local function openTerminal()
-		if vim.fn.bufexists(te_buf) ~= 1 then
-			vim.cmd("split | wincmd J | resize 10 | terminal")
-			te_win_id = vim.fn.win_getid()
-			te_buf = vim.fn.bufnr("%")
-		elseif vim.fn.win_gotoid(te_win_id) ~= 1 then
-			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
-			te_win_id = vim.fn.win_getid()
-		end
-		vim.cmd("startinsert")
-	end
-	local function hideTerminal()
-		if vim.fn.win_gotoid(te_win_id) == 1 then
-			vim.cmd("hide")
-		end
-	end
-	local function toggleTerminal()
-		if vim.fn.win_gotoid(te_win_id) == 1 then
-			hideTerminal()
-		else
-			openTerminal()
-		end
-	end
 	local function toggleBackground()
 		if vim.o.background == "dark" then
 			vim.o.background = "light"
@@ -705,7 +696,6 @@ now(function()
 	Imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
-	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
@@ -721,7 +711,6 @@ now(function()
 	Nmap("<leader>bc", ":close<CR>", "Close window")
 	Nmap("<leader>bd", ":lua MiniBufremove.delete()<CR>", "Delete")
 	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
-	Nmap("<leader>bp", ":lua require('nvim-window').pick()<CR>", "Pick window")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	Nmap("<leader>cP", '"+P', "Paste to clipboard")
 	Nmap("<leader>cX", '"+X', "Cut to clipboard")
@@ -745,6 +734,28 @@ now(function()
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
 	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
+	Nmap("<leader>fC", ":Pick hl_groups<CR>", "Search highlight groups")
+	Nmap("<leader>fM", ':Pick marks scope="all"<CR>', "Search workspace marks")
+	Nmap("<leader>fS", ":Pick grep_live<CR>", "Search content live")
+	Nmap("<leader>fX", ':Pick diagnostic scope="all"<CR>', "Search workspace diagnostics")
+	Nmap("<leader>fY", ':Pick lsp scope="workspace_symbol"<CR>', "Search workspace symbols")
+	Nmap("<leader>fb", ":Pick buffers<CR>", "Search buffers")
+	Nmap("<leader>ff", ":Pick files<CR>", "Search files")
+	Nmap("<leader>fgC", ":Pick git_commits<CR>", "Search commits")
+	Nmap("<leader>fgb", ":Pick git_branches<CR>", "Search branches")
+	Nmap("<leader>fgc", ':Pick git_commits path="%"<CR>', "Search buffer commits")
+	Nmap("<leader>fgf", ":Pick git_files<CR>", "Search git files")
+	Nmap("<leader>fgs", ':Pick git_hunks scope="staged"<CR>', "Search git hunks staged")
+	Nmap("<leader>fgu", ':Pick git_hunks scope="unstaged"<CR>', "Search git hunks unstaged")
+	Nmap("<leader>fk", ":Pick keymaps<CR>", "Search keymaps")
+	Nmap("<leader>fl", ':Pick buf_lines scope="current"<CR>', "Search buffer lines")
+	Nmap("<leader>fm", ':Pick marks scope="buf"<CR>', "Search document marks")
+	Nmap("<leader>fo", ':Pick list scope="location"<CR>', "Search loclist")
+	Nmap("<leader>fq", ':Pick list scope="quickfix"<CR>', "Search quickfix")
+	Nmap("<leader>fs", ":Pick grep<CR>", "Search content")
+	Nmap("<leader>ft", ":Pick treesitter<CR>", "Search treesitter tree")
+	Nmap("<leader>fx", ':Pick diagnostic scope="current"<CR>', "Search document diagnostics")
+	Nmap("<leader>fy", ':Pick lsp scope="document_symbol"<CR>', "Search document symbols")
 	Nmap("<leader>gc", ":lua require('neogen').generate({ type = 'class' })<CR>", "Generate class annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'file' })<CR>", "Generate file annotations")
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
@@ -927,8 +938,8 @@ now(function()
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
 			-- Disable semantic highlighting
-			local client = vim.lsp.get_client_by_id(args.data.client_id)
-			client.server_capabilities.semanticTokensProvider = nil
+			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
+			-- client.server_capabilities.semanticTokensProvider = nil
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWrite", {
@@ -949,41 +960,6 @@ end)
 
 -- Lazy loaded plugins registration
 later(function()
-	add({
-		source = "ibhagwan/fzf-lua",
-		depends = {
-			"mini.nvim",
-		},
-	})
-	require("fzf-lua").setup({
-		"max-perf",
-		defaults = {
-			preview_pager = "delta --diff-so-fancy --width=$FZF_PREVIEW_COLUMNS",
-		},
-		fzf_colors = true,
-		winopts = {
-			width = Global.floatMultiplier,
-			height = Global.floatMultiplier,
-			border = "thicc",
-			preview = {
-				default = "bat",
-				vertical = "up:50%",
-				layout = "vertical",
-			},
-		},
-		fzf_opts = {
-			["--layout"] = "default",
-		},
-		previewers = {
-			bat = {
-				theme = "Solarized (dark)",
-			},
-		},
-		grep = {
-			multiline = 1,
-		},
-	})
-	vim.cmd("FzfLua register_ui_select")
 	add({
 		source = "leoluz/nvim-dap-go",
 		depends = {
@@ -1048,43 +1024,8 @@ later(function()
 			vim.cmd("lopen")
 		end
 	end
-	Imap("<C-x><C-f>", require("fzf-lua").complete_path, "Fuzzy complete path")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Nmap("<leader>fC", ":FzfLua colorschemes<CR>", "Change colorschemes")
-	Nmap("<leader>fL", ":FzfLua lines<CR>", "Search lines")
-	Nmap("<leader>fR", ":FzfLua treesitter<CR>", "Search treesitter symbols")
-	Nmap("<leader>fS", ":FzfLua live_grep_native<CR>", "Search content live")
-	Nmap("<leader>fT", ":FzfLua tags<CR>", "Search tags")
-	Nmap("<leader>fX", ":FzfLua diagnostics_workspace<CR>", "Search workspace diagnostics")
-	Nmap("<leader>fY", ":FzfLua lsp_workspace_symbols<CR>", "Search workspace symbols")
-	Nmap("<leader>fb", ":FzfLua buffers<CR>", "Search buffers")
-	Nmap("<leader>fc", ":FzfLua lsp_code_actions<CR>", "Code Actions")
-	Nmap("<leader>fdb", ":FzfLua dap_breakpoints<CR>", "Search dap breakpoints")
-	Nmap("<leader>fdc", ":FzfLua dap_configurations<CR>", "Search dap configurations")
-	Nmap("<leader>fdf", ":FzfLua dap_frames<CR>", "Search dap frames")
-	Nmap("<leader>fdv", ":FzfLua dap_variables<CR>", "Search dap variables")
-	Nmap("<leader>ff", ":FzfLua files<CR>", "Search files")
-	Nmap("<leader>fgB", ":FzfLua git_branches<CR>", "Search branches")
-	Nmap("<leader>fgC", ":FzfLua git_commits<CR>", "Search commits")
-	Nmap("<leader>fgS", ":FzfLua git_stash<CR>", "Search git stash")
-	Nmap("<leader>fgb", ":FzfLua git_blame<CR>", "Search buffer blame")
-	Nmap("<leader>fgc", ":FzfLua git_bcommits<CR>", "Search buffer commits")
-	Nmap("<leader>fgf", ":FzfLua git_files<CR>", "Search Git files")
-	Nmap("<leader>fgs", ":FzfLua git_status<CR>", "Search git status")
-	Nmap("<leader>fgt", ":FzfLua git_tags<CR>", "Search git tags")
-	Nmap("<leader>fh", ":FzfLua highlights<CR>", "Search highlight groups")
-	Nmap("<leader>fj", ":FzfLua jumps<CR>", "Search jumps")
-	Nmap("<leader>fk", ":FzfLua keymaps<CR>", "Search keymaps")
-	Nmap("<leader>fl", ":FzfLua blines<CR>", "Search buffer lines")
-	Nmap("<leader>fm", ":FzfLua marks<CR>", "Search marks")
-	Nmap("<leader>fo", ":FzfLua loclist<CR>", "Search loclist")
-	Nmap("<leader>fq", ":FzfLua quickfix<CR>", "Search quickfix")
-	Nmap("<leader>fr", ":FzfLua lsp_references<CR>", "Search lsp references")
-	Nmap("<leader>fs", ":FzfLua grep_project<CR>", "Search content")
-	Nmap("<leader>ft", ":FzfLua btags<CR>", "Search buffer tags")
-	Nmap("<leader>fx", ":FzfLua diagnostics_document<CR>", "Search document diagnostics")
-	Nmap("<leader>fy", ":FzfLua lsp_document_symbols<CR>", "Search document symbols")
 	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
 	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
@@ -1092,8 +1033,6 @@ later(function()
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Vmap("<leader>fgb", ":FzfLua git_blame<CR>", "Search buffer blame")
-	Vmap("<leader>fgc", ":FzfLua git_bcommits<CR>", "Search buffer commits")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
 
