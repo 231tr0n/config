@@ -239,6 +239,7 @@ now(function()
 		},
 	})
 	require("mini.align").setup()
+	require("mini.animate").setup()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
