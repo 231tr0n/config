@@ -824,12 +824,13 @@ now(function()
 				or vim.bo.buftype == "nofile"
 				or vim.bo.filetype == "qf"
 				or vim.bo.filetype == "git"
+				or vim.bo.filetype == "diff"
 			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
-				if vim.bo.filetype == "git" then
-					vim.bo.foldmethod = "expr"
-					vim.bo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
+					vim.wo.foldmethod = "expr"
+					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 				end
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
@@ -1225,10 +1226,10 @@ later(function()
 				},
 				workspace = {
 					checkThirdParty = false,
-					library = {
-						vim.env.VIMRUNTIME,
-					},
-					-- library = vim.api.nvim_get_runtime_file("", true),
+					-- library = {
+					-- 	vim.env.VIMRUNTIME,
+					-- },
+					library = vim.api.nvim_get_runtime_file("", true),
 				},
 			},
 		},
