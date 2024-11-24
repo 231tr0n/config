@@ -829,6 +829,14 @@ now(function()
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
 				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
+					-- Remove whitespace characters which dont look good in diffs
+					vim.opt_local.listchars:remove("leadmultispace")
+					vim.opt_local.listchars:remove("tab")
+					vim.opt_local.listchars:append({
+						leadmultispace = "  ",
+						tab = "  ",
+					})
+					-- MiniGit diff fold settings
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 				end
