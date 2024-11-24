@@ -823,9 +823,14 @@ now(function()
 				or vim.bo.buftype == "terminal"
 				or vim.bo.buftype == "nofile"
 				or vim.bo.filetype == "qf"
+				or vim.bo.filetype == "git"
 			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
+				if vim.bo.filetype == "git" then
+					vim.bo.foldmethod = "expr"
+					vim.bo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				end
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
