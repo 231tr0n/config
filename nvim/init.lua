@@ -462,6 +462,9 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("yorickpeterse/nvim-window")
+	add("yorickpeterse/nvim-pqf")
+	require("pqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -712,6 +715,7 @@ now(function()
 	Nmap("<leader>bc", ":close<CR>", "Close window")
 	Nmap("<leader>bd", ":lua MiniBufremove.delete()<CR>", "Delete")
 	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
+	Nmap("<leader>bp", ":lua require('nvim-window').pick()<CR>", "Pick window")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	Nmap("<leader>cP", '"+P', "Paste to clipboard")
 	Nmap("<leader>cX", '"+X', "Cut to clipboard")
