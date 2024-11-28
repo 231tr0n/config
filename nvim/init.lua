@@ -782,11 +782,7 @@ now(function()
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
 	Nmap("<leader>lh", ":lua vim.lsp.buf.hover()<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
-	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
-	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
-	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
-	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
@@ -954,13 +950,13 @@ now(function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd("LspAttach", {
-		callback = function(args)
-			-- Disable semantic highlighting
-			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
-			-- client.server_capabilities.semanticTokensProvider = nil
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("LspAttach", {
+	-- 	callback = function(args)
+	-- 		-- Disable semantic highlighting
+	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
+	-- 		client.server_capabilities.semanticTokensProvider = nil
+	-- 	end,
+	-- })
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
@@ -1045,9 +1041,13 @@ later(function()
 	end
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
+	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
 	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
 	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
+	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
+	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
