@@ -995,6 +995,24 @@ later(function()
 			"mfussenegger/nvim-dap",
 		},
 	})
+	add("David-Kunz/gen.nvim")
+	require("gen").setup({
+		model = "llama3.2:1b",
+		host = "localhost",
+		port = "11434",
+		display_mode = "split",
+		show_prompt = true,
+		show_model = true,
+		no_auto_close = false,
+		command = function(options)
+			return "curl --silent --no-buffer -X POST http://"
+				.. options.host
+				.. ":"
+				.. options.port
+				.. "/api/chat -d $body"
+		end,
+		debug = false,
+	})
 end)
 
 -- Lazy loaded keymaps registration
@@ -1029,6 +1047,8 @@ later(function()
 			vim.cmd("lopen")
 		end
 	end
+	Nmap("<leader>am", require("gen").select_model, "Select model")
+	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
 	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
 	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
@@ -1039,6 +1059,8 @@ later(function()
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
+	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
 
 -- Lazy loaded dap configurations setup
