@@ -958,14 +958,14 @@ now(function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd("LspAttach", {
-		callback = function(args)
-			-- -- Disable semantic highlighting
-			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
-			-- client.server_capabilities.semanticTokensProvider = nil
-			vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("LspAttach", {
+	-- 	callback = function(args)
+	-- 		-- Disable semantic highlighting
+	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
+	-- 		client.server_capabilities.semanticTokensProvider = nil
+	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+	-- 	end,
+	-- })
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
