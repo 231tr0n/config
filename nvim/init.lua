@@ -123,7 +123,7 @@ now(function()
 	vim.o.listchars = "tab:" .. Global.leadMultiSpace .. ",trail: ,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
-	vim.o.mousescroll = "ver:5,hor:5"
+	vim.o.mousescroll = "ver:1,hor:1"
 	vim.o.number = true
 	vim.o.path = "**"
 	vim.o.pumblend = 0
