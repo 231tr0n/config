@@ -812,24 +812,53 @@ end)
 
 -- Autocommands registration
 now(function()
-	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "background",
-		callback = function()
-			Global.apply_colorscheme()
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
+		callback = function(args)
+			if args.match == "MiniGitUpdated" then
+				local summary = vim.b[args.buf].minigit_summary
+				vim.b[args.buf].minigit_summary_string = summary.head_name or ""
+			elseif args.match == "MiniFilesBufferCreate" then
+				local b = args.data.buf_id
+				vim.keymap.set("n", "g~", function()
+					local path = (MiniFiles.get_fs_entry() or {}).path
+					if path == nil then
+						return vim.notify("Cursor is not on valid entry")
+					end
+					vim.fn.chdir(vim.fs.dirname(path))
+				end, { buffer = b, desc = "Set cwd" })
+				vim.keymap.set("n", "gy", function()
+					local path = (MiniFiles.get_fs_entry() or {}).path
+					if path == nil then
+						return vim.notify("Cursor is not on valid entry")
+					end
+					vim.fn.setreg("", path)
+				end, { buffer = b, desc = "Yank path" })
+				vim.keymap.set("n", "gY", function()
+					local path = (MiniFiles.get_fs_entry() or {}).path
+					if path == nil then
+						return vim.notify("Cursor is not on valid entry")
+					end
+					vim.fn.setreg("+", path)
+				end, { buffer = b, desc = "Yank path" })
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "shiftwidth",
-		callback = function()
-			Global.leadMultiSpaceCalc()
+		pattern = "background,shiftwidth",
+		callback = function(args)
+			if args.match == "background" then
+				Global.apply_colorscheme()
+			elseif args.match == "shiftwidth" then
+				Global.leadMultiSpaceCalc()
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
 			if
-				vim.bo.filetype == "NvimTree"
-				or vim.bo.filetype == "netrw"
+				vim.bo.filetype == "netrw"
 				or vim.bo.filetype == "help"
 				or vim.bo.buftype == "terminal"
 				or vim.bo.buftype == "nofile"
