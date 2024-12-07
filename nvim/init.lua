@@ -587,6 +587,7 @@ now(function()
 			python = { "black" },
 			rust = { "rustfmt" },
 			sh = { "shfmt" },
+			sql = { "sqlfluff" },
 			svelte = { "prettier" },
 			tex = { "latexindent" },
 			typescript = { "prettier" },
@@ -631,6 +632,7 @@ now(function()
 		jsonc = { "jsonlint" },
 		python = { "pylint" },
 		sh = { "shellcheck" },
+		sql = { "sqlfluff" },
 		svelte = { "eslint" },
 		typescript = { "eslint" },
 	}

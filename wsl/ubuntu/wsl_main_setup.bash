@@ -111,7 +111,9 @@ cd ~
 sudo apt install -y clang-tidy shellcheck checkstyle checkstyle-doc
 sudo luarocks install luacheck
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ~/.local/bin
-pipx install pylint yamllint
+pipx install pylint
+pipx install yamllint
+pipx install sqlfluff
 sudo npm install -g jsonlint@latest
 sudo npm install -g eslint@latest
 sudo npm install -g npm-groovy-lint@latest
