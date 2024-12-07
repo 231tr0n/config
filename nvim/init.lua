@@ -797,7 +797,7 @@ now(function()
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
-	Nmap("<leader>wc", ":close<CR>", "Close window")
+	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wp", require("nvim-window").pick, "Pick window")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
@@ -871,11 +871,18 @@ now(function()
 				or vim.bo.filetype == "qf"
 				or vim.bo.filetype == "git"
 				or vim.bo.filetype == "diff"
+				or vim.bo.filetype == "fugitive"
+				or vim.bo.filetype == "floggraph"
 			then
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
-				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
-					-- Remove whitespace characters which dont look good in diffs
+				vim.b.minitrailspace_disable = true
+				MiniTrailspace.unhighlight()
+				if vim.bo.filetype == "floggraph" then
+					vim.opt_local.listchars:remove("eol")
+				end
+				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
+					vim.opt_local.listchars:remove("eol")
 					vim.opt_local.listchars:remove("leadmultispace")
 					vim.opt_local.listchars:remove("tab")
 					vim.opt_local.listchars:append({
@@ -1031,6 +1038,13 @@ later(function()
 		source = "mfussenegger/nvim-dap-python",
 		depends = {
 			"mfussenegger/nvim-dap",
+		},
+	})
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
 		},
 	})
 	add("David-Kunz/gen.nvim")
