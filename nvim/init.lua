@@ -298,6 +298,7 @@ now(function()
 				{ mode = "n", keys = "<leader>tj", desc = "+Java" },
 				{ mode = "n", keys = "<leader>tp", desc = "+Python" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
+				{ mode = "n", keys = "<leader>w", desc = "+Window" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.g(),
@@ -722,10 +723,8 @@ now(function()
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
-	Nmap("<leader>bc", ":close<CR>", "Close window")
 	Nmap("<leader>bd", ":lua MiniBufremove.delete()<CR>", "Delete")
 	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
-	Nmap("<leader>bp", ":lua require('nvim-window').pick()<CR>", "Pick window")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	Nmap("<leader>cP", '"+P', "Paste to clipboard")
 	Nmap("<leader>cX", '"+X', "Cut to clipboard")
@@ -796,6 +795,9 @@ now(function()
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
+	Nmap("<leader>wc", ":close<CR>", "Close window")
+	Nmap("<leader>wo", ":only<CR>", "Close other windows")
+	Nmap("<leader>wp", require("nvim-window").pick, "Pick window")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
