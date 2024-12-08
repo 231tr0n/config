@@ -660,6 +660,13 @@ now(function()
 	})
 	require("helpview").setup()
 	add({
+		source = "Wansmer/treesj",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("treesj").setup()
+	add({
 		source = "andrewferrier/debugprint.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
