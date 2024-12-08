@@ -576,7 +576,7 @@ now(function()
 			c = { "clang_format" },
 			css = { "prettier" },
 			fish = { "fish_indent" },
-			go = { "gofmt" },
+			go = { "gofmt", "gofumpt" },
 			groovy = { "npm-groovy-lint" },
 			html = { "prettier" },
 			java = { "google-java-format" },
@@ -677,19 +677,7 @@ now(function()
 end)
 
 -- New commands registration
-now(function()
-	vim.api.nvim_create_user_command("Format", function(args)
-		local range = nil
-		if args.count ~= -1 then
-			local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
-			range = {
-				start = { args.line1, 0 },
-				["end"] = { args.line2, end_line:len() },
-			}
-		end
-		require("conform").format({ async = true, range = range })
-	end, { range = true })
-end)
+now(function() end)
 
 -- Non lazy keymaps registration
 now(function()
@@ -800,13 +788,13 @@ now(function()
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
 	Nmap("<leader>gg", ":lua require('neogen').generate()<CR>", "Generate annotations")
 	Nmap("<leader>gt", ":lua require('neogen').generate({ type = 'type' })<CR>", "Generate type annotations")
-	Nmap("<leader>lF", ":lua vim.lsp.buf.format({async = true})<CR>", "Lsp Format")
+	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
 	Nmap("<leader>ldh", ":lua vim.diagnostic.open_float()<CR>", "Hover diagnostics")
 	Nmap("<leader>ldn", ":lua vim.diagnostic.goto_next()<CR>", "Goto next diagnostic")
 	Nmap("<leader>ldp", ":lua vim.diagnostic.goto_prev()<CR>", "Goto prev diagnostic")
 	Nmap("<leader>ldt", diagnosticVirtualTextToggle, "Virtual text toggle")
-	Nmap("<leader>lf", ":Format<CR>", "Format code")
+	Nmap("<leader>lf", require("conform").format, "Format code")
 	Nmap("<leader>lgD", ":lua vim.lsp.buf.declaration()<CR>", "Goto declaration")
 	Nmap("<leader>lgb", "<C-t>", "Previous tag")
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
@@ -836,7 +824,7 @@ now(function()
 	Vmap("<leader>cp", '"+p', "Paste to clipboard")
 	Vmap("<leader>cx", '"+x', "Cut to clipboard")
 	Vmap("<leader>cy", '"+y', "Copy to clipboard")
-	Xmap("<leader>lf", ":Format<CR>", "Format code")
+	Xmap("<leader>lf", require("conform").format, "Format code")
 end)
 
 -- Autocommands registration
