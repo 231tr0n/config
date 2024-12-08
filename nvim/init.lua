@@ -651,6 +651,29 @@ now(function()
 		},
 	})
 	require("render-markdown").setup()
+	add({
+		source = "OXY2DEV/helpview.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+			"echasnovski/mini.nvim",
+		},
+	})
+	require("helpview").setup()
+	add({
+		source = "andrewferrier/debugprint.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+			"echasnovski/mini.nvim",
+		},
+	})
+	require("debugprint").setup({
+		keymaps = {
+			normal = {
+				toggle_comment_debug_prints = "g?c",
+				delete_debug_prints = "g?d",
+			},
+		},
+	})
 end)
 
 -- New commands registration
