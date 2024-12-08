@@ -292,6 +292,7 @@ now(function()
 				{ mode = "n", keys = "<leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<leader>lj", desc = "+Java" },
+				{ mode = "n", keys = "<leader>p", desc = "+Print" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<leader>tg", desc = "+Go" },
@@ -676,8 +677,24 @@ now(function()
 	require("debugprint").setup({
 		keymaps = {
 			normal = {
-				toggle_comment_debug_prints = "g?c",
-				delete_debug_prints = "g?d",
+				plain_below = "<leader>pp",
+				plain_above = "<leader>pP",
+				variable_below = "<leader>pv",
+				variable_above = "<leader>pV",
+				variable_below_alwaysprompt = "<leader>pq",
+				variable_above_alwaysprompt = "<leader>pQ",
+				textobj_below = "<leader>po",
+				textobj_above = "<leader>pO",
+				toggle_comment_debug_prints = "<leader>pc",
+				delete_debug_prints = "<leader>pd",
+			},
+			insert = {
+				plain = "<C-G>p",
+				variable = "<C-G>v",
+			},
+			visual = {
+				variable_below = "<leader>pv",
+				variable_above = "<leader>pV",
 			},
 		},
 	})
