@@ -681,6 +681,8 @@ now(function()
 			},
 		},
 	})
+	vim.g.sleuth_automatic = 1
+	add("tpope/vim-sleuth")
 end)
 
 -- New commands registration
