@@ -583,7 +583,7 @@ now(function()
 			c = { "clang_format" },
 			css = { "prettier" },
 			fish = { "fish_indent" },
-			go = { "gofmt", "gofumpt" },
+			go = { "gofmt", "gofumpt", "goimports", "golines" },
 			groovy = { "npm-groovy-lint" },
 			html = { "prettier" },
 			java = { "google-java-format" },
