@@ -123,6 +123,8 @@ pipx install black
 sudo npm install -g prettier@latest
 go install -v github.com/google/yamlfmt/cmd/yamlfmt@latest
 go install -v mvdan.cc/gofumpt@latest
+go install github.com/segmentio/golines@latest
+go install golang.org/x/tools/cmd/goimports@latest
 go install -v mvdan.cc/sh/v3/cmd/shfmt@latest
 cargo install stylua
 cargo install stylua --features lua52
