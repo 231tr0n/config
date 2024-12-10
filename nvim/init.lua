@@ -704,7 +704,6 @@ now(function()
 			},
 		},
 	})
-	vim.g.sleuth_automatic = 1
 	add("tpope/vim-sleuth")
 end)
 
@@ -949,6 +948,9 @@ now(function()
 			else
 				-- Set winbar
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+				-- Call Sleuth command to detect indentation and set leadmultispace
+				vim.cmd("Sleuth")
+				Global.leadMultiSpaceCalc()
 				-- HTML tag completion with >, >> and >>> for below filetypes
 				if
 					vim.bo.filetype == "svelte"
