@@ -29,6 +29,7 @@ now(function()
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
+		-- Space and tab characters to use
 		leadSpace = "›", -- │
 		nextSpace = " ",
 		background_dark = "#002B30",
@@ -36,12 +37,14 @@ now(function()
 		background_light = "#bbbbbb",
 		foreground_light = "#444444",
 	}
+	-- Add document support for completion items to lspCapabilities
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport = Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport
 		or {}
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties = {
 		"documentation",
 		"detail",
 	}
+	-- Function to set leadmultispace correctly
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
 	Global.leadMultiSpaceCalc = function()
 		vim.opt_local.listchars:remove("leadmultispace")
@@ -104,6 +107,7 @@ now(function()
 	vim.g.mapleader = " "
 	vim.g.maplocalleader = " "
 	vim.g.nerd_font = true
+	vim.o.background = "dark"
 	vim.o.breakindent = true
 	vim.o.completeopt = "menu,menuone,noselect"
 	vim.o.conceallevel = 2
@@ -163,7 +167,7 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	vim.o.background = "dark"
+	-- Define dark and light color palettes
 	Global.palette_dark = require("mini.hues").make_palette({
 		foreground = Global.foreground_dark,
 		background = Global.background_dark,
@@ -178,6 +182,7 @@ now(function()
 		accent = "bg",
 		saturation = "high",
 	})
+	-- Function to apply colorscheme
 	Global.apply_colorscheme = function()
 		if vim.o.background == "dark" then
 			Global.palette = Global.palette_dark
@@ -557,6 +562,7 @@ now(function()
 				local max_filesize = 2 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
+					-- Match syntax for @punctuation.bracket so that all kinds of braces are highlighted even if treesitter is disabled
 					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
 					return true
 				end
@@ -707,6 +713,7 @@ now(function() end)
 
 -- Non lazy keymaps registration
 now(function()
+	-- Function to toggle background
 	local function toggleBackground()
 		if vim.o.background == "dark" then
 			vim.o.background = "light"
@@ -714,14 +721,17 @@ now(function()
 			vim.o.background = "dark"
 		end
 	end
+	-- Function to convert spaces to tabs
 	local function toggleTabs()
 		vim.opt.expandtab = false
 		vim.cmd("retab!")
 	end
+	-- Function to convert tabs to spaces
 	local function toggleSpaces()
 		vim.opt.expandtab = true
 		vim.cmd("retab!")
 	end
+	-- Function to toggle virtual text for diagnostics
 	local function diagnosticVirtualTextToggle()
 		vim.diagnostic.config({
 			virtual_text = not vim.diagnostic.config().virtual_text,
@@ -910,33 +920,36 @@ now(function()
 				or vim.bo.filetype == "diff"
 				or vim.bo.filetype == "fugitive"
 				or vim.bo.filetype == "floggraph"
+				or vim.bo.filetype == "dap-repl"
+				or vim.bo.filetype == "dap-float"
 			then
+				-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
 				vim.b.minitrailspace_disable = true
+				vim.opt_local.listchars:remove("eol")
+				vim.opt_local.listchars:remove("leadmultispace")
+				vim.opt_local.listchars:remove("tab")
+				vim.opt_local.listchars:append({
+					leadmultispace = "  ",
+					tab = "  ",
+				})
 				MiniTrailspace.unhighlight()
-				if vim.bo.filetype == "floggraph" then
-					vim.opt_local.listchars:remove("eol")
-				end
 				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
-					vim.opt_local.listchars:remove("eol")
-					vim.opt_local.listchars:remove("leadmultispace")
-					vim.opt_local.listchars:remove("tab")
-					vim.opt_local.listchars:append({
-						leadmultispace = "  ",
-						tab = "  ",
-					})
 					-- MiniGit diff fold settings
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				elseif vim.bo.filetype == "dap-float" then
+					-- Map q to quit window in dap-float filetype
+					Nmap("q", "<C-w>q", "Quit window", { buffer = true })
+				elseif vim.bo.filetype == "dap-repl" then
+					-- Dap repl autocompletion setup
+					require("dap.ext.autocompl").attach()
 				end
-			elseif vim.bo.filetype == "dap-repl" then
-				-- Dap repl autocompletion setup
-				require("dap.ext.autocompl").attach()
-				vim.b.miniindentscope_disable = true
 			else
+				-- Set winbar
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
-				Global.leadMultiSpaceCalc()
+				-- HTML tag completion with >, >> and >>> for below filetypes
 				if
 					vim.bo.filetype == "svelte"
 					or vim.bo.filetype == "jsx"
@@ -947,7 +960,6 @@ now(function()
 					or vim.bo.filetype == "javascriptreact"
 					or vim.bo.filetype == "typescriptreact"
 				then
-					-- HTML tag completion with >, >> and >>>
 					vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 					Imap("><Space>", ">", "Cancel html pairs")
 					Imap(
@@ -1050,15 +1062,15 @@ now(function()
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
-			require("conform").format()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
+			require("conform").format()
 		end,
 	})
 	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 		callback = function()
-			require("lint").try_lint()
 			Global.leadMultiSpaceCalc()
+			require("lint").try_lint()
 		end,
 	})
 end)
@@ -1106,6 +1118,7 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
+	-- Function to toggle quickfix list
 	local function toggleQuickFix()
 		local qf_exists = false
 		for _, win in pairs(vim.fn.getwininfo()) do
@@ -1121,6 +1134,7 @@ later(function()
 			vim.cmd("copen")
 		end
 	end
+	-- Function to toggle location list
 	local function toggleLocList()
 		local ll_exists = false
 		for _, win in pairs(vim.fn.getwininfo()) do
@@ -1480,11 +1494,13 @@ later(function()
 	lspconfig.angularls.setup({
 		capabilities = Global.lspCapabilities,
 	})
+	-- Start lsp lazily
 	vim.cmd("LspStart")
 end)
 
 -- Lazy loaded custom configuration
 later(function()
+	-- Define custom signs for diagnostics and dap
 	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
@@ -1501,6 +1517,7 @@ later(function()
 	)
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+	-- Set border for lsp floating window
 	local border = {
 		{ "╭", "FloatBorder" },
 		{ "─", "FloatBorder" },
