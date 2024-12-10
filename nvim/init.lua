@@ -704,7 +704,6 @@ now(function()
 			},
 		},
 	})
-	add("tpope/vim-sleuth")
 end)
 
 -- New commands registration
@@ -948,8 +947,7 @@ now(function()
 			else
 				-- Set winbar
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
-				-- Call sleuth command to detect indentation and set leadmultispace
-				vim.cmd("Sleuth")
+				-- Call leadMultiSpaceCalc to set leadmultispace
 				Global.leadMultiSpaceCalc()
 				-- HTML tag completion with >, >> and >>> for below filetypes
 				if
@@ -1071,7 +1069,6 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 		callback = function()
-			vim.cmd("Sleuth")
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
 		end,
