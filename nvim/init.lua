@@ -471,6 +471,7 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("tpope/vim-sleuth")
 	add("yorickpeterse/nvim-window")
 	add("yorickpeterse/nvim-pqf")
 	require("pqf").setup()
@@ -948,6 +949,7 @@ now(function()
 				-- Set winbar
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				-- Call leadMultiSpaceCalc to set leadmultispace
+				vim.cmd("silent! Sleuth")
 				Global.leadMultiSpaceCalc()
 				-- HTML tag completion with >, >> and >>> for below filetypes
 				if
@@ -1065,6 +1067,7 @@ now(function()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
 			require("conform").format()
+			vim.cmd("silent! Sleuth")
 		end,
 	})
 	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
