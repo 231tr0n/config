@@ -597,6 +597,7 @@ now(function()
 			sh = { "shfmt" },
 			sql = { "sqlfluff" },
 			svelte = { "prettier" },
+			svg = { "xmllint" },
 			tex = { "latexindent" },
 			typescript = { "prettier" },
 			xml = { "xmllint" },
@@ -1389,21 +1390,21 @@ later(function()
 			},
 		},
 	})
-	-- lspconfig.pyright.setup({
-	-- 	capabilities = Global.lspCapabilities,
-	-- })
-	lspconfig.basedpyright.setup({
+	lspconfig.pyright.setup({
 		capabilities = Global.lspCapabilities,
-		settings = {
-			basedpyright = {
-				analysis = {
-					autoSearchPaths = true,
-					diagnosticMode = "openFilesOnly",
-					useLibraryCodeForTypes = true,
-				},
-			},
-		},
 	})
+	-- lspconfig.basedpyright.setup({
+	-- 	capabilities = Global.lspCapabilities,
+	-- 	settings = {
+	-- 		basedpyright = {
+	-- 			analysis = {
+	-- 				autoSearchPaths = true,
+	-- 				diagnosticMode = "openFilesOnly",
+	-- 				useLibraryCodeForTypes = true,
+	-- 			},
+	-- 		},
+	-- 	},
+	-- })
 	lspconfig.rust_analyzer.setup({
 		capabilities = Global.lspCapabilities,
 		settings = {
