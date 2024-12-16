@@ -690,14 +690,6 @@ now(function() end)
 
 -- Non lazy keymaps registration
 now(function()
-	-- Function to toggle background
-	local function toggleBackground()
-		if vim.o.background == "dark" then
-			vim.o.background = "light"
-		else
-			vim.o.background = "dark"
-		end
-	end
 	-- Function to convert spaces to tabs
 	local function toggleTabs()
 		vim.opt.expandtab = false
@@ -876,7 +868,7 @@ now(function()
 	})
 	vim.api.nvim_create_autocmd("OptionSet", {
 		pattern = "shiftwidth",
-		callback = function(args)
+		callback = function()
 			Global.leadMultiSpaceCalc()
 		end,
 	})
@@ -1020,14 +1012,14 @@ now(function()
 			end)())
 		end,
 	})
-	vim.api.nvim_create_autocmd("LspAttach", {
-		callback = function(args)
-			-- Disable semantic highlighting
-			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
-			-- client.server_capabilities.semanticTokensProvider = nil
-			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("LspAttach", {
+	-- 	callback = function(args)
+	-- 		-- Disable semantic highlighting
+	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
+	-- 		client.server_capabilities.semanticTokensProvider = nil
+	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+	-- 	end,
+	-- })
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
