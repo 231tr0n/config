@@ -32,10 +32,24 @@ now(function()
 		-- Space and tab characters to use
 		leadSpace = "›", -- │
 		nextSpace = " ",
-		background_dark = "#002B30",
-		foreground_dark = "#839496",
-		background_light = "#bbbbbb",
-		foreground_light = "#444444",
+		palette = {
+			base00 = "#282C34",
+			base01 = "#353B45",
+			base02 = "#3E4451",
+			base03 = "#545862",
+			base04 = "#565C64",
+			base05 = "#ABB2BF",
+			base06 = "#B6BDCA",
+			base07 = "#C8CCD4",
+			base08 = "#E06C75",
+			base09 = "#D19A66",
+			base0A = "#E5C07B",
+			base0B = "#98C379",
+			base0C = "#56B6C2",
+			base0D = "#61AFEF",
+			base0E = "#C678DD",
+			base0F = "#BE5046",
+		},
 	}
 	-- Add document support for completion items to lspCapabilities
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport = Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport
@@ -114,7 +128,7 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	vim.o.fillchars = [[eob: ,foldopen:▾,foldsep: ,foldclose:▸]] -- ,
+	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]] -- ▾,▸
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -167,52 +181,16 @@ now(function()
 		},
 	})
 	vim.notify = MiniNotify.make_notify()
-	-- Define dark and light color palettes
-	Global.palette_dark = require("mini.hues").make_palette({
-		foreground = Global.foreground_dark,
-		background = Global.background_dark,
-		n_hues = 8,
-		accent = "bg",
-		saturation = "mediumhigh",
-	})
-	Global.palette_light = require("mini.hues").make_palette({
-		foreground = Global.foreground_light,
-		background = Global.background_light,
-		n_hues = 8,
-		accent = "bg",
-		saturation = "high",
-	})
 	-- Function to apply colorscheme
 	Global.apply_colorscheme = function()
-		if vim.o.background == "dark" then
-			Global.palette = Global.palette_dark
-		else
-			Global.palette = Global.palette_light
-		end
-		require("mini.hues").apply_palette(Global.palette, {
-			default = true,
+		require("mini.base16").setup({
+			palette = Global.palette,
+			plugins = { default = true },
 		})
-		Hi("@constructor.lua", { fg = Global.palette.red, bold = true })
-		Hi("@keyword.debug", { fg = Global.palette.cyan })
-		Hi("@keyword.directive", { fg = Global.palette.blue })
-		Hi("@keyword.import", { fg = Global.palette.blue })
-		Hi("@keyword.return", { fg = Global.palette.orange })
-		Hi("@keyword.storage", { fg = Global.palette.fg })
-		Hi("@none", { fg = Global.palette.fg })
-		Hi("@tag.attribute", { fg = Global.palette.cyan })
-		Hi("Delimiter", { fg = Global.palette.red, bold = true })
-		Hi("DiffChange", { bg = Global.palette.bg_edge2, fg = Global.palette.fg })
-		Hi("DiffText", { bg = Global.palette.bg_mid2, fg = Global.palette.fg })
-		Hi("FzfLuaBorder", { bg = Global.palette.bg, fg = Global.palette.bg })
-		Hi("FzfLuaFzfBorder", { bg = Global.palette.bg, fg = Global.palette.fg })
-		Hi("FzfLuaFzfMatch", { fg = Global.palette.green })
+		Hi("Operator", { link = "Delimiter" })
+		Hi("@tag.delimiter", { link = "Delimiter" })
+		Hi("@tag.attribute", { link = "Statement" })
 		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-		Hi("NormalNC", { link = "StatusLineNC" })
-		Hi("Operator", { fg = Global.palette.red, bold = true })
-		Hi("Statement", { bg = "NONE", fg = Global.palette.orange })
-		Hi("Type", { fg = Global.palette.cyan })
-		Hi("WinBar", { link = "StatusLineNC" })
-		Hi("WinBarNC", { link = "StatusLine" })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -762,10 +740,9 @@ now(function()
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.hues colorscheme")
-	Nmap("<F6>", toggleBackground, "Apply mini.hues colorscheme")
-	Nmap("<F7>", ":TSContextToggle<CR>", "Toggle treesitter context")
-	Nmap("<F8>", MiniNotify.clear, "Clear all notifications")
+	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
+	Nmap("<F6>", ":TSContextToggle<CR>", "Toggle treesitter context")
+	Nmap("<F7>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -898,169 +875,159 @@ now(function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "background,shiftwidth",
+		pattern = "shiftwidth",
 		callback = function(args)
-			if args.match == "background" then
-				Global.apply_colorscheme()
-			elseif args.match == "shiftwidth" then
-				Global.leadMultiSpaceCalc()
-			end
+			Global.leadMultiSpaceCalc()
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
-			if
-				vim.bo.filetype == "netrw"
-				or vim.bo.filetype == "help"
-				or vim.bo.buftype == "terminal"
-				or vim.bo.buftype == "nofile"
-				or vim.bo.filetype == "qf"
-				or vim.bo.filetype == "git"
-				or vim.bo.filetype == "diff"
-				or vim.bo.filetype == "fugitive"
-				or vim.bo.filetype == "floggraph"
-				or vim.bo.filetype == "dap-repl"
-				or vim.bo.filetype == "dap-float"
-			then
-				-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
-				vim.b.minicursorword_disable = true
-				vim.b.miniindentscope_disable = true
-				vim.b.minitrailspace_disable = true
-				vim.opt_local.listchars:remove("eol")
-				vim.opt_local.listchars:remove("leadmultispace")
-				vim.opt_local.listchars:remove("tab")
-				vim.opt_local.listchars:append({
-					leadmultispace = "  ",
-					tab = "  ",
-				})
-				MiniTrailspace.unhighlight()
-				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
-					-- MiniGit diff fold settings
-					vim.wo.foldmethod = "expr"
-					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-				elseif vim.bo.filetype == "dap-float" then
-					-- Map q to quit window in dap-float filetype
-					Nmap("q", "<C-w>q", "Quit window", { buffer = true })
-				elseif vim.bo.filetype == "dap-repl" then
-					-- Dap repl autocompletion setup
-					require("dap.ext.autocompl").attach()
-				end
-			else
-				-- Set winbar
-				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
-				-- Call leadMultiSpaceCalc to set leadmultispace
-				Global.leadMultiSpaceCalc()
-				-- HTML tag completion with >, >> and >>> for below filetypes
-				if
-					vim.bo.filetype == "svelte"
-					or vim.bo.filetype == "jsx"
-					or vim.bo.filetype == "tsx"
-					or vim.bo.filetype == "html"
-					or vim.bo.filetype == "xml"
-					or vim.bo.filetype == "xsl"
-					or vim.bo.filetype == "javascriptreact"
-					or vim.bo.filetype == "typescriptreact"
-				then
-					vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-					Imap("><Space>", ">", "Cancel html pairs")
-					Imap(
-						">",
-						"><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>",
-						"Html pairs in newline",
-						{
-							buffer = true,
-						}
-					)
-					Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
-						buffer = true,
-					})
-					Imap(
-						">>>",
-						"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
-						"Html pairs in sameline with cursor at end",
-						{
-							buffer = true,
-						}
-					)
-				elseif vim.bo.filetype == "java" then
-					-- Java lsp lazy loading setup
-					require("jdtls").start_or_attach((function()
-						local config = {
-							cmd = { "/usr/bin/jdtls" },
-							root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-							settings = {
-								java = {
-									references = {
-										includeDecompiledSources = true,
-									},
-									eclipse = {
-										downloadSources = true,
-									},
-									maven = {
-										downloadSources = true,
-									},
-									format = {
-										enabled = true,
-									},
-									inlayHints = {
-										parameterNames = {
-											enabled = "all",
-											exclusions = { "this" },
-										},
-									},
-									signatureHelp = { enabled = true, description = { enabled = true } },
-									contentProvider = { preferred = "fernflower" },
-									codeGeneration = {
-										toString = {
-											template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-										},
-										useBlocks = true,
-									},
-									configuration = {
-										runtimes = {
-											{
-												name = "JavaSE-11",
-												path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-											},
-											{
-												name = "JavaSE-17",
-												path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-											},
-											{
-												name = "JavaSE-21",
-												path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
-											},
-										},
-									},
-								},
-							},
-							capabilities = Global.lspCapabilities,
-						}
-						local bundles = {
-							vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-						}
-						vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-						local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-						extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-						config["init_options"] = {
-							bundles = bundles,
-							extendedClientCapabilities = extendedClientCapabilities,
-						}
-						return config
-					end)())
-				end
+			-- Set winbar
+			vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+			-- Call leadMultiSpaceCalc to set leadmultispace
+			Global.leadMultiSpaceCalc()
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "netrw,help,terminal,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float",
+		callback = function()
+			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
+			vim.b.minicursorword_disable = true
+			vim.b.miniindentscope_disable = true
+			vim.b.minitrailspace_disable = true
+			vim.opt_local.listchars:remove("eol")
+			vim.opt_local.listchars:remove("leadmultispace")
+			vim.opt_local.listchars:remove("tab")
+			vim.opt_local.listchars:append({
+				leadmultispace = "  ",
+				tab = "  ",
+			})
+			MiniTrailspace.unhighlight()
+			if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
+				-- MiniGit diff fold settings
+				vim.wo.foldmethod = "expr"
+				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+			elseif vim.bo.filetype == "dap-float" then
+				-- Map q to quit window in dap-float filetype
+				Nmap("q", "<C-w>q", "Quit window", { buffer = true })
+			elseif vim.bo.filetype == "dap-repl" then
+				-- Dap repl autocompletion setup
+				require("dap.ext.autocompl").attach()
 			end
 		end,
 	})
-	-- vim.api.nvim_create_autocmd("LspAttach", {
-	-- 	callback = function(args)
-	-- 		-- Disable semantic highlighting
-	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
-	-- 		client.server_capabilities.semanticTokensProvider = nil
-	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-	-- 	end,
-	-- })
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "svelte,jsx,tsx,html,xml,xsl,javascriptreact,typescriptreact",
+		callback = function()
+			-- HTML tag completion with >, >> and >>> for below filetypes
+			vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+			Imap("><Space>", ">", "Cancel html pairs")
+			Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Html pairs in newline", {
+				buffer = true,
+			})
+			Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
+				buffer = true,
+			})
+			Imap(
+				">>>",
+				"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
+				"Html pairs in sameline with cursor at end",
+				{
+					buffer = true,
+				}
+			)
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "java",
+		callback = function()
+			-- Remove below minicompletion tweaks once https://github.com/echasnovski/mini.nvim/discussions/1315 is resolved
+			vim.b.minicompletion_config = {
+				lsp_completion = {
+					process_items = function(items, base)
+						for _, i in ipairs(items) do
+							i.detail = nil
+						end
+						return MiniCompletion.default_process_items(items, base)
+					end,
+				},
+			}
+			-- Java lsp lazy loading setup
+			require("jdtls").start_or_attach((function()
+				local config = {
+					cmd = { "/usr/bin/jdtls" },
+					root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+					settings = {
+						java = {
+							references = {
+								includeDecompiledSources = true,
+							},
+							eclipse = {
+								downloadSources = true,
+							},
+							maven = {
+								downloadSources = true,
+							},
+							format = {
+								enabled = true,
+							},
+							inlayHints = {
+								parameterNames = {
+									enabled = "all",
+									exclusions = { "this" },
+								},
+							},
+							signatureHelp = { enabled = true, description = { enabled = true } },
+							contentProvider = { preferred = "fernflower" },
+							codeGeneration = {
+								toString = {
+									template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+								},
+								useBlocks = true,
+							},
+							configuration = {
+								runtimes = {
+									{
+										name = "JavaSE-11",
+										path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+									},
+									{
+										name = "JavaSE-17",
+										path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+									},
+									{
+										name = "JavaSE-21",
+										path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+									},
+								},
+							},
+						},
+					},
+					capabilities = Global.lspCapabilities,
+				}
+				local bundles = {
+					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
+				}
+				vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+				local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+				extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+				config["init_options"] = {
+					bundles = bundles,
+					extendedClientCapabilities = extendedClientCapabilities,
+				}
+				return config
+			end)())
+		end,
+	})
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			-- Disable semantic highlighting
+			-- local client = vim.lsp.get_client_by_id(args.data.client_id)
+			-- client.server_capabilities.semanticTokensProvider = nil
+			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+		end,
+	})
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
