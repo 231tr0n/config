@@ -33,23 +33,44 @@ now(function()
 		leadSpace = "›", -- │
 		nextSpace = " ",
 		palette = {
-			base00 = "#282C34",
-			base01 = "#353B45",
-			base02 = "#3E4451",
-			base03 = "#545862",
-			base04 = "#565C64",
-			base05 = "#ABB2BF",
-			base06 = "#B6BDCA",
-			base07 = "#C8CCD4",
-			base08 = "#E06C75",
-			base09 = "#D19A66",
-			base0A = "#E5C07B",
-			base0B = "#98C379",
-			base0C = "#56B6C2",
-			base0D = "#61AFEF",
-			base0E = "#C678DD",
-			base0F = "#BE5046",
+			base00 = "#2E3440",
+			base01 = "#3B4252",
+			base02 = "#434C5E",
+			base03 = "#4C566A",
+			base04 = "#D8DEE9",
+			base05 = "#E5E9F0",
+			base06 = "#ECEFF4",
+			base07 = "#8FBCBB",
+			base08 = "#88C0D0",
+			base09 = "#81A1C1",
+			base0A = "#5E81AC",
+			base0B = "#BF616A",
+			base0C = "#D08770",
+			base0D = "#EBCB8B",
+			base0E = "#A3BE8C",
+			base0F = "#B48EAD",
 		},
+		palette_extra = {
+			base03_bright = "#616E88",
+		},
+		-- palette = {
+		-- 	base00 = "#282C34",
+		-- 	base01 = "#353B45",
+		-- 	base02 = "#3E4451",
+		-- 	base03 = "#545862",
+		-- 	base04 = "#565C64",
+		-- 	base05 = "#ABB2BF",
+		-- 	base06 = "#B6BDCA",
+		-- 	base07 = "#C8CCD4",
+		-- 	base08 = "#E06C75",
+		-- 	base09 = "#D19A66",
+		-- 	base0A = "#E5C07B",
+		-- 	base0B = "#98C379",
+		-- 	base0C = "#56B6C2",
+		-- 	base0D = "#61AFEF",
+		-- 	base0E = "#C678DD",
+		-- 	base0F = "#BE5046",
+		-- },
 	}
 	-- Add document support for completion items to lspCapabilities
 	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport = Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport
@@ -533,9 +554,20 @@ now(function()
 		sync_install = false,
 		auto_install = true,
 		ignore_install = {},
-		-- Disable highlighting if file size is greater than 2MB
+		indent = {
+			enable = true,
+			-- Disable indenting if file size is greater than 2MB
+			disable = function(lang, buf)
+				local max_filesize = 2 * 1024 * 1024
+				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
+					return true
+				end
+			end,
+		},
 		highlight = {
 			enable = true,
+			-- Disable highlighting if file size is greater than 2MB
 			disable = function(lang, buf)
 				local max_filesize = 2 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
@@ -549,6 +581,7 @@ now(function()
 		},
 	})
 	vim.wo.foldmethod = "expr"
+	-- Set foldexpr to treesitter provided folds
 	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	add("mfussenegger/nvim-dap")
 	local dap = require("dap")
@@ -867,9 +900,13 @@ now(function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "shiftwidth",
-		callback = function()
-			Global.leadMultiSpaceCalc()
+		pattern = "shiftwidth,background",
+		callback = function(args)
+			if args.match == "background" then
+				Global.apply_colorscheme()
+			elseif args.match == "shiftwidth" then
+				Global.leadMultiSpaceCalc()
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
@@ -897,7 +934,7 @@ now(function()
 			})
 			MiniTrailspace.unhighlight()
 			if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
-				-- MiniGit diff fold settings
+				-- Set foldexpr to mini.diff provided folds
 				vim.wo.foldmethod = "expr"
 				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 			elseif vim.bo.filetype == "dap-float" then
@@ -1012,14 +1049,15 @@ now(function()
 			end)())
 		end,
 	})
-	-- vim.api.nvim_create_autocmd("LspAttach", {
-	-- 	callback = function(args)
-	-- 		-- Disable semantic highlighting
-	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
-	-- 		client.server_capabilities.semanticTokensProvider = nil
-	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-	-- 	end,
-	-- })
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			-- Disable semantic highlighting
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			client.server_capabilities.semanticTokensProvider = nil
+			-- Set foldexpr to lsp provided folds
+			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+		end,
+	})
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
