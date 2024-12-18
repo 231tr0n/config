@@ -30,8 +30,9 @@ now(function()
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
 		-- Space and tab characters to use
-		leadSpace = "›", -- │
+		leadSpace = "›",
 		nextSpace = " ",
+		leadTabSpace = "»",
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -59,6 +60,7 @@ now(function()
 		"detail",
 	}
 	-- Function to set leadmultispace correctly
+	Global.leadMultiTabSpace = Global.leadTabSpace .. Global.nextSpace
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
 	Global.leadMultiSpaceCalc = function()
 		vim.opt_local.listchars:remove("leadmultispace")
@@ -138,7 +140,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:" .. Global.leadMultiSpace .. ",trail: ,extends:»,precedes:«,nbsp:⦸,eol:¬"
+	vim.o.listchars = "tab:" .. Global.leadMultiTabSpace .. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:1,hor:1"
