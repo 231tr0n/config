@@ -170,7 +170,7 @@ now(function()
 	vim.o.showcmd = true
 	vim.o.showmatch = true
 	vim.o.showmode = false
-	vim.o.signcolumn = "auto:1"
+	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = false
 	vim.o.splitbelow = true
 	vim.o.splitright = true
