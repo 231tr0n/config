@@ -451,9 +451,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	add("yorickpeterse/nvim-window")
-	add("yorickpeterse/nvim-pqf")
-	require("pqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -829,7 +826,6 @@ now(function()
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
-	Nmap("<leader>wp", require("nvim-window").pick, "Pick window")
 	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
