@@ -755,9 +755,9 @@ now(function()
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
 	Nmap("<leader>bd", ":lua MiniBufremove.delete()<CR>", "Delete")
-	Nmap("<leader>bz", MiniMisc.zoom, "Open current buffer in zoomed manner")
 	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
+	Nmap("<leader>bz", MiniMisc.zoom, "Open current buffer in zoomed manner")
 	Nmap("<leader>cP", '"+P', "Paste to clipboard")
 	Nmap("<leader>cX", '"+X', "Cut to clipboard")
 	Nmap("<leader>cY", '"+Y', "Copy to clipboard")
@@ -827,9 +827,9 @@ now(function()
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
-	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wp", require("nvim-window").pick, "Pick window")
+	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
 	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
@@ -843,6 +843,7 @@ now(function()
 	Vmap("<leader>cp", '"+p', "Paste to clipboard")
 	Vmap("<leader>cx", '"+x', "Cut to clipboard")
 	Vmap("<leader>cy", '"+y', "Copy to clipboard")
+	Vmap("<leader>h", ':vim.fn.setqflist(MiniDiff.export("qf"))', "List diff hunks")
 	Xmap("<leader>lf", require("conform").format, "Format code")
 end)
 
@@ -1067,13 +1068,6 @@ later(function()
 		source = "mfussenegger/nvim-dap-python",
 		depends = {
 			"mfussenegger/nvim-dap",
-		},
-	})
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
 		},
 	})
 	add("David-Kunz/gen.nvim")
