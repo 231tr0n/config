@@ -664,36 +664,12 @@ now(function()
 	})
 	require("treesj").setup()
 	add({
-		source = "andrewferrier/debugprint.nvim",
+		source = "Goose97/timber.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
-			"echasnovski/mini.nvim",
 		},
 	})
-	require("debugprint").setup({
-		keymaps = {
-			normal = {
-				plain_below = "<leader>pp",
-				plain_above = "<leader>pP",
-				variable_below = "<leader>pv",
-				variable_above = "<leader>pV",
-				variable_below_alwaysprompt = "<leader>pq",
-				variable_above_alwaysprompt = "<leader>pQ",
-				textobj_below = "<leader>po",
-				textobj_above = "<leader>pO",
-				toggle_comment_debug_prints = "<leader>pc",
-				delete_debug_prints = "<leader>pd",
-			},
-			insert = {
-				plain = "<C-G>p",
-				variable = "<C-G>v",
-			},
-			visual = {
-				variable_below = "<leader>pv",
-				variable_above = "<leader>pV",
-			},
-		},
-	})
+	require("timber").setup()
 end)
 
 -- New commands registration
