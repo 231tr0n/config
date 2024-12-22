@@ -807,7 +807,7 @@ now(function()
 	Nmap("<leader>dl", ":lua require('dap').run_last()<CR>", "Run Last")
 	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<CR>", "Set log point")
 	Nmap("<leader>dp", ":lua require('dap.ui.widgets').preview()<CR>", "Preview")
-	Nmap("<leader>dr", ":lua require('dap').repl.open({}, '30vsplit new')<CR>", "Open Repl")
+	Nmap("<leader>dr", ":lua require('dap').repl.open({}, 'vsplit new')<CR>", "Open Repl")
 	Nmap("<leader>ds", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets'.scopes)<CR>", "Scopes")
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
@@ -986,6 +986,7 @@ now(function()
 			)
 		end,
 	})
+	-- Java lsp and debug setup
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "java",
 		callback = function()
@@ -1094,13 +1095,6 @@ end)
 
 -- Lazy loaded plugins registration
 later(function()
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
 	add({
 		source = "leoluz/nvim-dap-go",
 		depends = {
@@ -1111,6 +1105,19 @@ later(function()
 		source = "mfussenegger/nvim-dap-python",
 		depends = {
 			"mfussenegger/nvim-dap",
+		},
+	})
+	add({
+		source = "mfussenegger/nluarepl",
+		depends = {
+			"mfussenegger/nvim-dap",
+		},
+	})
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
 		},
 	})
 	add("David-Kunz/gen.nvim")
@@ -1147,162 +1154,6 @@ later(function()
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-end)
-
--- Lazy loaded dap configurations setup
-later(function()
-	local dap = require("dap")
-	dap.adapters.delve = {
-		type = "server",
-		host = "127.0.0.1",
-		port = 38697,
-	}
-	require("dap-go").setup({
-		dap_configurations = {
-			{
-				type = "go",
-				name = "Attach remote",
-				mode = "remote",
-				request = "attach",
-			},
-			{
-				type = "go",
-				name = "Attach remote(Substitute path)",
-				mode = "remote",
-				request = "attach",
-				substitutePath = {
-					{ from = "${workspaceFolder}", to = "${workspaceFolder}" },
-				},
-			},
-		},
-	})
-	require("dap-python").setup("~/.local/share/debugpy/bin/python")
-	require("dap").adapters["pwa-node"] = {
-		type = "server",
-		host = "localhost",
-		port = "${port}",
-		executable = {
-			command = "node",
-			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
-		},
-	}
-	for _, language in ipairs({ "typescript", "javascript" }) do
-		require("dap").configurations[language] = {
-			{
-				type = "pwa-node",
-				request = "launch",
-				name = "Launch file",
-				program = "${file}",
-				cwd = "${workspaceFolder}",
-			},
-			{
-				type = "pwa-node",
-				request = "attach",
-				name = "Attach",
-				processId = require("dap.utils").pick_process,
-				cwd = "${workspaceFolder}",
-			},
-			{
-				type = "pwa-node",
-				request = "launch",
-				name = "Debug Jest Tests",
-				-- trace = true, -- include debugger info
-				runtimeExecutable = "node",
-				runtimeArgs = {
-					"./node_modules/jest/bin/jest.js",
-					"--runInBand",
-				},
-				rootPath = "${workspaceFolder}",
-				cwd = "${workspaceFolder}",
-				console = "integratedTerminal",
-				internalConsoleOptions = "neverOpen",
-			},
-			{
-				type = "pwa-node",
-				request = "launch",
-				name = "Debug Mocha Tests",
-				-- trace = true, -- include debugger info
-				runtimeExecutable = "node",
-				runtimeArgs = {
-					"./node_modules/mocha/bin/mocha.js",
-				},
-				rootPath = "${workspaceFolder}",
-				cwd = "${workspaceFolder}",
-				console = "integratedTerminal",
-				internalConsoleOptions = "neverOpen",
-			},
-		}
-	end
-	dap.configurations.java = {
-		{
-			type = "java",
-			request = "attach",
-			name = "Debug (Attach) - Remote",
-			hostName = "127.0.0.1",
-			port = 5005,
-		},
-	}
-	dap.adapters.lldb = {
-		type = "executable",
-		command = (function()
-			if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
-				return "/usr/bin/lldb-dap-18"
-			end
-			return "/usr/bin/lldb-dap"
-		end)(),
-		name = "lldb",
-	}
-	dap.configurations.rust = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-			initCommands = function()
-				local rustc_sysroot = vim.fn.trim(vim.fn.system("rustc --print sysroot"))
-				local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
-				local commands_file = rustc_sysroot .. "/lib/rustlib/etc/lldb_commands"
-				local commands = {}
-				local file = io.open(commands_file, "r")
-				if file then
-					for line in file:lines() do
-						table.insert(commands, line)
-					end
-					file:close()
-				end
-				table.insert(commands, 1, script_import)
-				return commands
-			end,
-		},
-	}
-	dap.configurations.cpp = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-		},
-	}
-	dap.configurations.c = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-		},
-	}
 end)
 
 -- Lazy loaded lsp configurations setup
@@ -1479,6 +1330,156 @@ later(function()
 	})
 	-- Start lsp lazily
 	vim.cmd("LspStart")
+end)
+
+-- Lazy loaded dap configurations setup
+later(function()
+	local dap = require("dap")
+	dap.adapters.delve = {
+		type = "server",
+		host = "127.0.0.1",
+		port = 38697,
+	}
+	require("dap-go").setup({
+		dap_configurations = {
+			{
+				type = "go",
+				name = "Attach remote",
+				mode = "remote",
+				request = "attach",
+				-- substitutePath = {
+				-- 	{ from = "${workspaceFolder}", to = "${workspaceFolder}" },
+				-- },
+			},
+		},
+	})
+	require("dap-python").setup("~/.local/share/debugpy/bin/python")
+	require("dap").adapters["pwa-node"] = {
+		type = "server",
+		host = "localhost",
+		port = "${port}",
+		executable = {
+			command = "node",
+			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
+		},
+	}
+	for _, language in ipairs({ "typescript", "javascript" }) do
+		require("dap").configurations[language] = {
+			{
+				type = "pwa-node",
+				request = "launch",
+				name = "Launch file",
+				program = "${file}",
+				cwd = "${workspaceFolder}",
+			},
+			{
+				type = "pwa-node",
+				request = "attach",
+				name = "Attach",
+				processId = require("dap.utils").pick_process,
+				cwd = "${workspaceFolder}",
+			},
+			{
+				type = "pwa-node",
+				request = "launch",
+				name = "Debug Jest Tests",
+				-- trace = true, -- include debugger info
+				runtimeExecutable = "node",
+				runtimeArgs = {
+					"./node_modules/jest/bin/jest.js",
+					"--runInBand",
+				},
+				rootPath = "${workspaceFolder}",
+				cwd = "${workspaceFolder}",
+				console = "integratedTerminal",
+				internalConsoleOptions = "neverOpen",
+			},
+			{
+				type = "pwa-node",
+				request = "launch",
+				name = "Debug Mocha Tests",
+				-- trace = true, -- include debugger info
+				runtimeExecutable = "node",
+				runtimeArgs = {
+					"./node_modules/mocha/bin/mocha.js",
+				},
+				rootPath = "${workspaceFolder}",
+				cwd = "${workspaceFolder}",
+				console = "integratedTerminal",
+				internalConsoleOptions = "neverOpen",
+			},
+		}
+	end
+	dap.configurations.java = {
+		{
+			type = "java",
+			request = "attach",
+			name = "Debug (Attach) - Remote",
+			hostName = "127.0.0.1",
+			port = 5005,
+		},
+	}
+	dap.adapters.lldb = {
+		type = "executable",
+		command = (function()
+			if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
+				return "/usr/bin/lldb-dap-18"
+			end
+			return "/usr/bin/lldb-dap"
+		end)(),
+		name = "lldb",
+	}
+	dap.configurations.rust = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+			initCommands = function()
+				local rustc_sysroot = vim.fn.trim(vim.fn.system("rustc --print sysroot"))
+				local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
+				local commands_file = rustc_sysroot .. "/lib/rustlib/etc/lldb_commands"
+				local commands = {}
+				local file = io.open(commands_file, "r")
+				if file then
+					for line in file:lines() do
+						table.insert(commands, line)
+					end
+					file:close()
+				end
+				table.insert(commands, 1, script_import)
+				return commands
+			end,
+		},
+	}
+	dap.configurations.cpp = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+		},
+	}
+	dap.configurations.c = {
+		{
+			name = "Launch file",
+			type = "lldb",
+			request = "launch",
+			program = function()
+				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+			stopOnEntry = false,
+		},
+	}
 end)
 
 -- Lazy loaded custom configuration
