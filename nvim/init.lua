@@ -451,6 +451,8 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("yorickpeterse/nvim-pqf")
+	require("pqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -677,6 +679,63 @@ now(function() end)
 
 -- Non lazy keymaps registration
 now(function()
+	local te_buf = nil
+	local te_win_id = nil
+	local function openTerminal()
+		if vim.fn.bufexists(te_buf) ~= 1 then
+			vim.cmd("split | wincmd J | resize 10 | terminal")
+			te_win_id = vim.fn.win_getid()
+			te_buf = vim.fn.bufnr("%")
+		elseif vim.fn.win_gotoid(te_win_id) ~= 1 then
+			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
+			te_win_id = vim.fn.win_getid()
+		end
+		vim.cmd("startinsert")
+	end
+	local function hideTerminal()
+		if vim.fn.win_gotoid(te_win_id) == 1 then
+			vim.cmd("hide")
+		end
+	end
+	local function toggleTerminal()
+		if vim.fn.win_gotoid(te_win_id) == 1 then
+			hideTerminal()
+		else
+			openTerminal()
+		end
+	end
+	-- Function to toggle quickfix list
+	local function toggleQuickFix()
+		local qf_exists = false
+		for _, win in pairs(vim.fn.getwininfo()) do
+			if win["quickfix"] == 1 then
+				qf_exists = true
+			end
+		end
+		if qf_exists == true then
+			vim.cmd("cclose")
+			return
+		end
+		if not vim.tbl_isempty(vim.fn.getqflist()) then
+			vim.cmd("copen")
+		end
+	end
+	-- Function to toggle location list
+	local function toggleLocList()
+		local ll_exists = false
+		for _, win in pairs(vim.fn.getwininfo()) do
+			if win["loclist"] == 1 then
+				ll_exists = true
+			end
+		end
+		if ll_exists == true then
+			vim.cmd("lclose")
+			return
+		end
+		if not vim.tbl_isempty(vim.fn.getloclist(0)) then
+			vim.cmd("lopen")
+		end
+	end
 	-- Function to convert spaces to tabs
 	local function toggleTabs()
 		vim.opt.expandtab = false
@@ -716,6 +775,7 @@ now(function()
 	Imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
+	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
 	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
 	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
@@ -800,6 +860,8 @@ now(function()
 	Nmap("<leader>lh", ":lua vim.lsp.buf.hover()<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
+	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
+	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
@@ -1073,44 +1135,10 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
-	-- Function to toggle quickfix list
-	local function toggleQuickFix()
-		local qf_exists = false
-		for _, win in pairs(vim.fn.getwininfo()) do
-			if win["quickfix"] == 1 then
-				qf_exists = true
-			end
-		end
-		if qf_exists == true then
-			vim.cmd("cclose")
-			return
-		end
-		if not vim.tbl_isempty(vim.fn.getqflist()) then
-			vim.cmd("copen")
-		end
-	end
-	-- Function to toggle location list
-	local function toggleLocList()
-		local ll_exists = false
-		for _, win in pairs(vim.fn.getwininfo()) do
-			if win["loclist"] == 1 then
-				ll_exists = true
-			end
-		end
-		if ll_exists == true then
-			vim.cmd("lclose")
-			return
-		end
-		if not vim.tbl_isempty(vim.fn.getloclist(0)) then
-			vim.cmd("lopen")
-		end
-	end
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
 	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
-	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
-	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
 	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
 	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
 	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
