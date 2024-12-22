@@ -1056,6 +1056,13 @@ end)
 
 -- Lazy loaded plugins registration
 later(function()
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
+		},
+	})
 	add({
 		source = "leoluz/nvim-dap-go",
 		depends = {
