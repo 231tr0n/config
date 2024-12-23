@@ -1106,12 +1106,6 @@ end)
 -- Lazy loaded plugins registration
 later(function()
 	add({
-		source = "leoluz/nvim-dap-go",
-		depends = {
-			"mfussenegger/nvim-dap",
-		},
-	})
-	add({
 		source = "mfussenegger/nvim-dap-python",
 		depends = {
 			"mfussenegger/nvim-dap",
@@ -1150,7 +1144,6 @@ later(function()
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
 	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
-	Nmap("<leader>tgm", ":lua require('dap-go').debug_test()<CR>", "Test method")
 	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
 	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
@@ -1339,25 +1332,10 @@ end)
 -- Lazy loaded dap configurations setup
 later(function()
 	local dap = require("dap")
-	dap.adapters.delve = {
-		type = "server",
-		host = "127.0.0.1",
-		port = 38697,
-	}
-	require("dap-go").setup({
-		dap_configurations = {
-			{
-				type = "go",
-				name = "Attach remote",
-				mode = "remote",
-				request = "attach",
-				-- substitutePath = {
-				-- 	{ from = "${workspaceFolder}", to = "${workspaceFolder}" },
-				-- },
-			},
-		},
-	})
+	-- Debug plugin setups
+	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
 	require("dap-python").setup("~/.local/share/debugpy/bin/python")
+	-- Adapter definitions
 	dap.adapters["pwa-node"] = {
 		type = "server",
 		host = "localhost",
@@ -1365,6 +1343,76 @@ later(function()
 		executable = {
 			command = "node",
 			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
+		},
+	}
+	dap.adapters.lldb = {
+		type = "executable",
+		command = (function()
+			if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
+				return "/usr/bin/lldb-dap-18"
+			end
+			return "/usr/bin/lldb-dap"
+		end)(),
+		name = "lldb",
+	}
+	dap.adapters.delve = function(callback, config)
+		if config.mode == "remote" and config.request == "attach" then
+			callback({
+				type = "server",
+				host = config.host or "127.0.0.1",
+				port = config.port or "38697",
+			})
+		else
+			callback({
+				type = "server",
+				port = "${port}",
+				executable = {
+					command = "dlv",
+					args = { "dap", "-l", "127.0.0.1:${port}", "--log", "--log-output=dap" },
+					detached = vim.fn.has("win32") == 0,
+				},
+			})
+		end
+	end
+	-- Debug configurations
+	-- dlv debug --headless -l 127.0.0.1:38697 main.go
+	dap.configurations.go = {
+		{
+			type = "delve",
+			name = "Debug",
+			request = "launch",
+			program = "${file}",
+		},
+		{
+			type = "delve",
+			name = "Debug test",
+			request = "launch",
+			mode = "test",
+			program = "${file}",
+		},
+		{
+			type = "delve",
+			name = "Debug test (go.mod)",
+			request = "launch",
+			mode = "test",
+			program = "./${relativeFileDirname}",
+		},
+		{
+			type = "delve",
+			name = "Attach remote",
+			mode = "remote",
+			request = "attach",
+		},
+	}
+	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 Main.java
+	-- mvnDebug exec:java -Dexec.mainClass="com.mycompany.app.App"
+	dap.configurations.java = {
+		{
+			type = "java",
+			request = "attach",
+			name = "Attach remote",
+			hostName = "127.0.0.1",
+			port = 8000,
 		},
 	}
 	for _, language in ipairs({ "typescript", "javascript" }) do
@@ -1387,7 +1435,7 @@ later(function()
 				type = "pwa-node",
 				request = "launch",
 				name = "Debug Jest Tests",
-				-- trace = true, -- include debugger info
+				-- trace = true,
 				runtimeExecutable = "node",
 				runtimeArgs = {
 					"./node_modules/jest/bin/jest.js",
@@ -1402,7 +1450,7 @@ later(function()
 				type = "pwa-node",
 				request = "launch",
 				name = "Debug Mocha Tests",
-				-- trace = true, -- include debugger info
+				-- trace = true,
 				runtimeExecutable = "node",
 				runtimeArgs = {
 					"./node_modules/mocha/bin/mocha.js",
@@ -1414,25 +1462,6 @@ later(function()
 			},
 		}
 	end
-	dap.configurations.java = {
-		{
-			type = "java",
-			request = "attach",
-			name = "Debug (Attach) - Remote",
-			hostName = "127.0.0.1",
-			port = 5005,
-		},
-	}
-	dap.adapters.lldb = {
-		type = "executable",
-		command = (function()
-			if vim.fn.empty(os.execute("which lldb-vscode")) == 0 then
-				return "/usr/bin/lldb-dap-18"
-			end
-			return "/usr/bin/lldb-dap"
-		end)(),
-		name = "lldb",
-	}
 	dap.configurations.rust = {
 		{
 			name = "Launch file",
