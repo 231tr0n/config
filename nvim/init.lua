@@ -21,7 +21,10 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Track and update self
-add("echasnovski/mini.nvim")
+add({
+	source = "echasnovski/mini.nvim",
+	depends = { "rafamadriz/friendly-snippets" },
+})
 
 -- Globals variables and functions declared and used
 now(function()
@@ -389,6 +392,11 @@ now(function()
 	})
 	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
+	require("mini.snippets").setup({
+		snippets = {
+			require("mini.snippets").gen_loader.from_lang(),
+		},
+	})
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
 		header = table.concat({
@@ -1105,12 +1113,6 @@ later(function()
 	})
 	add({
 		source = "mfussenegger/nvim-dap-python",
-		depends = {
-			"mfussenegger/nvim-dap",
-		},
-	})
-	add({
-		source = "mfussenegger/nluarepl",
 		depends = {
 			"mfussenegger/nvim-dap",
 		},
