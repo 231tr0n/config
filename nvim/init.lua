@@ -453,6 +453,8 @@ end)
 now(function()
 	add("yorickpeterse/nvim-pqf")
 	require("pqf").setup()
+	add("kevinhwang91/nvim-bqf")
+	require("bqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -636,13 +638,6 @@ now(function()
 		typescript = { "eslint" },
 	}
 	add({
-		source = "mfussenegger/nvim-jdtls",
-		depends = {
-			"mfussenegger/nvim-dap",
-			"neovim/nvim-lspconfig",
-		},
-	})
-	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -672,6 +667,13 @@ now(function()
 		},
 	})
 	require("timber").setup()
+	add({
+		source = "mfussenegger/nvim-jdtls",
+		depends = {
+			"mfussenegger/nvim-dap",
+			"neovim/nvim-lspconfig",
+		},
+	})
 end)
 
 -- New commands registration
