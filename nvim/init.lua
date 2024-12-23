@@ -818,7 +818,7 @@ now(function()
 	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<CR>", "Set log point")
 	Nmap("<leader>dp", ":lua require('dap.ui.widgets').preview()<CR>", "Preview")
 	Nmap("<leader>dr", ":lua require('dap').repl.open({}, 'vsplit new')<CR>", "Open Repl")
-	Nmap("<leader>ds", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets'.scopes)<CR>", "Scopes")
+	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
@@ -1368,7 +1368,7 @@ later(function()
 				port = "${port}",
 				executable = {
 					command = "dlv",
-					args = { "dap", "-l", "127.0.0.1:${port}", "--log", "--log-output=dap" },
+					args = { "dap", "-l", "127.0.0.1:${port}" },
 					detached = vim.fn.has("win32") == 0,
 				},
 			})
