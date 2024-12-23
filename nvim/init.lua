@@ -1356,7 +1356,7 @@ later(function()
 		},
 	})
 	require("dap-python").setup("~/.local/share/debugpy/bin/python")
-	require("dap").adapters["pwa-node"] = {
+	dap.adapters["pwa-node"] = {
 		type = "server",
 		host = "localhost",
 		port = "${port}",
@@ -1366,7 +1366,7 @@ later(function()
 		},
 	}
 	for _, language in ipairs({ "typescript", "javascript" }) do
-		require("dap").configurations[language] = {
+		dap.configurations[language] = {
 			{
 				type = "pwa-node",
 				request = "launch",
