@@ -1360,7 +1360,7 @@ later(function()
 			callback({
 				type = "server",
 				host = config.host or "127.0.0.1",
-				port = config.port or "38697",
+				port = config.port or 38697,
 			})
 		else
 			callback({
@@ -1402,6 +1402,8 @@ later(function()
 			name = "Attach remote",
 			mode = "remote",
 			request = "attach",
+			hostName = "127.0.0.1",
+			port = 38697,
 		},
 	}
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 Main.java
