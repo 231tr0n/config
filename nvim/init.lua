@@ -21,10 +21,7 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Track and update self
-add({
-	source = "echasnovski/mini.nvim",
-	depends = { "rafamadriz/friendly-snippets" },
-})
+add("echasnovski/mini.nvim")
 
 -- Globals variables and functions declared and used
 now(function()
@@ -393,6 +390,8 @@ now(function()
 	})
 	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
+	-- Snippets provider plugin
+	add("rafamadriz/friendly-snippets")
 	require("mini.snippets").setup({
 		snippets = {
 			require("mini.snippets").gen_loader.from_lang(),
@@ -597,43 +596,6 @@ now(function()
 	local dap = require("dap")
 	dap.defaults.fallback.force_external_terminal = true
 	dap.defaults.fallback.terminal_win_cmd = "belowright new | resize 15"
-	add("stevearc/conform.nvim")
-	local conform = require("conform")
-	conform.setup({
-		formatters_by_ft = {
-			c = { "clang_format" },
-			css = { "prettier" },
-			fish = { "fish_indent" },
-			go = { "gofmt", "gofumpt", "goimports", "golines" },
-			groovy = { "npm-groovy-lint" },
-			html = { "prettier" },
-			java = { "google-java-format" },
-			javascript = { "prettier" },
-			json = { "jq", "prettier" },
-			jsonc = { "prettier" },
-			lua = { "stylua" },
-			python = { "black" },
-			rust = { "rustfmt" },
-			sh = { "shfmt" },
-			sql = { "sqlfluff" },
-			svelte = { "prettier" },
-			svg = { "xmllint" },
-			tex = { "latexindent" },
-			typescript = { "prettier" },
-			xml = { "xmllint" },
-			yaml = { "yamlfmt" },
-		},
-		default_format_opts = {
-			lsp_format = "fallback",
-		},
-	})
-	conform.formatters.yamlfmt = {
-		prepend_args = { "-formatter", "include_document_start=true,indentless_arrays=true" },
-	}
-	conform.formatters.shfmt = {
-		prepend_args = { "-s" },
-	}
-	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 	add({
 		source = "nvim-treesitter/nvim-treesitter-context",
 		depends = {
@@ -648,23 +610,6 @@ now(function()
 		},
 	})
 	require("neogen").setup({ snippet_engine = "nvim" })
-	add("mfussenegger/nvim-lint")
-	require("lint").linters_by_ft = {
-		-- lua = { "luacheck" },
-		-- yaml = { "yamllint" },
-		c = { "clangtidy" },
-		go = { "golangcilint" },
-		groovy = { "npm-groovy-lint" },
-		java = { "checkstyle" },
-		javascript = { "eslint" },
-		json = { "jsonlint" },
-		jsonc = { "jsonlint" },
-		python = { "pylint" },
-		sh = { "shellcheck" },
-		sql = { "sqlfluff" },
-		svelte = { "eslint" },
-		typescript = { "eslint" },
-	}
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
@@ -771,8 +716,63 @@ now(function()
 	end
 end)
 
--- New commands registration
-now(function() end)
+-- Linting and formatting setup
+now(function()
+	add("stevearc/conform.nvim")
+	local conform = require("conform")
+	conform.setup({
+		formatters_by_ft = {
+			c = { "clang_format" },
+			css = { "prettier" },
+			fish = { "fish_indent" },
+			go = { "gofmt", "gofumpt", "goimports", "golines" },
+			groovy = { "npm-groovy-lint" },
+			html = { "prettier" },
+			java = { "google-java-format" },
+			javascript = { "prettier" },
+			json = { "jq", "prettier" },
+			jsonc = { "prettier" },
+			lua = { "stylua" },
+			python = { "black" },
+			rust = { "rustfmt" },
+			sh = { "shfmt" },
+			sql = { "sqlfluff" },
+			svelte = { "prettier" },
+			svg = { "xmllint" },
+			tex = { "latexindent" },
+			typescript = { "prettier" },
+			xml = { "xmllint" },
+			yaml = { "yamlfmt" },
+		},
+		default_format_opts = {
+			lsp_format = "fallback",
+		},
+	})
+	conform.formatters.yamlfmt = {
+		prepend_args = { "-formatter", "include_document_start=true,indentless_arrays=true" },
+	}
+	conform.formatters.shfmt = {
+		prepend_args = { "-s" },
+	}
+	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+	add("mfussenegger/nvim-lint")
+	require("lint").linters_by_ft = {
+		-- lua = { "luacheck" },
+		-- yaml = { "yamllint" },
+		c = { "clangtidy" },
+		go = { "golangcilint" },
+		groovy = { "npm-groovy-lint" },
+		java = { "checkstyle" },
+		javascript = { "eslint" },
+		json = { "jsonlint" },
+		jsonc = { "jsonlint" },
+		python = { "pylint" },
+		sh = { "shellcheck" },
+		sql = { "sqlfluff" },
+		svelte = { "eslint" },
+		typescript = { "eslint" },
+	}
+end)
 
 -- Non lazy keymaps registration
 now(function()
