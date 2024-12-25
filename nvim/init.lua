@@ -1262,21 +1262,50 @@ later(function()
 			},
 		},
 	})
-	lspconfig.vtsls.setup({
+	lspconfig.ts_ls.setup({
 		capabilities = Global.lspCapabilities,
 		settings = {
 			typescript = {
 				inlayHints = {
-					parameterNames = { enabled = "all" },
-					parameterTypes = { enabled = true },
-					variableTypes = { enabled = true },
-					propertyDeclarationTypes = { enabled = true },
-					functionLikeReturnTypes = { enabled = true },
-					enumMemberValues = { enabled = true },
+					includeInlayParameterNameHints = "all",
+					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+					includeInlayFunctionParameterTypeHints = true,
+					includeInlayVariableTypeHints = true,
+					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+					includeInlayPropertyDeclarationTypeHints = true,
+					includeInlayFunctionLikeReturnTypeHints = true,
+					includeInlayEnumMemberValueHints = true,
+				},
+			},
+			javascript = {
+				inlayHints = {
+					includeInlayParameterNameHints = "all",
+					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+					includeInlayFunctionParameterTypeHints = true,
+					includeInlayVariableTypeHints = true,
+					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+					includeInlayPropertyDeclarationTypeHints = true,
+					includeInlayFunctionLikeReturnTypeHints = true,
+					includeInlayEnumMemberValueHints = true,
 				},
 			},
 		},
 	})
+	-- lspconfig.vtsls.setup({
+	-- 	capabilities = Global.lspCapabilities,
+	-- 	settings = {
+	-- 		typescript = {
+	-- 			inlayHints = {
+	-- 				parameterNames = { enabled = "all" },
+	-- 				parameterTypes = { enabled = true },
+	-- 				variableTypes = { enabled = true },
+	-- 				propertyDeclarationTypes = { enabled = true },
+	-- 				functionLikeReturnTypes = { enabled = true },
+	-- 				enumMemberValues = { enabled = true },
+	-- 			},
+	-- 		},
+	-- 	},
+	-- })
 	lspconfig.svelte.setup({
 		capabilities = Global.lspCapabilities,
 		settings = {
