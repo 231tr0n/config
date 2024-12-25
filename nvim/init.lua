@@ -354,6 +354,7 @@ now(function()
 		"go.mod",
 		"package.json",
 		"pom.xml",
+		"build.gradle",
 		".git",
 	})
 	require("mini.move").setup({
@@ -652,7 +653,7 @@ now(function()
 		require("jdtls").start_or_attach((function()
 			local config = {
 				cmd = { "/usr/bin/jdtls" },
-				root_dir = require("jdtls.setup").find_root({ "mvnw", "gradlew", "pom.xml", ".git" }),
+				root_dir = require("jdtls.setup").find_root({ "mvnw", "gradlew", "pom.xml", "build.gradle", ".git" }),
 				settings = {
 					java = {
 						references = {
