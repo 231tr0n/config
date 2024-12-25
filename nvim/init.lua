@@ -702,6 +702,73 @@ now(function()
 			"neovim/nvim-lspconfig",
 		},
 	})
+	Global.jdtls_start = function()
+		-- Java lsp lazy loading setup
+		require("jdtls").start_or_attach((function()
+			local config = {
+				cmd = { "/usr/bin/jdtls" },
+				root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+				settings = {
+					java = {
+						references = {
+							includeDecompiledSources = true,
+						},
+						eclipse = {
+							downloadSources = true,
+						},
+						maven = {
+							downloadSources = true,
+						},
+						format = {
+							enabled = true,
+						},
+						inlayHints = {
+							parameterNames = {
+								enabled = "all",
+								exclusions = { "this" },
+							},
+						},
+						signatureHelp = { enabled = true, description = { enabled = true } },
+						contentProvider = { preferred = "fernflower" },
+						codeGeneration = {
+							toString = {
+								template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+							},
+							useBlocks = true,
+						},
+						configuration = {
+							runtimes = {
+								{
+									name = "JavaSE-11",
+									path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+								},
+								{
+									name = "JavaSE-17",
+									path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+								},
+								{
+									name = "JavaSE-21",
+									path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+								},
+							},
+						},
+					},
+				},
+				capabilities = Global.lspCapabilities,
+			}
+			local bundles = {
+				vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
+			}
+			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+			local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+			extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+			config["init_options"] = {
+				bundles = bundles,
+				extendedClientCapabilities = extendedClientCapabilities,
+			}
+			return config
+		end)())
+	end
 end)
 
 -- New commands registration
@@ -999,82 +1066,18 @@ now(function()
 					end,
 				},
 			}
-			-- Java lsp lazy loading setup
-			require("jdtls").start_or_attach((function()
-				local config = {
-					cmd = { "/usr/bin/jdtls" },
-					root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
-					settings = {
-						java = {
-							references = {
-								includeDecompiledSources = true,
-							},
-							eclipse = {
-								downloadSources = true,
-							},
-							maven = {
-								downloadSources = true,
-							},
-							format = {
-								enabled = true,
-							},
-							inlayHints = {
-								parameterNames = {
-									enabled = "all",
-									exclusions = { "this" },
-								},
-							},
-							signatureHelp = { enabled = true, description = { enabled = true } },
-							contentProvider = { preferred = "fernflower" },
-							codeGeneration = {
-								toString = {
-									template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-								},
-								useBlocks = true,
-							},
-							configuration = {
-								runtimes = {
-									{
-										name = "JavaSE-11",
-										path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-									},
-									{
-										name = "JavaSE-17",
-										path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-									},
-									{
-										name = "JavaSE-21",
-										path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
-									},
-								},
-							},
-						},
-					},
-					capabilities = Global.lspCapabilities,
-				}
-				local bundles = {
-					vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-				}
-				vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-				local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-				extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-				config["init_options"] = {
-					bundles = bundles,
-					extendedClientCapabilities = extendedClientCapabilities,
-				}
-				return config
-			end)())
+			Global.jdtls_start()
 		end,
 	})
-	-- vim.api.nvim_create_autocmd("LspAttach", {
-	-- 	callback = function(args)
-	-- 		-- Disable semantic highlighting
-	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
-	-- 		client.server_capabilities.semanticTokensProvider = nil
-	-- 		-- Set foldexpr to lsp provided folds
-	-- 		-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-	-- 	end,
-	-- })
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			-- Disable semantic highlighting
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			client.server_capabilities.semanticTokensProvider = nil
+			-- Set foldexpr to lsp provided folds
+			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+		end,
+	})
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
@@ -1128,6 +1131,7 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
+	Nmap("<F8>", Global.jdtls_start, "Start jdtls")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
