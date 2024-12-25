@@ -459,9 +459,20 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add({
+		source = "junegunn/fzf",
+		hooks = {
+			post_checkout = function()
+				vim.fn["fzf#install"]()
+			end,
+		},
+	})
 	add("yorickpeterse/nvim-pqf")
 	require("pqf").setup()
-	add("kevinhwang91/nvim-bqf")
+	add({
+		source = "kevinhwang91/nvim-bqf",
+		depends = { "junegunn/fzf" },
+	})
 	require("bqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
