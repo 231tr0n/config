@@ -192,10 +192,11 @@ now(function()
 			palette = Global.palette,
 			plugins = { default = true },
 		})
-		Hi("Operator", { link = "Delimiter" })
-		Hi("@tag.delimiter", { link = "Delimiter" })
 		Hi("@tag.attribute", { link = "Statement" })
+		Hi("@tag.delimiter", { link = "Delimiter" })
 		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
+		Hi("Operator", { link = "Delimiter" })
+		Hi("QuickFixLineNr", { link = "SpecialKey" })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -459,21 +460,29 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	add({
-		source = "junegunn/fzf",
-		hooks = {
-			post_checkout = function()
-				vim.fn["fzf#install"]()
-			end,
+	add("stevearc/quicker.nvim")
+	require("quicker").setup({
+		keys = {
+			{
+				">",
+				function()
+					require("quicker").expand({ before = 5, after = 5, add_to_existing = true })
+				end,
+				desc = "Expand quickfix context",
+			},
+			{
+				"<",
+				function()
+					require("quicker").collapse()
+				end,
+				desc = "Collapse quickfix context",
+			},
 		},
+		follow = {
+			enabled = true,
+		},
+		trim_leading_whitespace = "all",
 	})
-	add("yorickpeterse/nvim-pqf")
-	require("pqf").setup()
-	add({
-		source = "kevinhwang91/nvim-bqf",
-		depends = { "junegunn/fzf" },
-	})
-	require("bqf").setup()
 	add("neovim/nvim-lspconfig")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -725,38 +734,6 @@ now(function()
 			openTerminal()
 		end
 	end
-	-- Function to toggle quickfix list
-	local function toggleQuickFix()
-		local qf_exists = false
-		for _, win in pairs(vim.fn.getwininfo()) do
-			if win["quickfix"] == 1 then
-				qf_exists = true
-			end
-		end
-		if qf_exists == true then
-			vim.cmd("cclose")
-			return
-		end
-		if not vim.tbl_isempty(vim.fn.getqflist()) then
-			vim.cmd("copen")
-		end
-	end
-	-- Function to toggle location list
-	local function toggleLocList()
-		local ll_exists = false
-		for _, win in pairs(vim.fn.getwininfo()) do
-			if win["loclist"] == 1 then
-				ll_exists = true
-			end
-		end
-		if ll_exists == true then
-			vim.cmd("lclose")
-			return
-		end
-		if not vim.tbl_isempty(vim.fn.getloclist(0)) then
-			vim.cmd("lopen")
-		end
-	end
 	-- Function to convert spaces to tabs
 	local function toggleTabs()
 		vim.opt.expandtab = false
@@ -821,6 +798,7 @@ now(function()
 	Nmap("<leader>cy", '"+y', "Copy to clipboard")
 	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
+	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
 	Nmap("<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
 	Nmap("<leader>dc", ":lua require('dap').continue()<CR>", "Continue")
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
@@ -829,7 +807,6 @@ now(function()
 	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<CR>", "Set log point")
 	Nmap("<leader>dp", ":lua require('dap.ui.widgets').preview()<CR>", "Preview")
 	Nmap("<leader>dr", ":lua require('dap').repl.open({}, 'vsplit new')<CR>", "Open Repl")
-	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
@@ -881,8 +858,8 @@ now(function()
 	Nmap("<leader>lh", ":lua vim.lsp.buf.hover()<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
-	Nmap("<leader>ql", toggleLocList, "Toggle loclist")
-	Nmap("<leader>qq", toggleQuickFix, "Toggle quickfix")
+	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
+	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
