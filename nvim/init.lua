@@ -955,9 +955,11 @@ now(function()
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
 		callback = function(args)
 			if args.match == "MiniGitUpdated" then
+				-- Remove additional git information
 				local summary = vim.b[args.buf].minigit_summary
 				vim.b[args.buf].minigit_summary_string = summary.head_name or ""
 			elseif args.match == "MiniFilesBufferCreate" then
+				-- Create mapping for setting current dir as pwd for neovim
 				local b = args.data.buf_id
 				vim.keymap.set("n", "g~", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
@@ -966,6 +968,7 @@ now(function()
 					end
 					vim.fn.chdir(vim.fs.dirname(path))
 				end, { buffer = b, desc = "Set cwd" })
+				-- Create mapping for yanking path of entry
 				vim.keymap.set("n", "gy", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
@@ -973,6 +976,7 @@ now(function()
 					end
 					vim.fn.setreg("", path)
 				end, { buffer = b, desc = "Yank path" })
+				-- Create mapping for yanking path of entry to clipboard
 				vim.keymap.set("n", "gY", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
@@ -980,6 +984,35 @@ now(function()
 					end
 					vim.fn.setreg("+", path)
 				end, { buffer = b, desc = "Yank path" })
+				-- Toggle dotfiles
+				local show_dotfiles = true
+				local filter_show = function(fs_entry)
+					return true
+				end
+				local filter_hide = function(fs_entry)
+					return not vim.startswith(fs_entry.name, ".")
+				end
+				local toggle_dotfiles = function()
+					show_dotfiles = not show_dotfiles
+					local new_filter = show_dotfiles and filter_show or filter_hide
+					MiniFiles.refresh({ content = { filter = new_filter } })
+				end
+				vim.keymap.set("n", "g.", toggle_dotfiles, { buffer = b })
+				-- Open files in horizontal or vertical pane
+				local map_split = function(buf_id, lhs, direction)
+					local rhs = function()
+						local cur_target = MiniFiles.get_explorer_state().target_window
+						local new_target = vim.api.nvim_win_call(cur_target, function()
+							vim.cmd(direction .. " split")
+							return vim.api.nvim_get_current_win()
+						end)
+						MiniFiles.set_target_window(new_target)
+					end
+					local desc = "Split " .. direction
+					vim.keymap.set("n", lhs, rhs, { buffer = buf_id, desc = desc })
+				end
+				map_split(b, "<C-s>", "belowright horizontal")
+				map_split(b, "<C-v>", "belowright vertical")
 			end
 		end,
 	})
