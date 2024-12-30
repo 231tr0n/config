@@ -610,7 +610,7 @@ now(function()
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
-	require("neogen").setup({ snippet_engine = "nvim" })
+	require("neogen").setup({ snippet_engine = "mini" })
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
@@ -1149,7 +1149,7 @@ later(function()
 		host = "localhost",
 		port = "11434",
 		display_mode = "split",
-		show_prompt = true,
+		show_prompt = "full",
 		show_model = true,
 		no_auto_close = false,
 		command = function(options)
