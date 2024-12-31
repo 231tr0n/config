@@ -1120,10 +1120,18 @@ now(function()
 			require("conform").format()
 		end,
 	})
-	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+	vim.api.nvim_create_autocmd("BufWritePost", {
 		callback = function()
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
+		end,
+	})
+	vim.api.nvim_create_autocmd("TextYankPost", {
+		callback = function()
+			vim.hl.on_yank({
+				timeout = 750,
+				on_macro = true,
+			})
 		end,
 	})
 end)
