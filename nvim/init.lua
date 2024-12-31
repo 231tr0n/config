@@ -1129,7 +1129,7 @@ now(function()
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		callback = function()
 			vim.hl.on_yank({
-				timeout = 750,
+				timeout = 1000,
 				on_macro = true,
 			})
 		end,
