@@ -167,5 +167,5 @@ sudo usermod -aG docker $USER
 
 ssh-keygen -t rsa
 
-echo -e "\e[32mOpen neovim and run the command ':PaqSync'\e[0m"
+echo -e "\e[32mOpen neovim and run the command ':DepsUpdate'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
