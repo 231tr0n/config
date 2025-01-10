@@ -1411,7 +1411,7 @@ later(function()
 	dap.adapters.lldb = {
 		type = "executable",
 		command = (function()
-			if vim.fn.empty(os.execute("which lldb-dap-19")) == 0 then
+			if vim.fn.executable("lldb-dap-19") then
 				return "/usr/bin/lldb-dap-19"
 			end
 			return "/usr/bin/lldb-dap"
