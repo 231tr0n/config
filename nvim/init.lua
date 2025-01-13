@@ -711,35 +711,12 @@ now(function()
 		end)())
 	end
 	add({
-		source = "andrewferrier/debugprint.nvim",
+		source = "Goose97/timber.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
-	require("debugprint").setup({
-		keymaps = {
-			normal = {
-				plain_below = "glp",
-				plain_above = "glP",
-				variable_below = "glv",
-				variable_above = "glV",
-				variable_below_alwaysprompt = "",
-				variable_above_alwaysprompt = "",
-				textobj_below = "glo",
-				textobj_above = "glO",
-				toggle_comment_debug_prints = "glt",
-				delete_debug_prints = "gld",
-			},
-			insert = {
-				plain = "<C-G>p",
-				variable = "<C-G>v",
-			},
-			visual = {
-				variable_below = "glv",
-				variable_above = "glV",
-			},
-		},
-	})
+	require("timber").setup()
 end)
 
 -- Linting and formatting setup
