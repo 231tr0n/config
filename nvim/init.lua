@@ -590,9 +590,9 @@ now(function()
 			additional_vim_regex_highlighting = false,
 		},
 	})
-	vim.wo.foldmethod = "expr"
+	vim.o.foldmethod = "expr"
 	-- Set foldexpr to treesitter provided folds
-	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	add("mfussenegger/nvim-dap")
 	local dap = require("dap")
 	dap.defaults.fallback.force_external_terminal = true
@@ -1040,10 +1040,7 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "netrw,help,terminal,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
 		callback = function()
-			-- Disable unwanted mini plugins in above filetypes, hide statuscolumn and remove unwanted listchars
-			vim.wo.foldcolumn = "0"
-			vim.wo.signcolumn = "no"
-			vim.wo.statuscolumn = ""
+			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 			vim.b.minicursorword_disable = true
 			vim.b.miniindentscope_disable = true
 			vim.b.minitrailspace_disable = true
@@ -1057,6 +1054,7 @@ now(function()
 			MiniTrailspace.unhighlight()
 			if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
 				-- Set foldexpr to mini.diff provided folds
+				vim.wo.signcolumn = "no"
 				vim.wo.foldmethod = "expr"
 				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 			elseif vim.bo.filetype == "dap-float" then
@@ -1065,6 +1063,11 @@ now(function()
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
+			else
+				-- Hide statuscolumn
+				vim.wo.foldcolumn = "0"
+				vim.wo.signcolumn = "no"
+				vim.wo.statuscolumn = ""
 			end
 		end,
 	})
