@@ -1038,9 +1038,12 @@ now(function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "netrw,help,terminal,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float",
+		pattern = "netrw,help,terminal,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
 		callback = function()
-			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
+			-- Disable unwanted mini plugins in above filetypes, hide statuscolumn and remove unwanted listchars
+			vim.wo.foldcolumn = "0"
+			vim.wo.signcolumn = "no"
+			vim.wo.statuscolumn = ""
 			vim.b.minicursorword_disable = true
 			vim.b.miniindentscope_disable = true
 			vim.b.minitrailspace_disable = true
