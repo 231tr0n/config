@@ -1447,6 +1447,7 @@ later(function()
 			name = "Debug",
 			request = "launch",
 			program = "${file}",
+			outputMode = "remote",
 		},
 		{
 			type = "delve",
@@ -1454,6 +1455,7 @@ later(function()
 			request = "launch",
 			mode = "test",
 			program = "${file}",
+			outputMode = "remote",
 		},
 		{
 			type = "delve",
@@ -1461,6 +1463,7 @@ later(function()
 			request = "launch",
 			mode = "test",
 			program = "./${relativeFileDirname}",
+			outputMode = "remote",
 		},
 		{
 			type = "delve",
@@ -1469,6 +1472,7 @@ later(function()
 			request = "attach",
 			hostName = "127.0.0.1",
 			port = 38697,
+			outputMode = "remote",
 		},
 	}
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 Main.java
