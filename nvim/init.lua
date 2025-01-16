@@ -568,7 +568,7 @@ now(function()
 			enable = true,
 			-- Disable indenting if file size is greater than 2MB
 			disable = function(lang, buf)
-				local max_filesize = 2 * 1024 * 1024
+				local max_filesize = 1 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
 					return true
@@ -579,9 +579,12 @@ now(function()
 			enable = true,
 			-- Disable highlighting if file size is greater than 2MB
 			disable = function(lang, buf)
-				local max_filesize = 2 * 1024 * 1024
+				if lang == "docker" then
+					return true
+				end
+				local max_filesize = 1 * 1024 * 1024
 				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
+				if ok and stats and stats.size > max_filesize then
 					-- Match syntax for @punctuation.bracket so that all kinds of braces are highlighted even if treesitter is disabled
 					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
 					return true
