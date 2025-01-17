@@ -579,7 +579,7 @@ now(function()
 			enable = true,
 			-- Disable highlighting if file size is greater than 2MB
 			disable = function(lang, buf)
-				if lang == "docker" then
+				if lang == "dockerfile" then
 					return true
 				end
 				local max_filesize = 1 * 1024 * 1024
