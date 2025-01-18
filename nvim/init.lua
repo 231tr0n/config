@@ -136,7 +136,7 @@ now(function()
 	vim.o.foldlevel = 99
 	vim.o.foldlevelstart = 99
 	vim.o.hlsearch = true
-	vim.o.ignorecase = false
+	vim.o.ignorecase = true
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
@@ -153,7 +153,7 @@ now(function()
 	vim.o.showmatch = true
 	vim.o.showmode = false
 	vim.o.signcolumn = "yes:1"
-	vim.o.smartcase = false
+	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
 	vim.o.synmaxcol = 100
