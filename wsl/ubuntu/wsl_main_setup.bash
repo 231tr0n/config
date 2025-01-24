@@ -165,7 +165,9 @@ cd ~
 sudo groupadd docker
 sudo usermod -aG docker $USER
 
-ssh-keygen -t rsa
+if ! test -d "$HOME/.ssh"; then
+  ssh-keygen -t rsa
+fi
 
 echo -e "\e[32mOpen neovim and run the command ':DepsUpdate'\e[0m"
 echo -e "\e[32mRun the scripts under ~/scripts folder if required\e[0m"
