@@ -227,7 +227,7 @@ now(function()
 		},
 	})
 	require("mini.align").setup()
-	require("mini.animate").setup()
+	-- require("mini.animate").setup()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
@@ -1422,8 +1422,8 @@ later(function()
 	dap.adapters.lldb = {
 		type = "executable",
 		command = (function()
-			if vim.fn.executable("lldb-dap-19") then
-				return "/usr/bin/lldb-dap-19"
+			if vim.fn.executable("lldb-dap-18") then
+				return "/usr/bin/lldb-dap-18"
 			end
 			return "/usr/bin/lldb-dap"
 		end)(),
