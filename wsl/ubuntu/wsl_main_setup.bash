@@ -155,7 +155,7 @@ sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 curl -fsSL https://ollama.com/install.sh | sh
 
 sudo npm install -g browser-sync tree-sitter-cli n nodemon quicktype
-pipx install watchdog
+pipx install watchdog pylatexenc
 go install -v github.com/air-verse/air@latest
 
 cd ~/scripts
