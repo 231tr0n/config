@@ -90,7 +90,7 @@ sudo npm install -g yaml-language-server@latest
 sudo npm install -g bash-language-server@latest
 sudo npm install -g typescript-language-server@latest
 sudo npm install -g @vtsls/language-server@latest
-sudo npm install -g @angular/language-server@latest @angular/language-service@latest
+sudo npm install -g @angular/language-server@latest
 sudo npm install -g svelte-language-server@latest
 cargo install --git https://github.com/latex-lsp/texlab
 sudo snap install marksman
