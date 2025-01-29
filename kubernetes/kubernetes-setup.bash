@@ -3,21 +3,26 @@
 set -xe
 
 MASTER="No"
+INGRESS="No"
 
 JOIN_CMD=""
 
 # Check if the script is run as super user
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Please run this script as super user."
+  echo "Please run this script as super user"
   exit 1
 fi
 
 # Check if the script is being instructed to run on master node
-while getopts 'mh' opt; do
+while getopts 'mhi' opt; do
   case "$opt" in
   m)
-    echo "Setting up script for master."
+    echo "Running installer script on master node"
     MASTER="Yes"
+    ;;
+  i)
+    echo "Setting up ingress for kubernetes cluster"
+    INGRESS="Yes"
     ;;
   h | ?)
     echo "-m: run this script for setting up master node"
@@ -31,7 +36,7 @@ sudo apt -y update
 sudo apt -y upgrade
 
 # Install packages required for running script
-sudo apt -y install apt-transport-https ca-certificates curl
+sudo apt -y install apt-transport-https ca-certificates curl jq
 
 # Enable overlay and br_netfilter kernel modules required for containerd to work
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
@@ -90,6 +95,12 @@ fi
 # Apply flannel CNI plugin yaml
 if [ "$MASTER" == "Yes" ]; then
   kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+fi
+
+# Apply nginx ingress controller yaml
+if [ "$INGRESS" == "Yes" ]; then
+  INGRESS_NGINX_VERSION=$(curl -sL https://api.github.com/repos/kubernetes/ingress-nginx/releases | jq -r '.[] | .name' | grep controller | head -n 1)
+  kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/$INGRESS_NGINX_VERSION/deploy/static/provider/baremetal/deploy.yaml"
 fi
 
 # Print versions
