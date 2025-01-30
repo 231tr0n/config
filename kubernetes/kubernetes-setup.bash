@@ -48,58 +48,58 @@ while getopts 'mhiv:' opt; do
 done
 
 # Update apt repos and upgrade any upgradable packages
-sudo apt -y update
+apt -y update
 
 # Install packages required for running script
-sudo apt -y install apt-transport-https ca-certificates curl jq vim
+apt -y install apt-transport-https ca-certificates curl jq vim
 
 # Install containerd
-sudo apt -y install containerd
+apt -y install containerd
 
 # Enable systemd cgroup support in containerd config toml file
-sudo mkdir -p /etc/containerd/
-sudo containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
-sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+mkdir -p /etc/containerd/
+containerd config default | tee /etc/containerd/config.toml >/dev/null
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 
 # Restart and enable containerd service
-sudo systemctl restart containerd
-sudo systemctl enable containerd
+systemctl restart containerd
+systemctl enable containerd
 
 # Install kubeadm, kubelet and/or kubectl
-curl -fsSL "https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key" | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt -y update
+curl -fsSL "https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key" | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
+apt -y update
 if [ "$MASTER" == "Yes" ]; then
-  sudo apt -y install kubeadm kubelet kubectl
+  apt -y install kubeadm kubelet kubectl
 else
-  sudo apt -y install kubeadm kubelet
+  apt -y install kubeadm kubelet
 fi
 
 # Turn off swap files or partitions
-sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-sudo swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+swapoff -a
 
 # Enable overlay and br_netfilter kernel modules required for containerd to work
-sudo modprobe -a overlay br_netfilter
-cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+modprobe -a overlay br_netfilter
+cat <<EOF | tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
 EOF
 
 # Configure sysctl
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+cat <<EOF | tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.ip_forward                 = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 EOF
-sudo sysctl --system
+sysctl --system
 
 # Initialize kubeadm
 if [ "$MASTER" == "Yes" ]; then
   KUBEADM_LOG_FILE="kubeadm.log"
-  sudo kubeadm init | tee $KUBEADM_LOG_FILE
+  kubeadm init | tee $KUBEADM_LOG_FILE
   JOIN_CMD=$(cat $KUBEADM_LOG_FILE | tail -n 2)
-  sudo rm -rf KUBEADM_LOG_FILE
+  rm -rf KUBEADM_LOG_FILE
 fi
 
 # Exit if kubeadm init command failed
@@ -115,8 +115,8 @@ fi
 # Setup kubectl config to connect to current cluster
 if [ "$MASTER" == "Yes" ]; then
   mkdir -p "$HOME/.kube"
-  sudo cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"
-  sudo chown "$(id -u)":"$(id -g)" "$HOME/.kube/config"
+  cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"
+  chown "$(id -u)":"$(id -g)" "$HOME/.kube/config"
 fi
 
 # Apply flannel CNI plugin yaml
