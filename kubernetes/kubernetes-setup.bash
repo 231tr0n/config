@@ -49,6 +49,7 @@ sudo modprobe -a overlay br_netfilter
 sudo apt -y install containerd runc containernetworking-plugins
 
 # Enable systemd cgroup support in containerd config toml file
+sudo mkdir -p /etc/containerd/
 sudo touch /etc/containerd/config.toml
 sudo containerd config default | sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml >/dev/null
 
