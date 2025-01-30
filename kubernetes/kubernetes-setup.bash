@@ -2,7 +2,7 @@
 
 set -e
 
-# CAUTION: Don't edit the parameters here. Do it via arugments to the script.
+# WARNING: Don't edit the parameters here
 KUBERNETES_VERSION="1.32"
 JOIN_CMD=""
 MASTER="No"
