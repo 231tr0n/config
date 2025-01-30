@@ -5,7 +5,7 @@ cd ~
 touch /home/zeltron/.hushlogin
 
 sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y --purge
-sudo apt install -y git curl wget inxi openssl ssh sshfs man-db htop jq vim tmux tmate ca-certificates libssl-dev libssh-dev libgit2-dev libcurl4-openssl-dev pkgconf nala software-properties-common
+sudo apt install -y git curl wget inxi openssl ssh sshfs man-db htop jq vim tmux tmate ca-certificates libssl-dev libssh-dev libgit2-dev libcurl4-openssl-dev pkgconf nala software-properties-common fuse
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -32,6 +32,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/x
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/js/node-debug.bash -o ~/scripts/node-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/python/python-debug.bash -o ~/scripts/python-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/kubernetes/kubernetes.bash -o ~/scripts/kubernetes.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/neovim.bash -o ~/scripts/neovim.bash
 
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
@@ -137,11 +138,12 @@ cd ~/scripts
 ./java-format.bash
 cd ~
 
-cargo install git-delta ripgrep fd-find bob-nvim bat hurl cargo-update
+cargo install git-delta ripgrep fd-find bat hurl cargo-update
 sudo npm install -g diff-so-fancy@latest
 
-# bob use latest
-bob use nightly
+cd ~/scripts
+./neovim.bash
+cd ~
 
 go install -v github.com/junegunn/fzf@latest
 go install -v github.com/nao1215/gup@latest
