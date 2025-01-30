@@ -1,31 +1,47 @@
 #!/bin/bash
 
-set -xe
+set -e
 
+KUBERNETES_VERSION="1.32"
+JOIN_CMD=""
 MASTER="No"
 INGRESS="No"
 
-JOIN_CMD=""
-
 # Check if the script is run as super user
 if [ "$(id -u)" -ne 0 ]; then
+  echo "------------------------------------"
   echo "Please run this script as super user"
+  echo "------------------------------------"
   exit 1
 fi
 
 # Check if the script is being instructed to run on master node
-while getopts 'mhi' opt; do
+while getopts 'mhiv:' opt; do
   case "$opt" in
   m)
+    echo "---------------------------------------"
     echo "Running installer script on master node"
+    echo "---------------------------------------"
     MASTER="Yes"
     ;;
   i)
+    echo "-----------------------------------------"
     echo "Setting up ingress for kubernetes cluster"
+    echo "-----------------------------------------"
     INGRESS="Yes"
     ;;
+  v)
+    echo "---------------------------------------------------------------"
+    echo "Using kubernetes version $OPTARG instead of $KUBERNETES_VERSION"
+    echo "---------------------------------------------------------------"
+    KUBERNETES_VERSION="$OPTARG"
+    ;;
   h | ?)
+    echo "------------------------------------------------------------"
     echo "-m: run this script for setting up master node"
+    echo "-i: apply ingress nginx config to kubernetes cluster"
+    echo "-v: set the version of kubernetes to install (default: 1.32)"
+    echo "------------------------------------------------------------"
     exit 1
     ;;
   esac
@@ -70,13 +86,14 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 sudo swapoff -a
 
 # Install kubeadm, kubelet and/or kubectl
+curl -fsSL "https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key" | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt -y update
+sudo apt -y upgrade
 if [ "$MASTER" == "Yes" ]; then
-  sudo snap install kubeadm --classic
-  sudo snap install kubelet --classic
-  sudo snap install kubectl --classic
+  sudo apt -y install kubeadm kubelet kubectl
 else
-  sudo snap install kubeadm --classic
-  sudo snap install kubelet --classic
+  sudo apt -y install kubeadm kubelet
 fi
 
 # Initialize kubeadm
@@ -85,6 +102,13 @@ if [ "$MASTER" == "Yes" ]; then
   sudo kubeadm init | tee $KUBEADM_LOG_FILE
   JOIN_CMD=$(cat $KUBEADM_LOG_FILE | tail -n 2)
   sudo rm -rf KUBEADM_LOG_FILE
+fi
+
+if [ -f /etc/kubernetes/admin.conf ]; then
+  echo "-------------------"
+  echo "Kubeadm init failed"
+  echo "-------------------"
+  exit 1
 fi
 
 # Setup kubectl config to connect to current cluster
