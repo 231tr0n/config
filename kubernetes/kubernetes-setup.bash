@@ -32,7 +32,7 @@ while getopts 'mhiv:' opt; do
     echo "------------------------------------------------------------"
     echo "-m: run this script for setting up master node"
     echo "-i: apply ingress nginx config to kubernetes cluster"
-    echo "-v: set the version of kubernetes to install (default: $KUBERNETES_VERSION)"
+    echo "-v VERSION: set the version of kubernetes to install (default: $KUBERNETES_VERSION)"
     echo "------------------------------------------------------------"
     exit
     ;;
