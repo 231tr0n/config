@@ -61,7 +61,7 @@ EOF
 sudo modprobe -a overlay br_netfilter
 
 # Install containerd, runc and official cni plugins
-sudo apt -y install containerd runc containernetworking-plugins
+sudo apt -y install containerd runc
 
 # Enable systemd cgroup support in containerd config toml file
 sudo mkdir -p /etc/containerd/
