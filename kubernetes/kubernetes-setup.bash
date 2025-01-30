@@ -49,6 +49,7 @@ done
 
 # Update apt repos and upgrade any upgradable packages
 apt -y update
+apt -y upgrade
 
 # Install packages required for running script
 apt -y install apt-transport-https ca-certificates curl jq vim
@@ -69,6 +70,7 @@ systemctl enable containerd
 curl -fsSL "https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key" | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
 apt -y update
+apt -y upgrade
 if [ "$MASTER" == "Yes" ]; then
   apt -y install kubeadm kubelet kubectl
 else
