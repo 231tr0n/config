@@ -53,7 +53,7 @@ sudo apt -y update
 # Install packages required for running script
 sudo apt -y install apt-transport-https ca-certificates curl jq vim
 
-# Install containerd, runc and official cni plugins
+# Install containerd
 sudo apt -y install containerd
 
 # Enable systemd cgroup support in containerd config toml file
