@@ -159,7 +159,7 @@ fi
 # Print join command to be run on worker nodes
 if [ "$MASTER" == "Yes" ]; then
   info_log "Run the below join command in all the worker nodes\n
-            $JOIN_CMD"
+$JOIN_CMD"
 else
   info_log "Run the join command provided by the master once initialized"
 fi
