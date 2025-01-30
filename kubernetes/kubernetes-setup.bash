@@ -42,7 +42,7 @@ while getopts 'mhiv:' opt; do
     echo "-i: apply ingress nginx config to kubernetes cluster"
     echo "-v: set the version of kubernetes to install (default: $KUBERNETES_VERSION)"
     echo "------------------------------------------------------------"
-    exit 0
+    exit
     ;;
   esac
 done
