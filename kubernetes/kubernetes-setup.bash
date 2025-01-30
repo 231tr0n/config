@@ -104,11 +104,13 @@ if [ "$MASTER" == "Yes" ]; then
   sudo rm -rf KUBEADM_LOG_FILE
 fi
 
-if [ ! -f /etc/kubernetes/admin.conf ]; then
-  echo "-------------------"
-  echo "Kubeadm init failed"
-  echo "-------------------"
-  exit 1
+if [ "$MASTER" == "Yes" ]; then
+  if [ ! -f /etc/kubernetes/admin.conf ]; then
+    echo "-------------------"
+    echo "Kubeadm init failed"
+    echo "-------------------"
+    exit 1
+  fi
 fi
 
 # Setup kubectl config to connect to current cluster
@@ -130,6 +132,7 @@ if [ "$INGRESS" == "Yes" ]; then
 fi
 
 # Print versions
+echo "------------------------"
 if [ "$MASTER" == "Yes" ]; then
   kubectl version
   kubeadm version
@@ -142,6 +145,7 @@ else
   containerd --version
   runc --version
 fi
+echo "------------------------"
 
 # Print join command to be run on worker nodes
 if [ "$MASTER" == "Yes" ]; then
