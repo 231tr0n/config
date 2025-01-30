@@ -126,9 +126,11 @@ if [ "$MASTER" == "Yes" ]; then
 fi
 
 # Apply nginx ingress controller yaml
-if [ "$INGRESS" == "Yes" ]; then
-  INGRESS_NGINX_VERSION=$(curl -sL https://api.github.com/repos/kubernetes/ingress-nginx/releases | jq -r '.[] | .name' | grep controller | head -n 1)
-  kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/$INGRESS_NGINX_VERSION/deploy/static/provider/baremetal/deploy.yaml"
+if [ "$MASTER" == "Yes" ]; then
+  if [ "$INGRESS" == "Yes" ]; then
+    INGRESS_NGINX_VERSION=$(curl -sL https://api.github.com/repos/kubernetes/ingress-nginx/releases | jq -r '.[] | .name' | grep controller | head -n 1)
+    kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/$INGRESS_NGINX_VERSION/deploy/static/provider/baremetal/deploy.yaml"
+  fi
 fi
 
 # Print versions
