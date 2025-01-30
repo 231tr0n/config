@@ -106,9 +106,9 @@ net.bridge.bridge-nf-call-ip6tables = 1
 EOF
 sysctl --system
 
-info_log "Initialize kubeadm"
 if [ "$MASTER" == "Yes" ]; then
-  KUBEADM_LOG_FILE="kubeadm.log"
+  info_log "Initialize kubeadm"
+  KUBEADM_LOG_FILE="kubeadm-init.log"
   kubeadm init | tee $KUBEADM_LOG_FILE
   JOIN_CMD=$(cat $KUBEADM_LOG_FILE | tail -n 2)
 fi
@@ -121,21 +121,21 @@ if [ "$MASTER" == "Yes" ]; then
   fi
 fi
 
-info_log "Setup kubectl config to connect to current cluster"
 if [ "$MASTER" == "Yes" ]; then
+  info_log "Setup kubectl config to connect to current cluster"
   mkdir -p "$HOME/.kube"
   cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"
   chown "$(id -u)":"$(id -g)" "$HOME/.kube/config"
 fi
 
-info_log "Apply flannel CNI plugin yaml"
 if [ "$MASTER" == "Yes" ]; then
+  info_log "Apply flannel CNI plugin yaml"
   kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 fi
 
-info_log "Apply nginx ingress controller yaml"
 if [ "$MASTER" == "Yes" ]; then
   if [ "$INGRESS" == "Yes" ]; then
+    info_log "Apply nginx ingress controller yaml"
     INGRESS_NGINX_VERSION=$(curl -sL https://api.github.com/repos/kubernetes/ingress-nginx/releases | jq -r '.[] | .name' | grep controller | head -n 1)
     kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/$INGRESS_NGINX_VERSION/deploy/static/provider/baremetal/deploy.yaml"
   fi
@@ -158,8 +158,8 @@ fi
 
 # Print join command to be run on worker nodes
 if [ "$MASTER" == "Yes" ]; then
-  info_log "Run the below join command in all the worker nodes"
-  info_log "$JOIN_CMD"
+  info_log "Run the below join command in all the worker nodes\n
+            $JOIN_CMD"
 else
-  info_log "Run the join command provided by the master node once initialized"
+  info_log "Run the join command provided by the master once initialized"
 fi
