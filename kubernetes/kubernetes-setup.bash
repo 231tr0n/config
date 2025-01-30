@@ -12,7 +12,7 @@ INGRESS="No"
 function error_log() {
   echo
   echo
-  echo -ne "[\e[1;36mINFO\e[1;0m] " >&2
+  echo -ne "[\e[1;31mERROR\e[1;0m] " >&2
   echo -e "$1" >&2
   echo
   echo
@@ -54,6 +54,7 @@ done
 # Check if the script is run as super user
 if [ "$(id -u)" -ne 0 ]; then
   error_log "Please run this script as super user"
+  exit 1
 fi
 
 info_log "Update apt repos and upgrade any upgradable packages"
@@ -116,6 +117,7 @@ fi
 if [ "$MASTER" == "Yes" ]; then
   if [ ! -f /etc/kubernetes/admin.conf ]; then
     error_log "Kubeadm init failed"
+    exit 1
   fi
 fi
 
