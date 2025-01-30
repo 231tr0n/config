@@ -36,7 +36,7 @@ sudo apt -y update
 sudo apt -y upgrade
 
 # Install packages required for running script
-sudo apt -y install apt-transport-https ca-certificates curl jq
+sudo apt -y install apt-transport-https ca-certificates curl jq vim
 
 # Enable overlay and br_netfilter kernel modules required for containerd to work
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
@@ -49,6 +49,7 @@ sudo modprobe -a overlay br_netfilter
 sudo apt -y install containerd runc containernetworking-plugins
 
 # Enable systemd cgroup support in containerd config toml file
+sudo touch /etc/containerd/config.toml
 sudo containerd config default | sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml >/dev/null
 
 # Restart and enable containerd service
