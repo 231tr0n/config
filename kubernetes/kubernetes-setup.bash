@@ -104,6 +104,7 @@ if [ "$MASTER" == "Yes" ]; then
   sudo rm -rf KUBEADM_LOG_FILE
 fi
 
+# Exit if kubeadm init command failed
 if [ "$MASTER" == "Yes" ]; then
   if [ ! -f /etc/kubernetes/admin.conf ]; then
     echo "-------------------"
