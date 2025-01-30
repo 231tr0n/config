@@ -9,7 +9,7 @@ MASTER="No"
 INGRESS="No"
 
 # Helper function used to print stages and information
-function error_log() {
+function error_log {
   echo
   echo
   echo -ne "[\e[1;31mERROR\e[1;0m] " >&2
@@ -17,7 +17,7 @@ function error_log() {
   echo
   echo
 }
-function info_log() {
+function info_log {
   echo
   echo
   echo -ne "[\e[1;36mINFO\e[1;0m] "
