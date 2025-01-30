@@ -53,36 +53,17 @@ sudo apt -y update
 # Install packages required for running script
 sudo apt -y install apt-transport-https ca-certificates curl jq vim
 
-# Enable overlay and br_netfilter kernel modules required for containerd to work
-cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
-overlay
-br_netfilter
-EOF
-sudo modprobe -a overlay br_netfilter
-
 # Install containerd, runc and official cni plugins
-sudo apt -y install containerd runc
+sudo apt -y install containerd
 
 # Enable systemd cgroup support in containerd config toml file
 sudo mkdir -p /etc/containerd/
-sudo touch /etc/containerd/config.toml
-sudo containerd config default | sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml >/dev/null
+sudo containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 
 # Restart and enable containerd service
 sudo systemctl restart containerd
 sudo systemctl enable containerd
-
-# Configure sysctl
-cat <<EOF | sudo tee /etc/sysctl.d/kubernetes.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-EOF
-sudo sysctl --system
-
-# Turn off swap files or partitions
-sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-sudo swapoff -a
 
 # Install kubeadm, kubelet and/or kubectl
 curl -fsSL "https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key" | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -93,6 +74,25 @@ if [ "$MASTER" == "Yes" ]; then
 else
   sudo apt -y install kubeadm kubelet
 fi
+
+# Turn off swap files or partitions
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+
+# Enable overlay and br_netfilter kernel modules required for containerd to work
+sudo modprobe -a overlay br_netfilter
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+# Configure sysctl
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.ipv4.ip_forward                 = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
+sudo sysctl --system
 
 # Initialize kubeadm
 if [ "$MASTER" == "Yes" ]; then
