@@ -129,10 +129,6 @@ go install github.com/segmentio/golines@latest
 go install golang.org/x/tools/cmd/goimports@latest
 go install -v mvdan.cc/sh/v3/cmd/shfmt@latest
 cargo install stylua
-cargo install stylua --features lua52
-cargo install stylua --features lua53
-cargo install stylua --features lua54
-cargo install stylua --features luau
 pipx install yamlfix
 cd ~/scripts
 ./java-format.bash
