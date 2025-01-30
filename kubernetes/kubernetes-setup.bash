@@ -135,7 +135,9 @@ if [ "$MASTER" == "Yes" ]; then
 fi
 
 # Print versions
-echo "------------------------"
+echo "------------------------------"
+echo "Print all versions of binaries"
+echo "------------------------------"
 if [ "$MASTER" == "Yes" ]; then
   kubectl version
   kubeadm version
@@ -148,19 +150,19 @@ else
   containerd --version
   runc --version
 fi
-echo "------------------------"
+echo "------------------------------"
 
 # Print join command to be run on worker nodes
 if [ "$MASTER" == "Yes" ]; then
   echo
   echo "---------------------------------------------------"
-  echo "Run the below join command in all the worker nodes."
+  echo "Run the below join command in all the worker nodes"
   echo "---------------------------------------------------"
   echo "$JOIN_CMD"
   echo "---------------------------------------------------"
 else
   echo
   echo "------------------------------------------------------------------"
-  echo "Run the join command provided by the master node once initialized."
+  echo "Run the join command provided by the master node once initialized"
   echo "------------------------------------------------------------------"
 fi
