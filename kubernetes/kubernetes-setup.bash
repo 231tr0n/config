@@ -7,14 +7,6 @@ JOIN_CMD=""
 MASTER="No"
 INGRESS="No"
 
-# Check if the script is run as super user
-if [ "$(id -u)" -ne 0 ]; then
-  echo "------------------------------------"
-  echo "Please run this script as super user"
-  echo "------------------------------------"
-  exit 1
-fi
-
 # Check if the script is being instructed to run on master node
 while getopts 'mhiv:' opt; do
   case "$opt" in
@@ -46,6 +38,14 @@ while getopts 'mhiv:' opt; do
     ;;
   esac
 done
+
+# Check if the script is run as super user
+if [ "$(id -u)" -ne 0 ]; then
+  echo "------------------------------------"
+  echo "Please run this script as super user"
+  echo "------------------------------------"
+  exit 1
+fi
 
 # Update apt repos and upgrade any upgradable packages
 apt -y update
