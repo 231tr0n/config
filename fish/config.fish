@@ -61,8 +61,6 @@ set -gx PATH $PATH $GOPATH/bin
 set -gx PATH $PATH $HOME/.local/bin
 set -gx PATH $PATH $HOME/.cargo/bin
 set -gx PATH $PATH /usr/local/go/bin
-set -gx PATH $PATH $HOME/.local/share/bob/nvim-bin
-set -gx PATH $PATH $HOME/.fzf/bin
 if grep -q -i microsoft /proc/sys/kernel/osrelease
     mkdir -p $HOME/.tmp/
     set -gx XDG_RUNTIME_DIR $HOME/.tmp/
