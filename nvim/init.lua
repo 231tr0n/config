@@ -460,6 +460,8 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("nacro90/numb.nvim")
+	require("numb").setup()
 	add("stevearc/quicker.nvim")
 	require("quicker").setup({
 		keys = {
