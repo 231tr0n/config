@@ -1050,6 +1050,8 @@ now(function()
 			vim.b.miniindentscope_disable = true
 			vim.b.minitrailspace_disable = true
 			vim.opt_local.listchars:remove("eol")
+			vim.opt_local.listchars:remove("nbsp")
+			vim.opt_local.listchars:remove("trail")
 			vim.opt_local.listchars:remove("leadmultispace")
 			vim.opt_local.listchars:remove("tab")
 			vim.opt_local.listchars:append({
