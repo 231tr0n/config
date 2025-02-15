@@ -85,7 +85,6 @@ cd ~
 sudo apt install -y clangd
 pipx install pyright
 pipx install basedpyright
-sudo Rscript -e 'install.packages("languageserver")'
 go install -v golang.org/x/tools/gopls@latest
 sudo npm install -g vscode-langservers-extracted@latest
 sudo npm install -g yaml-language-server@latest
