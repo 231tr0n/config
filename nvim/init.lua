@@ -280,6 +280,7 @@ now(function()
 				{ mode = "n", keys = "<leader>lj", desc = "+Java" },
 				{ mode = "n", keys = "<leader>p", desc = "+Print" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
+				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
 				{ mode = "n", keys = "<leader>t", desc = "+Test" },
 				{ mode = "n", keys = "<leader>tg", desc = "+Go" },
 				{ mode = "n", keys = "<leader>tj", desc = "+Java" },
@@ -494,6 +495,14 @@ now(function()
 			end,
 		},
 	})
+	local parser_configs = require("nvim-treesitter.parsers").get_parser_configs()
+	parser_configs.lua_patterns = {
+		install_info = {
+			url = "https://github.com/OXY2DEV/tree-sitter-lua_patterns",
+			files = { "src/parser.c" },
+			branch = "main",
+		},
+	}
 	require("nvim-treesitter.configs").setup({
 		ensure_installed = {
 			"angular",
@@ -531,6 +540,7 @@ now(function()
 			"json5",
 			"latex",
 			"lua",
+			"lua_patterns",
 			"luadoc",
 			"make",
 			"markdown",
@@ -634,6 +644,14 @@ now(function()
 		},
 	})
 	require("helpview").setup()
+	add({
+		source = "OXY2DEV/patterns.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+			"echasnovski/mini.nvim",
+		},
+	})
+	require("patterns").setup()
 	add({
 		source = "Wansmer/treesj",
 		depends = {
@@ -935,6 +953,8 @@ now(function()
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
 	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
+	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
+	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
 	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
