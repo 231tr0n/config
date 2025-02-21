@@ -1056,7 +1056,7 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
-			if vim.bo.filetype ~= "LuaPatterns" and vim.bo.filetype ~= "RegexPatterns" then
+			if vim.bo.buftype ~= "nofile" then
 				-- Set winbar
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				-- Call leadMultiSpaceCalc to set leadmultispace
@@ -1126,17 +1126,6 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "java",
 		callback = function()
-			-- Remove below minicompletion tweaks once https://github.com/echasnovski/mini.nvim/discussions/1315 is resolved
-			vim.b.minicompletion_config = {
-				lsp_completion = {
-					process_items = function(items, base)
-						for _, i in ipairs(items) do
-							i.detail = nil
-						end
-						return MiniCompletion.default_process_items(items, base)
-					end,
-				},
-			}
 			Global.jdtls_start()
 		end,
 	})
