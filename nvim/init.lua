@@ -1056,10 +1056,12 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
-			-- Set winbar
-			vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
-			-- Call leadMultiSpaceCalc to set leadmultispace
-			Global.leadMultiSpaceCalc()
+			if vim.bo.filetype ~= "LuaPatterns" and vim.bo.filetype ~= "RegexPatterns" then
+				-- Set winbar
+				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+				-- Call leadMultiSpaceCalc to set leadmultispace
+				Global.leadMultiSpaceCalc()
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
