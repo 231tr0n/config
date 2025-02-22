@@ -589,19 +589,19 @@ now(function()
 		},
 		highlight = {
 			enable = true,
-			-- Disable highlighting if file size is greater than 2MB
-			disable = function(lang, buf)
-				if lang == "dockerfile" then
-					return true
-				end
-				local max_filesize = 1 * 1024 * 1024
-				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-				if ok and stats and stats.size > max_filesize then
-					-- Match syntax for @punctuation.bracket so that all kinds of braces are highlighted even if treesitter is disabled
-					vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
-					return true
-				end
-			end,
+			-- -- Disable highlighting if file size is greater than 2MB
+			-- disable = function(lang, buf)
+			-- 	if lang == "dockerfile" then
+			-- 		return true
+			-- 	end
+			-- 	local max_filesize = 1 * 1024 * 1024
+			-- 	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+			-- 	if ok and stats and stats.size > max_filesize then
+			-- 		-- Match syntax for @punctuation.bracket so that all kinds of braces are highlighted even if treesitter is disabled
+			-- 		vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
+			-- 		return true
+			-- 	end
+			-- end,
 			additional_vim_regex_highlighting = false,
 		},
 	})
