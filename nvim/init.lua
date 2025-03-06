@@ -613,6 +613,12 @@ now(function()
 	dap.defaults.fallback.force_external_terminal = true
 	dap.defaults.fallback.terminal_win_cmd = "belowright new | resize 15"
 	add({
+		source = "igorlfs/nvim-dap-view",
+		depends = {
+			"mfussenegger/nvim-dap",
+		},
+	})
+	add({
 		source = "nvim-treesitter/nvim-treesitter-context",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -903,6 +909,7 @@ now(function()
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
+	Nmap("<leader>dt", ":DapViewToggle<CR>", "Toggle dap view")
 	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>fM", ':Pick marks scope="all"<CR>', "Search workspace marks")
