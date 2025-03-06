@@ -609,15 +609,33 @@ now(function()
 	-- Set foldexpr to treesitter provided folds
 	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	add("mfussenegger/nvim-dap")
-	local dap = require("dap")
-	dap.defaults.fallback.force_external_terminal = true
-	dap.defaults.fallback.terminal_win_cmd = "belowright new | resize 15"
 	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
 			"mfussenegger/nvim-dap",
 		},
 	})
+	require("dap-view").setup({
+		winbar = {
+			show = true,
+			default_section = "breakpoints",
+		},
+	})
+	local dap = require("dap")
+	-- dap.defaults.fallback.force_external_terminal = true
+	-- dap.defaults.fallback.terminal_win_cmd = "belowright new | resize 15"
+	dap.listeners.before.attach.dapui_config = function()
+		vim.cmd("DapViewOpen")
+	end
+	dap.listeners.before.launch.dapui_config = function()
+		vim.cmd("DapViewOpen")
+	end
+	dap.listeners.before.event_terminated.dapui_config = function()
+		vim.cmd("DapViewClose")
+	end
+	dap.listeners.before.event_exited.dapui_config = function()
+		vim.cmd("DapViewClose")
+	end
 	add({
 		source = "nvim-treesitter/nvim-treesitter-context",
 		depends = {
@@ -898,6 +916,7 @@ now(function()
 	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
 	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
+	Nmap("<leader>dT", ":DapViewToggle!<CR>", "Toggle dap view")
 	Nmap("<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
 	Nmap("<leader>dc", ":lua require('dap').continue()<CR>", "Continue")
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
@@ -910,6 +929,7 @@ now(function()
 	Nmap("<leader>dsi", ":lua require('dap').step_into()<CR>", "Step into")
 	Nmap("<leader>dso", ":lua require('dap').step_out()<CR>", "Step out")
 	Nmap("<leader>dt", ":DapViewToggle<CR>", "Toggle dap view")
+	Nmap("<leader>dw", ":DapViewWatch<CR>", "Add a new expression watcher")
 	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>fM", ':Pick marks scope="all"<CR>', "Search workspace marks")
