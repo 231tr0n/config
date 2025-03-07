@@ -124,7 +124,6 @@ now(function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
-	vim.diagnostic.config({ virtual_text = true, underline = false, severity_sort = true })
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -177,6 +176,15 @@ now(function()
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildcharm = vim.fn.char2nr(Global.term)
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
+	vim.diagnostic.config({
+		virtual_text = true,
+		virtual_lines = false,
+		float = {
+			border = "rounded",
+		},
+		underline = false,
+		severity_sort = true,
+	})
 end)
 
 -- Initial UI setup
@@ -212,6 +220,7 @@ now(function()
 		Hi("NormalFloat", { link = "Normal" })
 		Hi("Operator", { link = "Delimiter" })
 		Hi("QuickFixLineNr", { link = "SpecialKey" })
+		Hi("TreesitterContext", { link = "Pmenu" })
 	end
 	Global.apply_colorscheme()
 	add("luukvbaal/statuscol.nvim")
@@ -404,6 +413,7 @@ now(function()
 					width = width,
 					row = math.floor(0.5 * (vim.o.lines - height)),
 					col = math.floor(0.5 * (vim.o.columns - width)),
+					border = "rounded",
 				}
 			end,
 		},
@@ -885,6 +895,12 @@ now(function()
 			virtual_text = not vim.diagnostic.config().virtual_text,
 		})
 	end
+	-- Function to toggle virtual lines for diagnostics
+	local function diagnosticVirtualLinesToggle()
+		vim.diagnostic.config({
+			virtual_lines = not vim.diagnostic.config().virtual_lines,
+		})
+	end
 	local keycode = vim.keycode or function(x)
 		return vim.api.nvim_replace_termcodes(x, true, true, true)
 	end
@@ -984,6 +1000,7 @@ now(function()
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
+	Nmap("<leader>ldT", diagnosticVirtualLinesToggle, "Virtual lines toggle")
 	Nmap("<leader>ldh", ":lua vim.diagnostic.open_float()<CR>", "Hover diagnostics")
 	Nmap("<leader>ldn", ":lua vim.diagnostic.goto_next()<CR>", "Goto next diagnostic")
 	Nmap("<leader>ldp", ":lua vim.diagnostic.goto_prev()<CR>", "Goto prev diagnostic")
@@ -1699,20 +1716,10 @@ later(function()
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 	-- Set border for lsp floating window
-	local border = {
-		{ "╭", "FloatBorder" },
-		{ "─", "FloatBorder" },
-		{ "╮", "FloatBorder" },
-		{ "│", "FloatBorder" },
-		{ "╯", "FloatBorder" },
-		{ "─", "FloatBorder" },
-		{ "╰", "FloatBorder" },
-		{ "│", "FloatBorder" },
-	}
 	local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
 	function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
 		opts = opts or {}
-		opts.border = opts.border or border
+		opts.border = opts.border or "rounded"
 		return original_util_open_floating_preview(contents, syntax, opts, ...)
 	end
 end)
