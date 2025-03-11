@@ -648,6 +648,11 @@ now(function()
 			show = true,
 			default_section = "breakpoints",
 		},
+		windows = {
+			terminal = {
+				hide = { "go", "delve" },
+			},
+		},
 	})
 	local dap = require("dap")
 	-- dap.defaults.fallback.force_external_terminal = true
@@ -1538,15 +1543,24 @@ later(function()
 				port = config.port or 38697,
 			})
 		else
-			callback({
-				type = "server",
-				port = "${port}",
-				executable = {
-					command = "dlv",
-					args = { "dap", "-l", "127.0.0.1:${port}" },
-					detached = vim.fn.has("win32") == 0,
-				},
-			})
+			local port = config.port or 38697
+			local host = config.host or "127.0.0.1"
+			local term_buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_command("vsplit")
+			vim.api.nvim_command("buffer " .. term_buf)
+			vim.fn.jobstart({ "dlv", "dap", "-l", host .. ":" .. port }, { term = true })
+			vim.defer_fn(function()
+				callback({ type = "server", host = host, port = port })
+			end, 100)
+			-- callback({
+			-- 	type = "server",
+			-- 	port = "${port}",
+			-- 	executable = {
+			-- 		command = "dlv",
+			-- 		args = { "dap", "-l", "127.0.0.1:${port}" },
+			-- 		detached = vim.fn.has("win32") == 0,
+			-- 	},
+			-- })
 		end
 	end
 	-- Debug configurations
@@ -1557,7 +1571,7 @@ later(function()
 			name = "Debug",
 			request = "launch",
 			program = "${file}",
-			outputMode = "remote",
+			-- outputMode = "remote",
 		},
 		{
 			type = "delve",
@@ -1565,7 +1579,7 @@ later(function()
 			request = "launch",
 			mode = "test",
 			program = "${file}",
-			outputMode = "remote",
+			-- outputMode = "remote",
 		},
 		{
 			type = "delve",
@@ -1573,7 +1587,7 @@ later(function()
 			request = "launch",
 			mode = "test",
 			program = "./${relativeFileDirname}",
-			outputMode = "remote",
+			-- outputMode = "remote",
 		},
 		{
 			type = "delve",
