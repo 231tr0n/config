@@ -1171,28 +1171,6 @@ now(function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "svelte,jsx,tsx,html,xml,xsl,javascriptreact,typescriptreact",
-		callback = function()
-			-- HTML tag completion with >, >> and >>> for below filetypes
-			vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-			Imap("><Space>", ">", "Cancel html pairs")
-			Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Html pairs in newline", {
-				buffer = true,
-			})
-			Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
-				buffer = true,
-			})
-			Imap(
-				">>>",
-				"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
-				"Html pairs in sameline with cursor at end",
-				{
-					buffer = true,
-				}
-			)
-		end,
-	})
 	-- Java lsp and debug setup
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "java",
