@@ -49,7 +49,7 @@ chmod +x ~/scripts/neovim.bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH=$PATH:$HOME/.cargo/bin
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo bash -
-sudo apt-add-repository -y ppa:fish-shell/release-3
+sudo apt-add-repository -y ppa:fish-shell/release-4
 sudo apt update -y && sudo apt upgrade -y
 sudo apt install -y fish
 
