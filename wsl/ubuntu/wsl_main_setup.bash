@@ -151,6 +151,7 @@ chsh -s /usr/bin/fish
 sudo apt update && sudo apt upgrade && sudo apt autoremove --purge
 
 curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma3:latest
 
 sudo npm install -g browser-sync tree-sitter-cli n nodemon quicktype
 pipx install watchdog pylatexenc
