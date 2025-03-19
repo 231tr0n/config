@@ -172,6 +172,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
+	vim.o.winborder = "rounded"
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildcharm = vim.fn.char2nr(Global.term)
@@ -1707,11 +1708,4 @@ later(function()
 	)
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
-	-- Set border for lsp floating window
-	local original_util_open_floating_preview = vim.lsp.util.open_floating_preview
-	function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-		opts = opts or {}
-		opts.border = opts.border or "rounded"
-		return original_util_open_floating_preview(contents, syntax, opts, ...)
-	end
 end)
