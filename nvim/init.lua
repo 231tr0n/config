@@ -677,6 +677,7 @@ now(function()
 		},
 	})
 	require("treesitter-context").setup({
+		mode = "topline",
 		max_lines = 6,
 	})
 	add({
