@@ -205,6 +205,7 @@ now(function()
 			palette = Global.palette,
 			plugins = { default = true },
 		})
+		Hi("@markup.link.vimdoc", { link = "Keyword" })
 		Hi("@tag.attribute", { link = "Statement" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
 		Hi("FloatFooter", { link = "MiniTablineCurrent" })
