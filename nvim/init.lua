@@ -491,30 +491,8 @@ end)
 now(function()
 	add("nacro90/numb.nvim")
 	require("numb").setup()
-	add("stevearc/quicker.nvim")
-	require("quicker").setup({
-		keys = {
-			{
-				">",
-				function()
-					require("quicker").expand({ before = 5, after = 5, add_to_existing = true })
-				end,
-				desc = "Expand quickfix context",
-			},
-			{
-				"<",
-				function()
-					require("quicker").collapse()
-				end,
-				desc = "Collapse quickfix context",
-			},
-		},
-		follow = {
-			enabled = true,
-		},
-		trim_leading_whitespace = "all",
-	})
 	add("neovim/nvim-lspconfig")
+	add("mfussenegger/nvim-dap")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
@@ -636,7 +614,34 @@ now(function()
 	vim.o.foldmethod = "expr"
 	-- Set foldexpr to treesitter provided folds
 	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-	add("mfussenegger/nvim-dap")
+	add({
+		source = "stevearc/quicker.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("quicker").setup({
+		keys = {
+			{
+				">",
+				function()
+					require("quicker").expand({ before = 5, after = 5, add_to_existing = true })
+				end,
+				desc = "Expand quickfix context",
+			},
+			{
+				"<",
+				function()
+					require("quicker").collapse()
+				end,
+				desc = "Collapse quickfix context",
+			},
+		},
+		follow = {
+			enabled = true,
+		},
+		trim_leading_whitespace = "all",
+	})
 	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
