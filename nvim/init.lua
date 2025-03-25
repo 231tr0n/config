@@ -26,7 +26,6 @@ add("echasnovski/mini.nvim")
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		term = vim.api.nvim_replace_termcodes("<C-z>", true, true, true),
 		-- Lsp capabilities used
 		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
 		floatMultiplier = 0.8,
@@ -169,13 +168,12 @@ now(function()
 	vim.o.undofile = false
 	vim.o.updatetime = 500
 	vim.o.wildmenu = true
-	vim.o.wildmode = "noselect:lastused,full"
+	vim.o.wildmode = "longest:full,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
 	vim.o.winborder = "rounded"
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
-	vim.opt.wildcharm = vim.fn.char2nr(Global.term)
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
 	vim.diagnostic.config({
 		virtual_text = true,
@@ -928,8 +926,6 @@ now(function()
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
 		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
 	end
-	Cmap("<Down>", "<End><C-U><Down>")
-	Cmap("<Up>", "<End><C-U><Up>")
 	Imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
@@ -1209,26 +1205,6 @@ now(function()
 				timeout = 1000,
 				on_macro = true,
 			})
-		end,
-	})
-	vim.api.nvim_create_autocmd("CmdlineChanged", {
-		pattern = ":",
-		callback = function()
-			local cmdline = vim.fn.getcmdline()
-			local curpos = vim.fn.getcmdpos()
-			local last_char = cmdline:sub(-1)
-			if
-				curpos == #cmdline + 1
-				and vim.fn.pumvisible() == 0
-				and last_char:match("[%w%/%: ]")
-				and not cmdline:match("^%d+$")
-			then
-				vim.opt.eventignore:append("CmdlineChanged")
-				vim.api.nvim_feedkeys(Global.term, "ti", false)
-				vim.schedule(function()
-					vim.opt.eventignore:remove("CmdlineChanged")
-				end)
-			end
 		end,
 	})
 end)
