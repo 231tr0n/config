@@ -515,6 +515,12 @@ now(function()
 			end,
 		},
 	})
+	add({
+		source = "nvim-treesitter/nvim-treesitter-textobjects",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
 	local parser_configs = require("nvim-treesitter.parsers").get_parser_configs()
 	parser_configs.lua_patterns = {
 		install_info = {
