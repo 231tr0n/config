@@ -1140,7 +1140,7 @@ now(function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "netrw,help,terminal,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
+		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
 		callback = function()
 			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 			vim.b.minicursorword_disable = true
