@@ -192,9 +192,6 @@ now(function()
 				[vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
 			},
 		},
-		float = {
-			border = "rounded",
-		},
 		underline = false,
 		severity_sort = true,
 	})
@@ -205,8 +202,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 2,
-				border = "rounded",
+				row = 3,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -272,7 +268,6 @@ now(function()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
-			win_borders = "rounded",
 		},
 		mappings = {
 			windows = true,
@@ -338,18 +333,10 @@ now(function()
 		},
 		window = {
 			delay = 0,
-			config = {
-				border = "rounded",
-			},
 		},
 	})
 	require("mini.comment").setup()
-	require("mini.completion").setup({
-		window = {
-			info = { border = "rounded" },
-			signature = { border = "rounded" },
-		},
-	})
+	require("mini.completion").setup()
 	-- This makes completion faster by suggesting words from current buffer only
 	vim.cmd("set complete=.")
 	require("mini.cursorword").setup()
@@ -427,7 +414,6 @@ now(function()
 					width = width,
 					row = math.floor(0.5 * (vim.o.lines - height)),
 					col = math.floor(0.5 * (vim.o.columns - width)),
-					border = "rounded",
 				}
 			end,
 		},
@@ -956,12 +942,11 @@ now(function()
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
 	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
-	Nmap("<F2>", ":nohl<CR>", "Remove search highlight")
-	Nmap("<F3>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
+	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F6>", ":TSContextToggle<CR>", "Toggle treesitter context")
-	Nmap("<F7>", MiniNotify.clear, "Clear all notifications")
+	Nmap("<F6>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>H", ':lua vim.fn.setloclist(MiniDiff.export("qf", { scope = "all" }))<CR>', "List diff hunks")
