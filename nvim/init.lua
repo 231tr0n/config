@@ -236,7 +236,7 @@ now(function()
 	add("luukvbaal/statuscol.nvim")
 	require("statuscol").setup({
 		relculright = false,
-		bt_ignore = { "terminal", "\\[dap-repl-*\\]" },
+		bt_ignore = { "terminal", "\\[dap-repl-*\\]", "nofile" },
 		ft_ignore = { "ministarter", "help" },
 		segments = {
 			{ text = { "%s" }, click = "v:lua.ScSa" },
@@ -1208,6 +1208,14 @@ now(function()
 		callback = function()
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
+		end,
+	})
+	vim.api.nvim_create_autocmd("CmdwinEnter", {
+		callback = function()
+			vim.wo.number = false
+			vim.wo.relativenumber = false
+			vim.wo.foldcolumn = "0"
+			vim.wo.signcolumn = "no"
 		end,
 	})
 	vim.api.nvim_create_autocmd("TextYankPost", {
