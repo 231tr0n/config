@@ -202,7 +202,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 2,
+				row = 3,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -220,6 +220,7 @@ now(function()
 		Hi("@tag.delimiter", { link = "Delimiter" })
 		Hi("FloatFooter", { link = "MiniTablineCurrent" })
 		Hi("FloatTitle", { link = "MiniTablineCurrent" })
+		Hi("Hlargs", { link = "Special" })
 		Hi("MiniClueDescGroup", { link = "Keyword" })
 		Hi("MiniClueNextKey", { link = "Function" })
 		Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
@@ -621,6 +622,13 @@ now(function()
 	-- Set foldexpr to treesitter provided folds
 	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 	add({
+		source = "m-demare/hlargs.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("hlargs").setup()
+	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -687,7 +695,6 @@ now(function()
 		},
 	})
 	require("treesitter-context").setup({
-		mode = "topline",
 		max_lines = 6,
 	})
 	add({
