@@ -161,7 +161,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.synmaxcol = 100
+	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
 	vim.o.textwidth = 0
