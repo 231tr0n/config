@@ -1710,28 +1710,3 @@ later(function()
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 end)
-
--- Custom functionality implementation
-later(function()
-	Global.test_func = function()
-		local position_params = vim.lsp.util.make_position_params(0, "utf-16")
-		vim.lsp.buf_request(0, "textDocument/prepareCallHierarchy", position_params, function(err, result)
-			if err or not result or vim.tbl_isempty(result) then
-				vim.notify("Could not prepare call hierarchy", vim.log.levels.ERROR)
-				return
-			end
-			local item = result[1]
-			local params1 = {
-				item = item,
-			}
-			MiniMisc.put(params1)
-			vim.lsp.buf_request(0, "callHierarchy/outgoingCalls", params1, function(err1, results)
-				if err1 or not result or vim.tbl_isempty(results) then
-					vim.notify("Could not make outgoing calls request", vim.log.levels.ERROR)
-					return
-				end
-				MiniMisc.put(results)
-			end)
-		end)
-	end
-end)
