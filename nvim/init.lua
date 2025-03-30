@@ -53,12 +53,11 @@ now(function()
 		},
 	}
 	-- Add document support for completion items to lspCapabilities
-	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport = Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport
-		or {}
-	Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties = {
-		"documentation",
-		"detail",
-	}
+	table.insert(
+		Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties,
+		"documentation"
+	)
+	table.insert(Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties, "detail")
 	-- Function to set leadmultispace correctly
 	Global.leadMultiTabSpace = Global.leadTabSpace .. Global.nextSpace
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
@@ -498,7 +497,7 @@ now(function()
 		source = "nvim-treesitter/nvim-treesitter",
 		hooks = {
 			post_checkout = function()
-				vim.cmd("TSUpdate")
+				vim.cmd("TSUpdateSync")
 			end,
 		},
 	})
