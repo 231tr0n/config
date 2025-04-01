@@ -785,9 +785,8 @@ now(function()
 				},
 				capabilities = Global.lspCapabilities,
 			}
-			local bundles = {
-				vim.fn.glob("/usr/share/java-debug/com.microsoft.java.debug.plugin.jar", true),
-			}
+			local bundles = {}
+			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
 			local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
 			extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
