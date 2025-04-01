@@ -1165,6 +1165,7 @@ now(function()
 			elseif vim.bo.filetype == "dap-repl" then
 				-- Dap repl autocompletion setup
 				require("dap.ext.autocompl").attach()
+				vim.wo.statuscolumn = ""
 			else
 				-- Hide statuscolumn
 				vim.wo.foldcolumn = "0"
