@@ -32,6 +32,8 @@ now(function()
 		-- Space and tab characters to use
 		leadSpace = "›",
 		nextSpace = " ",
+		foldOpen = "", -- ▾
+		foldClose = "", -- ▸
 		leadTabSpace = "»",
 		palette = {
 			base00 = "#282C34",
@@ -134,7 +136,7 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	vim.o.fillchars = [[eob: ,foldopen:,foldsep: ,foldclose:]] -- ▾,▸
+	vim.o.fillchars = "eob: ,foldopen:" .. Global.foldOpen .. ",foldsep: ,foldclose:" .. Global.foldClose
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -174,6 +176,11 @@ now(function()
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
+	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum - 1)) ? (foldclosed(v:lnum) == -1 ? '"
+		.. Global.foldOpen
+		.. " ' : '"
+		.. Global.foldClose
+		.. " ') : '  '}"
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -201,7 +208,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 3,
+				row = 2,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -233,23 +240,6 @@ now(function()
 		Hi("TreesitterContext", { link = "Pmenu" })
 	end
 	Global.apply_colorscheme()
-	add("luukvbaal/statuscol.nvim")
-	require("statuscol").setup({
-		relculright = false,
-		bt_ignore = { "terminal", "\\[dap-repl-*\\]", "nofile" },
-		ft_ignore = { "ministarter", "help" },
-		segments = {
-			{ text = { "%s" }, click = "v:lua.ScSa" },
-			{
-				text = { require("statuscol.builtin").lnumfunc },
-				click = "v:lua.ScLa",
-			},
-			{
-				text = { require("statuscol.builtin").foldfunc, " " },
-				click = "v:lua.ScFa",
-			},
-		},
-	})
 end)
 
 -- Mini plugins setup
@@ -1181,6 +1171,23 @@ now(function()
 				vim.wo.signcolumn = "no"
 				vim.wo.statuscolumn = ""
 			end
+		end,
+	})
+	vim.api.nvim_create_autocmd("TermOpen", {
+		callback = function()
+			vim.wo.statuscolumn = ""
+		end,
+	})
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		pattern = { "DAP *" },
+		callback = function(args)
+			local win = vim.fn.bufwinid(args.buf)
+			vim.schedule(function()
+				if win and not vim.api.nvim_win_is_valid(win) then
+					return
+				end
+				vim.api.nvim_set_option_value("statuscolumn", "", { win = win })
+			end)
 		end,
 	})
 	-- Java lsp and debug setup
