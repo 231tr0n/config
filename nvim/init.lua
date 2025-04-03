@@ -124,6 +124,8 @@ now(function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
+	vim.g.loaded_matchparen = 1
+	vim.g.loaded_matchit = 1
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -610,6 +612,15 @@ now(function()
 	vim.o.foldmethod = "expr"
 	-- Set foldexpr to treesitter provided folds
 	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+	add({
+		source = "tar80/matchwith.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("matchwith").setup({
+		jump_key = "%",
+	})
 	add({
 		source = "m-demare/hlargs.nvim",
 		depends = {
