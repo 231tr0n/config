@@ -26,15 +26,13 @@ add("echasnovski/mini.nvim")
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		-- Lsp capabilities used
-		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
-		floatMultiplier = 0.8,
-		-- Space and tab characters to use
+		-- Space, tab and fold characters to use
 		leadSpace = "›",
 		nextSpace = " ",
+		leadTabSpace = "»",
 		foldOpen = "", -- ▾
 		foldClose = "", -- ▸
-		leadTabSpace = "»",
+		floatMultiplier = 0.8,
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -54,12 +52,6 @@ now(function()
 			base0F = "#BE5046",
 		},
 	}
-	-- Add document support for completion items to lspCapabilities
-	table.insert(
-		Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties,
-		"documentation"
-	)
-	table.insert(Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties, "detail")
 	-- Function to set leadmultispace correctly
 	Global.leadMultiTabSpace = Global.leadTabSpace .. Global.nextSpace
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
@@ -124,8 +116,6 @@ now(function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
-	vim.g.loaded_matchparen = 1
-	vim.g.loaded_matchit = 1
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
@@ -329,8 +319,9 @@ now(function()
 	})
 	require("mini.comment").setup()
 	require("mini.completion").setup()
-	-- This makes completion faster by suggesting words from current buffer only
-	vim.cmd("set complete=.")
+	-- Extend mini.completion capabilities with default capabilities
+	Global.lspCapabilities =
+		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	require("mini.cursorword").setup()
 	require("mini.diff").setup()
 	require("mini.extra").setup()
@@ -612,15 +603,6 @@ now(function()
 	vim.o.foldmethod = "expr"
 	-- Set foldexpr to treesitter provided folds
 	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-	add({
-		source = "tar80/matchwith.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("matchwith").setup({
-		jump_key = "%",
-	})
 	add({
 		source = "m-demare/hlargs.nvim",
 		depends = {
@@ -1061,6 +1043,7 @@ end)
 
 -- Autocommands registration
 now(function()
+	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
 		callback = function(args)
@@ -1126,6 +1109,7 @@ now(function()
 			end
 		end,
 	})
+	-- Run colorscheme and multispace calc functions when respective options are changed
 	vim.api.nvim_create_autocmd("OptionSet", {
 		pattern = "shiftwidth,background",
 		callback = function(args)
@@ -1136,6 +1120,42 @@ now(function()
 			end
 		end,
 	})
+	-- Add matchpairs and matchit support for svelte
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "svelte",
+		callback = function()
+			vim.cmd([[
+        if exists('b:did_ftplugin')
+          finish
+        endif
+        let b:did_ftplugin = 1
+
+        setlocal matchpairs+=<:>
+        setlocal commentstring=<!--\ %s\ -->
+        setlocal comments=s:<!--,m:\ \ \ \ ,e:-->
+
+        let b:undo_ftplugin = 'setlocal comments< commentstring< matchpairs<'
+
+        if exists('&omnifunc')
+          setlocal omnifunc=htmlcomplete#CompleteTags
+          call htmlcomplete#DetectOmniFlavor()
+          let b:undo_ftplugin ..= " | setlocal omnifunc<"
+        endif
+
+        if exists("loaded_matchit") && !exists("b:match_words")
+          let b:match_ignorecase = 1
+          let b:match_words = '<!--:-->,' ..
+          \	      '<:>,' ..
+          \	      '<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>,' ..
+          \	      '<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>,' ..
+          \	      '<\@<=\([^/!][^ \t>]*\)[^>]*\%(>\|$\):<\@<=/\1>'
+          let b:html_set_match_words = 1
+          let b:undo_ftplugin ..= " | unlet! b:match_ignorecase b:match_words b:html_set_match_words"
+        endif
+      ]])
+		end,
+	})
+	-- Set winbar to filename with path
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
@@ -1147,6 +1167,7 @@ now(function()
 			end
 		end,
 	})
+	-- Various settings for plugin filetypes
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
 		callback = function()
@@ -1184,11 +1205,13 @@ now(function()
 			end
 		end,
 	})
+	-- Remove statuscolumn for terminal
 	vim.api.nvim_create_autocmd("TermOpen", {
 		callback = function()
 			vim.wo.statuscolumn = ""
 		end,
 	})
+	-- Remove statuscolumn for any nvim-dap windows
 	vim.api.nvim_create_autocmd("BufWinEnter", {
 		pattern = { "DAP *" },
 		callback = function(args)
@@ -1208,6 +1231,7 @@ now(function()
 			Global.jdtls_start()
 		end,
 	})
+	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
 			-- Disable semantic highlighting
@@ -1217,6 +1241,7 @@ now(function()
 			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
 		end,
 	})
+	-- Trim files on save setup
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
@@ -1225,12 +1250,14 @@ now(function()
 			require("conform").format()
 		end,
 	})
+	-- Lint on write setup
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		callback = function()
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
 		end,
 	})
+	-- Disable statuscolumn in command window
 	vim.api.nvim_create_autocmd("CmdwinEnter", {
 		callback = function()
 			vim.wo.number = false
@@ -1239,6 +1266,7 @@ now(function()
 			vim.wo.signcolumn = "no"
 		end,
 	})
+	-- Highlight yanked text for 1 second
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		callback = function()
 			vim.hl.on_yank({
