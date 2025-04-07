@@ -26,15 +26,13 @@ add("echasnovski/mini.nvim")
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		-- Lsp capabilities used
-		lspCapabilities = vim.lsp.protocol.make_client_capabilities(),
-		floatMultiplier = 0.8,
-		-- Space and tab characters to use
+		-- Space, tab and fold characters to use
 		leadSpace = "›",
 		nextSpace = " ",
+		leadTabSpace = "»",
 		foldOpen = "", -- ▾
 		foldClose = "", -- ▸
-		leadTabSpace = "»",
+		floatMultiplier = 0.8,
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -54,12 +52,6 @@ now(function()
 			base0F = "#BE5046",
 		},
 	}
-	-- Add document support for completion items to lspCapabilities
-	table.insert(
-		Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties,
-		"documentation"
-	)
-	table.insert(Global.lspCapabilities.textDocument.completion.completionItem.resolveSupport.properties, "detail")
 	-- Function to set leadmultispace correctly
 	Global.leadMultiTabSpace = Global.leadTabSpace .. Global.nextSpace
 	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
@@ -327,8 +319,9 @@ now(function()
 	})
 	require("mini.comment").setup()
 	require("mini.completion").setup()
-	-- This makes completion faster by suggesting words from current buffer only
-	vim.cmd("set complete=.")
+	-- Extend mini.completion capabilities with default capabilities
+	Global.lspCapabilities =
+		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	require("mini.cursorword").setup()
 	require("mini.diff").setup()
 	require("mini.extra").setup()
@@ -724,6 +717,79 @@ now(function()
 		},
 	})
 	require("treesj").setup()
+	-- add({
+	-- 	source = "mfussenegger/nvim-jdtls",
+	-- 	depends = {
+	-- 		"mfussenegger/nvim-dap",
+	-- 		"neovim/nvim-lspconfig",
+	-- 	},
+	-- })
+	-- Global.jdtls_start = function()
+	-- 	-- Java lsp lazy loading setup
+	-- 	require("jdtls").start_or_attach((function()
+	-- 		local config = {
+	-- 			cmd = { "/usr/bin/jdtls" },
+	-- 			root_dir = require("jdtls.setup").find_root({ "mvnw", "gradlew", "pom.xml", "build.gradle", ".git" }),
+	-- 			settings = {
+	-- 				java = {
+	-- 					references = {
+	-- 						includeDecompiledSources = true,
+	-- 					},
+	-- 					eclipse = {
+	-- 						downloadSources = true,
+	-- 					},
+	-- 					maven = {
+	-- 						downloadSources = true,
+	-- 					},
+	-- 					format = {
+	-- 						enabled = true,
+	-- 					},
+	-- 					inlayHints = {
+	-- 						parameterNames = {
+	-- 							enabled = "all",
+	-- 							exclusions = { "this" },
+	-- 						},
+	-- 					},
+	-- 					signatureHelp = { enabled = true, description = { enabled = true } },
+	-- 					contentProvider = { preferred = "fernflower" },
+	-- 					codeGeneration = {
+	-- 						toString = {
+	-- 							template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+	-- 						},
+	-- 						useBlocks = true,
+	-- 					},
+	-- 					configuration = {
+	-- 						runtimes = {
+	-- 							{
+	-- 								name = "JavaSE-11",
+	-- 								path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+	-- 							},
+	-- 							{
+	-- 								name = "JavaSE-17",
+	-- 								path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+	-- 							},
+	-- 							{
+	-- 								name = "JavaSE-21",
+	-- 								path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+	-- 							},
+	-- 						},
+	-- 					},
+	-- 				},
+	-- 			},
+	-- 			capabilities = Global.lspCapabilities,
+	-- 		}
+	-- 		local bundles = {}
+	-- 		vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
+	-- 		vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	-- 		local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+	-- 		extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+	-- 		config["init_options"] = {
+	-- 			bundles = bundles,
+	-- 			extendedClientCapabilities = extendedClientCapabilities,
+	-- 		}
+	-- 		return config
+	-- 	end)())
+	-- end
 	add({
 		source = "Goose97/timber.nvim",
 		depends = {
@@ -977,6 +1043,7 @@ end)
 
 -- Autocommands registration
 now(function()
+	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
 		callback = function(args)
@@ -1042,6 +1109,7 @@ now(function()
 			end
 		end,
 	})
+	-- Run colorscheme and multispace calc functions when respective options are changed
 	vim.api.nvim_create_autocmd("OptionSet", {
 		pattern = "shiftwidth,background",
 		callback = function(args)
@@ -1052,6 +1120,32 @@ now(function()
 			end
 		end,
 	})
+	-- Add matchpairs and matchit support for svelte
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "svelte",
+		callback = function()
+			vim.cmd([[
+        if exists('&omnifunc')
+          setlocal omnifunc=htmlcomplete#CompleteTags
+          call htmlcomplete#DetectOmniFlavor()
+        endif
+
+        if exists("loaded_matchit") && !exists("b:match_words")
+          let b:match_ignorecase = 1
+          let b:match_words = '<:>,' .
+            \ '<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>,' .
+            \ '<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>,' .
+            \ '<\@<=\([^/][^ \t>]*\)[^>]*\%(>\|$\):<\@<=/\1>,' .
+            \ '{#\(if\|each\)[^}]*}:{\:else[^}]*}:{\/\(if\|each\)},' .
+            \ '{#await[^}]*}:{\:then[^}]*}:{\:catch[^}]*}:{\/await},' .
+            \ '{#snippet[^}]*}:{\/snippet},' .
+            \ '{#key[^}]*}:{\/key}'
+          let b:html_set_match_words = 1
+        endif
+      ]])
+		end,
+	})
+	-- Set winbar to filename with path
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function()
@@ -1063,6 +1157,7 @@ now(function()
 			end
 		end,
 	})
+	-- Various settings for plugin filetypes
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
 		callback = function()
@@ -1100,23 +1195,33 @@ now(function()
 			end
 		end,
 	})
+	-- Remove statuscolumn for terminal
 	vim.api.nvim_create_autocmd("TermOpen", {
 		callback = function()
 			vim.wo.statuscolumn = ""
 		end,
 	})
-	-- vim.api.nvim_create_autocmd("BufWinEnter", {
-	-- 	pattern = { "dap-repl" },
-	-- 	callback = function(args)
-	-- 		local win = vim.fn.bufwinid(args.buf)
-	-- 		vim.schedule(function()
-	-- 			if win and not vim.api.nvim_win_is_valid(win) then
-	-- 				return
-	-- 			end
-	-- 			vim.api.nvim_set_option_value("statuscolumn", "", { win = win })
-	-- 		end)
+	-- Remove statuscolumn for any nvim-dap windows
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		pattern = { "DAP *" },
+		callback = function(args)
+			local win = vim.fn.bufwinid(args.buf)
+			vim.schedule(function()
+				if win and not vim.api.nvim_win_is_valid(win) then
+					return
+				end
+				vim.api.nvim_set_option_value("statuscolumn", "", { win = win })
+			end)
+		end,
+	})
+	-- Java lsp and debug setup
+	-- vim.api.nvim_create_autocmd("FileType", {
+	-- 	pattern = "java",
+	-- 	callback = function()
+	-- 		Global.jdtls_start()
 	-- 	end,
 	-- })
+	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
 			-- Disable semantic highlighting
@@ -1126,6 +1231,7 @@ now(function()
 			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
 		end,
 	})
+	-- Trim files on save setup
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
@@ -1134,20 +1240,23 @@ now(function()
 			require("conform").format()
 		end,
 	})
+	-- Lint on write setup
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		callback = function()
 			Global.leadMultiSpaceCalc()
 			require("lint").try_lint()
 		end,
 	})
+	-- Disable statuscolumn in command window
 	vim.api.nvim_create_autocmd("CmdwinEnter", {
 		callback = function()
 			vim.wo.number = false
-			vim.wo.signcolumn = "no"
+			vim.wo.relativenumber = false
 			vim.wo.foldcolumn = "0"
-			vim.wo.statuscolumn = ""
+			vim.wo.signcolumn = "no"
 		end,
 	})
+	-- Highlight yanked text for 1 second
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		callback = function()
 			vim.hl.on_yank({
@@ -1195,8 +1304,13 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
+	-- Nmap("<F8>", Global.jdtls_start, "Start jdtls")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
+	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
+	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
+	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
@@ -1415,13 +1529,11 @@ later(function()
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
 	lspconfig.jdtls.setup({
 		capabilities = Global.lspCapabilities,
-		settings = {
-			init_options = {
-				bundles = bundles,
-				extendedClientCapabilities = {
-					classFileContentsSupport = true,
-					executeClientCommandSupport = true,
-				},
+		init_options = {
+			bundles = bundles,
+			extendedClientCapabilities = {
+				classFileContentsSupport = true,
+				executeClientCommandSupport = true,
 			},
 		},
 	})
@@ -1433,19 +1545,6 @@ end)
 later(function()
 	local dap = require("dap")
 	-- Debug plugin setups
-	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
-	require("dap-python").setup("~/.local/share/debugpy/bin/python")
-	-- Adapter definitions
-	dap.adapters["pwa-node"] = {
-		type = "server",
-		host = "localhost",
-		port = "${port}",
-		executable = {
-			command = "node",
-			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
-		},
-	}
-	-- Java adapter helper function
 	local execute_command = function(command, callback, bufnr)
 		local candidates = vim.lsp.get_clients({ name = "jdtls" })
 		if #candidates == 0 then
@@ -1480,6 +1579,18 @@ later(function()
 			})
 		end, bufnr)
 	end
+	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
+	require("dap-python").setup("~/.local/share/debugpy/bin/python")
+	-- Adapter definitions
+	dap.adapters["pwa-node"] = {
+		type = "server",
+		host = "localhost",
+		port = "${port}",
+		executable = {
+			command = "node",
+			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
+		},
+	}
 	dap.adapters.lldb = {
 		type = "executable",
 		command = (function()
