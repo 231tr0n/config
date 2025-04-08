@@ -1120,31 +1120,6 @@ now(function()
 			end
 		end,
 	})
-	-- Add matchpairs and matchit support for svelte
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "svelte",
-		callback = function()
-			vim.cmd([[
-        if exists('&omnifunc')
-          setlocal omnifunc=htmlcomplete#CompleteTags
-          call htmlcomplete#DetectOmniFlavor()
-        endif
-
-        if exists("loaded_matchit") && !exists("b:match_words")
-          let b:match_ignorecase = 1
-          let b:match_words = '<:>,' .
-            \ '<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>,' .
-            \ '<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>,' .
-            \ '<\@<=\([^/][^ \t>]*\)[^>]*\%(>\|$\):<\@<=/\1>,' .
-            \ '{#\(if\|each\)[^}]*}:{\:else[^}]*}:{\/\(if\|each\)},' .
-            \ '{#await[^}]*}:{\:then[^}]*}:{\:catch[^}]*}:{\/await},' .
-            \ '{#snippet[^}]*}:{\/snippet},' .
-            \ '{#key[^}]*}:{\/key}'
-          let b:html_set_match_words = 1
-        endif
-      ]])
-		end,
-	})
 	-- Set winbar to filename with path
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
