@@ -1120,31 +1120,6 @@ now(function()
 			end
 		end,
 	})
-	-- Add matchpairs and matchit support for svelte
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "svelte",
-		callback = function()
-			vim.cmd([[
-        if exists('&omnifunc')
-          setlocal omnifunc=htmlcomplete#CompleteTags
-          call htmlcomplete#DetectOmniFlavor()
-        endif
-
-        if exists("loaded_matchit") && !exists("b:match_words")
-          let b:match_ignorecase = 1
-          let b:match_words = '<:>,' .
-            \ '<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>,' .
-            \ '<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>,' .
-            \ '<\@<=\([^/][^ \t>]*\)[^>]*\%(>\|$\):<\@<=/\1>,' .
-            \ '{#\(if\|each\)[^}]*}:{\:else[^}]*}:{\/\(if\|each\)},' .
-            \ '{#await[^}]*}:{\:then[^}]*}:{\:catch[^}]*}:{\/await},' .
-            \ '{#snippet[^}]*}:{\/snippet},' .
-            \ '{#key[^}]*}:{\/key}'
-          let b:html_set_match_words = 1
-        endif
-      ]])
-		end,
-	})
 	-- Set winbar to filename with path
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
@@ -1254,6 +1229,7 @@ now(function()
 			vim.wo.relativenumber = false
 			vim.wo.foldcolumn = "0"
 			vim.wo.signcolumn = "no"
+			vim.wo.statuscolumn = ""
 		end,
 	})
 	-- Highlight yanked text for 1 second
@@ -1316,6 +1292,81 @@ later(function()
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
+end)
+
+later(function()
+	Global.jdtls_execute_command = function(command, callback, bufnr)
+		local candidates = vim.lsp.get_clients({ name = "jdtls" })
+		if #candidates == 0 then
+			vim.notify("No LSP clients found", vim.log.levels.ERROR)
+			return
+		end
+		local co
+		if not callback then
+			co = coroutine.running()
+			if co then
+				callback = function(err, resp)
+					coroutine.resume(co, err, resp)
+				end
+			end
+		end
+		candidates[1].request("workspace/executeCommand", command, callback, bufnr)
+		if co then
+			return coroutine.yield()
+		end
+	end
+	Global.java_open_classfile = function(fname)
+		local uri
+		local use_cmd
+		if vim.startswith(fname, "jdt://") then
+			uri = fname
+			use_cmd = false
+		else
+			uri = vim.uri_from_fname(fname)
+			use_cmd = true
+			if not vim.startswith(uri, "file://") then
+				return
+			end
+		end
+		local buf = vim.api.nvim_get_current_buf()
+		vim.bo[buf].modifiable = true
+		vim.bo[buf].swapfile = false
+		vim.bo[buf].buftype = "nofile"
+		-- This triggers FileType event which should fire up the lsp client if not already running
+		vim.bo[buf].filetype = "java"
+		local timeout_ms = 5000
+		vim.wait(timeout_ms, function()
+			return next(vim.lsp.get_clients({ name = "jdtls", bufnr = buf })) ~= nil
+		end)
+		local client = vim.lsp.get_clients({ name = "jdtls", bufnr = buf })[1]
+		assert(client, "Must have a `jdtls` client to load class file or jdt uri")
+
+		local content
+		local function handler(err, result)
+			assert(not err, vim.inspect(err))
+			content = result
+			local normalized = string.gsub(result, "\r\n", "\n")
+			local source_lines = vim.split(normalized, "\n", { plain = true })
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, source_lines)
+			vim.bo[buf].modifiable = false
+		end
+
+		if use_cmd then
+			local command = {
+				command = "java.decompile",
+				arguments = { uri },
+			}
+			Global.jdtls_execute_command(command, handler)
+		else
+			local params = {
+				uri = uri,
+			}
+			client.request("java/classFileContents", params, handler, buf)
+		end
+		vim.wait(timeout_ms, function()
+			return content ~= nil
+		end)
+	end
 end)
 
 -- Lazy loaded lsp configurations setup
@@ -1527,8 +1578,53 @@ later(function()
 	local bundles = {}
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	local status_callback = function(_, result)
+		api.nvim_command(
+			string.format(':echohl Function | echo "%s" | echohl None', string.sub(result.message, 1, vim.v.echospace))
+		)
+	end
 	lspconfig.jdtls.setup({
 		capabilities = Global.lspCapabilities,
+		settings = {
+			java = {
+				references = {
+					includeDecompiledSources = true,
+				},
+				eclipse = {
+					downloadSources = true,
+				},
+				maven = {
+					downloadSources = true,
+				},
+				format = {
+					enabled = true,
+				},
+				inlayHints = {
+					parameterNames = {
+						enabled = "all",
+						exclusions = { "this" },
+					},
+				},
+				signatureHelp = { enabled = true, description = { enabled = true } },
+				contentProvider = { preferred = "fernflower" },
+				configuration = {
+					runtimes = {
+						{
+							name = "JavaSE-11",
+							path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+						},
+						{
+							name = "JavaSE-17",
+							path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+						},
+						{
+							name = "JavaSE-21",
+							path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+						},
+					},
+				},
+			},
+		},
 		init_options = {
 			bundles = bundles,
 			extendedClientCapabilities = {
@@ -1545,26 +1641,6 @@ end)
 later(function()
 	local dap = require("dap")
 	-- Debug plugin setups
-	local execute_command = function(command, callback, bufnr)
-		local candidates = vim.lsp.get_clients({ name = "jdtls" })
-		if #candidates == 0 then
-			vim.notify("No LSP clients found", vim.log.levels.ERROR)
-			return
-		end
-		local co
-		if not callback then
-			co = coroutine.running()
-			if co then
-				callback = function(err, resp)
-					coroutine.resume(co, err, resp)
-				end
-			end
-		end
-		candidates[1].request("workspace/executeCommand", command, callback, bufnr)
-		if co then
-			return coroutine.yield()
-		end
-	end
 	dap.adapters.java = function(callback, config)
 		local jdtls = vim.tbl_filter(function(client)
 			return client.name == "jdtls" and client.config and client.config.root_dir == config.cwd
