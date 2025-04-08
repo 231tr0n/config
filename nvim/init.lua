@@ -1229,6 +1229,7 @@ now(function()
 			vim.wo.relativenumber = false
 			vim.wo.foldcolumn = "0"
 			vim.wo.signcolumn = "no"
+			vim.wo.statuscolumn = ""
 		end,
 	})
 	-- Highlight yanked text for 1 second
