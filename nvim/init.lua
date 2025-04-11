@@ -647,6 +647,7 @@ now(function()
 	require("dap-view").setup({
 		winbar = {
 			show = true,
+			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
 		},
 		windows = {
@@ -655,20 +656,20 @@ now(function()
 			},
 		},
 	})
-	local dap = require("dap")
+	local dap, dv = require("dap"), require("dap-view")
 	-- dap.defaults.fallback.force_external_terminal = true
 	-- dap.defaults.fallback.terminal_win_cmd = "belowright new | resize 15"
-	dap.listeners.before.attach.dapui_config = function()
-		vim.cmd("DapViewOpen")
+	dap.listeners.before.attach["dap-view-config"] = function()
+		dv.open()
 	end
-	dap.listeners.before.launch.dapui_config = function()
-		vim.cmd("DapViewOpen")
+	dap.listeners.before.launch["dap-view-config"] = function()
+		dv.open()
 	end
-	dap.listeners.before.event_terminated.dapui_config = function()
-		vim.cmd("DapViewClose")
+	dap.listeners.before.event_terminated["dap-view-config"] = function()
+		dv.close()
 	end
-	dap.listeners.before.event_exited.dapui_config = function()
-		vim.cmd("DapViewClose")
+	dap.listeners.before.event_exited["dap-view-config"] = function()
+		dv.close()
 	end
 	add({
 		source = "nvim-treesitter/nvim-treesitter-context",

@@ -1315,6 +1315,44 @@ later(function()
 			return coroutine.yield()
 		end
 	end
+	Global.may_jdtls_buf = function(bufnr)
+		if vim.bo[bufnr].filetype == "java" then
+			return true
+		end
+		local fname = vim.api.nvim_buf_get_name(bufnr)
+		return vim.endswith(fname, "build.gradle") or vim.endswith(fname, "pom.xml")
+	end
+	Global.attach_to_active_buf = function(bufnr, client_name)
+		local function try_attach(buf)
+			if not Global.may_jdtls_buf(buf) then
+				return nil
+			end
+			local clients = vim.lsp.get_clients({ bufnr = buf, name = client_name })
+			local _, client = next(clients)
+			if client then
+				vim.lsp.buf_attach_client(bufnr, client.id)
+				return client.id
+			end
+			return nil
+		end
+		local altbuf = vim.fn.bufnr("#", -1)
+		if altbuf and altbuf > 0 then
+			local client_id = try_attach(altbuf)
+			if client_id then
+				return client_id
+			end
+		end
+		for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+			if vim.api.nvim_buf_is_loaded(buf) then
+				local client_id = try_attach(buf)
+				if client_id then
+					return client_id
+				end
+			end
+		end
+		print("No active LSP client found to use for jdt:// document")
+		return nil
+	end
 	Global.java_open_classfile = function(fname)
 		local uri
 		local use_cmd
@@ -1332,9 +1370,9 @@ later(function()
 		vim.bo[buf].modifiable = true
 		vim.bo[buf].swapfile = false
 		vim.bo[buf].buftype = "nofile"
-		-- This triggers FileType event which should fire up the lsp client if not already running
 		vim.bo[buf].filetype = "java"
 		local timeout_ms = 5000
+
 		vim.wait(timeout_ms, function()
 			return next(vim.lsp.get_clients({ name = "jdtls", bufnr = buf })) ~= nil
 		end)
@@ -1367,6 +1405,23 @@ later(function()
 			return content ~= nil
 		end)
 	end
+end)
+
+later(function()
+	vim.api.nvim_create_autocmd("BufReadCmd", {
+		pattern = "jdt://*",
+		callback = function()
+			vim.notify("inside")
+			Global.java_open_classfile(vim.fn.expand("<amatch>"))
+		end,
+	})
+	vim.api.nvim_create_autocmd("BufReadCmd", {
+		pattern = "*.class",
+		callback = function()
+			vim.notify("inside")
+			Global.java_open_classfile(vim.fn.expand("<amatch>"))
+		end,
+	})
 end)
 
 -- Lazy loaded lsp configurations setup
