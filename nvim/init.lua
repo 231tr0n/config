@@ -299,10 +299,6 @@ now(function()
 				{ mode = "n", keys = "<leader>p", desc = "+Print" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
-				{ mode = "n", keys = "<leader>t", desc = "+Test" },
-				{ mode = "n", keys = "<leader>tg", desc = "+Go" },
-				{ mode = "n", keys = "<leader>tj", desc = "+Java" },
-				{ mode = "n", keys = "<leader>tp", desc = "+Python" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<leader>w", desc = "+Window" },
 			},
@@ -1058,6 +1054,14 @@ now(function()
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				-- Call leadMultiSpaceCalc to set leadmultispace
 				Global.leadMultiSpaceCalc()
+			else
+				if vim.bo.filetype == "java" then
+					local fname = vim.fn.expand("%")
+					if vim.startswith(fname, "jdt://") or vim.endswith(fname, ".class") then
+						-- TODO fix winbar not being set for class files and jdt uris
+						vim.wo.winbar = "⠀⠀🢥 Java URI or Class file"
+					end
+				end
 			end
 		end,
 	})
@@ -1167,12 +1171,6 @@ end)
 
 -- Lazy loaded plugins registration
 later(function()
-	add({
-		source = "mfussenegger/nvim-dap-python",
-		depends = {
-			"mfussenegger/nvim-dap",
-		},
-	})
 	add("tpope/vim-fugitive")
 	add({
 		source = "rbong/vim-flog",
@@ -1204,9 +1202,6 @@ end)
 later(function()
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
-	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
-	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
 	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
 	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
@@ -1590,10 +1585,31 @@ end)
 -- Lazy loaded dap configurations setup
 later(function()
 	local dap = require("dap")
-	-- Debug plugin setups
-	require("dap-python").setup("~/.local/share/debugpy/bin/python")
 	-- Adapter definitions
-	dap.adapters["jdtls-debug"] = function(callback, config)
+	dap.adapters.debugpy = function(callback, config)
+		if config.request == "attach" then
+			local port = (config.connect or config).port
+			local host = (config.connect or config).host or "127.0.0.1"
+			callback({
+				type = "server",
+				port = assert(port, "`connect.port` is required for a python `attach` configuration"),
+				host = host,
+				options = {
+					source_filetype = "python",
+				},
+			})
+		else
+			callback({
+				type = "executable",
+				command = "~/.local/share/debugpy/bin/python",
+				args = { "-m", "debugpy.adapter" },
+				options = {
+					source_filetype = "python",
+				},
+			})
+		end
+	end
+	dap.adapters["jdtls-java-debug"] = function(callback, config)
 		local jdtls_client = vim.tbl_filter(function(client)
 			return client.name == "jdtls" and client.config and client.config.root_dir == config.cwd
 		end, vim.lsp.get_clients())[1]
@@ -1659,7 +1675,7 @@ later(function()
 	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
 	dap.configurations.python = {
 		{
-			type = "python",
+			type = "debugpy",
 			name = "Attach remote",
 			mode = "remote",
 			request = "attach",
@@ -1684,15 +1700,15 @@ later(function()
 	-- mvnDebug exec:java -Dexec.mainClass="com.mycompany.app.App"
 	dap.configurations.java = {
 		{
-			type = "jdtls-debug",
+			type = "jdtls-java-debug",
 			request = "attach",
 			name = "Attach remote",
 			hostName = "127.0.0.1",
-			port = 8000,
+			port = 9229,
 			outputMode = "remote",
 		},
 	}
-	-- TODO Find instructions on how to start debugger remotely for js-debug
+	-- node --inspect-wait=127.0.0.1:9229 main.js
 	for _, language in ipairs({ "typescript", "javascript" }) do
 		dap.configurations[language] = {
 			{
