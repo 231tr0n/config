@@ -719,79 +719,6 @@ now(function()
 	})
 	require("treesj").setup()
 	add({
-		source = "mfussenegger/nvim-jdtls",
-		depends = {
-			"mfussenegger/nvim-dap",
-			"neovim/nvim-lspconfig",
-		},
-	})
-	Global.jdtls_start = function()
-		-- Java lsp lazy loading setup
-		require("jdtls").start_or_attach((function()
-			local config = {
-				cmd = { "/usr/bin/jdtls" },
-				root_dir = require("jdtls.setup").find_root({ "mvnw", "gradlew", "pom.xml", "build.gradle", ".git" }),
-				settings = {
-					java = {
-						references = {
-							includeDecompiledSources = true,
-						},
-						eclipse = {
-							downloadSources = true,
-						},
-						maven = {
-							downloadSources = true,
-						},
-						format = {
-							enabled = true,
-						},
-						inlayHints = {
-							parameterNames = {
-								enabled = "all",
-								exclusions = { "this" },
-							},
-						},
-						signatureHelp = { enabled = true, description = { enabled = true } },
-						contentProvider = { preferred = "fernflower" },
-						codeGeneration = {
-							toString = {
-								template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-							},
-							useBlocks = true,
-						},
-						configuration = {
-							runtimes = {
-								{
-									name = "JavaSE-11",
-									path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-								},
-								{
-									name = "JavaSE-17",
-									path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-								},
-								{
-									name = "JavaSE-21",
-									path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
-								},
-							},
-						},
-					},
-				},
-				capabilities = Global.lspCapabilities,
-			}
-			local bundles = {}
-			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
-			vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-			local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-			extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-			config["init_options"] = {
-				bundles = bundles,
-				extendedClientCapabilities = extendedClientCapabilities,
-			}
-			return config
-		end)())
-	end
-	add({
 		source = "Goose97/timber.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -934,8 +861,9 @@ now(function()
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F5>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F6>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
+	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
+	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
+	Nmap("<F7>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
 	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
 	Nmap("<leader>F", require("conform").format, "Format code")
@@ -1190,13 +1118,6 @@ now(function()
 			end)
 		end,
 	})
-	-- Java lsp and debug setup
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "java",
-		callback = function()
-			Global.jdtls_start()
-		end,
-	})
 	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
@@ -1281,13 +1202,8 @@ end)
 
 -- Lazy loaded keymaps registration
 later(function()
-	Nmap("<F8>", Global.jdtls_start, "Start jdtls")
 	Nmap("<leader>am", require("gen").select_model, "Select model")
 	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Nmap("<leader>ljo", ":lua require('jdtls').organize_imports()<CR>", "Organize imports")
-	Nmap("<leader>ljv", ":lua require('jdtls').extract_variable()<CR>", "Extract variable")
-	Nmap("<leader>tjc", ":lua require('jdtls').test_class()<CR>", "Test class")
-	Nmap("<leader>tjm", ":lua require('jdtls').test_nearest_method()<CR>", "Test method")
 	Nmap("<leader>tpc", ":lua require('dap-python').test_class()<CR>", "Test class")
 	Nmap("<leader>tpm", ":lua require('dap-python').test_method()<CR>", "Test method")
 	Nmap("<leader>tps", ":lua require('dap-python').debug_selection()<CR>", "Debug selection")
@@ -1300,7 +1216,7 @@ later(function()
 	local lspconfig = require("lspconfig")
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
 	for k, v in ipairs(lua_runtime_files) do
-		if v == "/home/my-login/.config/nvim" then
+		if v == vim.fn.stdpath("config") then
 			table.remove(lua_runtime_files, k)
 		end
 	end
@@ -1501,17 +1417,197 @@ later(function()
 	lspconfig.angularls.setup({
 		capabilities = Global.lspCapabilities,
 	})
+	local bundles = {}
+	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
+	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	lspconfig.jdtls.setup({
+		capabilities = Global.lspCapabilities,
+		settings = {
+			java = {
+				references = {
+					includeDecompiledSources = true,
+				},
+				eclipse = {
+					downloadSources = true,
+				},
+				maven = {
+					downloadSources = true,
+				},
+				format = {
+					enabled = true,
+				},
+				inlayHints = {
+					parameterNames = {
+						enabled = "all",
+						exclusions = { "this" },
+					},
+				},
+				signatureHelp = { enabled = true, description = { enabled = true } },
+				contentProvider = { preferred = "fernflower" },
+				configuration = {
+					runtimes = {
+						{
+							name = "JavaSE-11",
+							path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+						},
+						{
+							name = "JavaSE-17",
+							path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+						},
+						{
+							name = "JavaSE-21",
+							path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+						},
+					},
+				},
+			},
+		},
+		init_options = {
+			bundles = bundles,
+			extendedClientCapabilities = {
+				classFileContentsSupport = true,
+				executeClientCommandSupport = true,
+			},
+		},
+		handlers = {
+			["language/status"] = vim.schedule_wrap(function(_, results)
+				vim.notify(results.message, vim.log.levels.INFO)
+			end),
+		},
+	})
 	-- Start lsp lazily
 	vim.cmd("LspStart")
+end)
+
+-- Lazy autocommands setup
+later(function()
+	vim.api.nvim_create_autocmd("BufReadCmd", {
+		pattern = "jdt://*,*.class",
+		callback = function(args)
+			local function is_jdtls_buf(buffer_nr)
+				if vim.bo[buffer_nr].filetype == "java" then
+					return true
+				end
+				local buf_name = vim.api.nvim_buf_get_name(buffer_nr)
+				return vim.endswith(buf_name, "build.gradle")
+					or vim.endswith(buf_name, "pom.xml")
+					or vim.startswith(buf_name, "jdt://")
+					or vim.endswith(buf_name, ".class")
+					or vim.endswith(buf_name, ".java")
+			end
+			local attached = false
+			local alt_buf = vim.fn.bufnr("#", -1)
+			if alt_buf and alt_buf > 0 then
+				if is_jdtls_buf(alt_buf) then
+					local candidates = vim.lsp.get_clients({ bufnr = alt_buf, name = "jdtls" })
+					if #candidates == 0 then
+						vim.notify("No jdtls client found", vim.log.levels.WARN)
+						return
+					end
+					local client = candidates[1]
+					vim.lsp.buf_attach_client(args.buf, client.id)
+					attached = true
+				end
+			end
+			if not attached then
+				for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+					if vim.api.nvim_buf_is_loaded(buffer) then
+						if is_jdtls_buf(buffer) then
+							local candidates = vim.lsp.get_clients({ bufnr = buffer, name = "jdtls" })
+							if #candidates == 0 then
+								vim.notify("No jdtls client found", vim.log.levels.WARN)
+								return
+							end
+							local client = candidates[1]
+							vim.lsp.buf_attach_client(args.buf, client.id)
+							if client then
+								attached = true
+								break
+							end
+						end
+					end
+				end
+			end
+			if not attached then
+				vim.notify("Cannot attach jdtls to buffer", vim.log.levels.WARN)
+				return
+			end
+			local fname = vim.fn.expand("<amatch>")
+			local uri
+			local use_cmd
+			if vim.startswith(fname, "jdt://") then
+				uri = fname
+				use_cmd = false
+			else
+				uri = vim.uri_from_fname(fname)
+				use_cmd = true
+				if not vim.startswith(uri, "file://") then
+					return
+				end
+			end
+			local buf = vim.api.nvim_get_current_buf()
+			vim.bo[buf].modifiable = true
+			vim.bo[buf].swapfile = false
+			vim.bo[buf].buftype = "nofile"
+			vim.bo[buf].filetype = "java"
+			local timeout_ms = 5000
+			vim.wait(timeout_ms, function()
+				return next(vim.lsp.get_clients({ name = "jdtls", bufnr = buf })) ~= nil
+			end)
+			local client = vim.lsp.get_clients({ name = "jdtls", bufnr = buf })[1]
+			if not client then
+				vim.notify("No jdtls client found", vim.log.levels.WARN)
+				return
+			end
+			local content
+			local function handler(err, result)
+				assert(not err, vim.inspect(err))
+				content = result
+				local normalized = string.gsub(result, "\r\n", "\n")
+				local source_lines = vim.split(normalized, "\n", { plain = true })
+				vim.api.nvim_buf_set_lines(buf, 0, -1, false, source_lines)
+				vim.bo[buf].modifiable = false
+			end
+			if use_cmd then
+				local command = {
+					command = "java.decompile",
+					arguments = { uri },
+				}
+				client:exec_cmd(command, nil, handler)
+			else
+				local params = {
+					uri = uri,
+				}
+				client:request("java/classFileContents", params, handler, buf)
+			end
+			vim.wait(timeout_ms, function()
+				return content ~= nil
+			end)
+		end,
+	})
 end)
 
 -- Lazy loaded dap configurations setup
 later(function()
 	local dap = require("dap")
 	-- Debug plugin setups
-	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
 	require("dap-python").setup("~/.local/share/debugpy/bin/python")
 	-- Adapter definitions
+	dap.adapters["jdtls-debug"] = function(callback, config)
+		local jdtls_client = vim.tbl_filter(function(client)
+			return client.name == "jdtls" and client.config and client.config.root_dir == config.cwd
+		end, vim.lsp.get_clients())[1]
+		local bufnr = vim.lsp.get_buffers_by_client_id(jdtls_client and jdtls_client.id)[1]
+			or vim.api.nvim_get_current_buf()
+		jdtls_client:exec_cmd({ command = "vscode.java.startDebugSession" }, { bufnr = bufnr }, function(err0, port)
+			assert(not err0, vim.inspect(err0))
+			callback({
+				type = "server",
+				host = "127.0.0.1",
+				port = port,
+			})
+		end)
+	end
 	dap.adapters["pwa-node"] = {
 		type = "server",
 		host = "localhost",
@@ -1560,31 +1656,20 @@ later(function()
 		end
 	end
 	-- Debug configurations
+	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
+	dap.configurations.python = {
+		{
+			type = "python",
+			name = "Attach remote",
+			mode = "remote",
+			request = "attach",
+			hostName = "127.0.0.1",
+			port = 5678,
+			outputMode = "remote",
+		},
+	}
 	-- dlv debug --headless -l 127.0.0.1:38697 main.go
 	dap.configurations.go = {
-		{
-			type = "delve",
-			name = "Debug",
-			request = "launch",
-			program = "${file}",
-			-- outputMode = "remote",
-		},
-		{
-			type = "delve",
-			name = "Debug test",
-			request = "launch",
-			mode = "test",
-			program = "${file}",
-			-- outputMode = "remote",
-		},
-		{
-			type = "delve",
-			name = "Debug test (go.mod)",
-			request = "launch",
-			mode = "test",
-			program = "./${relativeFileDirname}",
-			-- outputMode = "remote",
-		},
 		{
 			type = "delve",
 			name = "Attach remote",
@@ -1599,111 +1684,27 @@ later(function()
 	-- mvnDebug exec:java -Dexec.mainClass="com.mycompany.app.App"
 	dap.configurations.java = {
 		{
-			type = "java",
+			type = "jdtls-debug",
 			request = "attach",
 			name = "Attach remote",
 			hostName = "127.0.0.1",
 			port = 8000,
+			outputMode = "remote",
 		},
 	}
+	-- TODO Find instructions on how to start debugger remotely for js-debug
 	for _, language in ipairs({ "typescript", "javascript" }) do
 		dap.configurations[language] = {
 			{
 				type = "pwa-node",
-				request = "launch",
-				name = "Launch file",
-				program = "${file}",
-				cwd = "${workspaceFolder}",
-			},
-			{
-				type = "pwa-node",
 				request = "attach",
-				name = "Attach",
-				processId = require("dap.utils").pick_process,
-				cwd = "${workspaceFolder}",
-			},
-			{
-				type = "pwa-node",
-				request = "launch",
-				name = "Debug Jest Tests",
-				-- trace = true,
-				runtimeExecutable = "node",
-				runtimeArgs = {
-					"./node_modules/jest/bin/jest.js",
-					"--runInBand",
-				},
-				rootPath = "${workspaceFolder}",
-				cwd = "${workspaceFolder}",
-				console = "integratedTerminal",
-				internalConsoleOptions = "neverOpen",
-			},
-			{
-				type = "pwa-node",
-				request = "launch",
-				name = "Debug Mocha Tests",
-				-- trace = true,
-				runtimeExecutable = "node",
-				runtimeArgs = {
-					"./node_modules/mocha/bin/mocha.js",
-				},
-				rootPath = "${workspaceFolder}",
-				cwd = "${workspaceFolder}",
-				console = "integratedTerminal",
-				internalConsoleOptions = "neverOpen",
+				name = "Attach remote",
+				hostName = "127.0.0.1",
+				port = 8000,
+				outputMode = "remote",
 			},
 		}
 	end
-	dap.configurations.rust = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-			initCommands = function()
-				local rustc_sysroot = vim.fn.trim(vim.fn.system("rustc --print sysroot"))
-				local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
-				local commands_file = rustc_sysroot .. "/lib/rustlib/etc/lldb_commands"
-				local commands = {}
-				local file = io.open(commands_file, "r")
-				if file then
-					for line in file:lines() do
-						table.insert(commands, line)
-					end
-					file:close()
-				end
-				table.insert(commands, 1, script_import)
-				return commands
-			end,
-		},
-	}
-	dap.configurations.cpp = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-		},
-	}
-	dap.configurations.c = {
-		{
-			name = "Launch file",
-			type = "lldb",
-			request = "launch",
-			program = function()
-				return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			end,
-			cwd = "${workspaceFolder}",
-			stopOnEntry = false,
-		},
-	}
 end)
 
 -- Lazy loaded custom configuration
