@@ -1583,24 +1583,15 @@ later(function()
 				port = config.port or 38697,
 			})
 		else
-			local port = config.port or 38697
-			local host = config.host or "127.0.0.1"
-			local term_buf = vim.api.nvim_create_buf(false, true)
-			vim.api.nvim_command("vsplit")
-			vim.api.nvim_command("buffer " .. term_buf)
-			vim.fn.jobstart({ "dlv", "dap", "-l", host .. ":" .. port }, { term = true })
-			vim.defer_fn(function()
-				callback({ type = "server", host = host, port = port })
-			end, 100)
-			-- callback({
-			-- 	type = "server",
-			-- 	port = "${port}",
-			-- 	executable = {
-			-- 		command = "dlv",
-			-- 		args = { "dap", "-l", "127.0.0.1:${port}" },
-			-- 		detached = vim.fn.has("win32") == 0,
-			-- 	},
-			-- })
+			callback({
+				type = "server",
+				port = "${port}",
+				executable = {
+					command = "dlv",
+					args = { "dap", "-l", "127.0.0.1:${port}" },
+					detached = vim.fn.has("win32") == 0,
+				},
+			})
 		end
 	end
 	-- Debug configurations
