@@ -31,9 +31,11 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/lua/l
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/xml/xml-lsp.bash -o ~/scripts/xml-lsp.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/js/node-debug.bash -o ~/scripts/node-debug.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/python/python-debug.bash -o ~/scripts/python-debug.bash
+curl https://raw.githubusercontent.com/231tr0n/config/main/lang-setup-conf/scala/coursier.bash -o ~/scripts/coursier.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/kubernetes/kubernetes.bash -o ~/scripts/kubernetes.bash
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/neovim.bash -o ~/scripts/neovim.bash
 
+chmod +x ~/scripts/coursier.bash
 chmod +x ~/scripts/java-debug.bash
 chmod +x ~/scripts/java-lsp.bash
 chmod +x ~/scripts/java-test.bash
@@ -46,6 +48,11 @@ chmod +x ~/scripts/python-debug.bash
 chmod +x ~/scripts/kubernetes.bash
 chmod +x ~/scripts/neovim.bash
 
+cd ~/scripts
+./coursier.bash
+export PATH=$PATH:$HOME/.local/share/coursier/bin
+cd ~
+cs install cs
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH=$PATH:$HOME/.cargo/bin
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo bash -
