@@ -644,8 +644,12 @@ now(function()
 			default_section = "breakpoints",
 		},
 		windows = {
+			height = 12,
+			position = "left",
 			terminal = {
+				position = "left",
 				hide = { "go", "delve" },
+				start_hidden = false,
 			},
 		},
 	})
@@ -781,7 +785,7 @@ end)
 -- Non lazy keymaps registration
 now(function()
 	local te_buf = nil
-	local te_win_id = nil
+	local te_win_id = -1
 	local function openTerminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
@@ -1002,6 +1006,7 @@ now(function()
 				-- Toggle dotfiles
 				local show_dotfiles = true
 				local filter_show = function(fs_entry)
+					fs_entry = fs_entry
 					return true
 				end
 				local filter_hide = function(fs_entry)
@@ -1124,7 +1129,9 @@ now(function()
 		callback = function(args)
 			-- Disable semantic highlighting
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
-			client.server_capabilities.semanticTokensProvider = nil
+			if client then
+				client.server_capabilities.semanticTokensProvider = nil
+			end
 			-- Set foldexpr to lsp provided folds
 			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
 		end,
