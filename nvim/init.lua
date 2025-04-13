@@ -645,7 +645,6 @@ now(function()
 		},
 		windows = {
 			height = 12,
-			position = "left",
 			terminal = {
 				position = "left",
 				hide = { "go", "delve" },
