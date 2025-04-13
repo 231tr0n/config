@@ -316,8 +316,6 @@ now(function()
 	require("mini.comment").setup()
 	require("mini.completion").setup()
 	-- Extend mini.completion capabilities with default capabilities
-	Global.lspCapabilities =
-		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	require("mini.cursorword").setup()
 	require("mini.diff").setup()
 	require("mini.extra").setup()
@@ -470,7 +468,6 @@ end)
 now(function()
 	add("nacro90/numb.nvim")
 	require("numb").setup()
-	add("neovim/nvim-lspconfig")
 	add("mfussenegger/nvim-dap")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
@@ -1167,315 +1164,7 @@ now(function()
 			})
 		end,
 	})
-end)
-
--- Lazy loaded plugins registration
-later(function()
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
-	add("David-Kunz/gen.nvim")
-	require("gen").setup({
-		model = "gemma3:latest",
-		host = "localhost",
-		port = "11434",
-		display_mode = "split",
-		show_prompt = "full",
-		show_model = true,
-		no_auto_close = false,
-		command = function(options)
-			return "curl --silent --no-buffer -X POST http://"
-				.. options.host
-				.. ":"
-				.. options.port
-				.. "/api/chat -d $body"
-		end,
-		debug = false,
-	})
-end)
-
--- Lazy loaded keymaps registration
-later(function()
-	Nmap("<leader>am", require("gen").select_model, "Select model")
-	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-end)
-
--- Lazy loaded lsp configurations setup
-later(function()
-	local lspconfig = require("lspconfig")
-	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
-	for k, v in ipairs(lua_runtime_files) do
-		if v == vim.fn.stdpath("config") then
-			table.remove(lua_runtime_files, k)
-		end
-	end
-	lspconfig.lua_ls.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			Lua = {
-				hint = {
-					enable = true,
-				},
-				runtime = {
-					version = "LuaJIT",
-				},
-				completion = {
-					callSnippet = "Replace",
-				},
-				workspace = {
-					-- library = {
-					-- 	vim.env.VIMRUNTIME,
-					-- },
-					library = lua_runtime_files,
-				},
-			},
-		},
-	})
-	lspconfig.marksman.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.r_language_server.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.texlab.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.html.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.eslint.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.cssls.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.bashls.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.gopls.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			gopls = {
-				hints = {
-					rangeVariableTypes = true,
-					parameterNames = true,
-					constantValues = true,
-					assignVariableTypes = true,
-					compositeLiteralFields = true,
-					compositeLiteralTypes = true,
-					functionTypeParameters = true,
-				},
-			},
-		},
-	})
-	lspconfig.pyright.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	-- lspconfig.basedpyright.setup({
-	-- 	capabilities = Global.lspCapabilities,
-	-- 	settings = {
-	-- 		basedpyright = {
-	-- 			analysis = {
-	-- 				autoSearchPaths = true,
-	-- 				diagnosticMode = "openFilesOnly",
-	-- 				useLibraryCodeForTypes = true,
-	-- 			},
-	-- 		},
-	-- 	},
-	-- })
-	lspconfig.rust_analyzer.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			["rust-analyzer"] = {
-				inlayHints = {
-					bindingModeHints = {
-						enable = false,
-					},
-					chainingHints = {
-						enable = true,
-					},
-					closingBraceHints = {
-						enable = true,
-						minLines = 25,
-					},
-					closureReturnTypeHints = {
-						enable = "never",
-					},
-					lifetimeElisionHints = {
-						enable = "never",
-						useParameterNames = false,
-					},
-					maxLength = 25,
-					parameterHints = {
-						enable = true,
-					},
-					reborrowHints = {
-						enable = "never",
-					},
-					renderColons = true,
-					typeHints = {
-						enable = true,
-						hideClosureInitialization = false,
-						hideNamedConstructor = false,
-					},
-				},
-			},
-		},
-	})
-	lspconfig.ts_ls.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			typescript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-				},
-			},
-			javascript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-				},
-			},
-		},
-	})
-	-- lspconfig.vtsls.setup({
-	-- 	capabilities = Global.lspCapabilities,
-	-- 	settings = {
-	-- 		typescript = {
-	-- 			inlayHints = {
-	-- 				parameterNames = { enabled = "all" },
-	-- 				parameterTypes = { enabled = true },
-	-- 				variableTypes = { enabled = true },
-	-- 				propertyDeclarationTypes = { enabled = true },
-	-- 				functionLikeReturnTypes = { enabled = true },
-	-- 				enumMemberValues = { enabled = true },
-	-- 			},
-	-- 		},
-	-- 	},
-	-- })
-	lspconfig.svelte.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			typescript = {
-				inlayHints = {
-					parameterNames = { enabled = "all" },
-					parameterTypes = { enabled = true },
-					variableTypes = { enabled = true },
-					propertyDeclarationTypes = { enabled = true },
-					functionLikeReturnTypes = { enabled = true },
-					enumMemberValues = { enabled = true },
-				},
-			},
-		},
-	})
-	lspconfig.clangd.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			clangd = {
-				InlayHints = {
-					Designators = true,
-					Enabled = true,
-					ParameterNames = true,
-					DeducedTypes = true,
-				},
-			},
-		},
-	})
-	lspconfig.yamlls.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.jsonls.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.lemminx.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	lspconfig.angularls.setup({
-		capabilities = Global.lspCapabilities,
-	})
-	local bundles = {}
-	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
-	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-	lspconfig.jdtls.setup({
-		capabilities = Global.lspCapabilities,
-		settings = {
-			java = {
-				references = {
-					includeDecompiledSources = true,
-				},
-				eclipse = {
-					downloadSources = true,
-				},
-				maven = {
-					downloadSources = true,
-				},
-				format = {
-					enabled = true,
-				},
-				inlayHints = {
-					parameterNames = {
-						enabled = "all",
-						exclusions = { "this" },
-					},
-				},
-				signatureHelp = { enabled = true, description = { enabled = true } },
-				contentProvider = { preferred = "fernflower" },
-				configuration = {
-					runtimes = {
-						{
-							name = "JavaSE-11",
-							path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
-						},
-						{
-							name = "JavaSE-17",
-							path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
-						},
-						{
-							name = "JavaSE-21",
-							path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
-						},
-					},
-				},
-			},
-		},
-		init_options = {
-			bundles = bundles,
-			extendedClientCapabilities = {
-				classFileContentsSupport = true,
-				executeClientCommandSupport = true,
-			},
-		},
-		handlers = {
-			["language/status"] = vim.schedule_wrap(function(_, results)
-				vim.notify(results.message, vim.log.levels.INFO)
-			end),
-		},
-	})
-	-- Start lsp lazily
-	vim.cmd("LspStart")
-end)
-
--- Lazy autocommands setup
-later(function()
+	-- Handle jdt URIs and java class files differently
 	vim.api.nvim_create_autocmd("BufReadCmd", {
 		pattern = "jdt://*,*.class",
 		callback = function(args)
@@ -1580,6 +1269,243 @@ later(function()
 			end)
 		end,
 	})
+end)
+
+-- Lsp configurations setup
+now(function()
+	add("neovim/nvim-lspconfig")
+	-- Lua lsp runtime files
+	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
+	for k, v in ipairs(lua_runtime_files) do
+		if v == vim.fn.stdpath("config") then
+			table.remove(lua_runtime_files, k)
+		end
+	end
+	-- Jdtls bundles
+	local bundles = {}
+	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
+	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	local lsp_servers = {
+		lua_ls = {
+			settings = {
+				Lua = {
+					hint = {
+						enable = true,
+					},
+					runtime = {
+						version = "LuaJIT",
+					},
+					completion = {
+						callSnippet = "Replace",
+					},
+					workspace = {
+						-- library = {
+						-- 	vim.env.VIMRUNTIME,
+						-- },
+						library = lua_runtime_files,
+					},
+				},
+			},
+		},
+		marksman = {},
+		texlab = {},
+		html = {},
+		eslint = {},
+		cssls = {},
+		bashls = {},
+		gopls = {
+			settings = {
+				gopls = {
+					hints = {
+						rangeVariableTypes = true,
+						parameterNames = true,
+						constantValues = true,
+						assignVariableTypes = true,
+						compositeLiteralFields = true,
+						compositeLiteralTypes = true,
+						functionTypeParameters = true,
+					},
+				},
+			},
+		},
+		-- pyright = {},
+		basedpyright = {
+			settings = {
+				basedpyright = {
+					analysis = {
+						autoSearchPaths = true,
+						diagnosticMode = "openFilesOnly",
+						useLibraryCodeForTypes = true,
+					},
+				},
+			},
+		},
+		-- vtsls = {
+		-- 	settings = {
+		-- 		typescript = {
+		-- 			inlayHints = {
+		-- 				parameterNames = { enabled = "all" },
+		-- 				parameterTypes = { enabled = true },
+		-- 				variableTypes = { enabled = true },
+		-- 				propertyDeclarationTypes = { enabled = true },
+		-- 				functionLikeReturnTypes = { enabled = true },
+		-- 				enumMemberValues = { enabled = true },
+		-- 			},
+		-- 		},
+		-- 	},
+		-- },
+		ts_ls = {
+			settings = {
+				typescript = {
+					inlayHints = {
+						includeInlayParameterNameHints = "all",
+						includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+						includeInlayFunctionParameterTypeHints = true,
+						includeInlayVariableTypeHints = true,
+						includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+						includeInlayPropertyDeclarationTypeHints = true,
+						includeInlayFunctionLikeReturnTypeHints = true,
+						includeInlayEnumMemberValueHints = true,
+					},
+				},
+				javascript = {
+					inlayHints = {
+						includeInlayParameterNameHints = "all",
+						includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+						includeInlayFunctionParameterTypeHints = true,
+						includeInlayVariableTypeHints = true,
+						includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+						includeInlayPropertyDeclarationTypeHints = true,
+						includeInlayFunctionLikeReturnTypeHints = true,
+						includeInlayEnumMemberValueHints = true,
+					},
+				},
+			},
+		},
+		svelte = {
+			settings = {
+				typescript = {
+					inlayHints = {
+						parameterNames = { enabled = "all" },
+						parameterTypes = { enabled = true },
+						variableTypes = { enabled = true },
+						propertyDeclarationTypes = { enabled = true },
+						functionLikeReturnTypes = { enabled = true },
+						enumMemberValues = { enabled = true },
+					},
+				},
+			},
+		},
+		yamlls = {},
+		jsonls = {},
+		lemminx = {},
+		angularls = {},
+		metals = {},
+		jdtls = {
+			settings = {
+				java = {
+					references = {
+						includeDecompiledSources = true,
+					},
+					eclipse = {
+						downloadSources = true,
+					},
+					maven = {
+						downloadSources = true,
+					},
+					format = {
+						enabled = true,
+					},
+					inlayHints = {
+						parameterNames = {
+							enabled = "all",
+							exclusions = { "this" },
+						},
+					},
+					signatureHelp = { enabled = true, description = { enabled = true } },
+					contentProvider = { preferred = "fernflower" },
+					configuration = {
+						runtimes = {
+							{
+								name = "JavaSE-11",
+								path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+							},
+							{
+								name = "JavaSE-17",
+								path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+							},
+							{
+								name = "JavaSE-21",
+								path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+							},
+						},
+					},
+				},
+			},
+			init_options = {
+				bundles = bundles,
+				extendedClientCapabilities = {
+					classFileContentsSupport = true,
+					executeClientCommandSupport = true,
+				},
+			},
+			handlers = {
+				["language/status"] = vim.schedule_wrap(function(_, results)
+					vim.notify(results.message, vim.log.levels.INFO)
+				end),
+			},
+		},
+	}
+	-- Set capabilities and load lsps
+	vim.lsp.config("*", {
+		capabilities = vim.tbl_extend(
+			"force",
+			vim.lsp.protocol.make_client_capabilities(),
+			MiniCompletion.get_lsp_capabilities()
+		),
+		root_markers = { ".git" },
+	})
+	for server, config in pairs(lsp_servers) do
+		vim.lsp.config(server, config)
+		vim.lsp.enable(server)
+	end
+end)
+
+-- Lazy loaded plugins registration
+later(function()
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
+		},
+	})
+	add("David-Kunz/gen.nvim")
+	require("gen").setup({
+		model = "gemma3:latest",
+		host = "localhost",
+		port = "11434",
+		display_mode = "split",
+		show_prompt = "full",
+		show_model = true,
+		no_auto_close = false,
+		command = function(options)
+			return "curl --silent --no-buffer -X POST http://"
+				.. options.host
+				.. ":"
+				.. options.port
+				.. "/api/chat -d $body"
+		end,
+		debug = false,
+	})
+end)
+
+-- Lazy loaded keymaps registration
+later(function()
+	Nmap("<leader>am", require("gen").select_model, "Select model")
+	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
+	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
 end)
 
 -- Lazy loaded dap configurations setup
@@ -1704,11 +1630,11 @@ later(function()
 			request = "attach",
 			name = "Attach remote",
 			hostName = "127.0.0.1",
-			port = 9229,
+			port = 8000,
 			outputMode = "remote",
 		},
 	}
-	-- node --inspect-wait=127.0.0.1:9229 main.js
+	-- node --inspect-brk=127.0.0.1:9229 main.js
 	for _, language in ipairs({ "typescript", "javascript" }) do
 		dap.configurations[language] = {
 			{
@@ -1716,7 +1642,7 @@ later(function()
 				request = "attach",
 				name = "Attach remote",
 				hostName = "127.0.0.1",
-				port = 8000,
+				port = 9229,
 				outputMode = "remote",
 			},
 		}
