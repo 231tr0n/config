@@ -27,12 +27,13 @@ add("echasnovski/mini.nvim")
 now(function()
 	Global = {
 		-- Space, tab and fold characters to use
-		leadSpace = "›",
-		nextSpace = " ",
-		leadTabSpace = "»",
-		foldOpen = "", -- ▾
-		foldClose = "", -- ▸
-		floatMultiplier = 0.8,
+		lead_space = "›",
+		next_space = " ",
+		winbar_arrow = "",
+		lead_tab_space = "»",
+		fold_open = "", -- ▾
+		fold_close = "", -- ▸
+		float_multiplier = 0.8,
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -53,12 +54,12 @@ now(function()
 		},
 	}
 	-- Function to set leadmultispace correctly
-	Global.leadMultiTabSpace = Global.leadTabSpace .. Global.nextSpace
-	Global.leadMultiSpace = Global.leadSpace .. Global.nextSpace
-	Global.leadMultiSpaceCalc = function()
+	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
+	Global.lead_multi_space = Global.lead_space .. Global.next_space
+	Global.lead_multi_space_calc = function()
 		vim.opt_local.listchars:remove("leadmultispace")
 		vim.opt_local.listchars:append({
-			leadmultispace = Global.leadSpace .. string.rep(Global.nextSpace, (vim.bo.shiftwidth - 1)),
+			leadmultispace = Global.lead_space .. string.rep(Global.next_space, (vim.bo.shiftwidth - 1)),
 		})
 	end
 	-- Mapping functions to map keys
@@ -128,7 +129,7 @@ now(function()
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
 	vim.o.expandtab = true
-	vim.o.fillchars = "eob: ,foldopen:" .. Global.foldOpen .. ",foldsep: ,foldclose:" .. Global.foldClose
+	vim.o.fillchars = "eob: ,foldopen:" .. Global.fold_open .. ",foldsep: ,foldclose:" .. Global.fold_close
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -138,7 +139,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:" .. Global.leadMultiTabSpace .. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
+	vim.o.listchars = "tab:" .. Global.lead_multi_tab_space .. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:1,hor:1"
@@ -169,9 +170,9 @@ now(function()
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
 	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum - 1)) ? (foldclosed(v:lnum) == -1 ? '"
-		.. Global.foldOpen
+		.. Global.fold_open
 		.. " ' : '"
-		.. Global.foldClose
+		.. Global.fold_close
 		.. " ') : '  '}"
 	vim.diagnostic.config({
 		virtual_text = true,
@@ -295,8 +296,6 @@ now(function()
 				{ mode = "n", keys = "<leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
-				{ mode = "n", keys = "<leader>lj", desc = "+Java" },
-				{ mode = "n", keys = "<leader>p", desc = "+Print" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
@@ -315,7 +314,6 @@ now(function()
 	})
 	require("mini.comment").setup()
 	require("mini.completion").setup()
-	-- Extend mini.completion capabilities with default capabilities
 	require("mini.cursorword").setup()
 	require("mini.diff").setup()
 	require("mini.extra").setup()
@@ -794,7 +792,7 @@ end)
 now(function()
 	local te_buf = nil
 	local te_win_id = -1
-	local function openTerminal()
+	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
 			te_win_id = vim.fn.win_getid()
@@ -805,36 +803,36 @@ now(function()
 		end
 		vim.cmd("startinsert")
 	end
-	local function hideTerminal()
+	local function hide_terminal()
 		if vim.fn.win_gotoid(te_win_id) == 1 then
 			vim.cmd("hide")
 		end
 	end
-	local function toggleTerminal()
+	local function toggle_terminal()
 		if vim.fn.win_gotoid(te_win_id) == 1 then
-			hideTerminal()
+			hide_terminal()
 		else
-			openTerminal()
+			open_terminal()
 		end
 	end
 	-- Function to convert spaces to tabs
-	local function toggleTabs()
+	local function toggle_tabs()
 		vim.opt.expandtab = false
 		vim.cmd("retab!")
 	end
 	-- Function to convert tabs to spaces
-	local function toggleSpaces()
+	local function toggle_spaces()
 		vim.opt.expandtab = true
 		vim.cmd("retab!")
 	end
 	-- Function to toggle virtual text for diagnostics
-	local function diagnosticVirtualTextToggle()
+	local function diagnostic_virtual_text_toggle()
 		vim.diagnostic.config({
 			virtual_text = not vim.diagnostic.config().virtual_text,
 		})
 	end
 	-- Function to toggle virtual lines for diagnostics
-	local function diagnosticVirtualLinesToggle()
+	local function diagnostic_virtual_lines_toggle()
 		vim.diagnostic.config({
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
@@ -847,7 +845,7 @@ now(function()
 		["ctrl-y"] = keycode("<C-y>"),
 		["ctrl-y_cr"] = keycode("<C-y><CR>"),
 	}
-	local function crAction()
+	local function cr_action()
 		if vim.fn.pumvisible() ~= 0 then
 			local item_selected = vim.fn.complete_info()["selected"] ~= -1
 			return item_selected and keys["ctrl-y"] or keys["ctrl-y_cr"]
@@ -855,22 +853,25 @@ now(function()
 			return require("mini.pairs").cr()
 		end
 	end
-	Global.miniPickVisits = function(cwd, desc)
+	local mini_pick_visits = function()
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
-		MiniExtra.pickers.visit_paths({ cwd = cwd, filter = "core", sort = sort_latest }, { source = { name = desc } })
+		MiniExtra.pickers.visit_paths(
+			{ cwd = "", filter = "core", sort = sort_latest },
+			{ source = { name = "Core visits" } }
+		)
 	end
-	Imap("<CR>", crAction, "Enter to select in wildmenu", { expr = true })
+	Imap("<CR>", cr_action, "Enter to select in wildmenu", { expr = true })
 	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
 	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
-	Nmap("<C-Space>", toggleTerminal, "Toggle terminal")
+	Nmap("<C-Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F7>", Global.leadMultiSpaceCalc, "Set leadmultispace according to shiftwidth")
-	Nmap("<Space><Space><Space>", toggleSpaces, "Expand tabs")
-	Nmap("<Tab><Tab><Tab>", toggleTabs, "Contract tabs")
+	Nmap("<F7>", Global.lead_multi_space_calc, "Set leadmultispace according to shiftwidth")
+	Nmap("<Space><Space><Space>", toggle_spaces, "Expand tabs")
+	Nmap("<Tab><Tab><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<leader>F", require("conform").format, "Format code")
 	Nmap("<leader>H", ':lua vim.fn.setloclist(MiniDiff.export("qf", { scope = "all" }))<CR>', "List diff hunks")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -937,9 +938,9 @@ now(function()
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
-	Nmap("<leader>ldT", diagnosticVirtualLinesToggle, "Virtual lines toggle")
+	Nmap("<leader>ldT", diagnostic_virtual_lines_toggle, "Virtual lines toggle")
 	Nmap("<leader>ldh", ":lua vim.diagnostic.open_float()<CR>", "Hover diagnostics")
-	Nmap("<leader>ldt", diagnosticVirtualTextToggle, "Virtual text toggle")
+	Nmap("<leader>ldt", diagnostic_virtual_text_toggle, "Virtual text toggle")
 	Nmap("<leader>lgD", ":lua vim.lsp.buf.declaration()<CR>", "Goto declaration")
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
 	Nmap("<leader>lgi", ":lua vim.lsp.buf.implementation()<CR>", "Goto implementation")
@@ -954,7 +955,7 @@ now(function()
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
 	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
 	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
-	Nmap("<leader>vf", "<cmd>lua Global.miniPickVisits('', 'Core visits')<cr>", "Core visits")
+	Nmap("<leader>vf", mini_pick_visits, "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
@@ -1051,19 +1052,7 @@ now(function()
 			if args.match == "background" then
 				Global.apply_colorscheme()
 			elseif args.match == "shiftwidth" then
-				Global.leadMultiSpaceCalc()
-			end
-		end,
-	})
-	-- Set winbar to filename with path
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "*",
-		callback = function()
-			if vim.bo.buftype ~= "nofile" then
-				-- Set winbar
-				vim.wo.winbar = "⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}"
-				-- Call leadMultiSpaceCalc to set leadmultispace
-				Global.leadMultiSpaceCalc()
+				Global.lead_multi_space_calc()
 			end
 		end,
 	})
@@ -1117,16 +1106,36 @@ now(function()
 			vim.wo.statuscolumn = ""
 		end,
 	})
-	-- Add winbar for jdt uri and classfile windows
+	-- Set winbar for all windows and calcuate lead_multi_space
 	vim.api.nvim_create_autocmd("BufWinEnter", {
-		pattern = { "jdt://*", "*.class" },
+		pattern = "*",
 		callback = function(args)
 			local win = vim.fn.bufwinid(args.buf)
 			vim.schedule(function()
 				if win and not vim.api.nvim_win_is_valid(win) then
 					return
 				end
-				vim.api.nvim_set_option_value("winbar", "⠀⠀󰁔 JDT URI or Class file", { win = win })
+				if
+					vim.bo.buftype ~= ""
+					and vim.bo.buftype ~= "help"
+					and vim.bo.buftype ~= "prompt"
+					and vim.bo.buftype ~= "nofile"
+					and vim.bo.buftype ~= "acwrite"
+					and vim.bo.buftype ~= "nowrite"
+					and vim.bo.buftype ~= "terminal"
+					and vim.bo.buftype ~= "quickfix"
+				then
+					if vim.startswith(args.match, "jdt://") or vim.endswith(args.match, ".class") then
+						vim.api.nvim_set_option_value("winbar", "⠀⠀󰁔 JDT URI or Class file", { win = win })
+					else
+						vim.api.nvim_set_option_value(
+							"winbar",
+							"⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}",
+							{ win = win }
+						)
+					end
+				end
+				Global.lead_multi_space_calc()
 			end)
 		end,
 	})
@@ -1154,7 +1163,7 @@ now(function()
 	-- Lint on write setup
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		callback = function()
-			Global.leadMultiSpaceCalc()
+			Global.lead_multi_space_calc()
 			require("lint").try_lint()
 		end,
 	})
@@ -1286,15 +1295,71 @@ end)
 
 -- Lsp configurations setup
 now(function()
+	-- Make lsp capabilities
+	local lsp_capabilities =
+		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
+	-- Define client commands
+	-- TODO provide support for following client commands
+	local commands = {
+		-- Jdtls client commands
+		-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
+		-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
+		-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
+		-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
+		-- ["java.action.rename"] = java_action_rename,
+		-- ["java.action.organizeImports"] = java_action_organize_imports,
+		-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
+		-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
+		-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
+		-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
+		-- ["_java.test.askClientForChoice"] = function() end,
+		-- ["_java.test.advancedAskClientForChoice"] = function() end,
+		-- ["_java.test.askClientForInput"] = function() end,
+	}
+	if vim.lsp.commands then
+		for k, v in pairs(commands) do
+			vim.lsp.commands[k] = v
+		end
+	end
 	add("neovim/nvim-lspconfig")
-	-- Lua lsp runtime files
+	-- Lua settings
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
 	for k, v in ipairs(lua_runtime_files) do
 		if v == vim.fn.stdpath("config") then
 			table.remove(lua_runtime_files, k)
 		end
 	end
-	-- Jdtls bundles
+	-- Jdtls settings
+	local extra_code_action_literals = {
+		"source.generate.toString",
+		"source.generate.hashCodeEquals",
+		"source.organizeImports",
+	}
+	local code_action_literals = vim.tbl_get(
+		lsp_capabilities,
+		"textDocument",
+		"codeAction",
+		"codeActionLiteralSupport",
+		"codeActionKind",
+		"valueSet"
+	) or {}
+	for _, extra_literal in ipairs(extra_code_action_literals) do
+		if not vim.tbl_contains(code_action_literals, extra_literal) then
+			table.insert(code_action_literals, extra_literal)
+		end
+	end
+	local extra_capabilities = {
+		textDocument = {
+			codeAction = {
+				codeActionLiteralSupport = {
+					codeActionKind = {
+						valueSet = code_action_literals,
+					},
+				},
+			},
+		},
+	}
+	local jdtls_capabilities = vim.tbl_deep_extend("force", lsp_capabilities, extra_capabilities)
 	local bundles = {}
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
@@ -1418,11 +1483,13 @@ now(function()
 				debuggingProvider = true,
 				executeClientCommandProvider = true,
 				doctorProvider = "json",
+				doctorVisibilityProvider = true,
 				disableColorOutput = true,
-				statusBarProvider = "show-message",
+				statusBarProvider = "off",
 			},
 		},
 		jdtls = {
+			capabilities = jdtls_capabilities,
 			settings = {
 				java = {
 					references = {
@@ -1467,7 +1534,14 @@ now(function()
 				bundles = bundles,
 				extendedClientCapabilities = {
 					classFileContentsSupport = true,
+					snippetEditSupport = true,
 					executeClientCommandSupport = true,
+					overrideMethodsPromptSupport = true,
+					hashCodeEqualsPromptSupport = true,
+					generateToStringPromptSupport = true,
+					generateDelegateMethodsPromptSupport = true,
+					generateConstructorsPromptSupport = true,
+					advancedOrganizeImportsSupport = true,
 				},
 			},
 			handlers = {
@@ -1479,11 +1553,7 @@ now(function()
 	}
 	-- Set capabilities and load lsps
 	vim.lsp.config("*", {
-		capabilities = vim.tbl_extend(
-			"force",
-			vim.lsp.protocol.make_client_capabilities(),
-			MiniCompletion.get_lsp_capabilities()
-		),
+		capabilities = lsp_capabilities,
 		root_markers = { ".git" },
 	})
 	for server, config in pairs(lsp_servers) do
