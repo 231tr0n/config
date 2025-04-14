@@ -53,6 +53,8 @@ now(function()
 			base0F = "#BE5046",
 		},
 	}
+	Global.java_compiled_files_winbar = "⠀⠀󰁔 JDT URI or Class file"
+	Global.winbar = "⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}"
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
@@ -1090,8 +1092,10 @@ now(function()
 				if vim.bo.filetype == "dap-repl" then
 					-- Dap repl autocompletion setup
 					require("dap.ext.autocompl").attach()
-					vim.wo.statuscolumn = ""
 				end
+				vim.wo.foldcolumn = "0"
+				vim.wo.signcolumn = "no"
+				vim.wo.statuscolumn = ""
 			else
 				-- Hide statuscolumn
 				vim.wo.foldcolumn = "0"
@@ -1116,8 +1120,7 @@ now(function()
 					return
 				end
 				if
-					vim.bo.buftype ~= ""
-					and vim.bo.buftype ~= "help"
+					vim.bo.buftype ~= "help"
 					and vim.bo.buftype ~= "prompt"
 					and vim.bo.buftype ~= "nofile"
 					and vim.bo.buftype ~= "acwrite"
@@ -1125,14 +1128,20 @@ now(function()
 					and vim.bo.buftype ~= "terminal"
 					and vim.bo.buftype ~= "quickfix"
 				then
-					if vim.startswith(args.match, "jdt://") or vim.endswith(args.match, ".class") then
-						vim.api.nvim_set_option_value("winbar", "⠀⠀󰁔 JDT URI or Class file", { win = win })
-					else
-						vim.api.nvim_set_option_value(
-							"winbar",
-							"⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}",
-							{ win = win }
-						)
+					if vim.bo.buftype == "" then
+						if vim.startswith(args.match, "jdt://") or vim.endswith(args.match, ".class") then
+							if vim.bo.filetype ~= "" then
+								vim.api.nvim_set_option_value(
+									"winbar",
+									Global.java_compiled_files_winbar,
+									{ win = win }
+								)
+							end
+						else
+							if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) then
+								vim.api.nvim_set_option_value("winbar", Global.winbar, { win = win })
+							end
+						end
 					end
 				end
 				Global.lead_multi_space_calc()
@@ -1162,7 +1171,13 @@ now(function()
 	})
 	-- Lint on write setup
 	vim.api.nvim_create_autocmd("BufWritePost", {
-		callback = function()
+		callback = function(args)
+			-- Set winbar if new file is written to the buffer
+			if vim.bo.buftype == "" then
+				if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) then
+					vim.wo.winbar = Global.winbar
+				end
+			end
 			Global.lead_multi_space_calc()
 			require("lint").try_lint()
 		end,
