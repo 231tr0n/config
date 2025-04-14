@@ -29,7 +29,7 @@ now(function()
 		-- Space, tab and fold characters to use
 		lead_space = "›",
 		next_space = " ",
-		winbar_arrow = "",
+		winbar_arrow = "󰁔",
 		lead_tab_space = "»",
 		fold_open = "", -- ▾
 		fold_close = "", -- ▸
@@ -53,8 +53,14 @@ now(function()
 			base0F = "#BE5046",
 		},
 	}
-	Global.java_compiled_files_winbar = "⠀⠀󰁔 JDT URI or Class file"
-	Global.winbar = "⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}"
+	Global.java_compiled_files_winbar = "⠀⠀" .. Global.winbar_arrow .. " JDT URI or Class file"
+	Global.winbar = "⠀⠀%{% '"
+		.. Global.winbar_arrow
+		.. " / "
+		.. Global.winbar_arrow
+		.. " ' . join(split(expand('%:p'), '/'), ' "
+		.. Global.winbar_arrow
+		.. " ') %}"
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
