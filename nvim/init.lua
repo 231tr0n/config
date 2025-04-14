@@ -1321,27 +1321,27 @@ now(function()
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	-- Define client commands
 	-- TODO provide support for following client commands
-	local commands = {
-		-- Jdtls client commands
-		-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
-		-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
-		-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
-		-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
-		-- ["java.action.rename"] = java_action_rename,
-		-- ["java.action.organizeImports"] = java_action_organize_imports,
-		-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
-		-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
-		-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
-		-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
-		-- ["_java.test.askClientForChoice"] = function() end,
-		-- ["_java.test.advancedAskClientForChoice"] = function() end,
-		-- ["_java.test.askClientForInput"] = function() end,
-	}
-	if vim.lsp.commands then
-		for k, v in pairs(commands) do
-			vim.lsp.commands[k] = v
-		end
-	end
+	-- local commands = {
+	-- Jdtls client commands
+	-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
+	-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
+	-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
+	-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
+	-- ["java.action.rename"] = java_action_rename,
+	-- ["java.action.organizeImports"] = java_action_organize_imports,
+	-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
+	-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
+	-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
+	-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
+	-- ["_java.test.askClientForChoice"] = function() end,
+	-- ["_java.test.advancedAskClientForChoice"] = function() end,
+	-- ["_java.test.askClientForInput"] = function() end,
+	-- }
+	-- if vim.lsp.commands then
+	-- 	for k, v in pairs(commands) do
+	-- 		vim.lsp.commands[k] = v
+	-- 	end
+	-- end
 	add("neovim/nvim-lspconfig")
 	-- Lua settings
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
@@ -1503,6 +1503,8 @@ now(function()
 			init_options = {
 				debuggingProvider = true,
 				executeClientCommandProvider = true,
+				inputBoxProvider = true,
+				quickPickProvider = true,
 				doctorProvider = "json",
 				doctorVisibilityProvider = true,
 				disableColorOutput = true,
@@ -1647,20 +1649,65 @@ later(function()
 			})
 		end
 	end
-	dap.adapters["jdtls-java-debug"] = function(callback, config)
-		local jdtls_client = vim.tbl_filter(function(client)
-			return client.name == "jdtls" and client.config and client.config.root_dir == config.cwd
-		end, vim.lsp.get_clients())[1]
-		local bufnr = vim.lsp.get_buffers_by_client_id(jdtls_client and jdtls_client.id)[1]
-			or vim.api.nvim_get_current_buf()
-		jdtls_client:exec_cmd({ command = "vscode.java.startDebugSession" }, { bufnr = bufnr }, function(err0, port)
+	dap.adapters["metals-scala-debug"] = function(callback, config)
+		local bufnr = vim.api.nvim_get_current_buf()
+		local clients = vim.lsp.get_clients({ name = "metals", bufnr = bufnr })
+		if #clients == 0 then
+			vim.notify("No metals client found", vim.log.levels.WARN)
+			return
+		end
+		local metals_client = clients[1]
+		metals_client:exec_cmd({
+			title = "debug",
+			command = "metals.debug-adapter-start",
+			arguments = {
+				hostName = config.host and config.host or "127.0.0.1",
+				port = config.port and config.port or "5005",
+				buildTarget = config.buildTarget,
+			},
+		}, { bufnr = bufnr }, function(err0, res)
 			assert(not err0, vim.inspect(err0))
+			local uri = res.result.uri
+			local results = {}
+			local idx = 1
+			local delim_from, delim_to = string.find(uri, ":", idx)
+			while delim_from do
+				table.insert(results, string.sub(uri, idx, delim_from - 1))
+				idx = delim_to + 1
+				delim_from, delim_to = string.find(uri, ":", idx)
+			end
+			table.insert(results, string.sub(uri, idx))
+			local port = results[3]
 			callback({
 				type = "server",
 				host = "127.0.0.1",
 				port = port,
+				options = {
+					initialize_timeout_sec = 10,
+				},
 			})
 		end)
+	end
+	dap.adapters["jdtls-java-debug"] = function(callback, _)
+		local bufnr = vim.api.nvim_get_current_buf()
+		local clients = vim.lsp.get_clients({ name = "jdtls", bufnr = bufnr })
+		if #clients == 0 then
+			vim.notify("No jdtls client found", vim.log.levels.WARN)
+			return
+		end
+		local jdtls_client = clients[1]
+		jdtls_client:exec_cmd(
+			{ title = "debug", command = "vscode.java.startDebugSession" },
+			{ bufnr = bufnr },
+			function(err0, port)
+				assert(not err0, vim.inspect(err0))
+				callback({
+					type = "server",
+					host = "127.0.0.1",
+					port = port,
+				})
+			end
+		)
 	end
 	dap.adapters["pwa-node"] = {
 		type = "server",
@@ -1735,6 +1782,17 @@ later(function()
 			hostName = "127.0.0.1",
 			port = 8000,
 			outputMode = "remote",
+		},
+	}
+	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -jar scala.jar
+	dap.configurations.scala = {
+		{
+			type = "metals-scala-debug",
+			request = "attach",
+			name = "Attach remote",
+			hostName = "127.0.0.1",
+			port = 5005,
+			buildTarget = "root",
 		},
 	}
 	-- node --inspect-brk=127.0.0.1:9229 main.js
