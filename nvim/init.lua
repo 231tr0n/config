@@ -637,18 +637,27 @@ now(function()
 			"mfussenegger/nvim-dap",
 		},
 	})
+	---@diagnostic disable-next-line: missing-fields
 	require("dap-view").setup({
+		---@diagnostic disable-next-line: missing-fields
 		winbar = {
-			show = true,
 			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
+			headers = {
+				breakpoints = "[B]reakpoints",
+				scopes = "[S]copes",
+				exceptions = "[E]xceptions",
+				watches = "[W]atches",
+				threads = "[T]hreads",
+				repl = "[R]EPL",
+				console = "[C]onsole",
+			},
 		},
+		---@diagnostic disable-next-line: missing-fields
 		windows = {
-			height = 12,
+			---@diagnostic disable-next-line: missing-fields
 			terminal = {
-				position = "left",
 				hide = { "go", "delve" },
-				start_hidden = false,
 			},
 		},
 	})
@@ -1055,21 +1064,13 @@ now(function()
 				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
 				-- Call leadMultiSpaceCalc to set leadmultispace
 				Global.leadMultiSpaceCalc()
-			else
-				if vim.bo.filetype == "java" then
-					local fname = vim.fn.expand("%")
-					if vim.startswith(fname, "jdt://") or vim.endswith(fname, ".class") then
-						-- TODO fix winbar not being set for class files and jdt uris
-						vim.wo.winbar = "⠀⠀🢥 Java URI or Class file"
-					end
-				end
 			end
 		end,
 	})
 	-- Various settings for plugin filetypes
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-float,ministarter",
-		callback = function()
+		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-view,dap-view-term,dap-float,ministarter",
+		callback = function(args)
 			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 			vim.b.minicursorword_disable = true
 			vim.b.miniindentscope_disable = true
@@ -1089,13 +1090,19 @@ now(function()
 				vim.wo.signcolumn = "no"
 				vim.wo.foldmethod = "expr"
 				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-			elseif vim.bo.filetype == "dap-float" then
-				-- Map q to quit window in dap-float filetype
-				Nmap("q", "<C-w>q", "Quit window", { buffer = true })
-			elseif vim.bo.filetype == "dap-repl" then
-				-- Dap repl autocompletion setup
-				require("dap.ext.autocompl").attach()
-				vim.wo.statuscolumn = ""
+			elseif
+				vim.bo.filetype == "dap-float"
+				or vim.bo.filetype == "dap-repl"
+				or vim.bo.filetype == "dap-view"
+				or vim.bo.filetype == "dap-view-term"
+			then
+				-- Map q to quit window in dap filetypes
+				Nmap("q", "<C-w>q", "Quit window", { buffer = args.buf })
+				if vim.bo.filetype == "dap-repl" then
+					-- Dap repl autocompletion setup
+					require("dap.ext.autocompl").attach()
+					vim.wo.statuscolumn = ""
+				end
 			else
 				-- Hide statuscolumn
 				vim.wo.foldcolumn = "0"
@@ -1110,16 +1117,16 @@ now(function()
 			vim.wo.statuscolumn = ""
 		end,
 	})
-	-- Remove statuscolumn for any nvim-dap windows
+	-- Add winbar for jdt uri and classfile windows
 	vim.api.nvim_create_autocmd("BufWinEnter", {
-		pattern = { "DAP *" },
+		pattern = { "jdt://*", "*.class" },
 		callback = function(args)
 			local win = vim.fn.bufwinid(args.buf)
 			vim.schedule(function()
 				if win and not vim.api.nvim_win_is_valid(win) then
 					return
 				end
-				vim.api.nvim_set_option_value("statuscolumn", "", { win = win })
+				vim.api.nvim_set_option_value("winbar", "⠀⠀🢥 JDT URI or Class file", { win = win })
 			end)
 		end,
 	})
@@ -1172,7 +1179,7 @@ now(function()
 	})
 	-- Handle jdt URIs and java class files differently
 	vim.api.nvim_create_autocmd("BufReadCmd", {
-		pattern = "jdt://*,*.class",
+		pattern = { "jdt://*", "*.class" },
 		callback = function(args)
 			local function is_jdtls_buf(buffer_nr)
 				if vim.bo[buffer_nr].filetype == "java" then
@@ -1406,7 +1413,15 @@ now(function()
 		jsonls = {},
 		lemminx = {},
 		angularls = {},
-		metals = {},
+		metals = {
+			init_options = {
+				debuggingProvider = true,
+				executeClientCommandProvider = true,
+				doctorProvider = "json",
+				disableColorOutput = true,
+				statusBarProvider = "show-message",
+			},
+		},
 		jdtls = {
 			settings = {
 				java = {
