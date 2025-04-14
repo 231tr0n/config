@@ -1061,7 +1061,7 @@ now(function()
 		callback = function()
 			if vim.bo.buftype ~= "nofile" then
 				-- Set winbar
-				vim.wo.winbar = "⠀⠀%{% '🢥 / 🢥 ' . join(split(expand('%:p'), '/'), ' 🢥 ') %}"
+				vim.wo.winbar = "⠀⠀%{% '󰁔 / 󰁔 ' . join(split(expand('%:p'), '/'), ' 󰁔 ') %}"
 				-- Call leadMultiSpaceCalc to set leadmultispace
 				Global.leadMultiSpaceCalc()
 			end
@@ -1126,7 +1126,7 @@ now(function()
 				if win and not vim.api.nvim_win_is_valid(win) then
 					return
 				end
-				vim.api.nvim_set_option_value("winbar", "⠀⠀🢥 JDT URI or Class file", { win = win })
+				vim.api.nvim_set_option_value("winbar", "⠀⠀󰁔 JDT URI or Class file", { win = win })
 			end)
 		end,
 	})
