@@ -1208,6 +1208,13 @@ now(function()
 			})
 		end,
 	})
+	-- Send focus event to metals lsp
+	vim.api.nvim_create_autocmd("BufEnter", {
+		pattern = { "*.scala" },
+		callback = function()
+			vim.lsp.buf_notify(0, "metals/didFocusTextDocument", vim.uri_from_bufnr(0))
+		end,
+	})
 	-- Handle jdt URIs and java class files differently
 	vim.api.nvim_create_autocmd("BufReadCmd", {
 		pattern = { "jdt://*", "*.class" },
@@ -1320,29 +1327,6 @@ now(function()
 	-- Make lsp capabilities
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
-	-- Define client commands
-	-- TODO provide support for following client commands
-	-- local commands = {
-	-- Jdtls client commands
-	-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
-	-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
-	-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
-	-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
-	-- ["java.action.rename"] = java_action_rename,
-	-- ["java.action.organizeImports"] = java_action_organize_imports,
-	-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
-	-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
-	-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
-	-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
-	-- ["_java.test.askClientForChoice"] = function() end,
-	-- ["_java.test.advancedAskClientForChoice"] = function() end,
-	-- ["_java.test.askClientForInput"] = function() end,
-	-- }
-	-- if vim.lsp.commands then
-	-- 	for k, v in pairs(commands) do
-	-- 		vim.lsp.commands[k] = v
-	-- 	end
-	-- end
 	add("neovim/nvim-lspconfig")
 	-- Lua settings
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
@@ -1501,6 +1485,18 @@ now(function()
 		lemminx = {},
 		angularls = {},
 		metals = {
+			settings = {
+				metals = {
+					autoImportBuild = "all",
+					inlayHints = {
+						hintsInPatternMatch = { enable = true },
+						implicitArguments = { enable = true },
+						implicitConversions = { enable = true },
+						inferredTypes = { enable = true },
+						typeParameters = { enable = true },
+					},
+				},
+			},
 			init_options = {
 				debuggingProvider = true,
 				executeClientCommandProvider = true,
@@ -1584,6 +1580,40 @@ now(function()
 		vim.lsp.config(server, config)
 		vim.lsp.enable(server)
 	end
+	-- Define client commands
+	-- TODO provide support for client commands supported by jdtls and scala metals
+	-- local commands = {
+	-- Jdtls client commands
+	-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
+	-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
+	-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
+	-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
+	-- ["java.action.rename"] = java_action_rename,
+	-- ["java.action.organizeImports"] = java_action_organize_imports,
+	-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
+	-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
+	-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
+	-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
+	-- ["_java.test.askClientForChoice"] = function() end,
+	-- ["_java.test.advancedAskClientForChoice"] = function() end,
+	-- ["_java.test.askClientForInput"] = function() end,
+	-- ["metals/quickPick"] = function() end,
+	-- ["metals/status"] = function() end,
+	-- ["metals/inputBox"] = function() end,
+	-- ["metals/quickPick"] = function() end,
+	-- }
+	-- if vim.lsp.commands then
+	-- 	for k, v in pairs(commands) do
+	-- 		vim.lsp.commands[k] = v
+	-- 	end
+	-- end
+	-- TODO implement following user commands in neovim for jdtls and scala metals
+	-- Jdtls set_runtime
+	-- Jdtls super_implementation
+	-- Jdtls build
+	-- Jdtls restart
+	-- Jdtls compile
+	-- Jdtls wipe_data_and_restart
 end)
 
 -- Lazy loaded plugins registration
@@ -1749,6 +1779,7 @@ later(function()
 		end
 	end
 	-- Debug configurations
+	-- TODO implement accepting debug configuration parameters as prompts
 	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
 	dap.configurations.python = {
 		{
