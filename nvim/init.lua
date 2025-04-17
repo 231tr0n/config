@@ -410,6 +410,7 @@ now(function()
 			require("mini.snippets").gen_loader.from_lang(),
 		},
 	})
+	MiniSnippets.start_lsp_server()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
 		header = table.concat({
@@ -1792,7 +1793,8 @@ later(function()
 			name = "Attach remote",
 			hostName = "127.0.0.1",
 			port = 5005,
-			buildTarget = "root",
+			-- Set this to artifact name or id in pom.xml or the name of the json in .bloop folder or the name in metals doctor
+			buildTarget = "example",
 		},
 	}
 	-- node --inspect-brk=127.0.0.1:9229 main.js
