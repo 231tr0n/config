@@ -1659,16 +1659,16 @@ later(function()
 		end
 		local metals_client = clients[1]
 		metals_client:exec_cmd({
-			title = "debug",
-			command = "metals.debug-adapter-start",
+			title = "debug-metals-scala",
+			command = "debug-adapter-start",
 			arguments = {
-				hostName = config.host and config.host or "127.0.0.1",
+				hostName = config.hostName and config.hostName or "127.0.0.1",
 				port = config.port and config.port or "5005",
 				buildTarget = config.buildTarget,
 			},
 		}, { bufnr = bufnr }, function(err0, res)
 			assert(not err0, vim.inspect(err0))
-			local uri = res.result.uri
+			local uri = res.uri
 			local results = {}
 			local idx = 1
 			local delim_from, delim_to = string.find(uri, ":", idx)
@@ -1698,7 +1698,7 @@ later(function()
 		end
 		local jdtls_client = clients[1]
 		jdtls_client:exec_cmd(
-			{ title = "debug", command = "vscode.java.startDebugSession" },
+			{ title = "debug-jdtls-java", command = "vscode.java.startDebugSession" },
 			{ bufnr = bufnr },
 			function(err0, port)
 				assert(not err0, vim.inspect(err0))
@@ -1793,7 +1793,7 @@ later(function()
 			name = "Attach remote",
 			hostName = "127.0.0.1",
 			port = 5005,
-			-- Set this to artifact name or id in pom.xml or the name of the json in .bloop folder or the name in metals doctor
+			-- Set this to artifact name or id in pom.xml or the name of the json file in .bloop folder or the name in metals doctor
 			buildTarget = "example",
 		},
 	}
