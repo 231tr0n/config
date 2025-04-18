@@ -1614,6 +1614,8 @@ now(function()
 	-- Jdtls restart
 	-- Jdtls compile
 	-- Jdtls wipe_data_and_restart
+	-- Metals super_implementation
+	-- Metals super_method_hierarchy
 end)
 
 -- Lazy loaded plugins registration
@@ -1628,7 +1630,7 @@ later(function()
 	add("David-Kunz/gen.nvim")
 	require("gen").setup({
 		model = "gemma3:latest",
-		host = "localhost",
+		host = "127.0.0.1",
 		port = "11434",
 		display_mode = "split",
 		show_prompt = "full",
@@ -1656,29 +1658,19 @@ end)
 -- Lazy loaded dap configurations setup
 later(function()
 	local dap = require("dap")
+	local input_helper = function(prompt, default)
+		return vim.fn.input({ prompt = prompt, default = default })
+	end
 	-- Adapter definitions
 	dap.adapters.debugpy = function(callback, config)
-		if config.request == "attach" then
-			local port = (config.connect or config).port
-			local host = (config.connect or config).host or "127.0.0.1"
-			callback({
-				type = "server",
-				port = assert(port, "`connect.port` is required for a python `attach` configuration"),
-				host = host,
-				options = {
-					source_filetype = "python",
-				},
-			})
-		else
-			callback({
-				type = "executable",
-				command = "~/.local/share/debugpy/bin/python",
-				args = { "-m", "debugpy.adapter" },
-				options = {
-					source_filetype = "python",
-				},
-			})
-		end
+		callback({
+			type = "server",
+			hostName = config.hostName,
+			port = config.port,
+			options = {
+				source_filetype = "python",
+			},
+		})
 	end
 	dap.adapters["metals-scala-debug"] = function(callback, config)
 		local bufnr = vim.api.nvim_get_current_buf()
@@ -1692,8 +1684,8 @@ later(function()
 			title = "debug-metals-scala",
 			command = "debug-adapter-start",
 			arguments = {
-				hostName = config.hostName and config.hostName or "127.0.0.1",
-				port = config.port and config.port or "5005",
+				hostName = config.hostName,
+				port = config.port,
 				buildTarget = config.buildTarget,
 			},
 		}, { bufnr = bufnr }, function(err0, res)
@@ -1708,11 +1700,11 @@ later(function()
 				delim_from, delim_to = string.find(uri, ":", idx)
 			end
 			table.insert(results, string.sub(uri, idx))
-			local port = results[3]
+			local res_port = results[3]
 			callback({
 				type = "server",
-				host = "127.0.0.1",
-				port = port,
+				hostName = "127.0.0.1",
+				port = tonumber(res_port),
 				options = {
 					initialize_timeout_sec = 10,
 				},
@@ -1730,66 +1722,46 @@ later(function()
 		jdtls_client:exec_cmd(
 			{ title = "debug-jdtls-java", command = "vscode.java.startDebugSession" },
 			{ bufnr = bufnr },
-			function(err0, port)
+			function(err0, res_port)
 				assert(not err0, vim.inspect(err0))
 				callback({
 					type = "server",
-					host = "127.0.0.1",
-					port = port,
+					hostName = "127.0.0.1",
+					port = tonumber(res_port),
 				})
 			end
 		)
 	end
 	dap.adapters["pwa-node"] = {
 		type = "server",
-		host = "localhost",
+		hostName = "localhost",
 		port = "${port}",
 		executable = {
 			command = "node",
 			args = { "/usr/share/js-debug/src/dapDebugServer.js", "${port}" },
 		},
 	}
-	dap.adapters.lldb = {
-		type = "executable",
-		command = (function()
-			if vim.fn.executable("lldb-dap-18") then
-				return "/usr/bin/lldb-dap-18"
-			end
-			return "/usr/bin/lldb-dap"
-		end)(),
-		name = "lldb",
-	}
 	dap.adapters.delve = function(callback, config)
-		if config.mode == "remote" and config.request == "attach" then
-			callback({
-				type = "server",
-				host = config.host or "127.0.0.1",
-				port = config.port or 38697,
-			})
-		else
-			callback({
-				type = "server",
-				port = "${port}",
-				executable = {
-					command = "dlv",
-					args = { "dap", "-l", "127.0.0.1:${port}" },
-					detached = vim.fn.has("win32") == 0,
-				},
-			})
-		end
+		callback({
+			type = "server",
+			hostName = config.hostName,
+			port = config.port,
+		})
 	end
 	-- Debug configurations
-	-- TODO implement accepting debug configuration parameters as prompts
-	-- ~/.local/share/debugpy/bin/python -m debugpy --listen localhost:5678 --wait-for-client main.py
+	-- ~/.local/share/debugpy/bin/python -m debugpy --listen 127.0.0.1:5678 --wait-for-client main.py
 	dap.configurations.python = {
 		{
 			type = "debugpy",
 			name = "Attach remote",
 			mode = "remote",
 			request = "attach",
-			hostName = "127.0.0.1",
-			port = 5678,
-			outputMode = "remote",
+			hostName = function()
+				return input_helper("Enter host: ", "127.0.0.1")
+			end,
+			port = function()
+				return input_helper("Enter port: ", 5678)
+			end,
 		},
 	}
 	-- dlv debug --headless -l 127.0.0.1:38697 main.go
@@ -1799,9 +1771,13 @@ later(function()
 			name = "Attach remote",
 			mode = "remote",
 			request = "attach",
-			hostName = "127.0.0.1",
-			port = 38697,
 			outputMode = "remote",
+			hostName = function()
+				return input_helper("Enter host: ", "127.0.0.1")
+			end,
+			port = function()
+				return input_helper("Enter port: ", 38697)
+			end,
 		},
 	}
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 Main.java
@@ -1809,23 +1785,36 @@ later(function()
 	dap.configurations.java = {
 		{
 			type = "jdtls-java-debug",
-			request = "attach",
 			name = "Attach remote",
-			hostName = "127.0.0.1",
-			port = 8000,
-			outputMode = "remote",
+			mode = "remote",
+			request = "attach",
+			hostName = function()
+				return input_helper("Enter host: ", "127.0.0.1")
+			end,
+			port = function()
+				return input_helper("Enter port: ", 8000)
+			end,
 		},
 	}
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -jar scala.jar
 	dap.configurations.scala = {
 		{
 			type = "metals-scala-debug",
-			request = "attach",
 			name = "Attach remote",
-			hostName = "127.0.0.1",
-			port = 5005,
-			-- Set this to artifact name or id in pom.xml or the name of the json file in .bloop folder or the name in metals doctor
-			buildTarget = "example",
+			mode = "remote",
+			request = "attach",
+			hostName = function()
+				return input_helper("Enter host: ", "127.0.0.1")
+			end,
+			port = function()
+				return input_helper("Enter port: ", 5005)
+			end,
+			buildTarget = function()
+				return input_helper(
+					"Enter build target[artifact name or id in pom.xml or name of the json file in .bloop folder]: ",
+					"example"
+				)
+			end,
 		},
 	}
 	-- node --inspect-brk=127.0.0.1:9229 main.js
@@ -1833,11 +1822,15 @@ later(function()
 		dap.configurations[language] = {
 			{
 				type = "pwa-node",
-				request = "attach",
 				name = "Attach remote",
-				hostName = "127.0.0.1",
-				port = 9229,
-				outputMode = "remote",
+				mode = "remote",
+				request = "attach",
+				hostName = function()
+					return input_helper("Enter host: ", "127.0.0.1")
+				end,
+				port = function()
+					return input_helper("Enter port: ", 9229)
+				end,
 			},
 		}
 	end
