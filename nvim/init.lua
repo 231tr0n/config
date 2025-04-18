@@ -1618,45 +1618,8 @@ now(function()
 	-- Metals super_method_hierarchy
 end)
 
--- Lazy loaded plugins registration
-later(function()
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
-	add("David-Kunz/gen.nvim")
-	require("gen").setup({
-		model = "gemma3:latest",
-		host = "127.0.0.1",
-		port = "11434",
-		display_mode = "split",
-		show_prompt = "full",
-		show_model = true,
-		no_auto_close = false,
-		command = function(options)
-			return "curl --silent --no-buffer -X POST http://"
-				.. options.host
-				.. ":"
-				.. options.port
-				.. "/api/chat -d $body"
-		end,
-		debug = false,
-	})
-end)
-
--- Lazy loaded keymaps registration
-later(function()
-	Nmap("<leader>am", require("gen").select_model, "Select model")
-	Nmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Smap("<leader>ap", ":Gen<CR>", "Prompt Model")
-	Xmap("<leader>ap", ":Gen<CR>", "Prompt Model")
-end)
-
--- Lazy loaded dap configurations setup
-later(function()
+-- Dap configurations setup
+now(function()
 	local dap = require("dap")
 	local input_helper = function(prompt, default)
 		return vim.fn.input({ prompt = prompt, default = default })
@@ -1834,6 +1797,36 @@ later(function()
 			},
 		}
 	end
+end)
+
+-- Lazy loaded plugins registration
+later(function()
+	add("tpope/vim-fugitive")
+	add({
+		source = "rbong/vim-flog",
+		depends = {
+			"tpope/vim-fugitive",
+		},
+	})
+	-- vim.g.copilot_node_command = "~/.nodenv/versions/18.18.0/bin/node"
+	-- vim.g.copilot_proxy = 'http://localhost:3128'
+	-- vim.g.copilot_proxy_strict_ssl = false
+	vim.g.copilot_no_tab_map = true
+	vim.g.copilot_no_maps = true
+	add("github/copilot.vim")
+	vim.cmd("Copilot status")
+end)
+
+-- Lazy loaded keymaps registration
+later(function()
+	Imap("<C-]>", "copilot#Accept()", "Accept copilot suggestion", {
+		expr = true,
+		replace_keycodes = false,
+	})
+	Imap("<C-\\>", "<cmd>call copilot#Dismiss()<CR>", "Dismiss copilot suggestion")
+	Imap("<M-\\>", "<cmd>call copilot#Suggest()<CR>", "Get copilot suggestion")
+	Imap("<M-[>", "<cmd>call copilot#Previous()<CR>", "Go to previous copilot suggestion")
+	Imap("<M-]>", "<cmd>call copilot#Next()<CR>", "Go to next copilot suggestion")
 end)
 
 -- Lazy loaded custom configuration
