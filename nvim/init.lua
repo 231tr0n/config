@@ -1935,6 +1935,7 @@ now(function()
 		end
 	end
 	-- TODO implement following user commands in neovim for jdtls and scala metals
+	-- TODO make sure all wanted metals commands are written here and then start implementing
 	-- Jdtls set_runtime
 	-- Jdtls super_implementation
 	-- Jdtls build
@@ -1944,6 +1945,8 @@ now(function()
 	-- Metals super_implementation
 	-- Metals restart
 	-- Metals import_build
+	-- Metals doctor_run
+	-- Metals doctor_reload
 end)
 
 -- Dap configurations setup
