@@ -34,6 +34,7 @@ now(function()
 		fold_open = "", -- ▾
 		fold_close = "", -- ▸
 		float_multiplier = 0.8,
+		offset_encoding = "utf-16",
 		palette = {
 			base00 = "#282C34",
 			base01 = "#353B45",
@@ -52,6 +53,75 @@ now(function()
 			base0E = "#C678DD",
 			base0F = "#BE5046",
 		},
+		get_lsp_clients = function(name, bufnr)
+			local clients
+			local buf = nil
+			if not bufnr then
+				buf = vim.api.nvim_get_current_buf()
+			end
+			clients = vim.lsp.get_clients({
+				bufnr = buf,
+				name = name,
+			})
+			if #clients == 0 then
+				vim.notify("No " .. name .. " client found", vim.log.levels.WARN)
+				return
+			end
+			return clients[1]
+		end,
+		coroutine_wrap = function(fn)
+			local co, is_main = coroutine.running()
+			if co and not is_main then
+				fn()
+			else
+				coroutine.wrap(function()
+					xpcall(fn, function(err)
+						local msg = debug.traceback(err, 2)
+						vim.notify(msg, vim.log.levels.ERROR)
+					end)
+				end)()
+			end
+		end,
+		lsp_client_exec_cmd = function(client, command, bufnr, handler)
+			local co
+			if not handler then
+				co = coroutine.running()
+				if co then
+					handler = function(err, result, ctx)
+						coroutine.resume(co, err, result, ctx)
+					end
+				end
+			end
+			local context = nil
+			if bufnr then
+				context = { bufnr = bufnr }
+			end
+			client:exec_cmd(command, context, handler)
+			if co then
+				return coroutine.yield()
+			end
+		end,
+		lsp_client_request = function(client, method, params, bufnr, handler)
+			local co
+			if not handler then
+				co = coroutine.running()
+				if co then
+					handler = function(err, result, ctx)
+						coroutine.resume(co, err, result, ctx)
+					end
+				end
+			end
+			client:request(method, params, handler, bufnr)
+			if co then
+				return coroutine.yield()
+			end
+		end,
+		input_helper = function(prompt, default)
+			return vim.fn.input({ prompt = prompt, default = default })
+		end,
+		-- TODO complete pick_helper and pick_many helper
+		-- pick_helper = function(prompt, default) end,
+		-- pick_many_helper = function(prompt, default) end,
 	}
 	Global.java_compiled_files_winbar = "⠀⠀" .. Global.winbar_arrow .. " JDT URI or Class file"
 	Global.winbar = "⠀⠀%{% '"
@@ -177,6 +247,7 @@ now(function()
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
+	-- TODO add marks to status column
 	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum - 1)) ? (foldclosed(v:lnum) == -1 ? '"
 		.. Global.fold_open
 		.. " ' : '"
@@ -222,6 +293,7 @@ now(function()
 			palette = Global.palette,
 			plugins = { default = true },
 		})
+		Hi("@constructor.lua", { link = "Delimiter" })
 		Hi("@markup.link.vimdoc", { link = "Keyword" })
 		Hi("@tag.attribute", { link = "Statement" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
@@ -473,6 +545,10 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	add("m4xshen/hardtime.nvim")
+	require("hardtime").setup({
+		enabled = false,
+	})
 	add("nacro90/numb.nvim")
 	require("numb").setup()
 	add("mfussenegger/nvim-dap")
@@ -905,7 +981,7 @@ now(function()
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
 	Nmap("<leader>dh", ":lua require('dap.ui.widgets').hover()<CR>", "Hover value")
 	Nmap("<leader>dl", ":lua require('dap').run_last()<CR>", "Run Last")
-	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<CR>", "Set log point")
+	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, Global.input_helper('Log: '))<CR>", "Log point")
 	Nmap("<leader>dp", ":lua require('dap.ui.widgets').preview()<CR>", "Preview")
 	Nmap("<leader>dr", ":lua require('dap').repl.open({}, 'vsplit new')<CR>", "Open Repl")
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
@@ -1234,12 +1310,10 @@ now(function()
 			local alt_buf = vim.fn.bufnr("#", -1)
 			if alt_buf and alt_buf > 0 then
 				if is_jdtls_buf(alt_buf) then
-					local candidates = vim.lsp.get_clients({ bufnr = alt_buf, name = "jdtls" })
-					if #candidates == 0 then
-						vim.notify("No jdtls client found", vim.log.levels.WARN)
+					local client = Global.get_lsp_clients("jdtls", alt_buf)
+					if not client then
 						return
 					end
-					local client = candidates[1]
 					vim.lsp.buf_attach_client(args.buf, client.id)
 					attached = true
 				end
@@ -1248,12 +1322,10 @@ now(function()
 				for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
 					if vim.api.nvim_buf_is_loaded(buffer) then
 						if is_jdtls_buf(buffer) then
-							local candidates = vim.lsp.get_clients({ bufnr = buffer, name = "jdtls" })
-							if #candidates == 0 then
-								vim.notify("No jdtls client found", vim.log.levels.WARN)
+							local client = Global.get_lsp_clients("jdtls", buffer)
+							if not client then
 								return
 							end
-							local client = candidates[1]
 							vim.lsp.buf_attach_client(args.buf, client.id)
 							if client then
 								attached = true
@@ -1287,16 +1359,18 @@ now(function()
 			vim.bo[buf].filetype = "java"
 			local timeout_ms = 5000
 			vim.wait(timeout_ms, function()
-				return next(vim.lsp.get_clients({ name = "jdtls", bufnr = buf })) ~= nil
+				return Global.get_lsp_clients("jdtls", buf) ~= nil
 			end)
-			local client = vim.lsp.get_clients({ name = "jdtls", bufnr = buf })[1]
+			local client = Global.get_lsp_clients("jdtls", buf)
 			if not client then
-				vim.notify("No jdtls client found", vim.log.levels.WARN)
 				return
 			end
 			local content
 			local function handler(err, result)
-				assert(not err, vim.inspect(err))
+				if err then
+					vim.notify("Error decompiling class files: " .. err.message, vim.log.levels.WARN)
+					return
+				end
 				content = result
 				local normalized = string.gsub(result, "\r\n", "\n")
 				local source_lines = vim.split(normalized, "\n", { plain = true })
@@ -1327,6 +1401,7 @@ now(function()
 	-- Make lsp capabilities
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
+	lsp_capabilities.general.positionEncodings = { Global.offset_encoding }
 	add("neovim/nvim-lspconfig")
 	-- Lua settings
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
@@ -1582,31 +1657,283 @@ now(function()
 	end
 	-- Define client commands
 	-- TODO provide support for client commands supported by jdtls and scala metals
-	-- local commands = {
-	-- Jdtls client commands
-	-- ["java.apply.workspaceEdit"] = java_apply_workspace_edit,
-	-- ["java.action.generateToStringPrompt"] = java_generate_to_string_prompt,
-	-- ["java.action.hashCodeEqualsPrompt"] = java_hash_code_equals_prompt,
-	-- ["java.action.applyRefactoringCommand"] = java_apply_refactoring_command,
-	-- ["java.action.rename"] = java_action_rename,
-	-- ["java.action.organizeImports"] = java_action_organize_imports,
-	-- ["java.action.organizeImports.chooseImports"] = java_choose_imports,
-	-- ["java.action.generateConstructorsPrompt"] = java_generate_constructors_prompt,
-	-- ["java.action.generateDelegateMethodsPrompt"] = java_generate_delegate_methods_prompt,
-	-- ["java.action.overrideMethodsPrompt"] = java_override_methods,
-	-- ["_java.test.askClientForChoice"] = function() end,
-	-- ["_java.test.advancedAskClientForChoice"] = function() end,
-	-- ["_java.test.askClientForInput"] = function() end,
-	-- ["metals/quickPick"] = function() end,
-	-- ["metals/status"] = function() end,
-	-- ["metals/inputBox"] = function() end,
-	-- ["metals/quickPick"] = function() end,
-	-- }
-	-- if vim.lsp.commands then
-	-- 	for k, v in pairs(commands) do
-	-- 		vim.lsp.commands[k] = v
-	-- 	end
-	-- end
+	-- TODO use pick, pick_many, confirm and input helpers for implemented client extensions
+	local commands = {
+		-- Jdtls client commands
+		["java.apply.workspaceEdit"] = function(command)
+			for _, argument in ipairs(command.arguments) do
+				vim.lsp.util.apply_workspace_edit(argument, Global.offset_encoding)
+			end
+		end,
+		["java.action.generateToStringPrompt"] = function(_, ctx)
+			local params = ctx.params
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local err, result = Global.lsp_client_request(client, "java/checkToStringStatus", params, bufnr)
+				if err then
+					vim.notify("Could not execute java/checkToStringStatus: " .. err.message, vim.log.levels.WARN)
+					return
+				end
+				if not result then
+					return
+				end
+				local err1, edit = Global.lsp_client_request(
+					client,
+					"java/generateToString",
+					{ context = params, fields = result.fields },
+					bufnr
+				)
+				if err1 then
+					vim.notify("Could not execute java/generateToString: " .. err1.message, vim.log.levels.WARN)
+				elseif edit then
+					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.action.hashCodeEqualsPrompt"] = function(_, ctx)
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local params = ctx.params
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local _, result = Global.lsp_client_request(client, "java/checkHashCodeEqualsStatus", params, bufnr)
+				if not result then
+					vim.notify("No result", vim.log.levels.INFO)
+					return
+				elseif not result.fields or #result.fields == 0 then
+					vim.notify(
+						string.format("The operation is not applicable to the type %", result.type),
+						vim.log.levels.WARN
+					)
+					return
+				end
+				local err1, edit = Global.lsp_client_request(
+					client,
+					"java/generateHashCodeEquals",
+					{ context = params, fields = result.fields },
+					bufnr
+				)
+				if err1 then
+					vim.notify("Could not execute java/generateHashCodeEquals: " .. err1.message, vim.log.levels.WARN)
+				elseif edit then
+					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.action.rename"] = function(command, ctx)
+			local target = command.arguments[1]
+			local win = vim.api.nvim_get_current_win()
+			local bufnr = vim.api.nvim_win_get_buf(win)
+			if bufnr ~= ctx.bufnr then
+				return
+			end
+			local lines = vim.api.nvim_buf_get_lines(ctx.bufnr, 0, -1, true)
+			local content = table.concat(lines, "\n")
+			local byteidx = vim.fn.byteidx(content, target.offset)
+			local line = vim.fn.byte2line(byteidx)
+			local col = byteidx - vim.fn.line2byte(line)
+			vim.api.nvim_win_set_cursor(win, { line, col + 1 })
+		end,
+		["java.action.organizeImports"] = function(_, ctx)
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local err, result = Global.lsp_client_request(client, "java/organizeImports", ctx.params, bufnr)
+				if err then
+					vim.notify("Error on organize imports: " .. err.message, vim.log.levels.WARN)
+					return
+				end
+				if result then
+					vim.lsp.util.apply_workspace_edit(result, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.action.generateConstructorsPrompt"] = function(_, ctx)
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local err, result = Global.lsp_client_request(client, "java/checkConstructorsStatus", ctx.params, bufnr)
+				if err then
+					vim.notify("Could not execute java/checkConstructorsStatus: " .. err.message, vim.log.levels.WARN)
+					return
+				end
+				if result then
+					vim.lsp.util.apply_workspace_edit(result, Global.offset_encoding)
+				end
+				local params = {
+					context = ctx.params,
+					constructors = result.constructors,
+					fields = result.fields,
+				}
+				local err1, edit = Global.lsp_client_request(client, "java/generateConstructors", params, bufnr)
+				if err1 then
+					vim.notify("Could not execute java/generateConstructors: " .. err1.message, vim.log.levels.WARN)
+				elseif edit then
+					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.action.generateDelegateMethodsPrompt"] = function(_, ctx)
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local err, status =
+					Global.lsp_client_request(client, "java/checkDelegateMethodsStatus", ctx.params, bufnr)
+				if err then
+					vim.notify(
+						"Could not execute java/checkDelegateMethodsStatus: " .. err.message,
+						vim.log.levels.WARN
+					)
+					return
+				end
+				if not status or not status.delegateFields or #status.delegateFields == 0 then
+					vim.notify("All delegatable fields are already implemented", vim.log.levels.INFO)
+					return
+				end
+				local fields = status.delegateFields
+				if #fields.delegateMethods == 0 then
+					vim.notify("All delegatable methods are already implemented", vim.log.levels.INFO)
+					return
+				end
+				local methods = fields.delegateMethods
+				if not methods or #methods == 0 then
+					return
+				end
+				local params = {
+					context = ctx.params,
+					delegateEntries = vim.tbl_map(function(x)
+						return {
+							field = fields.field,
+							delegateMethod = x,
+						}
+					end, methods),
+				}
+				local err1, workspace_edit =
+					Global.lsp_client_request(client, "java/generateDelegateMethods", params, bufnr)
+				if err1 then
+					vim.notify("Could not execute java/generateDelegateMethods: " .. err1.message, vim.log.levels.WARN)
+				elseif workspace_edit then
+					vim.lsp.util.apply_workspace_edit(workspace_edit, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.action.overrideMethodsPrompt"] = function(_, ctx)
+			if not ctx.buffer then
+				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
+				return
+			end
+			local bufnr = ctx.buffer
+			local client = Global.get_lsp_clients("jdtls", bufnr)
+			if not client then
+				return
+			end
+			Global.coroutine_wrap(function()
+				local err, result = Global.lsp_client_request(client, "java/listOverridableMethods", ctx.params, bufnr)
+				if err then
+					vim.notify("Error getting overridable methods: " .. err.message, vim.log.levels.WARN)
+					return
+				end
+				if not result or not result.methods then
+					vim.notify("No methods to override", vim.log.levels.INFO)
+					return
+				end
+				local params = {
+					context = ctx.params,
+					overridableMethods = result.methods,
+				}
+				local err1, edit = Global.lsp_client_request(client, "java/addOverridableMethods", params, bufnr)
+				if err1 then
+					print("Error getting workspace edits: " .. err1.message)
+					return
+				end
+				if edit then
+					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+				end
+			end)
+		end,
+		["java.show.references"] = function(args)
+			local arguments = args.arguments
+			local locations = arguments[3]
+			local items = vim.lsp.util.locations_to_items(locations, Global.offset_encoding)
+			local list = {
+				title = "References",
+				items = items,
+			}
+			vim.fn.setqflist({}, " ", list)
+			vim.cmd("botright copen")
+		end,
+		["_java.test.askClientForInput"] = function(args)
+			local prompt = args[1]
+			local default = args[2]
+			local result = Global.input_helper(prompt .. ": ", default)
+			return result and result or vim.NIL
+		end,
+		-- ["_java.test.askClientForChoice"] = function() end,
+		-- ["_java.test.advancedAskClientForChoice"] = function() end,
+		-- ["_java.test.askClientForInput"] = function() end,
+		["metals/quickPick"] = function(_, result)
+			local ids = {}
+			local labels = {}
+			for i, item in pairs(result.items) do
+				table.insert(ids, item.id)
+				table.insert(labels, i .. " - " .. item.label)
+			end
+			local choice = vim.fn.inputlist(labels)
+			if choice == 0 then
+				return { cancelled = true }
+			else
+				return { itemId = ids[choice] }
+			end
+		end,
+		["metals/inputBox"] = function(_, result)
+			local name = Global.input_helper(result.prompt .. ": ", result.value)
+			if name == "" then
+				return { cancelled = true }
+			else
+				return { value = name }
+			end
+		end,
+	}
+	if vim.lsp.commands then
+		for k, v in pairs(commands) do
+			vim.lsp.commands[k] = v
+		end
+	end
 	-- TODO implement following user commands in neovim for jdtls and scala metals
 	-- Jdtls set_runtime
 	-- Jdtls super_implementation
@@ -1615,15 +1942,13 @@ now(function()
 	-- Jdtls compile
 	-- Jdtls wipe_data_and_restart
 	-- Metals super_implementation
-	-- Metals super_method_hierarchy
+	-- Metals restart
+	-- Metals import_build
 end)
 
 -- Dap configurations setup
 now(function()
 	local dap = require("dap")
-	local input_helper = function(prompt, default)
-		return vim.fn.input({ prompt = prompt, default = default })
-	end
 	-- Adapter definitions
 	dap.adapters.debugpy = function(callback, config)
 		callback({
@@ -1637,13 +1962,11 @@ now(function()
 	end
 	dap.adapters["metals-scala-debug"] = function(callback, config)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local clients = vim.lsp.get_clients({ name = "metals", bufnr = bufnr })
-		if #clients == 0 then
-			vim.notify("No metals client found", vim.log.levels.WARN)
+		local client = Global.get_lsp_clients("metals", bufnr)
+		if not client then
 			return
 		end
-		local metals_client = clients[1]
-		metals_client:exec_cmd({
+		client:exec_cmd({
 			title = "debug-metals-scala",
 			command = "debug-adapter-start",
 			arguments = {
@@ -1651,8 +1974,11 @@ now(function()
 				port = config.port,
 				buildTarget = config.buildTarget,
 			},
-		}, { bufnr = bufnr }, function(err0, res)
-			assert(not err0, vim.inspect(err0))
+		}, { bufnr = bufnr }, function(err, res)
+			if err then
+				vim.notify("Error starting scala debug adapter: " .. err.message, vim.log.levels.WARN)
+				return
+			end
 			local uri = res.uri
 			local results = {}
 			local idx = 1
@@ -1676,17 +2002,18 @@ now(function()
 	end
 	dap.adapters["jdtls-java-debug"] = function(callback, _)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local clients = vim.lsp.get_clients({ name = "jdtls", bufnr = bufnr })
-		if #clients == 0 then
-			vim.notify("No jdtls client found", vim.log.levels.WARN)
+		local client = Global.get_lsp_clients("jdtls", bufnr)
+		if not client then
 			return
 		end
-		local jdtls_client = clients[1]
-		jdtls_client:exec_cmd(
+		client:exec_cmd(
 			{ title = "debug-jdtls-java", command = "vscode.java.startDebugSession" },
 			{ bufnr = bufnr },
-			function(err0, res_port)
-				assert(not err0, vim.inspect(err0))
+			function(err, res_port)
+				if err then
+					vim.notify("Error starting jdtls debug adapter: " .. err.message, vim.log.levels.WARN)
+					return
+				end
 				callback({
 					type = "server",
 					hostName = "127.0.0.1",
@@ -1720,10 +2047,10 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return input_helper("Enter host: ", "127.0.0.1")
+				return Global.input_helper("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return input_helper("Enter port: ", 5678)
+				return Global.input_helper("Enter port: ", 5678)
 			end,
 		},
 	}
@@ -1736,10 +2063,10 @@ now(function()
 			request = "attach",
 			outputMode = "remote",
 			hostName = function()
-				return input_helper("Enter host: ", "127.0.0.1")
+				return Global.input_helper("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return input_helper("Enter port: ", 38697)
+				return Global.input_helper("Enter port: ", 38697)
 			end,
 		},
 	}
@@ -1752,14 +2079,15 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return input_helper("Enter host: ", "127.0.0.1")
+				return Global.input_helper("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return input_helper("Enter port: ", 8000)
+				return Global.input_helper("Enter port: ", 8000)
 			end,
 		},
 	}
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -jar scala.jar
+	-- TODO mvnDebug scala:run -Dexec.mainClass="com.mycompany.app.App"
 	dap.configurations.scala = {
 		{
 			type = "metals-scala-debug",
@@ -1767,14 +2095,14 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return input_helper("Enter host: ", "127.0.0.1")
+				return Global.input_helper("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return input_helper("Enter port: ", 5005)
+				return Global.input_helper("Enter port: ", 5005)
 			end,
 			buildTarget = function()
-				return input_helper(
-					"Enter build target[artifact name or id in pom.xml or name of the json file in .bloop folder]: ",
+				return Global.input_helper(
+					"Enter build target[artifact id in pom.xml or name of the json file in .bloop folder]: ",
 					"example"
 				)
 			end,
@@ -1789,10 +2117,10 @@ now(function()
 				mode = "remote",
 				request = "attach",
 				hostName = function()
-					return input_helper("Enter host: ", "127.0.0.1")
+					return Global.input_helper("Enter host: ", "127.0.0.1")
 				end,
 				port = function()
-					return input_helper("Enter port: ", 9229)
+					return Global.input_helper("Enter port: ", 9229)
 				end,
 			},
 		}
@@ -1811,6 +2139,7 @@ later(function()
 	-- vim.g.copilot_node_command = "~/.nodenv/versions/18.18.0/bin/node"
 	-- vim.g.copilot_proxy = 'http://localhost:3128'
 	-- vim.g.copilot_proxy_strict_ssl = false
+	-- vim.g.copilot_settings = { selectedCompletionModel = 'gpt-4o-copilot' }
 	vim.g.copilot_no_tab_map = true
 	vim.g.copilot_no_maps = true
 	add("github/copilot.vim")
