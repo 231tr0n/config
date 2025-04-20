@@ -53,7 +53,7 @@ now(function()
 			base0E = "#C678DD",
 			base0F = "#BE5046",
 		},
-		get_lsp_clients = function(name, bufnr)
+		get_lsp_client = function(name, bufnr)
 			local clients
 			local buf = nil
 			if not bufnr then
@@ -119,9 +119,6 @@ now(function()
 		input_helper = function(prompt, default)
 			return vim.fn.input({ prompt = prompt, default = default })
 		end,
-		-- TODO complete pick_helper and pick_many helper
-		-- pick_helper = function(prompt, default) end,
-		-- pick_many_helper = function(prompt, default) end,
 	}
 	Global.java_compiled_files_winbar = "⠀⠀" .. Global.winbar_arrow .. " JDT URI or Class file"
 	Global.winbar = "⠀⠀%{% '"
@@ -1030,6 +1027,7 @@ now(function()
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
 	Nmap("<leader>lgi", ":lua vim.lsp.buf.implementation()<CR>", "Goto implementation")
 	Nmap("<leader>lgr", ":lua vim.lsp.buf.references()<CR>", "Goto references")
+	Nmap("<leader>lgs", ":lua Global.super_implementation()<CR>", "Goto super implementation")
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
 	Nmap("<leader>lh", ":lua vim.lsp.buf.hover()<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.buf.incoming_calls()<CR>", "Lsp incoming calls")
@@ -1310,7 +1308,7 @@ now(function()
 			local alt_buf = vim.fn.bufnr("#", -1)
 			if alt_buf and alt_buf > 0 then
 				if is_jdtls_buf(alt_buf) then
-					local client = Global.get_lsp_clients("jdtls", alt_buf)
+					local client = Global.get_lsp_client("jdtls", alt_buf)
 					if not client then
 						return
 					end
@@ -1322,7 +1320,7 @@ now(function()
 				for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
 					if vim.api.nvim_buf_is_loaded(buffer) then
 						if is_jdtls_buf(buffer) then
-							local client = Global.get_lsp_clients("jdtls", buffer)
+							local client = Global.get_lsp_client("jdtls", buffer)
 							if not client then
 								return
 							end
@@ -1359,9 +1357,9 @@ now(function()
 			vim.bo[buf].filetype = "java"
 			local timeout_ms = 5000
 			vim.wait(timeout_ms, function()
-				return Global.get_lsp_clients("jdtls", buf) ~= nil
+				return Global.get_lsp_client("jdtls", buf) ~= nil
 			end)
-			local client = Global.get_lsp_clients("jdtls", buf)
+			local client = Global.get_lsp_client("jdtls", buf)
 			if not client then
 				return
 			end
@@ -1656,8 +1654,6 @@ now(function()
 		vim.lsp.enable(server)
 	end
 	-- Define client commands
-	-- TODO provide support for client commands supported by jdtls and scala metals
-	-- TODO use pick, pick_many, confirm and input helpers for implemented client extensions
 	local commands = {
 		-- Jdtls client commands
 		["java.apply.workspaceEdit"] = function(command)
@@ -1667,12 +1663,12 @@ now(function()
 		end,
 		["java.action.generateToStringPrompt"] = function(_, ctx)
 			local params = ctx.params
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local bufnr = ctx.bufnr
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1699,13 +1695,13 @@ now(function()
 			end)
 		end,
 		["java.action.hashCodeEqualsPrompt"] = function(_, ctx)
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
+			local bufnr = ctx.bufnr
 			local params = ctx.params
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1749,12 +1745,12 @@ now(function()
 			vim.api.nvim_win_set_cursor(win, { line, col + 1 })
 		end,
 		["java.action.organizeImports"] = function(_, ctx)
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local bufnr = ctx.bufnr
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1770,12 +1766,12 @@ now(function()
 			end)
 		end,
 		["java.action.generateConstructorsPrompt"] = function(_, ctx)
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local bufnr = ctx.bufnr
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1802,12 +1798,12 @@ now(function()
 			end)
 		end,
 		["java.action.generateDelegateMethodsPrompt"] = function(_, ctx)
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local bufnr = ctx.bufnr
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1853,12 +1849,12 @@ now(function()
 			end)
 		end,
 		["java.action.overrideMethodsPrompt"] = function(_, ctx)
-			if not ctx.buffer then
+			if not ctx.bufnr then
 				vim.notify("'ctx' does not have a buffer", vim.log.levels.WARN)
 				return
 			end
-			local bufnr = ctx.buffer
-			local client = Global.get_lsp_clients("jdtls", bufnr)
+			local bufnr = ctx.bufnr
+			local client = Global.get_lsp_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1886,67 +1882,58 @@ now(function()
 				end
 			end)
 		end,
-		["java.show.references"] = function(args)
-			local arguments = args.arguments
-			local locations = arguments[3]
-			local items = vim.lsp.util.locations_to_items(locations, Global.offset_encoding)
-			local list = {
-				title = "References",
-				items = items,
-			}
-			vim.fn.setqflist({}, " ", list)
-			vim.cmd("botright copen")
-		end,
-		["_java.test.askClientForInput"] = function(args)
-			local prompt = args[1]
-			local default = args[2]
-			local result = Global.input_helper(prompt .. ": ", default)
-			return result and result or vim.NIL
-		end,
-		-- ["_java.test.askClientForChoice"] = function() end,
-		-- ["_java.test.advancedAskClientForChoice"] = function() end,
-		-- ["_java.test.askClientForInput"] = function() end,
-		["metals/quickPick"] = function(_, result)
-			local ids = {}
-			local labels = {}
-			for i, item in pairs(result.items) do
-				table.insert(ids, item.id)
-				table.insert(labels, i .. " - " .. item.label)
-			end
-			local choice = vim.fn.inputlist(labels)
-			if choice == 0 then
-				return { cancelled = true }
-			else
-				return { itemId = ids[choice] }
-			end
-		end,
-		["metals/inputBox"] = function(_, result)
-			local name = Global.input_helper(result.prompt .. ": ", result.value)
-			if name == "" then
-				return { cancelled = true }
-			else
-				return { value = name }
-			end
-		end,
 	}
 	if vim.lsp.commands then
 		for k, v in pairs(commands) do
 			vim.lsp.commands[k] = v
 		end
 	end
-	-- TODO implement following user commands in neovim for jdtls and scala metals
-	-- TODO make sure all wanted metals commands are written here and then start implementing
-	-- Jdtls set_runtime
-	-- Jdtls super_implementation
-	-- Jdtls build
-	-- Jdtls restart
-	-- Jdtls compile
-	-- Jdtls wipe_data_and_restart
-	-- Metals super_implementation
-	-- Metals restart
-	-- Metals import_build
-	-- Metals doctor_run
-	-- Metals doctor_reload
+	Global.super_implementation = function()
+		if vim.bo.filetype == "java" then
+			Global.coroutine_wrap(function()
+				local params = {
+					type = "superImplementation",
+					position = vim.lsp.util.make_position_params(
+						vim.api.nvim_get_current_win(),
+						Global.offset_encoding
+					),
+				}
+				local bufnr = vim.api.nvim_get_current_buf()
+				local err, result =
+					Global.lsp_client_request(Global.get_lsp_client("jdtls", bufnr), "java/findLinks", params, bufnr)
+				if err then
+					vim.notify("Error getting super implementation: " .. err.message, vim.log.levels.WARN)
+					return
+				end
+				if not result then
+					vim.notify("No super implementations found", vim.log.levels.INFO)
+					return
+				end
+				if #result == 1 then
+					vim.lsp.util.show_document(result[1], Global.offset_encoding, { focus = true })
+				elseif #result > 1 then
+					local items = vim.lsp.util.locations_to_items(result, Global.offset_encoding)
+					local list = {
+						title = "References",
+						items = items,
+					}
+					vim.fn.setqflist({}, " ", list)
+					vim.cmd("botright copen")
+				end
+			end)
+		elseif vim.bo.filetype == "scala" then
+			Global.coroutine_wrap(function()
+				local params = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), Global.offset_encoding)
+				local bufnr = vim.api.nvim_get_current_buf()
+				Global.lsp_client_exec_cmd(Global.get_lsp_client("metals", bufnr), {
+					command = "goto-super-method",
+					arguments = { params },
+				}, bufnr)
+			end)
+		else
+			vim.notify("Super implementation not supported for this language", vim.log.levels.INFO)
+		end
+	end
 end)
 
 -- Dap configurations setup
@@ -1965,7 +1952,7 @@ now(function()
 	end
 	dap.adapters["metals-scala-debug"] = function(callback, config)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.get_lsp_clients("metals", bufnr)
+		local client = Global.get_lsp_client("metals", bufnr)
 		if not client then
 			return
 		end
@@ -2005,7 +1992,7 @@ now(function()
 	end
 	dap.adapters["jdtls-java-debug"] = function(callback, _)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.get_lsp_clients("jdtls", bufnr)
+		local client = Global.get_lsp_client("jdtls", bufnr)
 		if not client then
 			return
 		end
@@ -2164,6 +2151,7 @@ end)
 -- Lazy loaded custom configuration
 later(function()
 	-- Define custom signs for diagnostics and dap
+	-- TODO add title to lsp float window
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define(
