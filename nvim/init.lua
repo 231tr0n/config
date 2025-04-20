@@ -53,7 +53,7 @@ now(function()
 			base0E = "#C678DD",
 			base0F = "#BE5046",
 		},
-		get_lsp_client = function(name, bufnr)
+		lsp_get_client = function(name, bufnr)
 			local clients
 			local buf = nil
 			if not bufnr then
@@ -1308,7 +1308,7 @@ now(function()
 			local alt_buf = vim.fn.bufnr("#", -1)
 			if alt_buf and alt_buf > 0 then
 				if is_jdtls_buf(alt_buf) then
-					local client = Global.get_lsp_client("jdtls", alt_buf)
+					local client = Global.lsp_get_client("jdtls", alt_buf)
 					if not client then
 						return
 					end
@@ -1320,7 +1320,7 @@ now(function()
 				for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
 					if vim.api.nvim_buf_is_loaded(buffer) then
 						if is_jdtls_buf(buffer) then
-							local client = Global.get_lsp_client("jdtls", buffer)
+							local client = Global.lsp_get_client("jdtls", buffer)
 							if not client then
 								return
 							end
@@ -1357,9 +1357,9 @@ now(function()
 			vim.bo[buf].filetype = "java"
 			local timeout_ms = 5000
 			vim.wait(timeout_ms, function()
-				return Global.get_lsp_client("jdtls", buf) ~= nil
+				return Global.lsp_get_client("jdtls", buf) ~= nil
 			end)
-			local client = Global.get_lsp_client("jdtls", buf)
+			local client = Global.lsp_get_client("jdtls", buf)
 			if not client then
 				return
 			end
@@ -1668,7 +1668,7 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1701,7 +1701,7 @@ now(function()
 			end
 			local bufnr = ctx.bufnr
 			local params = ctx.params
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1750,7 +1750,7 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1771,7 +1771,7 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1803,7 +1803,7 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1854,7 +1854,7 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.get_lsp_client("jdtls", bufnr)
+			local client = Global.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
@@ -1900,7 +1900,7 @@ now(function()
 				}
 				local bufnr = vim.api.nvim_get_current_buf()
 				local err, result =
-					Global.lsp_client_request(Global.get_lsp_client("jdtls", bufnr), "java/findLinks", params, bufnr)
+					Global.lsp_client_request(Global.lsp_get_client("jdtls", bufnr), "java/findLinks", params, bufnr)
 				if err then
 					vim.notify("Error getting super implementation: " .. err.message, vim.log.levels.WARN)
 					return
@@ -1925,7 +1925,7 @@ now(function()
 			Global.coroutine_wrap(function()
 				local params = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), Global.offset_encoding)
 				local bufnr = vim.api.nvim_get_current_buf()
-				Global.lsp_client_exec_cmd(Global.get_lsp_client("metals", bufnr), {
+				Global.lsp_client_exec_cmd(Global.lsp_get_client("metals", bufnr), {
 					command = "goto-super-method",
 					arguments = { params },
 				}, bufnr)
@@ -1952,7 +1952,7 @@ now(function()
 	end
 	dap.adapters["metals-scala-debug"] = function(callback, config)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.get_lsp_client("metals", bufnr)
+		local client = Global.lsp_get_client("metals", bufnr)
 		if not client then
 			return
 		end
@@ -1992,7 +1992,7 @@ now(function()
 	end
 	dap.adapters["jdtls-java-debug"] = function(callback, _)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.get_lsp_client("jdtls", bufnr)
+		local client = Global.lsp_get_client("jdtls", bufnr)
 		if not client then
 			return
 		end
