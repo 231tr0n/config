@@ -199,7 +199,7 @@ now(function()
 	vim.g.nerd_font = true
 	vim.o.background = "dark"
 	vim.o.breakindent = true
-	vim.o.completeopt = "menu,menuone,noselect"
+	vim.o.completeopt = "menuone,noselect,fuzzy"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
