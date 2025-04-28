@@ -375,6 +375,7 @@ now(function()
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
+				{ mode = "n", keys = "<leader>t", desc = "+Tree" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<leader>w", desc = "+Window" },
 			},
@@ -732,6 +733,9 @@ now(function()
 				repl = "[R]EPL",
 				console = "[C]onsole",
 			},
+			controls = {
+				enabled = true,
+			},
 		},
 		---@diagnostic disable-next-line: missing-fields
 		windows = {
@@ -810,6 +814,36 @@ now(function()
 		},
 	})
 	require("timber").setup()
+	add({
+		source = "bassamsdata/namu.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("namu").setup({
+		namu_symbols = {
+			options = {
+				AllowKinds = {
+					default = {
+						"Function",
+						"Method",
+						"Class",
+						"Module",
+						"Property",
+						"Variable",
+						"Constant",
+						"Enum",
+						"Interface",
+						"Field",
+						"Struct",
+					},
+				},
+				display = {
+					format = "tree_guides",
+				},
+			},
+		},
+	})
 end)
 
 -- Linting and formatting setup
@@ -1038,6 +1072,14 @@ now(function()
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
 	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
 	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
+	Nmap("<leader>tb", ":Namu call both<CR>", "Both calls treeview")
+	Nmap("<leader>ti", ":Namu call in<CR>", "Incoming calls treeview")
+	Nmap("<leader>to", ":Namu call out<CR>", "Outgoing calls treeview")
+	Nmap("<leader>ts", ":Namu symbols<CR>", "Symbols treeview")
+	Nmap("<leader>ts", ":Namu watchtower<CR>", "Watchtower treeview")
+	Nmap("<leader>tt", ":Namu treesitter<CR>", "Treesitter treeview")
+	Nmap("<leader>tw", ":Namu watchtower<CR>", "Watchtower treeview")
+	Nmap("<leader>tw", ":Namu workspace<CR>", "Workspace treeview")
 	Nmap("<leader>vf", mini_pick_visits, "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
