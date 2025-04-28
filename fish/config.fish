@@ -56,12 +56,42 @@ if status is-interactive
     fish_vi_key_bindings
 end
 
+# Go path variables
 set -gx GOPATH $HOME/go
 set -gx PATH $PATH $GOPATH/bin
-set -gx PATH $PATH $HOME/.local/bin
-set -gx PATH $PATH $HOME/.cargo/bin
 set -gx PATH $PATH /usr/local/go/bin
+
+# Java variables
+set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
+set -gx JDK_JAVA_OPTIONS
+
+# Maven variables
+set -gx MAVEN_OPTS
+
+# Rust path variables
+set -gx PATH $PATH $HOME/.cargo/bin
+
+# Additional user bin path variables
+set -gx PATH $PATH $HOME/.local/bin
+
+# Coursier path variables
 set -gx PATH $PATH $HOME/.local/share/coursier/bin
+
+# Hive path variables
+set -gx HIVE_HOME /opt/hive
+set -gx PATH $PATH $HIVE_HOME/bin
+
+# Hadoop path variables
+set -gx HADOOP_HOME /opt/hadoop
+set -gx HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
+set -gx PATH $PATH $HADOOP_HOME/bin
+set -gx PATH $PATH $HADOOP_HOME/sbin
+
+# Spark path variables
+set -gx SPARK_HOME /opt/spark
+set -gx PATH $PATH $SPARK_HOME/bin
+set -gx PATH $PATH $SPARK_HOME/sbin
+
 if grep -q -i microsoft /proc/sys/kernel/osrelease
     mkdir -p $HOME/.tmp/
     set -gx XDG_RUNTIME_DIR $HOME/.tmp/
