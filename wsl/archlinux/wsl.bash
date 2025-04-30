@@ -69,7 +69,7 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
     mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
   fi
-  reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+  reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
   pacman -Syu --noconfirm --needed sudo fish
 
@@ -87,7 +87,7 @@ fi
 sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
 cd "$HOME"
 
-sudo_cmd reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+sudo_cmd reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
 if ! command -v yay &>/dev/null; then
   sudo_cmd pacman -Syu --noconfirm --needed git base-devel
