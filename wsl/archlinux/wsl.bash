@@ -65,7 +65,6 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   sed -i 's/#Color/Color/g' /etc/pacman.conf
   sed -i 's/NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
 
-  pacman -Syu --noconfirm --needed
   pacman -Syu --noconfirm --needed sudo fish
 
   echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)
@@ -81,14 +80,12 @@ fi
 
 sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
 cd "$HOME"
-sudo_cmd pacman -Syu --noconfirm --needed
 sudo_cmd pacman -Syu --noconfirm --needed git base-devel reflector
 
 if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
   sudo_cmd mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 fi
 sudo_cmd reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
-sudo_cmd pacman -Syu --noconfirm --needed
 
 if ! command -v yay &>/dev/null; then
   git clone https://aur.archlinux.org/yay-bin.git "$HOME/yay-bin"
