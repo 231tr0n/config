@@ -28,7 +28,8 @@ while getopts 's:r:u:p:h' opt; do
     -r: root password
     -u: system username
     -p: system password
-    -h: print help"
+    -h: print help
+    \n"
     exit
     ;;
   esac
@@ -42,7 +43,7 @@ function sudo_cmd {
   fi
 }
 
-if grep "default=" /etc/wsl.conf >/dev/null && grep "guiApplications=" /etc/wsl.conf >/dev/null; then
+if grep "default=" /etc/wsl.conf &>/dev/null && grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
   WSL_CONFIG_CHANGED="Yes"
 fi
 
@@ -52,11 +53,11 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
     exit 1
   fi
 
-  if ! grep "default=" /etc/wsl.conf >/dev/null; then
+  if ! grep "default=" /etc/wsl.conf &>/dev/null; then
     WSL_CONFIG_CHANGED="Yes"
     printf "\n\n[user]\ndefault=%s" "$DEFAULT_USERNAME" >>/etc/wsl.conf
   fi
-  if ! grep "guiApplications=" /etc/wsl.conf >/dev/null; then
+  if ! grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
     WSL_CONFIG_CHANGED="Yes"
     printf "\n\n[wsl2]\nguiApplications=true" >>/etc/wsl.conf
   fi
@@ -82,15 +83,19 @@ fi
 cd "$HOME"
 sudo_cmd pacman -Syu --noconfirm --needed git base-devel reflector
 
-sudo_cmd mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
+  sudo_cmd mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+fi
 sudo_cmd reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 sudo_cmd pacman -Syu --noconfirm --needed
 
-git clone https://aur.archlinux.org/yay-bin.git "$HOME/yay-bin"
-cd "$HOME/yay-bin"
-makepkg -sic --noconfirm
-cd "$HOME"
-rm -rf yay-bin
+if ! command -v yay &>/dev/null; then
+  git clone https://aur.archlinux.org/yay-bin.git "$HOME/yay-bin"
+  cd "$HOME/yay-bin"
+  makepkg -sic --noconfirm
+  cd "$HOME"
+  rm -rf yay-bin
+fi
 
 mkdir -p ~/.config
 mkdir -p ~/.config/nvim
@@ -119,7 +124,7 @@ sudo_cmd usermod -aG docker "$USER"
 sudo_cmd systemctl enable docker
 sudo_cmd systemctl enable ollama
 
-if ! test -d "$HOME/.ssh"; then
+if ! [ -d "$HOME/.ssh" ]; then
   printf "\n%s\n%s\n" "$SSH_KEY_PASSWORD" "$SSH_KEY_PASSWORD" | ssh-keygen -t rsa
 fi
 
