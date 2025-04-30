@@ -99,6 +99,9 @@ function sudo_cmd {
 
 cd "$HOME"
 
+sudo_cmd echo "$USER"
+sudo_cmd echo "$HOME"
+
 sudo_cmd reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
 if ! command -v yay &>/dev/null; then
