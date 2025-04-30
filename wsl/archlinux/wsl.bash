@@ -61,6 +61,8 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
     printf "\n\n[wsl2]\nguiApplications=true" >>/etc/wsl.conf
   fi
 
+  echo "Color" >>/etc/pacman.conf
+
   pacman -Syu --noconfirm --needed
   pacman -Syu --noconfirm --needed sudo fish
 
