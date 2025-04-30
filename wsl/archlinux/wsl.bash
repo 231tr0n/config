@@ -130,3 +130,5 @@ if ! [ -d "$HOME/.ssh" ]; then
 fi
 
 nvim --headless -c +'lua MiniDeps.update(nil, { force = true })' +TSUpdateSync +qa
+
+printf "[\e[1;36mINFO\e[1;0m] Run 'wsl --terminate archlinux' to apply all changes\n"
