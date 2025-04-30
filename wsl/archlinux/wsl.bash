@@ -81,6 +81,7 @@ fi
 
 sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
 cd "$HOME"
+sudo_cmd pacman -Syu --noconfirm --needed
 sudo_cmd pacman -Syu --noconfirm --needed git base-devel reflector
 
 if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
