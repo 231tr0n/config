@@ -1183,7 +1183,7 @@ now(function()
 	})
 	-- Various settings for plugin filetypes
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-view,dap-view-term,dap-float,ministarter",
+		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-view,dap-view-term,dap-float,ministarter,copilot_chat",
 		callback = function(args)
 			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 			vim.b.minicursorword_disable = true
@@ -2176,6 +2176,7 @@ later(function()
 	vim.g.copilot_no_maps = true
 	add("github/copilot.vim")
 	vim.cmd("Copilot status")
+	add("DanBradbury/copilot-chat.vim")
 end)
 
 -- Lazy loaded keymaps registration
@@ -2188,6 +2189,10 @@ later(function()
 	Imap("<M-\\>", "<cmd>call copilot#Suggest()<CR>", "Get copilot suggestion")
 	Imap("<M-[>", "<cmd>call copilot#Previous()<CR>", "Go to previous copilot suggestion")
 	Imap("<M-]>", "<cmd>call copilot#Next()<CR>", "Go to next copilot suggestion")
+	Nmap("<leader>af", "<cmd>CopilotChatFocus<CR>", "Focus copilot chat")
+	Nmap("<leader>at", "<cmd>CopilotChatOpen<CR>", "Open copilot chat")
+	Nmap("<leader>at", "<cmd>CopilotChatOpen<CR>", "Open copilot chat")
+	Vmap("<leader>as", "<Plug>CopilotChatAddSelection", "Add selection to copilot chat")
 end)
 
 -- Lazy loaded custom configuration
