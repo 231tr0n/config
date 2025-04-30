@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 DEFAULT_USERNAME="zeltron"
 DEFAULT_USER_PASSWORD="zeltron"
@@ -77,10 +77,9 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   useradd -m -s /usr/bin/fish -G wheel "$DEFAULT_USERNAME"
 
   passwd -s "$DEFAULT_USERNAME" <<<"$DEFAULT_USER_PASSWORD"
-
-  su - "$DEFAULT_USERNAME"
 fi
 
+sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
 cd "$HOME"
 sudo_cmd pacman -Syu --noconfirm --needed git base-devel reflector
 
@@ -132,3 +131,4 @@ fi
 nvim --headless -c +'lua MiniDeps.update(nil, { force = true })' +TSUpdateSync +qa
 
 printf "[\e[1;36mINFO\e[1;0m] Run 'wsl --terminate archlinux' to apply all changes\n"
+EOF
