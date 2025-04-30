@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 cd ~
 
 touch /home/zeltron/.hushlogin
