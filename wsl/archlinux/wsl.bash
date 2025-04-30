@@ -6,6 +6,7 @@ set -e
 SYSTEM_USERNAME="zeltron"
 SYSTEM_PASSWORD="zeltron"
 ROOT_PASSWORD="$SYSTEM_PASSWORD"
+SSH_KEY_PASSWORD="$SYSTEM_PASSWORD"
 WSL_CONFIG_CHANGED="No"
 
 function error_log {
@@ -36,8 +37,13 @@ while getopts 'r:u:p:h' opt; do
   u)
     SYSTEM_USERNAME="$OPTARG"
     ;;
+  s)
+    SSH_KEY_PASSWORD="$OPTARG"
+    ;;
   h | ?)
     info_log "Help\n
+    -s: ssh-key password
+    -r: root password
     -u: system username
     -p: system password
     -h: print help"
@@ -132,9 +138,7 @@ sudo systemctl enable --now docker
 sudo systemctl enable --now ollama
 
 if ! test -d "$HOME/.ssh"; then
-  ssh-keygen -t rsa
+  printf "\n$SSH_KEY_PASSWORD\n$SSH_KEY_PASSWORD\n" | ssh-keygen -t rsa
 fi
-
-git config --global core.editor "nvim"
 
 nvim --headless -c +'lua MiniDeps.update(nil, { force = true })' +TSUpdateSync +qa
