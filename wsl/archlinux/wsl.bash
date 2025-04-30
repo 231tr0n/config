@@ -65,6 +65,12 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   sed -i 's/#Color/Color/g' /etc/pacman.conf
   sed -i 's/NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
 
+  pacman -Syu --noconfirm --needed reflector
+  if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
+    mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+  fi
+  reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+
   pacman -Syu --noconfirm --needed sudo fish
 
   echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)
@@ -80,14 +86,11 @@ fi
 
 sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
 cd "$HOME"
-sudo_cmd pacman -Syu --noconfirm --needed git base-devel reflector
 
-if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
-  sudo_cmd mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
-fi
 sudo_cmd reflector --fastest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 if ! command -v yay &>/dev/null; then
+  sudo_cmd pacman -Syu --noconfirm --needed git base-devel
   git clone https://aur.archlinux.org/yay-bin.git "$HOME/yay-bin"
   cd "$HOME/yay-bin"
   makepkg -sic --noconfirm
@@ -110,7 +113,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_p
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o ~/.config/fish/functions/fish_user_key_bindings.fish
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
 
-echo "$DEFAULT_USER_PASSWORD" | yay -Syu --sudoloop --noconfirm --needed go jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck checkstyle luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals bloop pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm
+echo "$DEFAULT_USER_PASSWORD" | yay -Syu --sudoloop --noconfirm --needed git base-devel fish sudo reflector go jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck checkstyle luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals bloop pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm
 
 rustup update stable
 
