@@ -84,7 +84,9 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   passwd -s "$DEFAULT_USERNAME" <<<"$DEFAULT_USER_PASSWORD"
 fi
 
-sudo -u "$DEFAULT_USERNAME" bash -xe <<EOF
+sudo -u "$DEFAULT_USERNAME" bash -xe -c : && DEFAULT_USER_RUN="sudo -u $DEFAULT_USERNAME"
+
+$DEFAULT_USER_RUN <<EOF
 cd "$HOME"
 
 sudo_cmd reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
