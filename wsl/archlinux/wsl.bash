@@ -35,12 +35,9 @@ while getopts 's:r:u:p:h' opt; do
   esac
 done
 
-function sudo_cmd {
-  if [ "$(id -u)" -eq 0 ]; then
-    "$@"
-  else
-    sudo -S "$@" <<<"$DEFAULT_USER_PASSWORD"
-  fi
+function info_log {
+  echo -ne "[\e[1;36mINFO\e[1;0m] "
+  echo -e "$1"
 }
 
 if grep "default=" /etc/wsl.conf &>/dev/null && grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
@@ -82,11 +79,24 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   useradd -m -s /usr/bin/fish -G wheel "$DEFAULT_USERNAME"
 
   passwd -s "$DEFAULT_USERNAME" <<<"$DEFAULT_USER_PASSWORD"
+
+  info_log "Run 'wsl --terminate archlinux' to apply all changes\n"
+  exit
 fi
 
-sudo -u "$DEFAULT_USERNAME" bash -c : && DEFAULT_USER_RUN="sudo -u $DEFAULT_USERNAME"
+if [ "$(id -u)" -eq 0 ]; then
+  error_log "Please dont run this script as super user"
+  exit 1
+fi
 
-$DEFAULT_USER_RUN bash <<EOF
+function sudo_cmd {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  else
+    sudo -S "$@" <<<"$DEFAULT_USER_PASSWORD"
+  fi
+}
+
 cd "$HOME"
 
 sudo_cmd reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
@@ -100,20 +110,20 @@ if ! command -v yay &>/dev/null; then
   rm -rf yay-bin
 fi
 
-mkdir -p ~/.config
-mkdir -p ~/.config/nvim
-mkdir -p ~/.config/fish
-mkdir -p ~/.config/fish/functions
-mkdir -p ~/.config/tmux
+mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.config/nvim"
+mkdir -p "$HOME/.config/fish"
+mkdir -p "$HOME/.config/fish/functions"
+mkdir -p "$HOME/.config/tmux"
 
-curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o ~/.gitconfig
-curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o ~/.config/nvim/init.lua
-curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o ~/.vimrc
-curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o ~/.config/tmux/tmux.conf
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o ~/.config/fish/config.fish
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o ~/.config/fish/functions/fish_prompt.fish
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o ~/.config/fish/functions/fish_user_key_bindings.fish
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o ~/.config/fish/functions/fish_mode_prompt.fish
+curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
+curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
+curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o "$HOME/.vimrc"
+curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf"
+curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish"
+curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish"
+curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish"
+curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 
 echo "$DEFAULT_USER_PASSWORD" | yay -Syu --sudoloop --noconfirm --needed git base-devel fish sudo reflector go jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck checkstyle luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals bloop pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm
 
@@ -133,5 +143,4 @@ fi
 
 nvim --headless -c +'lua MiniDeps.update(nil, { force = true })' +TSUpdateSync +qa
 
-printf "[\e[1;36mINFO\e[1;0m] Run 'wsl --terminate archlinux' to apply all changes\n"
-EOF
+info_log "Run 'ollama pull gemma3'\n"
