@@ -123,7 +123,7 @@ default_user_cmd rustup update stable
 
 default_user_cmd coursier setup -y
 
-groupadd docker
+groupadd docker 2>&1
 usermod -aG docker "$USER"
 
 systemctl enable docker
