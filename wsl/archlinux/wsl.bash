@@ -126,7 +126,7 @@ usermod -aG docker "$DEFAULT_USERNAME"
 systemctl enable docker
 systemctl enable ollama
 
-if ! [ -d "$HOME/.ssh" ]; then
+if ! [ -d "/home/$DEFAULT_USERNAME/.ssh" ]; then
   default_user_cmd ssh-keygen -t rsa -N "$SSH_KEY_PASSWORD" -f '$HOME/.ssh/id_rsa'
 fi
 
