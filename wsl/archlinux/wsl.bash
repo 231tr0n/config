@@ -45,7 +45,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-if grep "default=" /etc/wsl.conf &>/dev/null && grep "guiApplications=" /etc/wsl.conf &>/dev/null && grep "interop" /etc/wsl.conf &>/dev/null; then
+if grep "default=" /etc/wsl.conf &>/dev/null; then
   WSL_CONFIG_CHANGED="Yes"
 fi
 
@@ -53,14 +53,6 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   if ! grep "default=" /etc/wsl.conf &>/dev/null; then
     WSL_CONFIG_CHANGED="Yes"
     printf "\n[user]\ndefault=%s" "$DEFAULT_USERNAME" >>/etc/wsl.conf
-  fi
-  if ! grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
-    WSL_CONFIG_CHANGED="Yes"
-    printf "\n\n[wsl2]\nguiApplications=true" >>/etc/wsl.conf
-  fi
-  if ! grep "interop" /etc/wsl.conf &>/dev/null; then
-    WSL_CONFIG_CHANGED="Yes"
-    printf "\n\n[interop]\nenabled=true" >>/etc/wsl.conf
   fi
 
   sed -i 's/#Color/Color/g' /etc/pacman.conf
