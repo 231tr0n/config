@@ -130,7 +130,7 @@ systemctl enable docker
 systemctl enable ollama
 
 if ! [ -d "$HOME/.ssh" ]; then
-  default_user_cmd printf "\n%s\n%s\n" "$SSH_KEY_PASSWORD" "$SSH_KEY_PASSWORD" | ssh-keygen -t rsa
+  default_user_cmd "printf '\n%s\n%s\n' $SSH_KEY_PASSWORD $SSH_KEY_PASSWORD | ssh-keygen -t rsa"
 fi
 
 default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true })'" "'+TSUpdateSync'" "'+qa'"
