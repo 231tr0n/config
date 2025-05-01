@@ -86,6 +86,7 @@ function default_user_cmd {
   for arg in "$@"; do
     args="$args $arg"
   done
+  args=${args# }
   su - "$DEFAULT_USERNAME" -c "$args"
 }
 
@@ -97,7 +98,9 @@ if ! command -v yay &>/dev/null; then
   pacman -Syu --noconfirm --needed git base-devel
   default_user_cmd rm -rf '$HOME/yay-bin'
   default_user_cmd git clone https://aur.archlinux.org/yay-bin.git '$HOME/yay-bin'
-  default_user_cmd cd '$HOME/yay-bin' '&&' makepkg -sic --noconfirm
+  echo "$DEFAULT_USERNAME $(echo $HOSTNAME)= NOPASSWD: /usr/bin/pacman" | (EDITOR='tee -a' visudo)
+  default_user_cmd bash -c 'cd $HOME/yay-bin && makepkg -sic --noconfirm'
+  sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
   default_user_cmd rm -rf '$HOME/yay-bin'
 fi
 
