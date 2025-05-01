@@ -121,7 +121,7 @@ default_user_cmd "yay -Syu --noconfirm --needed git base-devel fish sudo reflect
 
 default_user_cmd rustup update stable
 
-default_user_cmd cs setup -y
+default_user_cmd coursier setup -y
 
 groupadd docker
 usermod -aG docker "$USER"
