@@ -45,18 +45,22 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-if grep "default=" /etc/wsl.conf &>/dev/null && grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
+if grep "default=" /etc/wsl.conf &>/dev/null && grep "guiApplications=" /etc/wsl.conf &>/dev/null && grep "interop" /etc/wsl.conf &>/dev/null; then
   WSL_CONFIG_CHANGED="Yes"
 fi
 
 if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
   if ! grep "default=" /etc/wsl.conf &>/dev/null; then
     WSL_CONFIG_CHANGED="Yes"
-    printf "\n\n[user]\ndefault=%s" "$DEFAULT_USERNAME" >>/etc/wsl.conf
+    printf "\n[user]\ndefault=%s" "$DEFAULT_USERNAME" >>/etc/wsl.conf
   fi
   if ! grep "guiApplications=" /etc/wsl.conf &>/dev/null; then
     WSL_CONFIG_CHANGED="Yes"
     printf "\n\n[wsl2]\nguiApplications=true" >>/etc/wsl.conf
+  fi
+  if ! grep "interop" /etc/wsl.conf &>/dev/null; then
+    WSL_CONFIG_CHANGED="Yes"
+    printf "\n\n[interop]\nenabled=true" >>/etc/wsl.conf
   fi
 
   sed -i 's/#Color/Color/g' /etc/pacman.conf
@@ -118,14 +122,14 @@ default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish
 default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o '$HOME/.config/fish/functions/fish_mode_prompt.fish'
 default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o '$HOME/wsl.bash'
 
-default_user_cmd "yay -Syu --noconfirm --needed git base-devel fish sudo reflector go jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck checkstyle luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm"
+default_user_cmd "yay -Syu --noconfirm --needed glibc-locales git base-devel fish sudo reflector go jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck checkstyle luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm"
 
 default_user_cmd rustup update stable
 
 default_user_cmd coursier setup -y
 
 groupadd -f docker
-usermod -aG docker "$USER"
+usermod -aG docker "$DEFAULT_USERNAME"
 
 systemctl enable docker
 systemctl enable ollama
