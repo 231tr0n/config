@@ -62,7 +62,7 @@ set -gx PATH $PATH $GOPATH/bin
 set -gx PATH $PATH /usr/local/go/bin
 
 # Java variables
-set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
+set -gx JAVA_HOME /usr/lib/jvm/default
 set -gx JDK_JAVA_OPTIONS
 
 # Maven variables
