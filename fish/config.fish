@@ -102,4 +102,6 @@ if status is-interactive
     exec tmux -2u
 end
 
+fish_config theme choose 'ayu Dark'
+
 zoxide init --cmd cd fish | source
