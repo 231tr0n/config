@@ -95,6 +95,7 @@ reflector --fastest 5 --protocol https --country India --sort rate --save /etc/p
 
 if ! command -v yay &>/dev/null; then
   pacman -Syu --noconfirm --needed git base-devel
+  default_user_cmd rm -rf '$HOME/yay-bin'
   default_user_cmd git clone https://aur.archlinux.org/yay-bin.git '$HOME/yay-bin'
   default_user_cmd cd '$HOME/yay-bin' '&&' makepkg -sic --noconfirm
   default_user_cmd rm -rf '$HOME/yay-bin'
