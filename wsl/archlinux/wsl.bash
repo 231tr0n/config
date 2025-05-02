@@ -114,7 +114,7 @@ default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish
 default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o '$HOME/.config/fish/functions/fish_mode_prompt.fish'
 default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o '$HOME/wsl.bash'
 
-default_user_cmd "yay -Syu --noconfirm --needed glibc-locales git base-devel fish sudo reflector go jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm"
+default_user_cmd "yay -Syu --noconfirm --needed xsel glibc-locales git base-devel fish sudo reflector go jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm"
 
 default_user_cmd rustup update stable
 
@@ -133,5 +133,7 @@ fi
 default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true })'" "'+TSUpdateSync'" "'+qa'"
 
 sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
+
+pacman -Rnsu "$(pacman -Qtdq)"
 
 info_log "Run 'wsl --terminate archlinux' to apply all changes\n"
