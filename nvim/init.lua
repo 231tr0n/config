@@ -1,6 +1,7 @@
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/opt/mini.nvim"
+---@diagnostic disable-next-line: undefined-field
 if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installing `mini.nvim`" | redraw')
 	local clone_cmd = {
@@ -733,6 +734,7 @@ now(function()
 				repl = "[R]EPL",
 				console = "[C]onsole",
 			},
+			---@diagnostic disable-next-line: missing-fields
 			controls = {
 				enabled = true,
 			},
@@ -1484,6 +1486,32 @@ now(function()
 	local bundles = {}
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	local env = {
+		---@diagnostic disable-next-line: undefined-field
+		HOME = vim.uv.os_homedir(),
+		XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME"),
+		JDTLS_JVM_ARGS = os.getenv("JDTLS_JVM_ARGS"),
+	}
+	local function get_cache_dir()
+		return env.XDG_CACHE_HOME and env.XDG_CACHE_HOME or env.HOME .. "/.cache"
+	end
+	local function get_jdtls_cache_dir()
+		return get_cache_dir() .. "/jdtls"
+	end
+	local function get_jdtls_config_dir()
+		return get_jdtls_cache_dir() .. "/config"
+	end
+	local function get_jdtls_workspace_dir()
+		return get_jdtls_cache_dir() .. "/workspace"
+	end
+	local function get_jdtls_jvm_args()
+		local args = {}
+		for a in string.gmatch((env.JDTLS_JVM_ARGS or ""), "%S+") do
+			local arg = string.format("--jvm-arg=%s", a)
+			table.insert(args, arg)
+		end
+		return unpack(args)
+	end
 	local lsp_servers = {
 		lua_ls = {
 			settings = {
@@ -1624,6 +1652,14 @@ now(function()
 			},
 		},
 		jdtls = {
+			cmd = {
+				"jdtls",
+				"-configuration",
+				get_jdtls_config_dir(),
+				"-data",
+				get_jdtls_workspace_dir(),
+				get_jdtls_jvm_args(),
+			},
 			capabilities = jdtls_capabilities,
 			settings = {
 				java = {
@@ -1666,6 +1702,7 @@ now(function()
 				},
 			},
 			init_options = {
+				workspace = get_jdtls_workspace_dir(),
 				bundles = bundles,
 				extendedClientCapabilities = {
 					classFileContentsSupport = true,
