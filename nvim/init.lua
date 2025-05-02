@@ -1263,6 +1263,9 @@ now(function()
 								)
 							end
 						else
+							if not vim.api.nvim_buf_is_valid(args.buf) then
+								return
+							end
 							if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) then
 								vim.api.nvim_set_option_value("winbar", Global.winbar, { win = win })
 							end
