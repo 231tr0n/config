@@ -429,6 +429,7 @@ now(function()
 	require("mini.indentscope").setup()
 	require("mini.jump").setup()
 	require("mini.jump2d").setup()
+	require("mini.keymap").setup()
 	require("mini.misc").setup()
 	MiniMisc.setup_auto_root({
 		"meson.build",
@@ -808,7 +809,9 @@ now(function()
 			"nvim-treesitter/nvim-treesitter",
 		},
 	})
-	require("treesj").setup()
+	require("treesj").setup({
+		use_default_keymaps = false,
+	})
 	add({
 		source = "Goose97/timber.nvim",
 		depends = {
@@ -908,6 +911,8 @@ end)
 
 -- Non lazy keymaps registration
 now(function()
+	local map_multistep = require("mini.keymap").map_multistep
+	local map_combo = require("mini.keymap").map_combo
 	local te_buf = nil
 	local te_win_id = -1
 	local function open_terminal()
@@ -955,22 +960,6 @@ now(function()
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
 	end
-	local keycode = vim.keycode or function(x)
-		return vim.api.nvim_replace_termcodes(x, true, true, true)
-	end
-	local keys = {
-		["cr"] = keycode("<CR>"),
-		["ctrl-y"] = keycode("<C-y>"),
-		["ctrl-y_cr"] = keycode("<C-y><CR>"),
-	}
-	local function cr_action()
-		if vim.fn.pumvisible() ~= 0 then
-			local item_selected = vim.fn.complete_info()["selected"] ~= -1
-			return item_selected and keys["ctrl-y"] or keys["ctrl-y_cr"]
-		else
-			return require("mini.pairs").cr()
-		end
-	end
 	local mini_pick_visits = function()
 		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
 		MiniExtra.pickers.visit_paths(
@@ -978,9 +967,6 @@ now(function()
 			{ source = { name = "Core visits" } }
 		)
 	end
-	Imap("<CR>", cr_action, "Enter to select in wildmenu", { expr = true })
-	Imap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "Cycle wildmenu anti-clockwise", { expr = true })
-	Imap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "Cycle wildmenu clockwise", { expr = true })
 	Nmap("<C-Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
@@ -991,7 +977,6 @@ now(function()
 	Nmap("<Space><Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Tab><Tab><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<leader>F", require("conform").format, "Format code")
-	Nmap("<leader>H", ':lua vim.fn.setloclist(MiniDiff.export("qf", { scope = "all" }))<CR>', "List diff hunks")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1052,7 +1037,6 @@ now(function()
 	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
 	Nmap("<leader>gg", ":lua require('neogen').generate()<CR>", "Generate annotations")
 	Nmap("<leader>gt", ":lua require('neogen').generate({ type = 'type' })<CR>", "Generate type annotations")
-	Nmap("<leader>h", ':lua vim.fn.setloclist(MiniDiff.export("qf", {scope="current"}))<CR>', "List buffer diff hunks")
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
@@ -1074,6 +1058,7 @@ now(function()
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
 	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
 	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
+	Nmap("<leader>s", ":TSJToggle<CR>", "Split/Join code blocks")
 	Nmap("<leader>tb", ":Namu call both<CR>", "Both calls treeview")
 	Nmap("<leader>ti", ":Namu call in<CR>", "Incoming calls treeview")
 	Nmap("<leader>to", ":Namu call out<CR>", "Outgoing calls treeview")
@@ -1093,7 +1078,6 @@ now(function()
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
-	Tmap("<Space><Esc>", "<C-\\><C-n>", "Escape terminal mode")
 	Vmap("<leader>cP", '"+P', "Paste to clipboard")
 	Vmap("<leader>cX", '"+X', "Cut to clipboard")
 	Vmap("<leader>cY", '"+Y', "Copy to clipboard")
@@ -1101,6 +1085,16 @@ now(function()
 	Vmap("<leader>cx", '"+x', "Cut to clipboard")
 	Vmap("<leader>cy", '"+y', "Copy to clipboard")
 	Xmap("<leader>lf", require("conform").format, "Format code")
+	map_combo("t", "jk", "<BS><BS><C-\\><C-n>")
+	map_combo("t", "kj", "<BS><BS><C-\\><C-n>")
+	map_combo({ "i", "c", "x", "s" }, "jk", "<BS><BS><Esc>")
+	map_combo({ "i", "c", "x", "s" }, "kj", "<BS><BS><Esc>")
+	map_multistep("i", "<BS>", { "minipairs_bs" })
+	map_multistep("i", "<C-u>", { "jump_after_close" })
+	map_multistep("i", "<C-y>", { "jump_before_open" })
+	map_multistep("i", "<CR>", { "pmenu_accept", "minipairs_cr" })
+	map_multistep("i", "<S-Tab>", { "pmenu_prev" })
+	map_multistep("i", "<Tab>", { "pmenu_next" })
 end)
 
 -- Autocommands registration
