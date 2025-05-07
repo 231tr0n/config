@@ -134,6 +134,8 @@ default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true }
 
 sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
 
-pacman -Rnsu "$(pacman -Qtdq)"
+default_user_cmd "yay -Rnsu \$(yay -Qtdq)"
+
+default_user_cmd "yay -Scc"
 
 info_log "Run 'wsl --terminate archlinux' to apply all changes\n"
