@@ -132,10 +132,10 @@ fi
 
 default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true })'" "'+TSUpdateSync'" "'+qa'"
 
-sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
-
 default_user_cmd "yay -Rnsu \$(yay -Qtdq)"
 
 default_user_cmd "yay -Scc"
+
+sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
 
 info_log "Run 'wsl --terminate archlinux' to apply all changes\n"
