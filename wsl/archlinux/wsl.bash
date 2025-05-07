@@ -132,9 +132,9 @@ fi
 
 default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true })'" "'+TSUpdateSync'" "'+qa'"
 
-default_user_cmd "yay -Rnsu \$(yay -Qtdq)"
+default_user_cmd "yay -Rnsu --noconfirm \$(yay -Qtdq)"
 
-default_user_cmd "yay -Scc"
+default_user_cmd "yay -Scc --noconfirm"
 
 sed -i "/\/usr\/sbin\/pacman/d" /etc/sudoers
 
