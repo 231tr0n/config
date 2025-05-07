@@ -1490,6 +1490,7 @@ now(function()
 		HOME = vim.uv.os_homedir(),
 		XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME"),
 		JDTLS_JVM_ARGS = os.getenv("JDTLS_JVM_ARGS"),
+		JAVA_EXECUTABLE = os.getenv("JAVA_EXECUTABLE"),
 	}
 	local function get_cache_dir()
 		return env.XDG_CACHE_HOME and env.XDG_CACHE_HOME or env.HOME .. "/.cache"
@@ -1510,6 +1511,9 @@ now(function()
 			table.insert(args, arg)
 		end
 		return unpack(args)
+	end
+	local function get_jdtls_java_executable()
+		return env.JAVA_EXECUTABLE or "/usr/lib/jvm/default/bin/java"
 	end
 	local lsp_servers = {
 		lua_ls = {
@@ -1629,6 +1633,11 @@ now(function()
 		metals = {
 			settings = {
 				metals = {
+					-- mavenScript = "/usr/local/bin/mvn",
+					-- gradleScript = "/usr/local/bin/gradle",
+					-- javaHome = "/usr/lib/jvm/default",
+					-- scalaCliLauncher = "/usr/local/bin/scala-cli",
+					-- bloopJvmProperties = "",
 					autoImportBuild = "all",
 					inlayHints = {
 						hintsInPatternMatch = { enable = true },
@@ -1636,7 +1645,11 @@ now(function()
 						implicitConversions = { enable = true },
 						inferredTypes = { enable = true },
 						typeParameters = { enable = true },
+						namedParameters = { enable = true },
+						byNameParameters = { enable = true },
 					},
+					defaultBspToBuildTool = true,
+					enableBestEffort = true,
 				},
 			},
 			init_options = {
@@ -1653,6 +1666,8 @@ now(function()
 		jdtls = {
 			cmd = {
 				"jdtls",
+				"--java-executable",
+				get_jdtls_java_executable(),
 				"-configuration",
 				get_jdtls_config_dir(),
 				"-data",
