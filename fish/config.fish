@@ -63,10 +63,10 @@ set -gx PATH $PATH /usr/local/go/bin
 
 # Java variables
 set -gx JAVA_HOME /usr/lib/jvm/default
-set -gx JDK_JAVA_OPTIONS
+# set -gx JDK_JAVA_OPTIONS
 
 # Maven variables
-set -gx MAVEN_OPTS
+# set -gx MAVEN_OPTS
 
 # Rust path variables
 set -gx PATH $PATH $HOME/.cargo/bin
@@ -97,11 +97,11 @@ if grep -q -i microsoft /proc/sys/kernel/osrelease
     set -gx XDG_RUNTIME_DIR $HOME/.tmp/
 end
 
+fish_config theme choose 'ayu Dark'
+
+zoxide init --cmd cd fish | source
+
 if status is-interactive
     and not set -q TMUX
     exec tmux -2u
 end
-
-fish_config theme choose 'ayu Dark'
-
-zoxide init --cmd cd fish | source
