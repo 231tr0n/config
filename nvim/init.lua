@@ -872,6 +872,7 @@ now(function()
 			rust = { "rustfmt" },
 			sh = { "shfmt" },
 			sql = { "sqlfluff" },
+			scala = { "scalafmt" },
 			svelte = { "prettier" },
 			svg = { "xmllint" },
 			tex = { "latexindent" },
