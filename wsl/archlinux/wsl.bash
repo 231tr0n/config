@@ -86,39 +86,39 @@ function default_user_cmd {
   su - "$DEFAULT_USERNAME" -c "$args"
 }
 
-echo "$DEFAULT_USERNAME $(echo $HOSTNAME)= NOPASSWD: /usr/bin/pacman,/usr/sbin/pacman" | (EDITOR='tee -a' visudo)
+echo "$DEFAULT_USERNAME $HOSTNAME= NOPASSWD: /usr/bin/pacman,/usr/sbin/pacman" | (EDITOR='tee -a' visudo)
 
 reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
 if ! command -v yay &>/dev/null; then
   pacman -Syu --noconfirm --needed git base-devel
-  default_user_cmd rm -rf '$HOME/yay-bin'
-  default_user_cmd git clone https://aur.archlinux.org/yay-bin.git '$HOME/yay-bin'
-  default_user_cmd cd '$HOME/yay-bin' '&&' makepkg -sic --noconfirm
-  default_user_cmd rm -rf '$HOME/yay-bin'
+  default_user_cmd "rm -rf \$HOME/yay-bin"
+  default_user_cmd "git clone https://aur.archlinux.org/yay-bin.git \$HOME/yay-bin"
+  default_user_cmd "cd \$HOME/yay-bin && makepkg -sic --noconfirm"
+  default_user_cmd "rm -rf \$HOME/yay-bin"
 fi
-
-default_user_cmd mkdir -p '$HOME/.config'
-default_user_cmd mkdir -p '$HOME/.config/nvim'
-default_user_cmd mkdir -p '$HOME/.config/fish'
-default_user_cmd mkdir -p '$HOME/.config/fish/functions'
-default_user_cmd mkdir -p '$HOME/.config/tmux'
-
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o '$HOME/.gitconfig'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o '$HOME/.config/nvim/init.lua'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o '$HOME/.vimrc'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o '$HOME/.config/tmux/tmux.conf'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o '$HOME/.config/fish/config.fish'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o '$HOME/.config/fish/functions/fish_prompt.fish'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o '$HOME/.config/fish/functions/fish_user_key_bindings.fish'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o '$HOME/.config/fish/functions/fish_mode_prompt.fish'
-default_user_cmd curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o '$HOME/wsl.bash'
 
 default_user_cmd "yay -Syu --noconfirm --needed xsel glibc-locales git base-devel fish sudo reflector go jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk jdk-openjdk python python-pip python-pipx curl wget ca-certificates openssl openssh inxi htop man-db jq vim neovim tree-sitter-cli tmux tmate libgit2 fuse rustup docker docker-buildx docker-compose bat fzf fd ripgrep lsd fastfetch nodejs-lts npm clang gcc typescript luajit texlive ts-node delve python-debugpy lldb gdb make cmake meson maven gradle ninja luarocks woff2 ctags ffmpeg mpv zoxide evince net-tools sysstat axel tldr ncdu firefox chromium bash-completion shellcheck luacheck python-pylint yamllint sqlfluff coursier java-debug jdtls metals pyright basedpyright-bin yaml-language-server sql-language-server svelte-language-server eslint-language-server lua-language-server typescript-language-server bash-language-server dockerfile-language-server vim-language-server lemminx vtsls marksman vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver vscode-js-debug-bin tidy libxml2 golangci-lint-langserver-bin golangci-lint-bin eslint python-black yamlfmt gofumpt golines shfmt stylua yamlfix google-java-format checkstyle-bin git-delta hurl cargo-update diff-so-fancy gup lazygit python-pylatexenc nodejs-nodemon ollama kubectl minikube helm inetutils"
 
-default_user_cmd rustup update stable
+default_user_cmd "mkdir -p \$HOME/.config"
+default_user_cmd "mkdir -p \$HOME/.config/nvim"
+default_user_cmd "mkdir -p \$HOME/.config/fish"
+default_user_cmd "mkdir -p \$HOME/.config/fish/functions"
+default_user_cmd "mkdir -p \$HOME/.config/tmux"
 
-default_user_cmd coursier setup -y
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o \$HOME/.gitconfig"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o \$HOME/.config/nvim/init.lua"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o \$HOME/.vimrc"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o \$HOME/.config/tmux/tmux.conf"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o \$HOME/.config/fish/config.fish"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o \$HOME/.config/fish/functions/fish_prompt.fish"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o \$HOME/.config/fish/functions/fish_user_key_bindings.fish"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o \$HOME/.config/fish/functions/fish_mode_prompt.fish"
+default_user_cmd "curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o \$HOME/wsl.bash"
+
+default_user_cmd "rustup update stable"
+
+default_user_cmd "coursier setup -y"
 
 groupadd -f docker
 usermod -aG docker "$DEFAULT_USERNAME"
@@ -127,10 +127,10 @@ systemctl enable docker
 systemctl enable ollama
 
 if ! [ -d "/home/$DEFAULT_USERNAME/.ssh" ]; then
-  default_user_cmd ssh-keygen -t rsa -N "$SSH_KEY_PASSWORD" -f '$HOME/.ssh/id_rsa'
+  default_user_cmd "ssh-keygen -t rsa -N $SSH_KEY_PASSWORD -f \$HOME/.ssh/id_rsa"
 fi
 
-default_user_cmd nvim --headless -c "'+lua MiniDeps.update(nil, { force = true })'" "'+TSUpdateSync'" "'+qa'"
+default_user_cmd "nvim --headless -c '+lua MiniDeps.update(nil, { force = true })' '+TSUpdateSync' '+qa'"
 
 default_user_cmd "yay -Rnsu --noconfirm \$(yay -Qtdq)"
 
