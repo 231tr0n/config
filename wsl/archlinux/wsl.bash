@@ -92,7 +92,7 @@ echo "$DEFAULT_USERNAME $HOSTNAME= NOPASSWD: /usr/bin/pacman,/usr/sbin/pacman" |
 reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
 if ! command -v yay &>/dev/null; then
-  pacman -Syu --noconfirm --needed git base-devel
+  pacman -Syu --noconfirm --needed git base-devel less
   default_user_cmd 'rm -rf $HOME/yay-bin'
   default_user_cmd 'git clone https://aur.archlinux.org/yay-bin.git $HOME/yay-bin'
   default_user_cmd 'cd $HOME/yay-bin && makepkg -sic --noconfirm'
