@@ -720,9 +720,7 @@ now(function()
 			"mfussenegger/nvim-dap",
 		},
 	})
-	---@diagnostic disable-next-line: missing-fields
 	require("dap-view").setup({
-		---@diagnostic disable-next-line: missing-fields
 		winbar = {
 			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
@@ -735,14 +733,11 @@ now(function()
 				repl = "[R]EPL",
 				console = "[C]onsole",
 			},
-			---@diagnostic disable-next-line: missing-fields
 			controls = {
 				enabled = true,
 			},
 		},
-		---@diagnostic disable-next-line: missing-fields
 		windows = {
-			---@diagnostic disable-next-line: missing-fields
 			terminal = {
 				hide = { "go", "delve" },
 			},
@@ -1663,6 +1658,11 @@ now(function()
 				disableColorOutput = true,
 				statusBarProvider = "off",
 			},
+			handlers = {
+				["metals/status"] = vim.schedule_wrap(function(_, results)
+					vim.notify(results.message, vim.log.levels.INFO)
+				end),
+			},
 		},
 		jdtls = {
 			cmd = {
@@ -1702,15 +1702,15 @@ now(function()
 						runtimes = {
 							{
 								name = "JavaSE-11",
-								path = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/",
+								path = "/usr/lib/jvm/java-11-openjdk/",
 							},
 							{
 								name = "JavaSE-17",
-								path = "/usr/lib/jvm/java-1.17.0-openjdk-amd64/",
+								path = "/usr/lib/jvm/java-17-openjdk/",
 							},
 							{
 								name = "JavaSE-21",
-								path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64/",
+								path = "/usr/lib/jvm/java-21-openjdk/",
 							},
 						},
 					},
