@@ -1057,6 +1057,7 @@ now(function()
 	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
 	Nmap("<leader>s", ":TSJToggle<CR>", "Split/Join code blocks")
 	Nmap("<leader>tb", ":Namu call both<CR>", "Both calls treeview")
+	Nmap("<leader>tc", ":Namu ctags<CR>", "Ctags treeview")
 	Nmap("<leader>ti", ":Namu call in<CR>", "Incoming calls treeview")
 	Nmap("<leader>to", ":Namu call out<CR>", "Outgoing calls treeview")
 	Nmap("<leader>ts", ":Namu symbols<CR>", "Symbols treeview")
@@ -1645,8 +1646,8 @@ now(function()
 						namedParameters = { enable = true },
 						byNameParameters = { enable = true },
 					},
-					defaultBspToBuildTool = true,
-					enableBestEffort = true,
+					-- defaultBspToBuildTool = true,
+					-- enableBestEffort = true,
 				},
 			},
 			init_options = {
