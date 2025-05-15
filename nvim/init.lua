@@ -545,10 +545,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	add("m4xshen/hardtime.nvim")
-	require("hardtime").setup({
-		enabled = false,
-	})
 	add("nacro90/numb.nvim")
 	require("numb").setup()
 	add("mfussenegger/nvim-dap")
@@ -775,13 +771,18 @@ now(function()
 	})
 	require("neogen").setup({ snippet_engine = "mini" })
 	add({
-		source = "OXY2DEV/markview.nvim",
+		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
 			"echasnovski/mini.nvim",
 		},
 	})
-	require("markview").setup()
+	require("render-markdown").setup({
+		completions = { lsp = { enabled = true } },
+		code = {
+			border = "thin",
+		},
+	})
 	add({
 		source = "OXY2DEV/helpview.nvim",
 		depends = {
@@ -970,7 +971,7 @@ now(function()
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", Global.lead_multi_space_calc, "Set leadmultispace according to shiftwidth")
-	Nmap("<F8>", ":Markview toggle<CR>", "Toggle markview preview")
+	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<leader>F", require("conform").format, "Format code")
