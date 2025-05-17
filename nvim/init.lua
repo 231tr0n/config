@@ -1,3 +1,9 @@
+-- Luacheck global variables declaration
+-- luacheck: globals vim
+-- luacheck: globals Global Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
+-- luacheck: globals MiniPick MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
+-- luacheck: globals MiniDeps MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
+
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/opt/mini.nvim"
@@ -246,7 +252,8 @@ now(function()
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
 	-- TODO add marks to status column
-	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum - 1)) ? (foldclosed(v:lnum) == -1 ? '"
+	-- luacheck: ignore
+	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum-1)) ? (foldclosed(v:lnum) == -1 ? '"
 		.. Global.fold_open
 		.. " ' : '"
 		.. Global.fold_close
@@ -664,7 +671,7 @@ now(function()
 			-- 	local max_filesize = 1 * 1024 * 1024
 			-- 	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 			-- 	if ok and stats and stats.size > max_filesize then
-			-- 		-- Match syntax for @punctuation.bracket so that all kinds of braces are highlighted even if treesitter is disabled
+			-- 		-- Match syntax for @punctuation.bracket to highlight all kinds of braces if treesitter is disabled
 			-- 		vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
 			-- 		return true
 			-- 	end
@@ -737,6 +744,15 @@ now(function()
 			terminal = {
 				hide = { "go", "delve" },
 			},
+			anchor = function()
+				local windows = vim.api.nvim_tabpage_list_wins(0)
+				for _, win in ipairs(windows) do
+					local bufnr = vim.api.nvim_win_get_buf(win)
+					if vim.bo[bufnr].buftype == "terminal" then
+						return win
+					end
+				end
+			end,
 		},
 	})
 	local dap, dv = require("dap"), require("dap-view")
@@ -849,61 +865,268 @@ end)
 
 -- Linting and formatting setup
 now(function()
-	add("stevearc/conform.nvim")
-	local conform = require("conform")
-	conform.setup({
-		formatters_by_ft = {
-			c = { "clang_format" },
-			css = { "prettier" },
-			fish = { "fish_indent" },
-			go = { "gofmt", "gofumpt", "goimports", "golines" },
-			groovy = { "npm-groovy-lint" },
-			html = { "prettier" },
-			java = { "google-java-format" },
-			javascript = { "prettier" },
-			json = { "jq", "prettier" },
-			jsonc = { "prettier" },
-			lua = { "stylua" },
-			python = { "black" },
-			rust = { "rustfmt" },
-			sh = { "shfmt" },
-			sql = { "sqlfluff" },
-			scala = { "scalafmt" },
-			svelte = { "prettier" },
-			svg = { "xmllint" },
-			tex = { "latexindent" },
-			typescript = { "prettier" },
-			xml = { "xmllint" },
-			yaml = { "yamlfmt" },
-		},
-		default_format_opts = {
-			lsp_format = "fallback",
-		},
+	vim.g.guard_config = {
+		fmt_on_save = true,
+		lsp_as_default_formatter = true,
+		save_on_fmt = true,
+		auto_lint = true,
+		lint_interval = 500,
+		refresh_diagnostic = true,
+	}
+	add("nvimdev/guard.nvim")
+	local ft = require("guard.filetype")
+	local lint = require("guard.lint")
+	ft("c"):fmt({
+		cmd = "clang-format",
+		args = { "prettier", "--stdin-filepath" },
+		fname = true,
+		stdin = true,
+	}):lint({
+		cmd = "clang-tidy",
+		args = { "--quiet" },
+		fname = true,
+		parse = lint.from_regex({
+			source = "clang-tidy",
+			regex = ":(%d+):(%d+):%s+(%w+):%s+(.-)%s+%[(.-)%]",
+			groups = { "lnum", "col", "severity", "message", "code" },
+			severities = {
+				information = lint.severities.info,
+				hint = lint.severities.info,
+				note = lint.severities.style,
+			},
+		}),
 	})
-	conform.formatters.yamlfmt = {
-		prepend_args = { "-formatter", "include_document_start=true,indentless_arrays=true" },
-	}
-	conform.formatters.shfmt = {
-		prepend_args = { "-s" },
-	}
-	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-	add("mfussenegger/nvim-lint")
-	require("lint").linters_by_ft = {
-		-- lua = { "luacheck" },
-		-- yaml = { "yamllint" },
-		c = { "clangtidy" },
-		go = { "golangcilint" },
-		groovy = { "npm-groovy-lint" },
-		java = { "checkstyle" },
-		javascript = { "eslint" },
-		json = { "jsonlint" },
-		jsonc = { "jsonlint" },
-		python = { "pylint" },
-		sh = { "shellcheck" },
-		sql = { "sqlfluff" },
-		svelte = { "eslint" },
-		typescript = { "eslint" },
-	}
+	ft("javascriptreact,typescriptreact,typescript,javascript,html,css,json,jsonc,yaml,svelte"):fmt({
+		cmd = "prettier",
+		args = { "--no-editorconfig", "--stdin-filepath" },
+		fname = true,
+		stdin = true,
+	}):lint({
+		cmd = "eslint",
+		args = { "--format", "json" },
+		fname = true,
+		parse = lint.from_json({
+			source = "eslint",
+			get_diagnostics = function(...)
+				return vim.json.decode(...)[1].messages
+			end,
+			attributes = {
+				severity = function(line)
+					return tostring(line.severity)
+				end,
+				lnum = "line",
+				col = "column",
+				message = "message",
+				code = "ruleId",
+				lnum_end = "endLine",
+				col_end = "endColumn",
+			},
+			severities = {
+				["1"] = lint.severities.warning,
+				["2"] = lint.severities.error,
+			},
+		}),
+	})
+	ft("lua"):fmt({
+		cmd = "stylua",
+		args = { "-" },
+		stdin = true,
+	}):lint({
+		cmd = "luacheck",
+		args = { "--formatter", "plain", "--codes" },
+		fname = true,
+		parse = lint.from_regex({
+			regex = "(%d+):(%d+):%s%((%a)(%w+)%) (.+)",
+			severities = {
+				E = lint.severities.error,
+				W = lint.severities.warning,
+			},
+			source = "luacheck",
+		}),
+	})
+	ft("fish"):fmt({
+		cmd = "fish_indent",
+		stdin = true,
+	})
+	ft("go")
+		:fmt({
+			cmd = "gofmt",
+			stdin = true,
+		})
+		:append({
+			cmd = "gofumpt",
+			stdin = true,
+		})
+		:append({
+			cmd = "goimports",
+			stdin = true,
+		})
+		:lint({
+			cmd = "golangci-lint",
+			args = { "run", "--show-stats=false", "--output.json.path", "stdout", "--allow-parallel-runners" },
+			fname = true,
+			parse = lint.from_json({
+				source = "golangci-lint",
+				get_diagnostics = function(...)
+					return vim.json.decode(...).Issues
+				end,
+				attributes = {
+					severity = function(line)
+						return line.Severity or "refactor"
+					end,
+					lnum = function(line)
+						return line.Pos.Line
+					end,
+					col = function(line)
+						return line.Pos.Column
+					end,
+					message = "Text",
+					code = "FromLinter",
+				},
+				severities = {
+					error = lint.severities.error,
+					warning = lint.severities.warning,
+					refactor = lint.severities.info,
+					convention = lint.severities.style,
+				},
+			}),
+		})
+	ft("tex"):fmt({
+		cmd = "latexindent",
+		args = { "-d", "-" },
+		stdin = true,
+	})
+	ft("xml,svg"):fmt({
+		cmd = "xmllint",
+		args = { "--format", "-" },
+		stdin = true,
+	})
+	ft("groovy"):fmt({
+		cmd = "npm-groovy-lint",
+		args = { "--format", "-" },
+		stdin = true,
+	})
+	ft("scala"):fmt({
+		cmd = "scalafmt",
+		args = { "--stdin" },
+		stdin = true,
+	})
+	ft("python"):fmt({
+		cmd = "black",
+		args = { "--quiet", "-" },
+		stdin = true,
+	}):lint({
+		cmd = "pylint",
+		args = { "--output-format", "json", "--enable-all-extensions", "--exit-zero" },
+		fname = true,
+		parse = lint.from_json({
+			attributes = {
+				severity = "type",
+				lnum = "line",
+				col = "column",
+				message = "message",
+				code = "symbol",
+				lnum_end = "endLine",
+				col_end = "endColumn",
+			},
+			severities = {
+				error = lint.severities.error,
+				fatal = lint.severities.error,
+				warning = lint.severities.warning,
+				refactor = lint.severities.info,
+				info = lint.severities.info,
+				convention = lint.severities.style,
+			},
+			source = "pylint",
+		}),
+	})
+	ft("rust"):fmt({
+		cmd = "rustfmt",
+		args = { "--emit", "stdout" },
+		stdin = true,
+	})
+	ft("sh"):fmt({
+		cmd = "shfmt",
+		stdin = true,
+	}):lint({
+		cmd = "shellcheck",
+		args = { "--format", "json" },
+		fname = true,
+		parse = lint.from_json({
+			attributes = {
+				severity = "level",
+				lnum = "line",
+				col = "column",
+				message = "message",
+				code = "code",
+				lnum_end = "endLine",
+				col_end = "endColumn",
+			},
+			severities = {
+				error = lint.severities.error,
+				warning = lint.severities.warning,
+				info = lint.severities.info,
+				style = lint.severities.style,
+			},
+			source = "shellcheck",
+		}),
+	})
+	ft("sql"):fmt({
+		cmd = "sqlfluff",
+		args = { "format", "--dialect", "sparksql", "-" },
+		stdin = true,
+	}):lint({
+		cmd = "sqlfluff",
+		args = { "lint", "--dialect", "sparksql", "--format", "json" },
+		fname = true,
+		parse = lint.from_json({
+			get_diagnostics = function(...)
+				return vim.json.decode(...)[1].violations
+			end,
+			attributes = {
+				severity = function(line)
+					return line.code == "PRS" and "error" or "warning"
+				end,
+				lnum = "start_line_no",
+				col = "start_line_pos",
+				message = "description",
+				code = "name",
+				lnum_end = "end_line_no",
+				col_end = "end_line_pos",
+			},
+			severities = {
+				error = lint.severities.error,
+				warning = lint.severities.warning,
+			},
+			source = "sqlfluff",
+		}),
+	})
+	ft("java"):fmt({
+		cmd = "google-java-format",
+		args = { "-" },
+		stdin = true,
+	}):lint({
+		fn = function()
+			local co = assert(coroutine.running())
+			vim.system({ "checkstyle", "-c", "google_checks.xml", vim.api.nvim_buf_get_name(0) }, {
+				text = true,
+			}, function(result)
+				coroutine.resume(co, result.stdout)
+			end)
+			return coroutine.yield()
+		end,
+		parse = lint.from_regex({
+			source = "checkstyle",
+			regex = "%[(%w+)%]%s+.-:(%d+):?(%d*):%s+(.-)%s+%[(.-)%]",
+			groups = { "severity", "lnum", "col", "message", "code" },
+			severities = {
+				ERROR = lint.severities.error,
+				WARN = lint.severities.warning,
+				INFO = lint.severities.info,
+				DEBUG = lint.severities.style,
+			},
+		}),
+	})
 end)
 
 -- Non lazy keymaps registration
@@ -974,7 +1197,7 @@ now(function()
 	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
-	Nmap("<leader>F", require("conform").format, "Format code")
+	Nmap("<leader>F", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1083,7 +1306,7 @@ now(function()
 	Vmap("<leader>cp", '"+p', "Paste to clipboard")
 	Vmap("<leader>cx", '"+x', "Cut to clipboard")
 	Vmap("<leader>cy", '"+y', "Copy to clipboard")
-	Xmap("<leader>lf", require("conform").format, "Format code")
+	Xmap("<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	map_combo("t", "jk", "<BS><BS><C-\\><C-n>")
 	map_combo("t", "kj", "<BS><BS><C-\\><C-n>")
 	map_combo({ "i", "c", "x", "s" }, "jk", "<BS><BS><Esc>")
@@ -1136,8 +1359,7 @@ now(function()
 				end, { buffer = b, desc = "Yank path" })
 				-- Toggle dotfiles
 				local show_dotfiles = true
-				local filter_show = function(fs_entry)
-					fs_entry = fs_entry
+				local filter_show = function(_)
 					return true
 				end
 				local filter_hide = function(fs_entry)
@@ -1180,7 +1402,22 @@ now(function()
 	})
 	-- Various settings for plugin filetypes
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "netrw,help,nofile,qf,git,diff,fugitive,floggraph,dap-repl,dap-view,dap-view-term,dap-float,ministarter,copilot_chat",
+		pattern = {
+			"netrw",
+			"help",
+			"nofile",
+			"qf",
+			"git",
+			"diff",
+			"fugitive",
+			"floggraph",
+			"dap-repl",
+			"dap-view",
+			"dap-view-term",
+			"dap-float",
+			"ministarter",
+			"copilot_chat",
+		},
 		callback = function(args)
 			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 			vim.b.minicursorword_disable = true
@@ -1289,10 +1526,9 @@ now(function()
 		callback = function()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
-			require("conform").format()
 		end,
 	})
-	-- Lint on write setup
+	-- Set winbar if new file is written to the buffer
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		callback = function(args)
 			-- Set winbar if new file is written to the buffer
@@ -1302,7 +1538,6 @@ now(function()
 				end
 			end
 			Global.lead_multi_space_calc()
-			require("lint").try_lint()
 		end,
 	})
 	-- Disable statuscolumn in command window
@@ -2126,7 +2361,7 @@ now(function()
 		})
 	end
 	-- Debug configurations
-	-- ~/.local/share/debugpy/bin/python -m debugpy --listen 127.0.0.1:5678 --wait-for-client main.py
+	-- debugpy --listen 127.0.0.1:5678 --wait-for-client main.py
 	dap.configurations.python = {
 		{
 			type = "debugpy",
@@ -2231,7 +2466,6 @@ later(function()
 	vim.g.copilot_no_maps = true
 	add("github/copilot.vim")
 	vim.cmd("Copilot status")
-	add("DanBradbury/copilot-chat.vim")
 end)
 
 -- Lazy loaded keymaps registration
