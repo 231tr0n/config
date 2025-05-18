@@ -878,8 +878,6 @@ now(function()
 	local lint = require("guard.lint")
 	ft("c"):fmt({
 		cmd = "clang-format",
-		args = { "prettier", "--stdin-filepath" },
-		fname = true,
 		stdin = true,
 	}):lint({
 		cmd = "clang-tidy",
@@ -898,13 +896,21 @@ now(function()
 	})
 	ft("javascriptreact,typescriptreact,typescript,javascript,html,css,json,jsonc,yaml,svelte"):fmt({
 		cmd = "prettier",
-		args = { "--no-editorconfig", "--stdin-filepath" },
+		args = { "--stdin-filepath" },
 		fname = true,
 		stdin = true,
+		find = {
+			".prettierrc",
+			".prettierrc.json",
+		},
 	}):lint({
 		cmd = "eslint",
 		args = { "--format", "json" },
 		fname = true,
+		find = {
+			"eslint.config.js",
+			"eslint.config.ts",
+		},
 		parse = lint.from_json({
 			source = "eslint",
 			get_diagnostics = function(...)
@@ -965,6 +971,10 @@ now(function()
 			cmd = "golangci-lint",
 			args = { "run", "--show-stats=false", "--output.json.path", "stdout", "--allow-parallel-runners" },
 			fname = true,
+			find = {
+				".golangci.yml",
+				".golangci.yaml",
+			},
 			parse = lint.from_json({
 				source = "golangci-lint",
 				get_diagnostics = function(...)
@@ -993,7 +1003,7 @@ now(function()
 		})
 	ft("tex"):fmt({
 		cmd = "latexindent",
-		args = { "-d", "-" },
+		args = { "-" },
 		stdin = true,
 	})
 	ft("xml,svg"):fmt({
@@ -1009,6 +1019,9 @@ now(function()
 	ft("scala"):fmt({
 		cmd = "scalafmt",
 		args = { "--stdin" },
+		find = {
+			".scalafmt.conf",
+		},
 		stdin = true,
 	})
 	ft("python"):fmt({
