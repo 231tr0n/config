@@ -895,22 +895,57 @@ now(function()
 		}),
 	})
 	ft("javascriptreact,typescriptreact,typescript,javascript,html,css,json,jsonc,yaml,svelte"):fmt({
-		cmd = "prettier",
-		args = { "--stdin-filepath" },
-		fname = true,
-		stdin = true,
-		find = {
-			".prettierrc",
-			".prettierrc.json",
-		},
+		fn = function(buf, range)
+			local config_list = vim.fs.find({
+				".prettierrc",
+				".prettierrc.json",
+			}, { upward = true })
+			local srow = range and range["start"][1] or 0
+			local erow = range and range["end"][1] or -1
+			local args
+			if #config_list > 0 then
+				args = { "prettier", "--config", config_list[1], "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
+			else
+				args = { "prettier", "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
+			end
+			local handle = vim.system(
+				args,
+				{ stdin = true, text = true },
+				vim.schedule_wrap(function(result)
+					if result.code ~= 0 then
+						return
+					end
+					vim.api.nvim_buf_set_lines(buf, srow, erow, false, vim.split(result.stdout, "\r?\n"))
+					vim.cmd("silent! noautocmd write!")
+				end)
+			)
+			handle:write(table.concat(vim.api.nvim_buf_get_lines(buf, srow, erow, false), "\n"))
+			handle:write(nil)
+		end,
 	}):lint({
-		cmd = "eslint",
-		args = { "--format", "json" },
-		fname = true,
-		find = {
-			"eslint.config.js",
-			"eslint.config.ts",
-		},
+		fn = function()
+			local config_list = vim.fs.find({
+				"eslint.config.js",
+				"eslint.config.ts",
+			}, { upward = true })
+			local co = assert(coroutine.running())
+			local args
+			if #config_list > 0 then
+				args = { "eslint", "--config", config_list[1], "--format", "json", vim.api.nvim_buf_get_name(0) }
+			else
+				args = { "eslint", "--format", "json", vim.api.nvim_buf_get_name(0) }
+			end
+			vim.system(args, {
+				text = true,
+			}, function(result)
+				if result.code ~= 0 and #result.stderr > 0 then
+					coroutine.resume(co, result)
+				else
+					coroutine.resume(co, result.stdout)
+				end
+			end)
+			return coroutine.yield()
+		end,
 		parse = lint.from_json({
 			source = "eslint",
 			get_diagnostics = function(...)
@@ -968,13 +1003,47 @@ now(function()
 			stdin = true,
 		})
 		:lint({
-			cmd = "golangci-lint",
-			args = { "run", "--show-stats=false", "--output.json.path", "stdout", "--allow-parallel-runners" },
-			fname = true,
-			find = {
-				".golangci.yml",
-				".golangci.yaml",
-			},
+			fn = function()
+				local config_list = vim.fs.find({
+					".golangci.yml",
+					".golangci.yaml",
+				}, { upward = true })
+				local co = assert(coroutine.running())
+				local args
+				if #config_list > 0 then
+					args = {
+						"golangci-lint",
+						"run",
+						"--show-stats=false",
+						"--output.json.path",
+						"stdout",
+						"--allow-parallel-runners",
+						"--config",
+						config_list[1],
+						vim.api.nvim_buf_get_name(0),
+					}
+				else
+					args = {
+						"golangci-lint",
+						"run",
+						"--show-stats=false",
+						"--output.json.path",
+						"stdout",
+						"--allow-parallel-runners",
+						vim.api.nvim_buf_get_name(0),
+					}
+				end
+				vim.system(args, {
+					text = true,
+				}, function(result)
+					if result.code ~= 0 and #result.stderr > 0 then
+						coroutine.resume(co, result)
+					else
+						coroutine.resume(co, result.stdout)
+					end
+				end)
+				return coroutine.yield()
+			end,
 			parse = lint.from_json({
 				source = "golangci-lint",
 				get_diagnostics = function(...)
@@ -1896,7 +1965,7 @@ now(function()
 						byNameParameters = { enable = true },
 					},
 					-- defaultBspToBuildTool = true,
-					-- enableBestEffort = true,
+					-- enableBestEffort = true, -- scala 3 only
 				},
 			},
 			init_options = {
