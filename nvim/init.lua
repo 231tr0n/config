@@ -38,8 +38,8 @@ now(function()
 		next_space = " ",
 		winbar_arrow = "󰁔",
 		lead_tab_space = "»",
-		fold_open = "", -- ▾
-		fold_close = "", -- ▸
+		fold_open = "▾", -- 
+		fold_close = "▸", -- 
 		float_multiplier = 0.8,
 		offset_encoding = "utf-16",
 		palette = {
@@ -302,9 +302,18 @@ now(function()
 		Hi("@markup.link.vimdoc", { link = "Keyword" })
 		Hi("@tag.attribute", { link = "Statement" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
+		Hi("DiagnosticSignError", { link = "DiagnosticError" })
+		Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
+		Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
+		Hi("DiagnosticSignOk", { link = "DiagnosticOk" })
+		Hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
 		Hi("FloatFooter", { link = "MiniTablineCurrent" })
 		Hi("FloatTitle", { link = "MiniTablineCurrent" })
+		Hi("FoldColumn", { link = "Comment" })
 		Hi("Hlargs", { link = "Special" })
+		Hi("LineNr", { link = "Comment" })
+		Hi("LineNrAbove", { link = "Comment" })
+		Hi("LineNrBelow", { link = "Comment" })
 		Hi("MiniClueDescGroup", { link = "Keyword" })
 		Hi("MiniClueNextKey", { link = "Function" })
 		Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
@@ -315,7 +324,9 @@ now(function()
 		Hi("NormalFloat", { link = "Normal" })
 		Hi("Operator", { link = "Delimiter" })
 		Hi("QuickFixLineNr", { link = "SpecialKey" })
+		Hi("SignColumn", { link = "Comment" })
 		Hi("TreesitterContext", { link = "Pmenu" })
+		Hi("WinSeparator", { link = "Normal" })
 	end
 	Global.apply_colorscheme()
 end)
