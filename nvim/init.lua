@@ -37,7 +37,7 @@ now(function()
 		lead_space = "›",
 		next_space = " ",
 		winbar_arrow = "󰁔",
-		status_column_separator = " ", -- │,▕
+		status_column_separator = "│", -- ▕
 		lead_tab_space = "»",
 		fold_open = "▾", -- 
 		fold_close = "▸", -- 
@@ -288,7 +288,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 2,
+				row = 3,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
