@@ -37,6 +37,7 @@ now(function()
 		lead_space = "›",
 		next_space = " ",
 		winbar_arrow = "󰁔",
+		status_column_separator = " ", -- │,▕
 		lead_tab_space = "»",
 		fold_open = "▾", -- 
 		fold_close = "▸", -- 
@@ -138,12 +139,6 @@ now(function()
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
-	Global.lead_multi_space_calc = function()
-		vim.opt_local.listchars:remove("leadmultispace")
-		vim.opt_local.listchars:append({
-			leadmultispace = Global.lead_space .. string.rep(Global.next_space, (vim.bo.shiftwidth - 1)),
-		})
-	end
 	-- Mapping functions to map keys
 	Tmap = function(suffix, rhs, desc, opts)
 		opts = opts or {}
@@ -197,6 +192,7 @@ end)
 now(function()
 	-- vim.cmd("let g:python_recommended_style=0")
 	-- vim.o.colorcolumn = "150"
+	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
 	vim.g.loaded_netrw = 1
@@ -210,7 +206,6 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.expandtab = true
 	vim.o.fillchars = "eob: ,foldopen:" .. Global.fold_open .. ",foldsep: ,foldclose:" .. Global.fold_close
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
@@ -221,7 +216,6 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:" .. Global.lead_multi_tab_space .. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:1,hor:1"
@@ -251,13 +245,22 @@ now(function()
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
+	vim.o.listchars = "tab:"
+		.. Global.lead_multi_tab_space
+		.. ",leadmultispace:"
+		.. Global.lead_multi_space
+		.. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	-- TODO add marks to status column
 	-- luacheck: ignore
 	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum-1)) ? (foldclosed(v:lnum) == -1 ? '"
 		.. Global.fold_open
-		.. " ' : '"
+		.. Global.status_column_separator
+		.. "' : '"
 		.. Global.fold_close
-		.. " ') : '  '}"
+		.. Global.status_column_separator
+		.. "') : ' "
+		.. Global.status_column_separator
+		.. "'}"
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -676,16 +679,16 @@ now(function()
 			enable = true,
 			-- -- Disable highlighting if file size is greater than 2MB
 			-- disable = function(lang, buf)
-			-- 	if lang == "dockerfile" then
-			-- 		return true
-			-- 	end
-			-- 	local max_filesize = 1 * 1024 * 1024
-			-- 	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-			-- 	if ok and stats and stats.size > max_filesize then
-			-- 		-- Match syntax for @punctuation.bracket to highlight all kinds of braces if treesitter is disabled
-			-- 		vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
-			-- 		return true
-			-- 	end
+			--	if lang == "dockerfile" then
+			--		return true
+			--	end
+			--	local max_filesize = 1 * 1024 * 1024
+			--	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+			--	if ok and stats and stats.size > max_filesize then
+			--		-- Match syntax for @punctuation.bracket to highlight all kinds of braces if treesitter is disabled
+			--		vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
+			--		return true
+			--	end
 			-- end,
 			additional_vim_regex_highlighting = false,
 		},
@@ -1286,7 +1289,6 @@ now(function()
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F7>", Global.lead_multi_space_calc, "Set leadmultispace according to shiftwidth")
 	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
@@ -1484,12 +1486,10 @@ now(function()
 	})
 	-- Run colorscheme and multispace calc functions when respective options are changed
 	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "shiftwidth,background",
+		pattern = "background",
 		callback = function(args)
 			if args.match == "background" then
 				Global.apply_colorscheme()
-			elseif args.match == "shiftwidth" then
-				Global.lead_multi_space_calc()
 			end
 		end,
 	})
@@ -1560,7 +1560,7 @@ now(function()
 			vim.wo.statuscolumn = ""
 		end,
 	})
-	-- Set winbar for all windows and calcuate lead_multi_space
+	-- Set winbar for all windows
 	vim.api.nvim_create_autocmd("BufWinEnter", {
 		pattern = "*",
 		callback = function(args)
@@ -1597,7 +1597,6 @@ now(function()
 						end
 					end
 				end
-				Global.lead_multi_space_calc()
 			end)
 		end,
 	})
@@ -1630,7 +1629,6 @@ now(function()
 					vim.wo.winbar = Global.winbar
 				end
 			end
-			Global.lead_multi_space_calc()
 		end,
 	})
 	-- Disable statuscolumn in command window
@@ -1857,7 +1855,7 @@ now(function()
 					},
 					workspace = {
 						-- library = {
-						-- 	vim.env.VIMRUNTIME,
+						--	vim.env.VIMRUNTIME,
 						-- },
 						library = lua_runtime_files,
 					},
@@ -1898,18 +1896,18 @@ now(function()
 			},
 		},
 		-- vtsls = {
-		-- 	settings = {
-		-- 		typescript = {
-		-- 			inlayHints = {
-		-- 				parameterNames = { enabled = "all" },
-		-- 				parameterTypes = { enabled = true },
-		-- 				variableTypes = { enabled = true },
-		-- 				propertyDeclarationTypes = { enabled = true },
-		-- 				functionLikeReturnTypes = { enabled = true },
-		-- 				enumMemberValues = { enabled = true },
-		-- 			},
-		-- 		},
-		-- 	},
+		--	settings = {
+		--		typescript = {
+		--			inlayHints = {
+		--				parameterNames = { enabled = "all" },
+		--				parameterTypes = { enabled = true },
+		--				variableTypes = { enabled = true },
+		--				propertyDeclarationTypes = { enabled = true },
+		--				functionLikeReturnTypes = { enabled = true },
+		--				enumMemberValues = { enabled = true },
+		--			},
+		--		},
+		--	},
 		-- },
 		ts_ls = {
 			settings = {
