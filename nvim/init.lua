@@ -370,6 +370,7 @@ now(function()
 			plugins = { default = true },
 		})
 		Hi("@constructor.lua", { link = "Delimiter" })
+		Hi("@lsp.type.parameter", { link = "Special" })
 		Hi("@markup.link.vimdoc", { link = "Keyword" })
 		Hi("@tag.attribute", { link = "Statement" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
@@ -384,7 +385,6 @@ now(function()
 		Hi("FloatFooter", { link = "MiniTablineCurrent" })
 		Hi("FloatTitle", { link = "MiniTablineCurrent" })
 		Hi("FoldColumn", { link = "Comment" })
-		Hi("Hlargs", { link = "Special" })
 		Hi("LineNr", { link = "Comment" })
 		Hi("LineNrAbove", { link = "Comment" })
 		Hi("LineNrBelow", { link = "Comment" })
@@ -645,8 +645,14 @@ now(function()
 		source = "nvim-treesitter/nvim-treesitter",
 		checkout = "main",
 		monitor = "main",
+		hooks = {
+			post_checkout = function()
+				vim.cmd("TSUpdate")
+			end,
+		},
 	})
-	require("nvim-treesitter").install(Global.languages):wait(300000)
+	require("nvim-treesitter").setup()
+	require("nvim-treesitter").install(Global.languages):wait(5 * 60 * 1000)
 	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
@@ -737,13 +743,6 @@ now(function()
 	require("treesitter-context").setup({
 		max_lines = 6,
 	})
-	add({
-		source = "danymat/neogen",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("neogen").setup({ snippet_engine = "mini" })
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
@@ -1284,11 +1283,6 @@ now(function()
 	Nmap("<leader>ft", ":Pick treesitter<CR>", "Search treesitter tree")
 	Nmap("<leader>fx", ':Pick diagnostic scope="current"<CR>', "Search document diagnostics")
 	Nmap("<leader>fy", ':Pick lsp scope="document_symbol"<CR>', "Search document symbols")
-	Nmap("<leader>gc", ":lua require('neogen').generate({ type = 'class' })<CR>", "Generate class annotations")
-	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'file' })<CR>", "Generate file annotations")
-	Nmap("<leader>gf", ":lua require('neogen').generate({ type = 'func' })<CR>", "Generate function annotations")
-	Nmap("<leader>gg", ":lua require('neogen').generate()<CR>", "Generate annotations")
-	Nmap("<leader>gt", ":lua require('neogen').generate({ type = 'type' })<CR>", "Generate type annotations")
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
@@ -1550,17 +1544,17 @@ now(function()
 		end,
 	})
 	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
-	vim.api.nvim_create_autocmd("LspAttach", {
-		callback = function(args)
-			-- Disable semantic highlighting
-			local client = vim.lsp.get_client_by_id(args.data.client_id)
-			if client then
-				client.server_capabilities.semanticTokensProvider = nil
-			end
-			-- Set foldexpr to lsp provided folds
-			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-		end,
-	})
+	-- vim.api.nvim_create_autocmd("LspAttach", {
+	-- 	callback = function(args)
+	-- 		-- Disable semantic highlighting
+	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
+	-- 		if client then
+	-- 			client.server_capabilities.semanticTokensProvider = nil
+	-- 		end
+	-- 		-- Set foldexpr to lsp provided folds
+	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+	-- 	end,
+	-- })
 	-- Trim files on save setup
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
