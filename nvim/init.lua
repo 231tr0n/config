@@ -61,6 +61,74 @@ now(function()
 			base0E = "#C678DD",
 			base0F = "#BE5046",
 		},
+		languages = {
+			"angular",
+			"awk",
+			"bash",
+			"bibtex",
+			"c",
+			"cmake",
+			"cpp",
+			"css",
+			"csv",
+			"diff",
+			"dockerfile",
+			"doxygen",
+			"fish",
+			"git_config",
+			"git_rebase",
+			"gitcommit",
+			"gitignore",
+			"go",
+			"gomod",
+			"gosum",
+			"gowork",
+			"graphql",
+			"groovy",
+			"html",
+			"http",
+			"hurl",
+			"ini",
+			"java",
+			"javascript",
+			"jq",
+			"jsdoc",
+			"json",
+			"json5",
+			"latex",
+			"lua",
+			"lua_patterns",
+			"luadoc",
+			"make",
+			"markdown",
+			"markdown_inline",
+			"meson",
+			"ninja",
+			"nix",
+			"perl",
+			"php",
+			"pug",
+			"python",
+			"regex",
+			"requirements",
+			"ruby",
+			"rust",
+			"scala",
+			"scss",
+			"sql",
+			"ssh_config",
+			"starlark",
+			"svelte",
+			"toml",
+			"typescript",
+			"vim",
+			"vimdoc",
+			"vue",
+			"xml",
+			"yaml",
+			"yuck",
+			"zig",
+		},
 		lsp_get_client = function(name, bufnr)
 			local clients
 			local buf = nil
@@ -575,138 +643,10 @@ now(function()
 	add("mfussenegger/nvim-dap")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
-		hooks = {
-			post_checkout = function()
-				vim.cmd("TSUpdateSync")
-			end,
-		},
+		checkout = "main",
+		monitor = "main",
 	})
-	add({
-		source = "nvim-treesitter/nvim-treesitter-textobjects",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	local parser_configs = require("nvim-treesitter.parsers").get_parser_configs()
-	parser_configs.lua_patterns = {
-		install_info = {
-			url = "https://github.com/OXY2DEV/tree-sitter-lua_patterns",
-			files = { "src/parser.c" },
-			branch = "main",
-		},
-	}
-	require("nvim-treesitter.configs").setup({
-		ensure_installed = {
-			"angular",
-			"awk",
-			"bash",
-			"bibtex",
-			"c",
-			"cmake",
-			"cpp",
-			"css",
-			"csv",
-			"diff",
-			"dockerfile",
-			"doxygen",
-			"fish",
-			"git_config",
-			"git_rebase",
-			"gitcommit",
-			"gitignore",
-			"go",
-			"gomod",
-			"gosum",
-			"gowork",
-			"graphql",
-			"groovy",
-			"html",
-			"http",
-			"hurl",
-			"ini",
-			"java",
-			"javascript",
-			"jq",
-			"jsdoc",
-			"json",
-			"json5",
-			"latex",
-			"lua",
-			"lua_patterns",
-			"luadoc",
-			"make",
-			"markdown",
-			"markdown_inline",
-			"meson",
-			"ninja",
-			"nix",
-			"perl",
-			"php",
-			"pug",
-			"python",
-			"regex",
-			"requirements",
-			"ruby",
-			"rust",
-			"scala",
-			"scss",
-			"sql",
-			"ssh_config",
-			"starlark",
-			"svelte",
-			"toml",
-			"typescript",
-			"vim",
-			"vimdoc",
-			"vue",
-			"xml",
-			"yaml",
-			"yuck",
-			"zig",
-		},
-		modules = {},
-		sync_install = false,
-		auto_install = true,
-		ignore_install = {},
-		indent = {
-			enable = true,
-			-- Disable indenting if file size is greater than 2MB
-			disable = function(lang, buf)
-				local max_filesize = 1 * 1024 * 1024
-				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-				if ok and stats and stats.size > max_filesize and lang ~= "wasm" then
-					return true
-				end
-			end,
-		},
-		highlight = {
-			enable = true,
-			-- -- Disable highlighting if file size is greater than 2MB
-			-- disable = function(lang, buf)
-			--	if lang == "dockerfile" then
-			--		return true
-			--	end
-			--	local max_filesize = 1 * 1024 * 1024
-			--	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-			--	if ok and stats and stats.size > max_filesize then
-			--		-- Match syntax for @punctuation.bracket to highlight all kinds of braces if treesitter is disabled
-			--		vim.cmd("syntax match @punctuation.bracket /[(){}\\[\\]]/")
-			--		return true
-			--	end
-			-- end,
-			additional_vim_regex_highlighting = false,
-		},
-	})
-	vim.o.foldmethod = "expr"
-	-- Set foldexpr to treesitter provided folds
-	vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-	add({
-		source = "m-demare/hlargs.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("hlargs").setup()
+	require("nvim-treesitter").install(Global.languages):wait(300000)
 	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
@@ -825,14 +765,6 @@ now(function()
 		},
 	})
 	require("helpview").setup()
-	add({
-		source = "OXY2DEV/patterns.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-			"echasnovski/mini.nvim",
-		},
-	})
-	require("patterns").setup()
 	add({
 		source = "Wansmer/treesj",
 		depends = {
@@ -1422,6 +1354,19 @@ end)
 
 -- Autocommands registration
 now(function()
+	-- Start treesitter on the supported language filetypes
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = Global.languages,
+		callback = function()
+			-- Start treesitter
+			vim.treesitter.start()
+			-- Set foldexpr to treesitter provided folds
+			vim.o.foldmethod = "expr"
+			vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+			-- Set indent expr
+			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		end,
+	})
 	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
