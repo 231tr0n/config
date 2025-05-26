@@ -136,9 +136,9 @@ if ! [ -d "/home/$DEFAULT_USERNAME/.ssh" ]; then
 	default_user_cmd "ssh-keygen -t rsa -N $SSH_KEY_PASSWORD -f \$HOME/.ssh/id_rsa"
 fi
 
-default_user_cmd "nvim --headless -c '+lua MiniDeps.update(nil, { force = true })' '+TSUpdateSync' '+qa'"
+default_user_cmd "nvim --headless -c '+lua MiniDeps.update(nil, { force = true })' '+TSUpdate' '+qa'"
 
-default_user_cmd 'yay -Rnsu --noconfirm $(yay -Qtdq)'
+default_user_cmd 'yay -Rnsu --noconfirm $(yay -Qtdq) || true'
 
 default_user_cmd "yay -Scc --noconfirm"
 
