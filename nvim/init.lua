@@ -1171,7 +1171,6 @@ end)
 -- Non lazy keymaps registration
 now(function()
 	local map_multistep = require("mini.keymap").map_multistep
-	local map_combo = require("mini.keymap").map_combo
 	local te_buf = nil
 	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
@@ -1332,6 +1331,7 @@ now(function()
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
+	Tmap("<Tab><Tab>", "<BS><BS><C-\\><C-n>", "Exit terminal mode")
 	Vmap("<leader>cP", '"+P', "Paste to clipboard")
 	Vmap("<leader>cX", '"+X', "Cut to clipboard")
 	Vmap("<leader>cY", '"+Y', "Copy to clipboard")
@@ -1339,10 +1339,6 @@ now(function()
 	Vmap("<leader>cx", '"+x', "Cut to clipboard")
 	Vmap("<leader>cy", '"+y', "Copy to clipboard")
 	Xmap("<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
-	map_combo("t", "jk", "<BS><BS><C-\\><C-n>")
-	map_combo("t", "kj", "<BS><BS><C-\\><C-n>")
-	map_combo({ "i", "c", "x", "s" }, "jk", "<BS><BS><Esc>")
-	map_combo({ "i", "c", "x", "s" }, "kj", "<BS><BS><Esc>")
 	map_multistep("i", "<BS>", { "minipairs_bs" })
 	map_multistep("i", "<C-u>", { "jump_after_close" })
 	map_multistep("i", "<C-y>", { "jump_before_open" })
