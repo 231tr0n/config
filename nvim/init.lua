@@ -129,6 +129,17 @@ now(function()
 			"yuck",
 			"zig",
 		},
+		customized_hover = function(fn)
+			local width = math.floor(vim.o.columns * 0.8)
+			local height = math.floor(vim.o.lines * 0.5)
+			fn({
+				border = "rounded",
+				max_width = width,
+				max_height = height,
+				title = " Hover ",
+				title_pos = "left",
+			})
+		end,
 		lsp_get_client = function(name, bufnr)
 			local clients
 			local buf = nil
@@ -1290,7 +1301,7 @@ now(function()
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
 	Nmap("<leader>ldT", diagnostic_virtual_lines_toggle, "Virtual lines toggle")
-	Nmap("<leader>ldh", ":lua vim.diagnostic.open_float()<CR>", "Hover diagnostics")
+	Nmap("<leader>ldh", ":lua Global.customized_hover(vim.diagnostic.open_float)<CR>", "Hover diagnostics")
 	Nmap("<leader>ldt", diagnostic_virtual_text_toggle, "Virtual text toggle")
 	Nmap("<leader>lgD", ":lua vim.lsp.buf.declaration()<CR>", "Goto declaration")
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
@@ -1298,7 +1309,7 @@ now(function()
 	Nmap("<leader>lgr", ":lua vim.lsp.buf.references()<CR>", "Goto references")
 	Nmap("<leader>lgs", ":lua Global.super_implementation()<CR>", "Goto super implementation")
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
-	Nmap("<leader>lh", ":lua vim.lsp.buf.hover()<CR>", "Hover symbol")
+	Nmap("<leader>lh", ":lua Global.customized_hover(vim.lsp.buf.hover)<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.buf.incoming_calls()<CR>", "Lsp incoming calls")
 	Nmap("<leader>lo", ":lua vim.lsp.buf.outgoing_calls()<CR>", "Lsp outgoing calls")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
