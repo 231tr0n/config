@@ -36,6 +36,7 @@ now(function()
 		-- Space, tab and fold characters to use
 		lead_space = "›",
 		next_space = " ",
+		te_win_id = -1,
 		winbar_arrow = "󰁔",
 		status_column_separator = "│", -- ▕
 		lead_tab_space = "»",
@@ -705,13 +706,13 @@ now(function()
 			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
 			headers = {
-				breakpoints = "[B]reakpoints",
-				scopes = "[S]copes",
-				exceptions = "[E]xceptions",
-				watches = "[W]atches",
-				threads = "[T]hreads",
-				repl = "[R]EPL",
-				console = "[C]onsole",
+				breakpoints = "[B]",
+				scopes = "[S]",
+				exceptions = "[E]",
+				watches = "[W]",
+				threads = "[T]",
+				repl = "[R]",
+				console = "[C]",
 			},
 			controls = {
 				enabled = true,
@@ -722,13 +723,7 @@ now(function()
 				hide = { "go", "delve" },
 			},
 			anchor = function()
-				local windows = vim.api.nvim_tabpage_list_wins(0)
-				for _, win in ipairs(windows) do
-					local bufnr = vim.api.nvim_win_get_buf(win)
-					if vim.bo[bufnr].buftype == "terminal" then
-						return win
-					end
-				end
+				return Global.te_win_id
 			end,
 		},
 	})
@@ -1178,25 +1173,24 @@ now(function()
 	local map_multistep = require("mini.keymap").map_multistep
 	local map_combo = require("mini.keymap").map_combo
 	local te_buf = nil
-	local te_win_id = -1
 	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
-			te_win_id = vim.fn.win_getid()
+			Global.te_win_id = vim.fn.win_getid()
 			te_buf = vim.fn.bufnr("%")
-		elseif vim.fn.win_gotoid(te_win_id) ~= 1 then
+		elseif vim.fn.win_gotoid(Global.te_win_id) ~= 1 then
 			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
-			te_win_id = vim.fn.win_getid()
+			Global.te_win_id = vim.fn.win_getid()
 		end
 		vim.cmd("startinsert")
 	end
 	local function hide_terminal()
-		if vim.fn.win_gotoid(te_win_id) == 1 then
+		if vim.fn.win_gotoid(Global.te_win_id) == 1 then
 			vim.cmd("hide")
 		end
 	end
 	local function toggle_terminal()
-		if vim.fn.win_gotoid(te_win_id) == 1 then
+		if vim.fn.win_gotoid(Global.te_win_id) == 1 then
 			hide_terminal()
 		else
 			open_terminal()
