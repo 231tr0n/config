@@ -1,4 +1,4 @@
--- Luacheck global variables declaration
+-- luacheck global variables declaration
 -- luacheck: globals vim
 -- luacheck: globals Global Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
@@ -329,9 +329,8 @@ now(function()
 		.. ",leadmultispace:"
 		.. Global.lead_multi_space
 		.. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
-	-- TODO add marks to status column
-	-- luacheck: ignore
-	vim.o.statuscolumn = "%s%l%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum-1)) ? (foldclosed(v:lnum) == -1 ? '"
+	vim.o.statuscolumn = "%s%l"
+		.. "%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum-1)) ? (foldclosed(v:lnum) == -1 ? '"
 		.. Global.fold_open
 		.. Global.status_column_separator
 		.. "' : '"
@@ -2535,7 +2534,6 @@ end)
 -- Lazy loaded custom configuration
 later(function()
 	-- Define custom signs for diagnostics and dap
-	-- TODO add title to lsp float window
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define(
