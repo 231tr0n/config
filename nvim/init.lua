@@ -130,6 +130,30 @@ now(function()
 			"yuck",
 			"zig",
 		},
+		statuscolumn_pad = function()
+			if vim.v.virtnum <= 0 then
+				return ""
+			end
+			local count = vim.fn.line("$")
+			if count < vim.g.numberwidth then
+				return string.rep(" ", vim.g.numberwidth)
+			end
+			return string.rep(" ", count)
+		end,
+		statuscolumn_fold = function()
+			local fold
+			local lnum = vim.v.lnum
+			if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
+				if vim.fn.foldclosed(lnum) == -1 then
+					fold = Global.fold_open .. Global.status_column_separator
+				else
+					fold = Global.fold_close .. Global.status_column_separator
+				end
+			else
+				fold = " " .. Global.status_column_separator
+			end
+			return fold
+		end,
 		customized_hover = function(fn)
 			local width = math.floor(vim.o.columns * 0.8)
 			local height = math.floor(vim.o.lines * 0.5)
@@ -330,16 +354,7 @@ now(function()
 		.. ",leadmultispace:"
 		.. Global.lead_multi_space
 		.. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
-	vim.o.statuscolumn = "%s%l"
-		.. "%{(foldlevel(v:lnum) && foldlevel(v:lnum) > foldlevel(v:lnum-1)) ? (foldclosed(v:lnum) == -1 ? '"
-		.. Global.fold_open
-		.. Global.status_column_separator
-		.. "' : '"
-		.. Global.fold_close
-		.. Global.status_column_separator
-		.. "') : ' "
-		.. Global.status_column_separator
-		.. "'}"
+	vim.o.statuscolumn = "%s%l%{v:lua.Global.statuscolumn_pad()}%{v:lua.Global.statuscolumn_fold()}"
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
