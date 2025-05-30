@@ -130,29 +130,28 @@ now(function()
 			"yuck",
 			"zig",
 		},
-		statuscolumn_pad = function()
-			if vim.v.virtnum <= 0 then
-				return ""
-			end
-			local count = vim.fn.line("$")
-			if count < vim.g.numberwidth then
-				return string.rep(" ", vim.g.numberwidth)
-			end
-			return string.rep(" ", count)
-		end,
-		statuscolumn_fold = function()
-			local fold
+		status_column_pad_and_fold = function()
+			local space = "⠀" -- The space here is a braille blank space "⠀"
 			local lnum = vim.v.lnum
-			if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
-				if vim.fn.foldclosed(lnum) == -1 then
-					fold = Global.fold_open .. Global.status_column_separator
-				else
-					fold = Global.fold_close .. Global.status_column_separator
+			if vim.v.virtnum == 0 then
+				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
+					if vim.fn.foldclosed(lnum) == -1 then
+						return Global.fold_open .. Global.status_column_separator
+					else
+						return Global.fold_close .. Global.status_column_separator
+					end
 				end
+				return space .. Global.status_column_separator
 			else
-				fold = " " .. Global.status_column_separator
+				local count = #tostring(vim.fn.line("$"))
+				local temp
+				if count < vim.wo.numberwidth then
+					temp = string.rep(space, vim.wo.numberwidth)
+				else
+					temp = string.rep(space, count)
+				end
+				return temp .. space .. Global.status_column_separator
 			end
-			return fold
 		end,
 		customized_hover = function(fn)
 			local width = math.floor(vim.o.columns * 0.8)
@@ -354,7 +353,7 @@ now(function()
 		.. ",leadmultispace:"
 		.. Global.lead_multi_space
 		.. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
-	vim.o.statuscolumn = "%s%l%{v:lua.Global.statuscolumn_pad()}%{v:lua.Global.statuscolumn_fold()}"
+	vim.o.statuscolumn = "%s%l%{v:lua.Global.status_column_pad_and_fold()}"
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
