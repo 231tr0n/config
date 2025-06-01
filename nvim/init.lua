@@ -381,7 +381,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 3,
+				row = 2,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
@@ -1376,6 +1376,36 @@ now(function()
 			vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 			-- Set indent expr
 			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			-- Enable tag closing for html filetypes
+			if
+				vim.bo.filetype == "svelte"
+				or vim.bo.filetype == "vue"
+				or vim.bo.filetype == "jsx"
+				or vim.bo.filetype == "tsx"
+				or vim.bo.filetype == "html"
+				or vim.bo.filetype == "xml"
+				or vim.bo.filetype == "xsl"
+				or vim.bo.filetype == "javascriptreact"
+				or vim.bo.filetype == "typescriptreact"
+			then
+				-- HTML tag completion with >, >> and >>>
+				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+				Imap("><Space>", ">", "Cancel html pairs")
+				Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Html pairs in newline", {
+					buffer = true,
+				})
+				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
+					buffer = true,
+				})
+				Imap(
+					">>>",
+					"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
+					"Html pairs in sameline with cursor at end",
+					{
+						buffer = true,
+					}
+				)
+			end
 		end,
 	})
 	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
