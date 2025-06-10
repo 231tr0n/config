@@ -866,11 +866,17 @@ now(function()
 		}),
 	})
 	ft("javascriptreact,typescriptreact,typescript,javascript,html,css,json,jsonc,yaml,svelte"):fmt({
+		health = function()
+			if vim.fn.executable("prettier") == 0 then
+				vim.health.error("prettier")
+			end
+			vim.health.ok("prettier")
+		end,
 		fn = function(buf, range)
 			local config_list = vim.fs.find({
 				".prettierrc",
 				".prettierrc.json",
-			}, { upward = true })
+			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
 			local srow = range and range["start"][1] or 0
 			local erow = range and range["end"][1] or -1
 			local args
@@ -894,11 +900,17 @@ now(function()
 			handle:write(nil)
 		end,
 	}):lint({
+		health = function()
+			if vim.fn.executable("eslint") == 0 then
+				vim.health.error("eslint")
+			end
+			vim.health.ok("eslint")
+		end,
 		fn = function()
 			local config_list = vim.fs.find({
 				"eslint.config.js",
 				"eslint.config.ts",
-			}, { upward = true })
+			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })
 			local co = assert(coroutine.running())
 			local args
 			if #config_list > 0 then
@@ -969,16 +981,18 @@ now(function()
 			cmd = "gofumpt",
 			stdin = true,
 		})
-		:append({
-			cmd = "goimports",
-			stdin = true,
-		})
 		:lint({
+			health = function()
+				if vim.fn.executable("golangci-lint") == 0 then
+					vim.health.error("golangci-lint")
+				end
+				vim.health.ok("golangci-lint")
+			end,
 			fn = function()
 				local config_list = vim.fs.find({
 					".golangci.yml",
 					".golangci.yaml",
-				}, { upward = true })
+				}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })
 				local co = assert(coroutine.running())
 				local args
 				if #config_list > 0 then
@@ -1159,6 +1173,12 @@ now(function()
 		args = { "-" },
 		stdin = true,
 	}):lint({
+		health = function()
+			if vim.fn.executable("checkstyle") == 0 then
+				vim.health.error("checkstyle")
+			end
+			vim.health.ok("checkstyle")
+		end,
 		fn = function()
 			local co = assert(coroutine.running())
 			vim.system({ "checkstyle", "-c", "google_checks.xml", vim.api.nvim_buf_get_name(0) }, {
