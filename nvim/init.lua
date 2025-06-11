@@ -1071,12 +1071,38 @@ now(function()
 		stdin = true,
 	})
 	ft("scala"):fmt({
-		cmd = "scalafmt",
-		args = { "--stdin" },
-		find = {
-			".scalafmt.conf",
-		},
-		stdin = true,
+		health = function()
+			if vim.fn.executable("scalafmt") == 0 then
+				vim.health.error("scalafmt not found")
+			end
+			vim.health.ok("scalafmt found")
+		end,
+		fn = function(buf, range)
+			local config_list = vim.fs.find({
+				".scalafmt.conf",
+			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
+			local srow = range and range["start"][1] or 0
+			local erow = range and range["end"][1] or -1
+			local args
+			if #config_list > 0 then
+				args = { "scalafmt", "--config", config_list[1], "--stdin" }
+			else
+				args = { "scalafmt", "--stdin" }
+			end
+			local handle = vim.system(
+				args,
+				{ stdin = true, text = true },
+				vim.schedule_wrap(function(result)
+					if result.code ~= 0 then
+						return
+					end
+					vim.api.nvim_buf_set_lines(buf, srow, erow, false, vim.split(result.stdout, "\r?\n"))
+					vim.cmd("silent! noautocmd write!")
+				end)
+			)
+			handle:write(table.concat(vim.api.nvim_buf_get_lines(buf, srow, erow, false), "\n"))
+			handle:write(nil)
+		end,
 	})
 	ft("python"):fmt({
 		cmd = "black",
