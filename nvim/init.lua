@@ -399,6 +399,7 @@ now(function()
 		Hi("@markup.link.vimdoc", { link = "Keyword" })
 		Hi("@tag.attribute", { link = "Statement" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
+		Hi("@variable.member", { link = "Identifier" })
 		Hi("CursorLineFold", { link = "Normal" })
 		Hi("CursorLineNr", { link = "Normal" })
 		Hi("CursorLineSign", { link = "Normal" })
@@ -1637,17 +1638,17 @@ now(function()
 		end,
 	})
 	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
-	-- vim.api.nvim_create_autocmd("LspAttach", {
-	-- 	callback = function(args)
-	-- 		-- Disable semantic highlighting
-	-- 		local client = vim.lsp.get_client_by_id(args.data.client_id)
-	-- 		if client then
-	-- 			client.server_capabilities.semanticTokensProvider = nil
-	-- 		end
-	-- 		-- Set foldexpr to lsp provided folds
-	-- 		vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-	-- 	end,
-	-- })
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			-- Disable semantic highlighting
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			if client then
+				client.server_capabilities.semanticTokensProvider = nil
+			end
+			-- Set foldexpr to lsp provided folds
+			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
+		end,
+	})
 	-- Trim files on save setup
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
