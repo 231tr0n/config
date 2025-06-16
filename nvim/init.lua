@@ -873,32 +873,28 @@ now(function()
 			end
 			vim.health.ok("prettier")
 		end,
-		fn = function(buf, range)
+		fn = function(buf, _, acc)
 			local config_list = vim.fs.find({
 				".prettierrc",
 				".prettierrc.json",
 			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
-			local srow = range and range["start"][1] or 0
-			local erow = range and range["end"][1] or -1
+			local co = assert(coroutine.running())
 			local args
 			if #config_list > 0 then
 				args = { "prettier", "--config", config_list[1], "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
 			else
 				args = { "prettier", "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
 			end
-			local handle = vim.system(
-				args,
-				{ stdin = true, text = true },
-				vim.schedule_wrap(function(result)
-					if result.code ~= 0 then
-						return
-					end
-					vim.api.nvim_buf_set_lines(buf, srow, erow, false, vim.split(result.stdout, "\r?\n"))
-					vim.cmd("silent! noautocmd write!")
-				end)
-			)
-			handle:write(table.concat(vim.api.nvim_buf_get_lines(buf, srow, erow, false), "\n"))
+			local handle = vim.system(args, { stdin = true, text = true }, function(result)
+				if result.code ~= 0 then
+					coroutine.resume(co, result)
+				else
+					coroutine.resume(co, result.stdout)
+				end
+			end)
+			handle:write(acc)
 			handle:write(nil)
+			return coroutine.yield()
 		end,
 	}):lint({
 		health = function()
@@ -1078,31 +1074,27 @@ now(function()
 			end
 			vim.health.ok("scalafmt found")
 		end,
-		fn = function(buf, range)
+		fn = function(buf, _, acc)
 			local config_list = vim.fs.find({
 				".scalafmt.conf",
 			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
-			local srow = range and range["start"][1] or 0
-			local erow = range and range["end"][1] or -1
+			local co = assert(coroutine.running())
 			local args
 			if #config_list > 0 then
 				args = { "scalafmt", "--config", config_list[1], "--stdin" }
 			else
 				args = { "scalafmt", "--stdin" }
 			end
-			local handle = vim.system(
-				args,
-				{ stdin = true, text = true },
-				vim.schedule_wrap(function(result)
-					if result.code ~= 0 then
-						return
-					end
-					vim.api.nvim_buf_set_lines(buf, srow, erow, false, vim.split(result.stdout, "\r?\n"))
-					vim.cmd("silent! noautocmd write!")
-				end)
-			)
-			handle:write(table.concat(vim.api.nvim_buf_get_lines(buf, srow, erow, false), "\n"))
+			local handle = vim.system(args, { stdin = true, text = true }, function(result)
+				if result.code ~= 0 then
+					coroutine.resume(co, result)
+				else
+					coroutine.resume(co, result.stdout)
+				end
+			end)
+			handle:write(acc)
 			handle:write(nil)
+			return coroutine.yield()
 		end,
 	})
 	ft("python"):fmt({
