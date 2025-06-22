@@ -306,7 +306,6 @@ VSCODE_PLUGINS=(
 	"angular.ng-template"
 	"dbaeumer.vscode-eslint"
 	"esbenp.prettier-vscode"
-	"ms-vscode.vscode-typescript-tslint-plugin"
 	"antfu.vite"
 	"vitest.explorer"
 	"msjsdiag.vscode-react-native"
