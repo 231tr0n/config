@@ -317,8 +317,6 @@ VSCODE_PLUGINS=(
 	"ms-azuretools.vscode-containers"
 	"ms-azuretools.vscode-docker"
 	"docker.docker"
-	"visualstudioexptteam.vs"
-	"visualstudioexptteam.intellicode-api-usage-examples"
 	"vscodevim.vim"
 	"github.github-vscode-theme"
 	"github.copilot"
