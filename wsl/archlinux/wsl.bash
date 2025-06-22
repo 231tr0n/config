@@ -173,6 +173,7 @@ PACKAGES=(
 	"tldr"
 	"ncdu"
 	"firefox"
+	"google-chrome"
 	"chromium"
 	"bash-completion"
 	"shellcheck"
