@@ -666,6 +666,24 @@ now(function()
 	require("mini.visits").setup()
 end)
 
+-- Custom mini.nvim configuration
+now(function()
+	MiniPick.registry.git_hunks = function(local_opts)
+		MiniExtra.pickers.git_hunks(local_opts, {
+			source = {
+				choose_marked = function(items_marked)
+					vim.tbl_map(function(item)
+						local patch = vim.deepcopy(item.header)
+						vim.list_extend(patch, item.hunk)
+						local cmd = { "git", "apply", "--cached", "-" }
+						vim.system(cmd, { stdin = patch }):wait()
+					end, items_marked)
+				end,
+			},
+		})
+	end
+end)
+
 -- Non lazy plugins registration
 now(function()
 	add("nacro90/numb.nvim")
