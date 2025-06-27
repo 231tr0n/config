@@ -2037,7 +2037,7 @@ now(function()
 			},
 			handlers = {
 				["metals/status"] = vim.schedule_wrap(function(_, results)
-					vim.notify(results.message, vim.log.levels.INFO)
+					vim.notify(results.text, vim.log.levels.INFO)
 				end),
 			},
 		},
