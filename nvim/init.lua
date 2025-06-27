@@ -2590,13 +2590,6 @@ end)
 
 -- Lazy loaded plugins registration
 later(function()
-	add("tpope/vim-fugitive")
-	add({
-		source = "rbong/vim-flog",
-		depends = {
-			"tpope/vim-fugitive",
-		},
-	})
 	-- vim.g.copilot_node_command = "~/.nodenv/versions/18.18.0/bin/node"
 	-- vim.g.copilot_proxy = 'http://localhost:3128'
 	-- vim.g.copilot_proxy_strict_ssl = false
