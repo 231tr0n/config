@@ -675,7 +675,12 @@ now(function()
 					vim.tbl_map(function(item)
 						local patch = vim.deepcopy(item.header)
 						vim.list_extend(patch, item.hunk)
-						local cmd = { "git", "apply", "--cached", "-" }
+						local cmd
+						if local_opts.scope == "staged" then
+							cmd = { "git", "apply", "--cached", "--reverse", "-" }
+						else
+							cmd = { "git", "apply", "--cached", "-" }
+						end
 						vim.system(cmd, { stdin = patch }):wait()
 					end, items_marked)
 				end,
