@@ -2016,7 +2016,7 @@ now(function()
 					-- javaHome = "/usr/lib/jvm/default",
 					-- scalaCliLauncher = "/usr/local/bin/scala-cli",
 					-- bloopJvmProperties = "",
-					autoImportBuild = "all",
+					-- autoImportBuild = "all",
 					inlayHints = {
 						hintsInPatternMatch = { enable = true },
 						implicitArguments = { enable = true },
