@@ -2017,6 +2017,7 @@ now(function()
 					-- scalaCliLauncher = "/usr/local/bin/scala-cli",
 					-- bloopJvmProperties = "",
 					-- autoImportBuild = "all",
+					-- enableBestEffort = true, -- scala 3 only
 					inlayHints = {
 						hintsInPatternMatch = { enable = true },
 						implicitArguments = { enable = true },
@@ -2026,8 +2027,7 @@ now(function()
 						namedParameters = { enable = true },
 						byNameParameters = { enable = true },
 					},
-					-- defaultBspToBuildTool = true,
-					-- enableBestEffort = true, -- scala 3 only
+					defaultBspToBuildTool = true, -- when using sbt or mill
 				},
 			},
 			init_options = {
