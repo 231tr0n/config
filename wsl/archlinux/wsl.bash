@@ -310,6 +310,8 @@ VSCODE_PLUGINS=(
 	"esbenp.prettier-vscode"
 	"antfu.vite"
 	"vitest.explorer"
+	"johnnymorganz.stylua"
+	"sumneko.lua"
 	"msjsdiag.vscode-react-native"
 	"redhat.vscode-yaml"
 	"redhat.vscode-xml"
