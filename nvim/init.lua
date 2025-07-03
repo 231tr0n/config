@@ -1,6 +1,6 @@
 -- luacheck global variables declaration
 -- luacheck: globals vim
--- luacheck: globals Global Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
+-- luacheck: globals Global Map Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
@@ -29,6 +29,112 @@ require("mini.deps").setup({ path = { package = path_package } })
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Track and update self
 add("echasnovski/mini.nvim")
+
+-- Mapping functions to map keys
+Tmap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("t", suffix, rhs, opts)
+end
+Cmap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("c", suffix, rhs, opts)
+end
+Nmap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("n", suffix, rhs, opts)
+end
+Vmap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("v", suffix, rhs, opts)
+end
+Imap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("i", suffix, rhs, opts)
+end
+Smap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("s", suffix, rhs, opts)
+end
+Xmap = function(suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set("x", suffix, rhs, opts)
+end
+Map = function(modes, suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set(modes or "n", suffix, rhs, opts)
+end
+
+-- Vscode neovim settings
+if vim.g.vscode then
+	-- Settings
+	vim.g.mapleader = " "
+	vim.g.maplocalleader = " "
+	-- Keymaps
+	Map({ "n", "v", "x" }, "zP", '"+P', "Paste to clipboard")
+	Map({ "n", "v", "x" }, "zX", '"+X', "Cut to clipboard")
+	Map({ "n", "v", "x" }, "zY", '"+Y', "Copy to clipboard")
+	Map({ "n", "v", "x" }, "zp", '"+p', "Paste to clipboard")
+	Map({ "n", "v", "x" }, "zx", '"+x', "Cut to clipboard")
+	Map({ "n", "v", "x" }, "zy", '"+y', "Copy to clipboard")
+	-- Plugins
+	require("mini.ai").setup({
+		custom_textobjects = {
+			B = require("mini.extra").gen_ai_spec.buffer(),
+			D = require("mini.extra").gen_ai_spec.diagnostic(),
+			I = require("mini.extra").gen_ai_spec.indent(),
+			L = require("mini.extra").gen_ai_spec.line(),
+			N = require("mini.extra").gen_ai_spec.number(),
+		},
+	})
+	require("mini.align").setup()
+	require("mini.bracketed").setup()
+	require("mini.comment").setup()
+	require("mini.extra").setup()
+	require("mini.indentscope").setup({
+		draw = {
+			animation = require("mini.indentscope").gen_animation.none(),
+		},
+	})
+	require("mini.jump").setup()
+	require("mini.jump2d").setup()
+	require("mini.keymap").setup()
+	require("mini.move").setup({
+		mappings = {
+			left = "H",
+			right = "L",
+			down = "J",
+			up = "K",
+			line_left = "H",
+			line_right = "L",
+			line_down = "J",
+			line_up = "K",
+		},
+		options = {
+			reindent_linewise = true,
+		},
+	})
+	require("mini.operators").setup()
+	require("mini.splitjoin").setup()
+	require("mini.surround").setup()
+	-- Goto ending of file
+	goto skip_neovim_config
+end
 
 -- Globals variables and functions declared and used
 now(function()
@@ -242,49 +348,6 @@ now(function()
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
-	-- Mapping functions to map keys
-	Tmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("t", suffix, rhs, opts)
-	end
-	Cmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("c", suffix, rhs, opts)
-	end
-	Nmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("n", suffix, rhs, opts)
-	end
-	Vmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("v", suffix, rhs, opts)
-	end
-	Imap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("i", suffix, rhs, opts)
-	end
-	Smap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("s", suffix, rhs, opts)
-	end
-	Xmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("x", suffix, rhs, opts)
-	end
 	-- Highlight function to define or change highlights
 	Hi = function(name, opts)
 		vim.api.nvim_set_hl(0, name, opts)
@@ -2637,3 +2700,4 @@ later(function()
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 end)
+::skip_neovim_config::
