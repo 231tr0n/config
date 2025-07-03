@@ -34,12 +34,12 @@ add("echasnovski/mini.nvim")
 now(function()
 	Global = {
 		-- Space, tab and fold characters to use
-		lead_space = "›",
+		lead_space = "·",
 		next_space = " ",
 		te_win_id = -1,
 		winbar_arrow = "󰁔",
 		status_column_separator = "│", -- ▕
-		lead_tab_space = "»",
+		lead_tab_space = "›", -- »
 		fold_open = "▾", -- 
 		fold_close = "▸", -- 
 		float_multiplier = 0.8,
