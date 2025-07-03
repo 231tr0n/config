@@ -319,6 +319,7 @@ VSCODE_PLUGINS=(
 	"ms-azuretools.vscode-docker"
 	"docker.docker"
 	"vscodevim.vim"
+	"asvetliakov.vscode-neovim"
 	"github.github-vscode-theme"
 	"github.copilot"
 	"github.copilot-chat"
