@@ -300,6 +300,7 @@ VSCODE_PLUGINS=(
 	"scalameta.metals"
 	"scala-lang.scala-snippets"
 	"vscjava.vscode-java-pack"
+	"davidanson.vscode-markdownlint"
 	"vmware.vscode-boot-dev-pack"
 	"redhat.vscode-quarkus"
 	"ms-vscode.js-debug"
