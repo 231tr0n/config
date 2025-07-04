@@ -327,6 +327,6 @@ VSCODE_PLUGINS=(
 	"github.copilot-chat"
 )
 
-default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | xargs -I {} code --install-extension {} --force"
+default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | xargs -I {} DONT_PROMPT_WSL_INSTALL=No_Prompt_please code --install-extension {} --force"
 
 info_log "Run 'wsl --terminate archlinux' to apply all changes\n"
