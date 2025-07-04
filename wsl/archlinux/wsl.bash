@@ -101,6 +101,7 @@ if ! command -v yay &>/dev/null; then
 fi
 
 PACKAGES=(
+	"ttf-cascadia-code-nerd"
 	"libsecret"
 	"gnome-keyring"
 	"xsel"
