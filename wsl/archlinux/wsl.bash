@@ -236,8 +236,7 @@ PACKAGES=(
 	"perl-file-homedir"
 	"yt-dlp"
 	"vi"
-	"code"
-	"code-marketplace"
+	"visual-studio-code-bin"
 )
 
 default_user_cmd "yay -Syu --noconfirm --needed ${PACKAGES[*]}"
