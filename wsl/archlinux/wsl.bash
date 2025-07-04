@@ -101,6 +101,8 @@ if ! command -v yay &>/dev/null; then
 fi
 
 PACKAGES=(
+	"libsecret"
+	"gnome-keyring"
 	"xsel"
 	"glibc-locales"
 	"git"
