@@ -93,7 +93,7 @@ set -gx PATH $PATH $SPARK_HOME/bin
 set -gx PATH $PATH $SPARK_HOME/sbin
 
 # Vscode variables
-set -gx DONT_PROMPT_WSL_INSTAL No_Prompt_please
+set -gx DONT_PROMPT_WSL_INSTALL No_Prompt_please
 
 if grep -q -i microsoft /proc/sys/kernel/osrelease
     mkdir -p $HOME/.tmp/
