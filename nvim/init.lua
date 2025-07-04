@@ -46,6 +46,7 @@ if vim.g.vscode then
 		end
 	end
 	-- Settings
+	vim.g.loaded_matchparen = 1
 	vim.opt.matchpairs:append("<:>")
 	vim.notify = vscode.notify
 	-- Plugins installation

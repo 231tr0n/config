@@ -318,6 +318,8 @@ VSCODE_PLUGINS=(
 	"mads-hartmann.bash-ide-vscode"
 	"timonwong.shellcheck"
 	"ms-azuretools.vscode-containers"
+	"usernamehw.errorlens"
+	"eamodio.gitlens"
 	"ms-azuretools.vscode-docker"
 	"docker.docker"
 	"asvetliakov.vscode-neovim"
