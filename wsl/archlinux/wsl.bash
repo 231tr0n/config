@@ -329,6 +329,7 @@ VSCODE_PLUGINS=(
 	"github.copilot"
 	"github.copilot-chat"
 	"redhat.vscode-community-server-connector"
+	"ms-toolsai.jupyter"
 )
 
 default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | DONT_PROMPT_WSL_INSTALL=No_Prompt_please xargs -I {} code --install-extension {} --force"
