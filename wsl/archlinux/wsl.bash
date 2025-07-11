@@ -317,6 +317,8 @@ VSCODE_PLUGINS=(
 	"vmware.vscode-boot-dev-pack"
 	"redhat.vscode-quarkus"
 	"ms-vscode.js-debug"
+	"ms-vscode.js-debug-companion"
+	"vscodevim.vim"
 	"svelte.svelte-vscode"
 	"angular.ng-template"
 	"dbaeumer.vscode-eslint"
