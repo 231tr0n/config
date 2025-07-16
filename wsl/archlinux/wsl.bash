@@ -351,7 +351,7 @@ VSCODE_PLUGINS=(
 	"ms-vscode.remote-repositories"
 	"ms-vscode-remote.vscode-remote-extensionpack"
 	"oracle.mysql-shell-for-vs-code"
-	"oracle.sql-developer"
+	"mtxr.sqltools"
 )
 
 default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | DONT_PROMPT_WSL_INSTALL=No_Prompt_please xargs -I {} code --install-extension {} --force"
