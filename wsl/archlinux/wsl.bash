@@ -347,8 +347,11 @@ VSCODE_PLUGINS=(
 	"redhat.vscode-community-server-connector"
 	"ms-toolsai.jupyter"
 	"mechatroner.rainbow-csv"
-	"ms-vscode-remote.remote-containers"
 	"ms-kubernetes-tools.vscode-kubernetes-tools"
+	"ms-vscode.remote-repositories"
+	"ms-vscode-remote.vscode-remote-extensionpack"
+	"oracle.mysql-shell-for-vs-code"
+	"oracle.sql-developer"
 )
 
 default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | DONT_PROMPT_WSL_INSTALL=No_Prompt_please xargs -I {} code --install-extension {} --force"
