@@ -251,9 +251,12 @@ PACKAGES=(
 	"yt-dlp"
 	"vi"
 	"visual-studio-code-bin"
+	"mariadb"
 )
 
 default_user_cmd "yay -Syu --noconfirm --needed ${PACKAGES[*]}"
+
+mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 
 npm install -g npm-groovy-lint@latest
 
