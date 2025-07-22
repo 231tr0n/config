@@ -851,14 +851,63 @@ now(function()
 		winbar = {
 			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
-			headers = {
-				breakpoints = "[B]",
-				scopes = "[S]",
-				exceptions = "[E]",
-				watches = "[W]",
-				threads = "[T]",
-				repl = "[R]",
-				console = "[C]",
+			base_sections = {
+				breakpoints = {
+					keymap = "B",
+					label = " [B]",
+					short_label = "[B]",
+					action = function()
+						require("dap-view.views").switch_to_view("breakpoints")
+					end,
+				},
+				scopes = {
+					keymap = "S",
+					label = "󰂥 [S]",
+					short_label = "[S]",
+					action = function()
+						require("dap-view.views").switch_to_view("scopes")
+					end,
+				},
+				exceptions = {
+					keymap = "E",
+					label = "󰢃 [E]",
+					short_label = "[E]",
+					action = function()
+						require("dap-view.views").switch_to_view("exceptions")
+					end,
+				},
+				watches = {
+					keymap = "W",
+					label = "󰛐 [W]",
+					short_label = "[W]",
+					action = function()
+						require("dap-view.views").switch_to_view("watches")
+					end,
+				},
+				threads = {
+					keymap = "T",
+					label = "󱉯 [T]",
+					short_label = "[T]",
+					action = function()
+						require("dap-view.views").switch_to_view("threads")
+					end,
+				},
+				repl = {
+					keymap = "R",
+					label = "󰯃 [R]",
+					short_label = "[R]",
+					action = function()
+						require("dap-view.repl").show()
+					end,
+				},
+				console = {
+					keymap = "C",
+					label = "󰆍 [C]",
+					short_label = "[C]",
+					action = function()
+						require("dap-view.term").show()
+					end,
+				},
 			},
 			controls = {
 				enabled = true,
