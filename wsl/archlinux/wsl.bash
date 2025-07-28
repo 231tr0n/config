@@ -355,6 +355,7 @@ VSCODE_PLUGINS=(
 	"mtxr.sqltools-driver-sqlite"
 	"mtxr.sqltools-driver-pg"
 	"mtxr.sqltools-driver-mysql"
+	"ms-windows-ai-studio.windows-ai-studio"
 )
 
 default_user_cmd "printf \"%s\n\" ${VSCODE_PLUGINS[*]} | DONT_PROMPT_WSL_INSTALL=No_Prompt_please xargs -I {} code --install-extension {} --force"
