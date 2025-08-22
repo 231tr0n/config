@@ -2,7 +2,7 @@
 -- luacheck: globals vim
 -- luacheck: globals Global Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
--- luacheck: globals MiniDeps MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
+-- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
@@ -30,16 +30,42 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Track and update self
 add("echasnovski/mini.nvim")
 
+-- Helper functions
+Map = function(modes, suffix, rhs, desc, opts)
+	opts = opts or {}
+	opts.silent = true
+	opts.desc = desc
+	vim.keymap.set(modes, suffix, rhs, opts)
+end
+Tmap = function(suffix, rhs, desc, opts)
+	Map("t", suffix, rhs, desc, opts)
+end
+Cmap = function(suffix, rhs, desc, opts)
+	Map("c", suffix, rhs, desc, opts)
+end
+Nmap = function(suffix, rhs, desc, opts)
+	Map("n", suffix, rhs, desc, opts)
+end
+Vmap = function(suffix, rhs, desc, opts)
+	Map("v", suffix, rhs, desc, opts)
+end
+Imap = function(suffix, rhs, desc, opts)
+	Map("i", suffix, rhs, desc, opts)
+end
+Smap = function(suffix, rhs, desc, opts)
+	Map("s", suffix, rhs, desc, opts)
+end
+Xmap = function(suffix, rhs, desc, opts)
+	Map("x", suffix, rhs, desc, opts)
+end
+Hi = function(name, opts)
+	vim.api.nvim_set_hl(0, name, opts)
+end
+
 -- Vscode neovim settings
 if vim.g.vscode then
 	local vscode = require("vscode")
 	-- Helper functions
-	Map = function(modes, suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set(modes or { "n" }, suffix, rhs, opts)
-	end
 	Vscode = function(cmd)
 		return function()
 			vscode.action(cmd)
@@ -74,7 +100,16 @@ if vim.g.vscode then
 		},
 	})
 	require("mini.jump").setup()
-	require("mini.jump2d").setup()
+	require("mini.jump2d").setup({
+		labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		view = {
+			dim = true,
+			n_steps_ahead = 2,
+		},
+		mappings = {
+			start_jumping = "",
+		},
+	})
 	require("mini.keymap").setup()
 	require("mini.move").setup({
 		mappings = {
@@ -100,32 +135,32 @@ if vim.g.vscode then
 			MiniBracketed.diagnostic(direction, { severity = vim.diagnostic.severity.ERROR })
 		end
 	end
-	Map(nil, "[e", error_diagnostic_cycle("backward"), "Error last")
-	Map(nil, "]e", error_diagnostic_cycle("forward"), "Error forward")
-	Map(nil, "gB", ":norm gxiagxila<CR>", "Move arg left")
-	Map(nil, "gb", ":norm gxiagxina<CR>", "Move arg right")
-	Map(nil, "<Space>D", Vscode("editor.action.peekDefinition"), "Peek definition")
-	Map(nil, "<Space>F", Vscode("editor.action.revealDeclaration"), "Show declaration")
-	Map(nil, "<Space>I", Vscode("editor.action.peekImplementation"), "Show implementations")
-	Map(nil, "<Space>R", Vscode("editor.action.rename"), "Rename")
-	Map(nil, "<Space>d", Vscode("editor.action.revealDefinition"), "Show definition")
-	Map(nil, "<Space>f", Vscode("editor.action.peekDeclaration"), "Peek declaration")
-	Map(nil, "<Space>h", Vscode("editor.showCallHierarchy"), "Show call hierarchy")
-	Map(nil, "<Space>i", Vscode("editor.action.goToImplementation"), "Show implementations")
-	Map(nil, "<Space>k", Vscode("editor.action.showHover"), "Show hover")
-	Map(nil, "<Space>o", Vscode("workbench.action.gotoSymbol"), "Goto symbol")
-	Map(nil, "<Space>r", Vscode("editor.action.referenceSearch.trigger"), "Show references")
-	Map(nil, "<Space>t", Vscode("editor.showTypeHierarchy"), "Show type hierarchy")
-	Map(nil, "<Space>tD", Vscode("editor.action.peekTypeDefinition"), "Peek type definition")
-	Map(nil, "<Space>td", Vscode("editor.action.goToTypeDefinition"), "Goto type definition")
-	Map(nil, "zC", Vscode("editor.foldRecursively"), "Fold")
-	Map(nil, "zM", Vscode("editor.foldAll"), "Fold")
-	Map(nil, "zO", Vscode("editor.unfoldRecursively"), "Unfold")
-	Map(nil, "zR", Vscode("editor.unfoldAll"), "Unfold")
-	Map(nil, "zc", Vscode("editor.fold"), "Fold")
-	Map(nil, "zc", Vscode("editor.fold"), "Fold")
-	Map(nil, "zo", Vscode("editor.unfold"), "Unfold")
-	Map(nil, "zo", Vscode("editor.unfold"), "Unfold")
+	Nmap("[e", error_diagnostic_cycle("backward"), "Error last")
+	Nmap("]e", error_diagnostic_cycle("forward"), "Error forward")
+	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
+	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
+	Nmap("<Space>D", Vscode("editor.action.peekDefinition"), "Peek definition")
+	Nmap("<Space>F", Vscode("editor.action.revealDeclaration"), "Show declaration")
+	Nmap("<Space>I", Vscode("editor.action.peekImplementation"), "Show implementations")
+	Nmap("<Space>R", Vscode("editor.action.rename"), "Rename")
+	Nmap("<Space>d", Vscode("editor.action.revealDefinition"), "Show definition")
+	Nmap("<Space>f", Vscode("editor.action.peekDeclaration"), "Peek declaration")
+	Nmap("<Space>h", Vscode("editor.showCallHierarchy"), "Show call hierarchy")
+	Nmap("<Space>i", Vscode("editor.action.goToImplementation"), "Show implementations")
+	Nmap("<Space>k", Vscode("editor.action.showHover"), "Show hover")
+	Nmap("<Space>o", Vscode("workbench.action.gotoSymbol"), "Goto symbol")
+	Nmap("<Space>r", Vscode("editor.action.referenceSearch.trigger"), "Show references")
+	Nmap("<Space>t", Vscode("editor.showTypeHierarchy"), "Show type hierarchy")
+	Nmap("<Space>tD", Vscode("editor.action.peekTypeDefinition"), "Peek type definition")
+	Nmap("<Space>td", Vscode("editor.action.goToTypeDefinition"), "Goto type definition")
+	Nmap("zC", Vscode("editor.foldRecursively"), "Fold")
+	Nmap("zM", Vscode("editor.foldAll"), "Fold")
+	Nmap("zO", Vscode("editor.unfoldRecursively"), "Unfold")
+	Nmap("zR", Vscode("editor.unfoldAll"), "Unfold")
+	Nmap("zc", Vscode("editor.fold"), "Fold")
+	Nmap("zc", Vscode("editor.fold"), "Fold")
+	Nmap("zo", Vscode("editor.unfold"), "Unfold")
+	Nmap("zo", Vscode("editor.unfold"), "Unfold")
 	Map({ "n", "v", "x" }, "<Space>F", Vscode("editor.action.formatDocument"), "Format document")
 	Map({ "n", "v", "x" }, "zP", '"+P', "Paste to clipboard")
 	Map({ "n", "v", "x" }, "zX", '"+X', "Cut to clipboard")
@@ -349,53 +384,6 @@ now(function()
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
-	-- Mapping functions to map keys
-	Tmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("t", suffix, rhs, opts)
-	end
-	Cmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("c", suffix, rhs, opts)
-	end
-	Nmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("n", suffix, rhs, opts)
-	end
-	Vmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("v", suffix, rhs, opts)
-	end
-	Imap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("i", suffix, rhs, opts)
-	end
-	Smap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("s", suffix, rhs, opts)
-	end
-	Xmap = function(suffix, rhs, desc, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.desc = desc
-		vim.keymap.set("x", suffix, rhs, opts)
-	end
-	-- Highlight function to define or change highlights
-	Hi = function(name, opts)
-		vim.api.nvim_set_hl(0, name, opts)
-	end
 end)
 
 -- Default settings
@@ -555,7 +543,7 @@ now(function()
 		},
 	})
 	require("mini.align").setup()
-	-- require("mini.animate").setup()
+	require("mini.animate").setup()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
@@ -604,6 +592,7 @@ now(function()
 				{ mode = "n", keys = "<leader>f", desc = "+Find" },
 				{ mode = "n", keys = "<leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
+				{ mode = "n", keys = "<leader>m", desc = "+Map" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
 				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
 				{ mode = "n", keys = "<leader>t", desc = "+Tree" },
@@ -614,6 +603,7 @@ now(function()
 			require("mini.clue").gen_clues.g(),
 			require("mini.clue").gen_clues.marks(),
 			require("mini.clue").gen_clues.registers(),
+			require("mini.clue").gen_clues.square_brackets(),
 			require("mini.clue").gen_clues.windows(),
 			require("mini.clue").gen_clues.z(),
 		},
@@ -658,8 +648,33 @@ now(function()
 	MiniIcons.tweak_lsp_kind()
 	require("mini.indentscope").setup()
 	require("mini.jump").setup()
-	require("mini.jump2d").setup()
+	require("mini.jump2d").setup({
+		labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		view = {
+			dim = true,
+			n_steps_ahead = 2,
+		},
+		mappings = {
+			start_jumping = "",
+		},
+	})
 	require("mini.keymap").setup()
+	require("mini.map").setup({
+		integrations = {
+			require("mini.map").gen_integration.builtin_search(),
+			require("mini.map").gen_integration.diff(),
+			require("mini.map").gen_integration.diagnostic(),
+		},
+		symbols = {
+			encode = require("mini.map").gen_encode_symbols.dot("4x2"),
+		},
+		window = {
+			focusable = true,
+			show_integration_count = true,
+			width = 30,
+			zindex = 100,
+		},
+	})
 	require("mini.misc").setup()
 	MiniMisc.setup_auto_root({
 		"meson.build",
@@ -967,15 +982,6 @@ now(function()
 		},
 	})
 	require("helpview").setup()
-	add({
-		source = "Wansmer/treesj",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("treesj").setup({
-		use_default_keymaps = false,
-	})
 	add({
 		source = "Goose97/timber.nvim",
 		depends = {
@@ -1457,6 +1463,14 @@ now(function()
 			{ source = { name = "Core visits" } }
 		)
 	end
+	Map({ "n", "x", "o" }, "<CR>", ":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>", "Start jump")
+	Map({ "x", "v", "n" }, "<leader>cP", '"+P', "Paste to clipboard")
+	Map({ "x", "v", "n" }, "<leader>cX", '"+X', "Cut to clipboard")
+	Map({ "x", "v", "n" }, "<leader>cY", '"+Y', "Copy to clipboard")
+	Map({ "x", "v", "n" }, "<leader>cp", '"+p', "Paste to clipboard")
+	Map({ "x", "v", "n" }, "<leader>cx", '"+x', "Cut to clipboard")
+	Map({ "x", "v", "n" }, "<leader>cy", '"+y', "Copy to clipboard")
+	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<C-Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
@@ -1466,7 +1480,6 @@ now(function()
 	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
-	Nmap("<leader>F", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1474,12 +1487,6 @@ now(function()
 	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	Nmap("<leader>bz", MiniMisc.zoom, "Open current buffer in zoomed manner")
-	Nmap("<leader>cP", '"+P', "Paste to clipboard")
-	Nmap("<leader>cX", '"+X', "Cut to clipboard")
-	Nmap("<leader>cY", '"+Y', "Copy to clipboard")
-	Nmap("<leader>cp", '"+p', "Paste to clipboard")
-	Nmap("<leader>cx", '"+x', "Cut to clipboard")
-	Nmap("<leader>cy", '"+y', "Copy to clipboard")
 	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
 	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
@@ -1539,6 +1546,8 @@ now(function()
 	Nmap("<leader>lo", ":lua vim.lsp.buf.outgoing_calls()<CR>", "Lsp outgoing calls")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
 	Nmap("<leader>ls", ":lua vim.lsp.buf.signature_help()<CR>", "Signature help")
+	Nmap("<leader>mT", ":lua MiniMap.toggle_focus(true)<CR>", "Toggle map focus")
+	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
 	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
 	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
@@ -1565,13 +1574,6 @@ now(function()
 	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
-	Vmap("<leader>cP", '"+P', "Paste to clipboard")
-	Vmap("<leader>cX", '"+X', "Cut to clipboard")
-	Vmap("<leader>cY", '"+Y', "Copy to clipboard")
-	Vmap("<leader>cp", '"+p', "Paste to clipboard")
-	Vmap("<leader>cx", '"+x', "Cut to clipboard")
-	Vmap("<leader>cy", '"+y', "Copy to clipboard")
-	Xmap("<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	map_multistep("i", "<BS>", { "minipairs_bs" })
 	map_multistep("i", "<C-u>", { "jump_after_close" })
 	map_multistep("i", "<C-y>", { "jump_before_open" })
@@ -1609,17 +1611,17 @@ now(function()
 			then
 				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
-				Imap("><Space>", ">", "Cancel html pairs")
-				Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Html pairs in newline", {
+				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
+				Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
 					buffer = true,
 				})
-				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Html pairs in same line", {
+				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Sameline html pairs", {
 					buffer = true,
 				})
 				Imap(
 					">>>",
 					"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
-					"Html pairs in sameline with cursor at end",
+					"Sameline cursor end html pairs",
 					{
 						buffer = true,
 					}
@@ -1638,29 +1640,29 @@ now(function()
 			elseif args.match == "MiniFilesBufferCreate" then
 				-- Create mapping for setting current dir as pwd for neovim
 				local b = args.data.buf_id
-				vim.keymap.set("n", "g~", function()
+				Nmap("g~", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
 						return vim.notify("Cursor is not on valid entry")
 					end
 					vim.fn.chdir(vim.fs.dirname(path))
-				end, { buffer = b, desc = "Set cwd" })
+				end, "Set cwd", { buffer = b })
 				-- Create mapping for yanking path of entry
-				vim.keymap.set("n", "gy", function()
+				Nmap("gy", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
 						return vim.notify("Cursor is not on valid entry")
 					end
 					vim.fn.setreg("", path)
-				end, { buffer = b, desc = "Yank path" })
+				end, "Yank path", { buffer = b })
 				-- Create mapping for yanking path of entry to clipboard
-				vim.keymap.set("n", "gY", function()
+				Nmap("gY", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
 						return vim.notify("Cursor is not on valid entry")
 					end
 					vim.fn.setreg("+", path)
-				end, { buffer = b, desc = "Yank path" })
+				end, "Yank path", { buffer = b })
 				-- Toggle dotfiles
 				local show_dotfiles = true
 				local filter_show = function(_)
@@ -1674,7 +1676,7 @@ now(function()
 					local new_filter = show_dotfiles and filter_show or filter_hide
 					MiniFiles.refresh({ content = { filter = new_filter } })
 				end
-				vim.keymap.set("n", "g.", toggle_dotfiles, { buffer = b })
+				Nmap("g.", toggle_dotfiles, "Toggle dotfiles", { buffer = b })
 				-- Open files in horizontal or vertical pane
 				local map_split = function(buf_id, lhs, direction)
 					local rhs = function()
@@ -1686,7 +1688,7 @@ now(function()
 						MiniFiles.set_target_window(new_target)
 					end
 					local desc = "Split " .. direction
-					vim.keymap.set("n", lhs, rhs, { buffer = buf_id, desc = desc })
+					Nmap(lhs, rhs, desc, { buffer = buf_id })
 				end
 				map_split(b, "<C-s>", "belowright horizontal")
 				map_split(b, "<C-v>", "belowright vertical")
@@ -2104,48 +2106,48 @@ now(function()
 				},
 			},
 		},
-		-- vtsls = {
-		--	settings = {
-		--		typescript = {
-		--			inlayHints = {
-		--				parameterNames = { enabled = "all" },
-		--				parameterTypes = { enabled = true },
-		--				variableTypes = { enabled = true },
-		--				propertyDeclarationTypes = { enabled = true },
-		--				functionLikeReturnTypes = { enabled = true },
-		--				enumMemberValues = { enabled = true },
-		--			},
-		--		},
-		--	},
-		-- },
-		ts_ls = {
+		vtsls = {
 			settings = {
 				typescript = {
 					inlayHints = {
-						includeInlayParameterNameHints = "all",
-						includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-						includeInlayFunctionParameterTypeHints = true,
-						includeInlayVariableTypeHints = true,
-						includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-						includeInlayPropertyDeclarationTypeHints = true,
-						includeInlayFunctionLikeReturnTypeHints = true,
-						includeInlayEnumMemberValueHints = true,
-					},
-				},
-				javascript = {
-					inlayHints = {
-						includeInlayParameterNameHints = "all",
-						includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-						includeInlayFunctionParameterTypeHints = true,
-						includeInlayVariableTypeHints = true,
-						includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-						includeInlayPropertyDeclarationTypeHints = true,
-						includeInlayFunctionLikeReturnTypeHints = true,
-						includeInlayEnumMemberValueHints = true,
+						parameterNames = { enabled = "all" },
+						parameterTypes = { enabled = true },
+						variableTypes = { enabled = true },
+						propertyDeclarationTypes = { enabled = true },
+						functionLikeReturnTypes = { enabled = true },
+						enumMemberValues = { enabled = true },
 					},
 				},
 			},
 		},
+		-- ts_ls = {
+		-- 	settings = {
+		-- 		typescript = {
+		-- 			inlayHints = {
+		-- 				includeInlayParameterNameHints = "all",
+		-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+		-- 				includeInlayFunctionParameterTypeHints = true,
+		-- 				includeInlayVariableTypeHints = true,
+		-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+		-- 				includeInlayPropertyDeclarationTypeHints = true,
+		-- 				includeInlayFunctionLikeReturnTypeHints = true,
+		-- 				includeInlayEnumMemberValueHints = true,
+		-- 			},
+		-- 		},
+		-- 		javascript = {
+		-- 			inlayHints = {
+		-- 				includeInlayParameterNameHints = "all",
+		-- 				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+		-- 				includeInlayFunctionParameterTypeHints = true,
+		-- 				includeInlayVariableTypeHints = true,
+		-- 				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+		-- 				includeInlayPropertyDeclarationTypeHints = true,
+		-- 				includeInlayFunctionLikeReturnTypeHints = true,
+		-- 				includeInlayEnumMemberValueHints = true,
+		-- 			},
+		-- 		},
+		-- 	},
+		-- },
 		svelte = {
 			settings = {
 				typescript = {
@@ -2747,34 +2749,6 @@ now(function()
 			},
 		}
 	end
-end)
-
--- Lazy loaded plugins registration
-later(function()
-	-- vim.g.copilot_node_command = "~/.nodenv/versions/18.18.0/bin/node"
-	-- vim.g.copilot_proxy = 'http://localhost:3128'
-	-- vim.g.copilot_proxy_strict_ssl = false
-	-- vim.g.copilot_settings = { selectedCompletionModel = 'gpt-4o-copilot' }
-	vim.g.copilot_no_tab_map = true
-	vim.g.copilot_no_maps = true
-	add("github/copilot.vim")
-	vim.cmd("Copilot status")
-end)
-
--- Lazy loaded keymaps registration
-later(function()
-	Imap("<C-]>", "copilot#Accept()", "Accept copilot suggestion", {
-		expr = true,
-		replace_keycodes = false,
-	})
-	Imap("<C-\\>", "<cmd>call copilot#Dismiss()<CR>", "Dismiss copilot suggestion")
-	Imap("<M-\\>", "<cmd>call copilot#Suggest()<CR>", "Get copilot suggestion")
-	Imap("<M-[>", "<cmd>call copilot#Previous()<CR>", "Go to previous copilot suggestion")
-	Imap("<M-]>", "<cmd>call copilot#Next()<CR>", "Go to next copilot suggestion")
-	Nmap("<leader>af", "<cmd>CopilotChatFocus<CR>", "Focus copilot chat")
-	Nmap("<leader>at", "<cmd>CopilotChatOpen<CR>", "Open copilot chat")
-	Nmap("<leader>at", "<cmd>CopilotChatOpen<CR>", "Open copilot chat")
-	Vmap("<leader>as", "<Plug>CopilotChatAddSelection", "Add selection to copilot chat")
 end)
 
 -- Lazy loaded custom configuration
