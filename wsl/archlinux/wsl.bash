@@ -163,6 +163,7 @@ PACKAGES=(
 	"typescript"
 	"luajit"
 	"texlive"
+	"texlab"
 	"ts-node"
 	"delve"
 	"python-debugpy"
