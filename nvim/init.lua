@@ -28,7 +28,7 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 -- Track and update self
-add("echasnovski/mini.nvim")
+add("nvim-mini/mini.nvim")
 
 -- Helper functions
 Map = function(modes, suffix, rhs, desc, opts)
