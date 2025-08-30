@@ -490,10 +490,14 @@ now(function()
 			plugins = { default = true },
 		})
 		Hi("@constructor.lua", { link = "Delimiter" })
+		Hi("@function.builtin", { link = "Function" })
 		Hi("@lsp.type.parameter", { link = "Special" })
 		Hi("@markup.link.vimdoc", { link = "Keyword" })
+		Hi("@module.builtin", { link = "Type" })
 		Hi("@tag.attribute", { link = "Statement" })
+		Hi("@tag.builtin", { link = "Tag" })
 		Hi("@tag.delimiter", { link = "Delimiter" })
+		Hi("@type.builtin", { link = "Type" })
 		Hi("@variable.member", { link = "Identifier" })
 		Hi("CursorLineFold", { link = "Normal" })
 		Hi("CursorLineNr", { link = "Normal" })
@@ -855,6 +859,26 @@ now(function()
 			enabled = true,
 		},
 		trim_leading_whitespace = "all",
+	})
+	add({
+		source = "m-demare/hlargs.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("hlargs").setup({
+		color = Global.palette.base0C,
+		paint_arg_declarations = true,
+		paint_arg_usages = true,
+		paint_catch_blocks = {
+			declarations = true,
+			usages = true,
+		},
+		extras = {
+			named_parameters = true,
+		},
+		hl_priority = 120,
+		excluded_argnames = {},
 	})
 	add({
 		source = "igorlfs/nvim-dap-view",
@@ -1463,7 +1487,6 @@ now(function()
 			{ source = { name = "Core visits" } }
 		)
 	end
-	Map({ "n", "x", "o" }, "<CR>", ":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>", "Start jump")
 	Map({ "x", "v", "n" }, "<leader>cP", '"+P', "Paste to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cX", '"+X', "Cut to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cY", '"+Y', "Copy to clipboard")
@@ -1590,6 +1613,14 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = Global.languages,
 		callback = function()
+			-- Map jump2d
+			Map(
+				{ "n", "x", "o" },
+				"<CR>",
+				":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+				"Start jump",
+				{ buffer = true }
+			)
 			-- Start treesitter
 			vim.treesitter.start()
 			-- Set foldexpr to treesitter provided folds
