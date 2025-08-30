@@ -965,7 +965,7 @@ now(function()
 		source = "MeanderingProgrammer/render-markdown.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
-			"echasnovski/mini.nvim",
+			"nvim-mini/mini.nvim",
 		},
 	})
 	require("render-markdown").setup({
@@ -978,7 +978,7 @@ now(function()
 		source = "OXY2DEV/helpview.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
-			"echasnovski/mini.nvim",
+			"nvim-mini/mini.nvim",
 		},
 	})
 	require("helpview").setup()
