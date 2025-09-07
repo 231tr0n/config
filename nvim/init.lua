@@ -588,17 +588,14 @@ now(function()
 		},
 		clues = {
 			{
-				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<leader>e", desc = "+Explorer" },
 				{ mode = "n", keys = "<leader>f", desc = "+Find" },
-				{ mode = "n", keys = "<leader>g", desc = "+Generate" },
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<leader>m", desc = "+Map" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
-				{ mode = "n", keys = "<leader>r", desc = "+Regex" },
 				{ mode = "n", keys = "<leader>t", desc = "+Tree" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<leader>w", desc = "+Window" },
