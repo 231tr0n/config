@@ -817,9 +817,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	add("nacro90/numb.nvim")
-	require("numb").setup()
-	add("mfussenegger/nvim-dap")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		checkout = "main",
@@ -861,6 +858,26 @@ now(function()
 		trim_leading_whitespace = "all",
 	})
 	add({
+		source = "RRethy/nvim-treesitter-endwise",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	add("mfussenegger/nvim-dap")
+	-- Define custom signs for diagnostics and dap
+	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
+	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
+	vim.fn.sign_define(
+		"DapBreakpointRejected",
+		{ text = "✗", texthl = "DiagnosticSignError", linehl = "", numhl = "" }
+	)
+	vim.fn.sign_define(
+		"DapBreakpointCondition",
+		{ text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" }
+	)
+	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
+	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+	add({
 		source = "m-demare/hlargs.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -895,57 +912,36 @@ now(function()
 					keymap = "B",
 					label = " [B]",
 					short_label = "[B]",
-					action = function()
-						require("dap-view.views").switch_to_view("breakpoints")
-					end,
 				},
 				scopes = {
 					keymap = "S",
 					label = "󰂥 [S]",
 					short_label = "[S]",
-					action = function()
-						require("dap-view.views").switch_to_view("scopes")
-					end,
 				},
 				exceptions = {
 					keymap = "E",
 					label = "󰢃 [E]",
 					short_label = "[E]",
-					action = function()
-						require("dap-view.views").switch_to_view("exceptions")
-					end,
 				},
 				watches = {
 					keymap = "W",
 					label = "󰛐 [W]",
 					short_label = "[W]",
-					action = function()
-						require("dap-view.views").switch_to_view("watches")
-					end,
 				},
 				threads = {
 					keymap = "T",
 					label = "󱉯 [T]",
 					short_label = "[T]",
-					action = function()
-						require("dap-view.views").switch_to_view("threads")
-					end,
 				},
 				repl = {
 					keymap = "R",
 					label = "󰯃 [R]",
 					short_label = "[R]",
-					action = function()
-						require("dap-view.repl").show()
-					end,
 				},
 				console = {
 					keymap = "C",
 					label = "󰆍 [C]",
 					short_label = "[C]",
-					action = function()
-						require("dap-view.term").show()
-					end,
 				},
 			},
 			controls = {
@@ -999,14 +995,6 @@ now(function()
 		},
 	})
 	add({
-		source = "OXY2DEV/helpview.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-mini/mini.nvim",
-		},
-	})
-	require("helpview").setup()
-	add({
 		source = "Goose97/timber.nvim",
 		depends = {
 			"nvim-treesitter/nvim-treesitter",
@@ -1038,6 +1026,7 @@ now(function()
 					},
 				},
 				display = {
+					mode = "icon",
 					format = "tree_guides",
 				},
 			},
@@ -1573,9 +1562,6 @@ now(function()
 	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
 	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
-	Nmap("<leader>re", ":Patterns explain<CR>", "Explain pattern")
-	Nmap("<leader>rh", ":Patterns hover<CR>", "Hover pattern")
-	Nmap("<leader>s", ":TSJToggle<CR>", "Split/Join code blocks")
 	Nmap("<leader>tb", ":Namu call both<CR>", "Both calls treeview")
 	Nmap("<leader>tc", ":Namu ctags<CR>", "Ctags treeview")
 	Nmap("<leader>ti", ":Namu call in<CR>", "Incoming calls treeview")
@@ -1591,10 +1577,10 @@ now(function()
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
+	Nmap("[g", ":norm gxiagxila<CR>", "Move arg left")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
-	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
+	Nmap("]g", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
-	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
 	map_multistep("i", "<BS>", { "minipairs_bs" })
@@ -1613,14 +1599,16 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = Global.languages,
 		callback = function()
-			-- Map jump2d
-			Map(
-				{ "n", "x", "o" },
-				"<CR>",
-				":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-				"Start jump",
-				{ buffer = true }
-			)
+			if vim.bo.buftype ~= "nofile" then
+				-- Map jump2d
+				Map(
+					{ "n", "x", "o" },
+					"<CR>",
+					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+					"Start jump",
+					{ buffer = true }
+				)
+			end
 			-- Start treesitter
 			vim.treesitter.start()
 			-- Set foldexpr to treesitter provided folds
@@ -1643,20 +1631,15 @@ now(function()
 				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
-				Imap(">", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
+				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
 					buffer = true,
 				})
-				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Sameline html pairs", {
+				Imap(">", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Sameline html pairs", {
 					buffer = true,
 				})
-				Imap(
-					">>>",
-					"><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>",
-					"Sameline cursor end html pairs",
-					{
-						buffer = true,
-					}
-				)
+				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>", "Sameline cursor end html pairs", {
+					buffer = true,
+				})
 			end
 		end,
 	})
@@ -2784,18 +2767,63 @@ end)
 
 -- Lazy loaded custom configuration
 later(function()
-	-- Define custom signs for diagnostics and dap
-	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
-	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
-	vim.fn.sign_define(
-		"DapBreakpointRejected",
-		{ text = "✗", texthl = "DiagnosticSignError", linehl = "", numhl = "" }
-	)
-	vim.fn.sign_define(
-		"DapBreakpointCondition",
-		{ text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" }
-	)
-	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
-	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+	Global.peek = function()
+		local win_states = {}
+		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
+
+		local function save_win_state(winnr)
+			win_states[winnr] = {}
+			for option, _ in pairs(options) do
+				win_states[winnr][option] = vim.api.nvim_get_option_value(option, { win = winnr })
+			end
+			win_states[winnr].cursor = vim.api.nvim_win_get_cursor(winnr)
+		end
+
+		local function restore_win_state(winnr)
+			if not win_states[winnr] then
+				return
+			end
+
+			for option, _ in pairs(options) do
+				vim.api.nvim_set_option_value(option, win_states[winnr][option], { win = winnr })
+			end
+			vim.api.nvim_win_set_cursor(winnr, win_states[winnr].cursor)
+
+			win_states[winnr] = nil
+		end
+
+		local goto_linenr = function(winnr, linenr)
+			linenr = math.max(math.min(linenr, vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(winnr))), 1)
+
+			if not win_states[winnr] then
+				save_win_state(winnr)
+			end
+
+			for option, value in pairs(options) do
+				vim.api.nvim_set_option_value(option, value, { win = winnr })
+			end
+			vim.api.nvim_win_set_cursor(winnr, { linenr, 1 })
+
+			vim.cmd("redraw")
+		end
+
+		vim.api.nvim_create_autocmd("CmdlineChanged", {
+			pattern = "*",
+			callback = function()
+				local cmdline_str = vim.api.nvim_call_function("getcmdline", {})
+				if tonumber(cmdline_str) then
+					goto_linenr(vim.api.nvim_get_current_win(), tonumber(cmdline_str))
+				end
+			end,
+		})
+
+		vim.api.nvim_create_autocmd("CmdlineLeave", {
+			pattern = "*",
+			callback = function()
+				restore_win_state(vim.api.nvim_get_current_win())
+			end,
+		})
+	end
+	Global.peek()
 end)
 ::skip_neovim_config::
