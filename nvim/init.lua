@@ -500,6 +500,7 @@ now(function()
 		Hi("@tag.delimiter", { link = "Delimiter" })
 		Hi("@type.builtin", { link = "Type" })
 		Hi("@variable.member", { link = "Identifier" })
+		Hi("@variable.parameter", { link = "Special" })
 		Hi("CursorLineFold", { link = "Normal" })
 		Hi("CursorLineNr", { link = "Normal" })
 		Hi("CursorLineSign", { link = "Normal" })
@@ -966,13 +967,6 @@ now(function()
 			border = "thin",
 		},
 	})
-	add({
-		source = "Goose97/timber.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("timber").setup()
 	add({
 		source = "bassamsdata/namu.nvim",
 		depends = {
