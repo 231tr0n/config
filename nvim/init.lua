@@ -373,14 +373,15 @@ now(function()
 			return vim.fn.input({ prompt = prompt, default = default })
 		end,
 	}
-	Global.java_compiled_files_winbar = "⠀⠀" .. Global.winbar_arrow .. " JDT URI or Class file"
-	Global.winbar = "⠀⠀%{% '"
+	Global.winbar_append = "%#MiniTablineTabpagesection#⠀⠀" .. Global.winbar_arrow .. " %#WinBar# "
+	Global.java_compiled_files_winbar = Global.winbar_append .. "JDT URI or Class file%<"
+	Global.winbar = Global.winbar_append
+		.. "/ "
 		.. Global.winbar_arrow
-		.. " / "
+		.. " %{%"
+		.. "join(split(expand('%:p'), '/'), ' "
 		.. Global.winbar_arrow
-		.. " ' . join(split(expand('%:p'), '/'), ' "
-		.. Global.winbar_arrow
-		.. " ') %}"
+		.. " ')%}%<"
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
@@ -875,26 +876,6 @@ now(function()
 	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
 	add({
-		source = "m-demare/hlargs.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("hlargs").setup({
-		color = Global.palette.base0C,
-		paint_arg_declarations = true,
-		paint_arg_usages = true,
-		paint_catch_blocks = {
-			declarations = true,
-			usages = true,
-		},
-		extras = {
-			named_parameters = true,
-		},
-		hl_priority = 120,
-		excluded_argnames = {},
-	})
-	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
 			"mfussenegger/nvim-dap",
@@ -1029,6 +1010,29 @@ now(function()
 			},
 		},
 	})
+end)
+
+-- Non lazy custom configuration
+now(function()
+	Global.keys = {}
+	local max_length = 5
+	vim.on_key(function(_, typed)
+		if typed ~= "" then
+			if #Global.keys >= max_length then
+				table.remove(Global.keys, #Global.keys)
+			end
+			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
+		end
+	end, vim.api.nvim_create_namespace("show-keys"))
+	Global.get_keys = function()
+		if Global.keys and #Global.keys > 0 then
+			return Global.winbar_append
+				.. "%#MiniTablineModifiedCurrent# "
+				.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
+				.. " %#WinBar#%<"
+		end
+		return Global.winbar_append
+	end
 end)
 
 -- Linting and formatting setup
@@ -1481,12 +1485,13 @@ now(function()
 	Map({ "x", "v", "n" }, "<leader>cy", '"+y', "Copy to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<C-Space>", toggle_terminal, "Toggle terminal")
+	Nmap("<Esc><Esc>", ":nohl<CR>", "Remove highlight")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -1813,8 +1818,26 @@ now(function()
 							if not vim.api.nvim_buf_is_valid(args.buf) then
 								return
 							end
-							if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) then
-								vim.api.nvim_set_option_value("winbar", Global.winbar, { win = win })
+							if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) and vim.bo.filetype ~= "help" then
+								vim.api.nvim_set_option_value("winbar", "%{%v:lua.Global.get_keys()%}", { win = win })
+								vim.api.nvim_create_autocmd("WinEnter", {
+									callback = function()
+										vim.api.nvim_set_option_value(
+											"winbar",
+											"%{%v:lua.Global.get_keys()%}",
+											{ win = vim.api.nvim_get_current_win() }
+										)
+									end,
+								})
+								vim.api.nvim_create_autocmd("WinLeave", {
+									callback = function()
+										vim.api.nvim_set_option_value(
+											"winbar",
+											Global.winbar,
+											{ win = vim.api.nvim_get_current_win() }
+										)
+									end,
+								})
 							end
 						end
 					end
@@ -1840,17 +1863,6 @@ now(function()
 		callback = function()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
-		end,
-	})
-	-- Set winbar if new file is written to the buffer
-	vim.api.nvim_create_autocmd("BufWritePost", {
-		callback = function(args)
-			-- Set winbar if new file is written to the buffer
-			if vim.bo.buftype == "" then
-				if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) then
-					vim.wo.winbar = Global.winbar
-				end
-			end
 		end,
 	})
 	-- Disable statuscolumn in command window
@@ -2764,6 +2776,7 @@ end)
 
 -- Lazy loaded custom configuration
 later(function()
+	-- Peek line number
 	Global.peek = function()
 		local win_states = {}
 		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
