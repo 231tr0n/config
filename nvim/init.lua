@@ -855,12 +855,6 @@ now(function()
 		},
 		trim_leading_whitespace = "all",
 	})
-	add({
-		source = "RRethy/nvim-treesitter-endwise",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
 	add("mfussenegger/nvim-dap")
 	-- Define custom signs for diagnostics and dap
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
