@@ -175,11 +175,13 @@ end
 -- Globals variables and functions declared and used
 now(function()
 	Global = {
-		-- Space, tab and fold characters to use
+		keys = {},
+		screenkey_max_length = 5,
+		winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# ",
 		lead_space = "·",
 		next_space = " ",
 		te_win_id = -1,
-		winbar_arrow = "󰁔",
+		te_flow_win_id = -1,
 		status_column_separator = "│", -- ▕
 		lead_tab_space = "›", -- »
 		fold_open = "▾", -- 
@@ -373,15 +375,33 @@ now(function()
 			return vim.fn.input({ prompt = prompt, default = default })
 		end,
 	}
-	Global.winbar_append = "%#MiniTablineTabpagesection#⠀⠀" .. Global.winbar_arrow .. " %#WinBar# "
-	Global.java_compiled_files_winbar = Global.winbar_append .. "JDT URI or Class file%<"
-	Global.winbar = Global.winbar_append
-		.. "/ "
-		.. Global.winbar_arrow
-		.. " %{%"
-		.. "join(split(expand('%:p'), '/'), ' "
-		.. Global.winbar_arrow
-		.. " ')%}%<"
+	-- Winbar screenkey setup
+	vim.on_key(function(_, typed)
+		if typed ~= "" then
+			if #Global.keys >= Global.screenkey_max_length then
+				table.remove(Global.keys, #Global.keys)
+			end
+			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
+		end
+	end, vim.api.nvim_create_namespace("show-keys"))
+	-- Winbar setup
+	Global.winbar = function(win_id)
+		if win_id and not vim.api.nvim_win_is_valid(win_id) then
+			return
+		end
+		if vim.api.nvim_get_current_win() == win_id then
+			if #Global.keys > 0 then
+				return Global.winbar_append
+					.. "%#MiniTablineModifiedCurrent# "
+					.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
+					.. " %#WinBar#%<"
+			else
+				return Global.winbar_append
+			end
+		else
+			return Global.winbar_append .. "%F"
+		end
+	end
 	-- Function to set leadmultispace correctly
 	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
 	Global.lead_multi_space = Global.lead_space .. Global.next_space
@@ -596,7 +616,6 @@ now(function()
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<leader>m", desc = "+Map" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
-				{ mode = "n", keys = "<leader>t", desc = "+Tree" },
 				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<leader>w", desc = "+Window" },
 			},
@@ -942,174 +961,6 @@ now(function()
 			border = "thin",
 		},
 	})
-end)
-
--- Non lazy custom configuration
-now(function()
-	-- Custom actions for git_hunks picker
-	MiniPick.registry.git_hunks = function(local_opts)
-		MiniExtra.pickers.git_hunks(local_opts, {
-			source = {
-				choose_marked = function(items_marked)
-					vim.tbl_map(function(item)
-						local patch = vim.deepcopy(item.header)
-						vim.list_extend(patch, item.hunk)
-						local cmd
-						if local_opts.scope == "staged" then
-							cmd = { "git", "apply", "--cached", "--reverse", "-" }
-						else
-							cmd = { "git", "apply", "--cached", "-" }
-						end
-						vim.system(cmd, { stdin = patch }):wait()
-					end, items_marked)
-				end,
-			},
-		})
-	end
-	MiniPick.registry.treesitter_symbols = function(opts)
-		local has_ts, _ = pcall(require, "nvim-treesitter")
-		if not has_ts then
-			vim.notify("Treesitter_symbols picker requires nvim-treesitter.", vim.log.levels.ERROR)
-			return
-		end
-
-		local buf = vim.api.nvim_get_current_buf()
-		if not vim.bo.filetype then
-			vim.notify("Cannot determine filetype for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-
-		local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
-		if not lang then
-			vim.notify("Cannot determine treesitter langugage for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-
-		local parser = vim.treesitter.get_parser(buf)
-		if not parser then
-			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-		parser:parse()
-
-		local root = parser:trees()[1]:root()
-		if not root then
-			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-
-		local query = (vim.treesitter.query.get(lang, "locals"))
-		if not query then
-			vim.notify("Cannot get locals queries for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-
-		local get = function(bufnr)
-			local definitions = {}
-			local scopes = {}
-			local references = {}
-
-			for id, node, metadata in query:iter_captures(root, bufnr) do
-				local kind = query.captures[id]
-
-				local scope = "local"
-				for k, v in pairs(metadata) do
-					if type(k) == "string" and vim.endswith(k, "local.scope") then
-						scope = v
-					end
-				end
-				if node and vim.startswith(kind, "local.definition") then
-					table.insert(definitions, { kind = kind, node = node, scope = scope })
-				end
-				if node and kind == "local.scope" then
-					table.insert(scopes, node)
-				end
-				if node and kind == "local.reference" then
-					table.insert(references, { kind = kind, node = node, scope = scope })
-				end
-			end
-
-			return definitions, references, scopes
-		end
-
-		local function recurse_local_nodes(local_def, accumulator, full_match, last_match)
-			if type(local_def) ~= "table" then
-				return
-			end
-			if local_def.node then
-				accumulator(local_def, local_def.node, full_match, last_match)
-			else
-				for match_key, def in pairs(local_def) do
-					recurse_local_nodes(
-						def,
-						accumulator,
-						full_match and (full_match .. "." .. match_key) or match_key,
-						match_key
-					)
-				end
-			end
-		end
-
-		local get_local_nodes = function(local_def)
-			local result = {}
-			recurse_local_nodes(local_def, function(def, _, kind)
-				table.insert(result, vim.tbl_extend("keep", { kind = kind }, def))
-			end)
-			return result
-		end
-
-		local kind_map = {
-			var = "variable",
-			parameter = "typeparameter",
-			associated = "property",
-		}
-
-		local entries = {}
-		for _, definition in ipairs(get(buf)) do
-			local nodes = get_local_nodes(definition)
-			for _, node in ipairs(nodes) do
-				if node.node then
-					node.kind = node.kind and node.kind:gsub(".*%.", "")
-					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node.node)
-					local node_text = vim.treesitter.get_node_text(node.node, buf)
-					local node_kind = node.kind or ""
-					node_kind = kind_map[node_kind] or node_kind
-					local icon, _, _ = MiniIcons.get("lsp", node_kind)
-					entries[#entries + 1] = {
-						text = string.format("%s [%s %s]", node_text, icon, node_kind),
-						bufnr = buf,
-						lnum = lnum + 1,
-						col = col + 1,
-						end_lnum = end_lnum + 1,
-						end_col = end_col + 1,
-					}
-				end
-			end
-		end
-
-		MiniPick.start(
-			vim.tbl_deep_extend("force", opts or {}, { source = { items = entries, name = "Tree-sitter symbols" } })
-		)
-	end
-	Global.keys = {}
-	local max_length = 5
-	vim.on_key(function(_, typed)
-		if typed ~= "" then
-			if #Global.keys >= max_length then
-				table.remove(Global.keys, #Global.keys)
-			end
-			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
-		end
-	end, vim.api.nvim_create_namespace("show-keys"))
-	Global.get_keys = function()
-		if Global.keys and #Global.keys > 0 then
-			return Global.winbar_append
-				.. "%#MiniTablineModifiedCurrent# "
-				.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
-				.. " %#WinBar#%<"
-		end
-		return Global.winbar_append
-	end
 end)
 
 -- Linting and formatting setup
@@ -1498,6 +1349,59 @@ now(function()
 	})
 end)
 
+-- Non lazy custom configuration
+now(function()
+	-- Peek line number
+	Global.peek = function()
+		local win_states = {}
+		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
+		local function save_win_state(winnr)
+			win_states[winnr] = {}
+			for option, _ in pairs(options) do
+				win_states[winnr][option] = vim.api.nvim_get_option_value(option, { win = winnr })
+			end
+			win_states[winnr].cursor = vim.api.nvim_win_get_cursor(winnr)
+		end
+		local function restore_win_state(winnr)
+			if not win_states[winnr] then
+				return
+			end
+			for option, _ in pairs(options) do
+				vim.api.nvim_set_option_value(option, win_states[winnr][option], { win = winnr })
+			end
+			vim.api.nvim_win_set_cursor(winnr, win_states[winnr].cursor)
+			win_states[winnr] = nil
+		end
+		local goto_linenr = function(winnr, linenr)
+			linenr = math.max(math.min(linenr, vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(winnr))), 1)
+			if not win_states[winnr] then
+				save_win_state(winnr)
+			end
+			for option, value in pairs(options) do
+				vim.api.nvim_set_option_value(option, value, { win = winnr })
+			end
+			vim.api.nvim_win_set_cursor(winnr, { linenr, 1 })
+			vim.cmd("redraw")
+		end
+		vim.api.nvim_create_autocmd("CmdlineChanged", {
+			pattern = "*",
+			callback = function()
+				local cmdline_str = vim.api.nvim_call_function("getcmdline", {})
+				if tonumber(cmdline_str) then
+					goto_linenr(vim.api.nvim_get_current_win(), tonumber(cmdline_str))
+				end
+			end,
+		})
+		vim.api.nvim_create_autocmd("CmdlineLeave", {
+			pattern = "*",
+			callback = function()
+				restore_win_state(vim.api.nvim_get_current_win())
+			end,
+		})
+	end
+	Global.peek()
+end)
+
 -- Non lazy keymaps registration
 now(function()
 	local map_multistep = require("mini.keymap").map_multistep
@@ -1527,12 +1431,12 @@ now(function()
 	end
 	-- Function to convert spaces to tabs
 	local function toggle_tabs()
-		vim.opt.expandtab = false
+		vim.o.expandtab = false
 		vim.cmd("retab!")
 	end
 	-- Function to convert tabs to spaces
 	local function toggle_spaces()
-		vim.opt.expandtab = true
+		vim.o.expandtab = true
 		vim.cmd("retab!")
 	end
 	-- Function to toggle virtual text for diagnostics
@@ -1599,6 +1503,7 @@ now(function()
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
 	Nmap("<leader>fM", ':Pick marks scope="all"<CR>', "Search workspace marks")
 	Nmap("<leader>fS", ":Pick grep_live<CR>", "Search content live")
+	Nmap("<leader>fT", ":Pick treesitter<CR>", "Search treesitter tree")
 	Nmap("<leader>fX", ':Pick diagnostic scope="all"<CR>', "Search workspace diagnostics")
 	Nmap("<leader>fY", ':Pick lsp scope="workspace_symbol"<CR>', "Search workspace symbols")
 	Nmap("<leader>fb", ":Pick buffers<CR>", "Search buffers")
@@ -1617,7 +1522,7 @@ now(function()
 	Nmap("<leader>fq", ':Pick list scope="quickfix"<CR>', "Search quickfix")
 	Nmap("<leader>fr", ":Pick resume<CR>", "Resume latest picker")
 	Nmap("<leader>fs", ":Pick grep<CR>", "Search content")
-	Nmap("<leader>ft", ":Pick treesitter<CR>", "Search treesitter tree")
+	Nmap("<leader>ft", ":Pick treesitter_symbols<CR>", "Search treesitter symbols")
 	Nmap("<leader>fx", ':Pick diagnostic scope="current"<CR>', "Search document diagnostics")
 	Nmap("<leader>fy", ':Pick lsp scope="document_symbol"<CR>', "Search document symbols")
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
@@ -1687,17 +1592,18 @@ now(function()
 			-- Set indent expr
 			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			-- Enable tag closing for html filetypes
-			if
-				vim.bo.filetype == "svelte"
-				or vim.bo.filetype == "vue"
-				or vim.bo.filetype == "jsx"
-				or vim.bo.filetype == "tsx"
-				or vim.bo.filetype == "html"
-				or vim.bo.filetype == "xml"
-				or vim.bo.filetype == "xsl"
-				or vim.bo.filetype == "javascriptreact"
-				or vim.bo.filetype == "typescriptreact"
-			then
+			local file_types = {
+				svelte = true,
+				vue = true,
+				jsx = true,
+				tsx = true,
+				html = true,
+				xml = true,
+				xsl = true,
+				javascriptreact = true,
+				typescriptreact = true,
+			}
+			if file_types[vim.bo.filetype] then
 				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
@@ -1856,65 +1762,21 @@ now(function()
 		end,
 	})
 	-- Set winbar for all windows
-	vim.api.nvim_create_autocmd("BufWinEnter", {
+	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter" }, {
 		pattern = "*",
-		callback = function(args)
-			local win = vim.fn.bufwinid(args.buf)
-			vim.schedule(function()
-				if win and not vim.api.nvim_win_is_valid(win) then
-					return
-				end
-				if
-					vim.bo.buftype ~= "help"
-					and vim.bo.buftype ~= "prompt"
-					and vim.bo.buftype ~= "nofile"
-					and vim.bo.buftype ~= "acwrite"
-					and vim.bo.buftype ~= "nowrite"
-					and vim.bo.buftype ~= "terminal"
-					and vim.bo.buftype ~= "quickfix"
-				then
-					if vim.bo.buftype == "" then
-						if vim.startswith(args.match, "jdt://") or vim.endswith(args.match, ".class") then
-							if vim.bo.filetype ~= "" then
-								vim.api.nvim_set_option_value(
-									"winbar",
-									Global.java_compiled_files_winbar,
-									{ win = win }
-								)
-							end
-						else
-							if not vim.api.nvim_buf_is_valid(args.buf) then
-								return
-							end
-							if
-								vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf))
-								and vim.bo.filetype ~= "help"
-								and vim.bo.buftype ~= "nofile"
-							then
-								vim.api.nvim_set_option_value("winbar", "%{%v:lua.Global.get_keys()%}", { win = win })
-								vim.api.nvim_create_autocmd("WinEnter", {
-									callback = function()
-										vim.api.nvim_set_option_value(
-											"winbar",
-											"%{%v:lua.Global.get_keys()%}",
-											{ win = vim.api.nvim_get_current_win() }
-										)
-									end,
-								})
-								vim.api.nvim_create_autocmd("WinLeave", {
-									callback = function()
-										vim.api.nvim_set_option_value(
-											"winbar",
-											Global.winbar,
-											{ win = vim.api.nvim_get_current_win() }
-										)
-									end,
-								})
-							end
-						end
-					end
-				end
-			end)
+		callback = function()
+			local buftypes = {
+				nofile = true,
+				terminal = true,
+				quickfix = true,
+				prompt = true,
+				help = true,
+				acwrite = true,
+				nowrite = true,
+			}
+			if not buftypes[vim.bo.buftype] then
+				vim.opt_local.winbar = "%{%v:lua.Global.winbar(str2nr(g:actual_curwin))%}"
+			end
 		end,
 	})
 	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
@@ -2848,64 +2710,137 @@ end)
 
 -- Lazy loaded custom configuration
 later(function()
-	-- Peek line number
-	Global.peek = function()
-		local win_states = {}
-		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
-
-		local function save_win_state(winnr)
-			win_states[winnr] = {}
-			for option, _ in pairs(options) do
-				win_states[winnr][option] = vim.api.nvim_get_option_value(option, { win = winnr })
-			end
-			win_states[winnr].cursor = vim.api.nvim_win_get_cursor(winnr)
-		end
-
-		local function restore_win_state(winnr)
-			if not win_states[winnr] then
-				return
-			end
-
-			for option, _ in pairs(options) do
-				vim.api.nvim_set_option_value(option, win_states[winnr][option], { win = winnr })
-			end
-			vim.api.nvim_win_set_cursor(winnr, win_states[winnr].cursor)
-
-			win_states[winnr] = nil
-		end
-
-		local goto_linenr = function(winnr, linenr)
-			linenr = math.max(math.min(linenr, vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(winnr))), 1)
-
-			if not win_states[winnr] then
-				save_win_state(winnr)
-			end
-
-			for option, value in pairs(options) do
-				vim.api.nvim_set_option_value(option, value, { win = winnr })
-			end
-			vim.api.nvim_win_set_cursor(winnr, { linenr, 1 })
-
-			vim.cmd("redraw")
-		end
-
-		vim.api.nvim_create_autocmd("CmdlineChanged", {
-			pattern = "*",
-			callback = function()
-				local cmdline_str = vim.api.nvim_call_function("getcmdline", {})
-				if tonumber(cmdline_str) then
-					goto_linenr(vim.api.nvim_get_current_win(), tonumber(cmdline_str))
-				end
-			end,
-		})
-
-		vim.api.nvim_create_autocmd("CmdlineLeave", {
-			pattern = "*",
-			callback = function()
-				restore_win_state(vim.api.nvim_get_current_win())
-			end,
+	-- Custom actions for git_hunks picker
+	MiniPick.registry.git_hunks = function(local_opts)
+		MiniExtra.pickers.git_hunks(local_opts, {
+			source = {
+				choose_marked = function(items_marked)
+					vim.tbl_map(function(item)
+						local patch = vim.deepcopy(item.header)
+						vim.list_extend(patch, item.hunk)
+						local cmd
+						if local_opts.scope == "staged" then
+							cmd = { "git", "apply", "--cached", "--reverse", "-" }
+						else
+							cmd = { "git", "apply", "--cached", "-" }
+						end
+						vim.system(cmd, { stdin = patch }):wait()
+					end, items_marked)
+				end,
+			},
 		})
 	end
-	Global.peek()
+	-- Treesitter symbols picker
+	MiniPick.registry.treesitter_symbols = function(opts)
+		local has_ts, _ = pcall(require, "nvim-treesitter")
+		if not has_ts then
+			vim.notify("Treesitter_symbols picker requires nvim-treesitter.", vim.log.levels.ERROR)
+			return
+		end
+		local buf = vim.api.nvim_get_current_buf()
+		if not vim.bo.filetype then
+			vim.notify("Cannot determine filetype for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+		if not lang then
+			vim.notify("Cannot determine treesitter langugage for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		local parser = vim.treesitter.get_parser(buf)
+		if not parser then
+			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		parser:parse()
+		local root = parser:trees()[1]:root()
+		if not root then
+			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		local query = (vim.treesitter.query.get(lang, "locals"))
+		if not query then
+			vim.notify("Cannot get locals queries for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		local get = function(bufnr)
+			local definitions = {}
+			local scopes = {}
+			local references = {}
+			for id, node, metadata in query:iter_captures(root, bufnr) do
+				local kind = query.captures[id]
+				local scope = "local"
+				for k, v in pairs(metadata) do
+					if type(k) == "string" and vim.endswith(k, "local.scope") then
+						scope = v
+					end
+				end
+				if node and vim.startswith(kind, "local.definition") then
+					table.insert(definitions, { kind = kind, node = node, scope = scope })
+				end
+				if node and kind == "local.scope" then
+					table.insert(scopes, node)
+				end
+				if node and kind == "local.reference" then
+					table.insert(references, { kind = kind, node = node, scope = scope })
+				end
+			end
+			return definitions, references, scopes
+		end
+		local function recurse_local_nodes(local_def, accumulator, full_match, last_match)
+			if type(local_def) ~= "table" then
+				return
+			end
+			if local_def.node then
+				accumulator(local_def, local_def.node, full_match, last_match)
+			else
+				for match_key, def in pairs(local_def) do
+					recurse_local_nodes(
+						def,
+						accumulator,
+						full_match and (full_match .. "." .. match_key) or match_key,
+						match_key
+					)
+				end
+			end
+		end
+		local get_local_nodes = function(local_def)
+			local result = {}
+			recurse_local_nodes(local_def, function(def, _, kind)
+				table.insert(result, vim.tbl_extend("keep", { kind = kind }, def))
+			end)
+			return result
+		end
+		local kind_map = {
+			var = "variable",
+			parameter = "typeparameter",
+			associated = "property",
+		}
+		local entries = {}
+		for _, definition in ipairs(get(buf)) do
+			local nodes = get_local_nodes(definition)
+			for _, node in ipairs(nodes) do
+				if node.node then
+					node.kind = node.kind and node.kind:gsub(".*%.", "")
+					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node.node)
+					local node_text = vim.treesitter.get_node_text(node.node, buf)
+					local node_kind = node.kind or ""
+					node_kind = kind_map[node_kind] or node_kind
+					local icon, _, _ = MiniIcons.get("lsp", node_kind)
+					entries[#entries + 1] = {
+						text = string.format("[%s %s] %s", icon, node_kind, node_text),
+						bufnr = buf,
+						lnum = lnum + 1,
+						col = col + 1,
+						end_lnum = end_lnum + 1,
+						end_col = end_col + 1,
+					}
+				end
+			end
+		end
+		MiniPick.start(
+			vim.tbl_deep_extend("force", opts or {}, { source = { items = entries, name = "Tree-sitter symbols" } })
+		)
+	end
 end)
 ::skip_neovim_config::
