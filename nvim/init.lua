@@ -180,8 +180,8 @@ now(function()
 		winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# ",
 		lead_space = "·",
 		next_space = " ",
-		te_win_id = -1,
-		te_flow_win_id = -1,
+		te_win = nil,
+		te_float_win = nil,
 		status_column_separator = "│", -- ▕
 		lead_tab_space = "›", -- »
 		fold_open = "▾", -- 
@@ -207,72 +207,72 @@ now(function()
 			base0F = "#BE5046",
 		},
 		languages = {
-			"angular",
-			"awk",
-			"bash",
-			"bibtex",
-			"c",
-			"cmake",
-			"cpp",
-			"css",
-			"csv",
-			"diff",
-			"dockerfile",
-			"doxygen",
-			"fish",
-			"git_config",
-			"git_rebase",
-			"gitcommit",
-			"gitignore",
-			"go",
-			"gomod",
-			"gosum",
-			"gowork",
-			"graphql",
-			"groovy",
-			"html",
-			"http",
-			"hurl",
-			"ini",
-			"java",
-			"javascript",
-			"jq",
-			"jsdoc",
-			"json",
-			"json5",
-			"latex",
-			"lua",
-			"lua_patterns",
-			"luadoc",
-			"make",
-			"markdown",
-			"markdown_inline",
-			"meson",
-			"ninja",
-			"nix",
-			"perl",
-			"php",
-			"pug",
-			"python",
-			"regex",
-			"requirements",
-			"ruby",
-			"rust",
-			"scala",
-			"scss",
-			"sql",
-			"ssh_config",
-			"starlark",
-			"svelte",
-			"toml",
-			"typescript",
-			"vim",
-			"vimdoc",
-			"vue",
-			"xml",
-			"yaml",
-			"yuck",
-			"zig",
+			angular = true,
+			awk = true,
+			bash = true,
+			bibtex = true,
+			c = true,
+			cmake = true,
+			cpp = true,
+			css = true,
+			csv = true,
+			diff = true,
+			dockerfile = true,
+			doxygen = true,
+			fish = true,
+			git_config = true,
+			git_rebase = true,
+			gitcommit = true,
+			gitignore = true,
+			go = true,
+			gomod = true,
+			gosum = true,
+			gowork = true,
+			graphql = true,
+			groovy = true,
+			html = true,
+			http = true,
+			hurl = true,
+			ini = true,
+			java = true,
+			javascript = true,
+			jq = true,
+			jsdoc = true,
+			json = true,
+			json5 = true,
+			latex = true,
+			lua = true,
+			lua_patterns = true,
+			luadoc = true,
+			make = true,
+			markdown = true,
+			markdown_inline = true,
+			meson = true,
+			ninja = true,
+			nix = true,
+			perl = true,
+			php = true,
+			pug = true,
+			python = true,
+			regex = true,
+			requirements = true,
+			ruby = true,
+			rust = true,
+			scala = true,
+			scss = true,
+			sql = true,
+			ssh_config = true,
+			starlark = true,
+			svelte = true,
+			toml = true,
+			typescript = true,
+			vim = true,
+			vimdoc = true,
+			vue = true,
+			xml = true,
+			yaml = true,
+			yuck = true,
+			zig = true,
 		},
 		status_column_pad_and_fold = function()
 			local space = "⠀" -- The space here is a braille blank space "⠀"
@@ -373,6 +373,13 @@ now(function()
 		end,
 		input_helper = function(prompt, default)
 			return vim.fn.input({ prompt = prompt, default = default })
+		end,
+		get_table_keys = function(t)
+			local ret = {}
+			for key, _ in pairs(t) do
+				table.insert(ret, key)
+			end
+			return ret
 		end,
 	}
 	-- Winbar screenkey setup
@@ -821,7 +828,7 @@ now(function()
 		},
 	})
 	require("nvim-treesitter").setup()
-	require("nvim-treesitter").install(Global.languages):wait(5 * 60 * 1000)
+	require("nvim-treesitter").install(Global.get_table_keys(Global.languages)):wait(5 * 60 * 1000)
 	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
@@ -920,7 +927,7 @@ now(function()
 				hide = { "go", "delve" },
 			},
 			anchor = function()
-				return Global.te_win_id
+				return Global.te_win
 			end,
 		},
 	})
@@ -1409,24 +1416,68 @@ now(function()
 	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
-			Global.te_win_id = vim.fn.win_getid()
+			Global.te_win = vim.fn.win_getid()
 			te_buf = vim.fn.bufnr("%")
-		elseif vim.fn.win_gotoid(Global.te_win_id) ~= 1 then
+		elseif vim.fn.win_gotoid(Global.te_win) ~= 1 then
 			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
-			Global.te_win_id = vim.fn.win_getid()
+			Global.te_win = vim.fn.win_getid()
 		end
 		vim.cmd("startinsert")
 	end
 	local function hide_terminal()
-		if vim.fn.win_gotoid(Global.te_win_id) == 1 then
+		if vim.fn.win_gotoid(Global.te_win) == 1 then
 			vim.cmd("hide")
 		end
 	end
 	local function toggle_terminal()
-		if vim.fn.win_gotoid(Global.te_win_id) == 1 then
+		if vim.fn.win_gotoid(Global.te_win) == 1 then
 			hide_terminal()
 		else
 			open_terminal()
+		end
+	end
+	local te_float_buf = nil
+	local previous_buf = nil
+	local function open_float_terminal()
+		local width = vim.o.columns * 0.8
+		local height = vim.o.lines * 0.6
+		local row = (vim.o.lines - height) / 2
+		local col = (vim.o.columns - width) / 2
+		previous_buf = vim.api.nvim_get_current_buf()
+		Global.te_float_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
+			relative = "editor",
+			row = math.floor(row),
+			col = math.floor(col),
+			width = math.floor(width),
+			height = math.floor(height),
+			focusable = true,
+			title = " Float Term ",
+			footer = " " .. vim.o.shell .. " ",
+			footer_pos = "right",
+		})
+		vim.api.nvim_set_current_win(Global.te_float_win)
+		if vim.fn.bufexists(te_float_buf) ~= 1 then
+			vim.cmd("terminal")
+			te_float_buf = vim.api.nvim_get_current_buf()
+		else
+			vim.cmd("buffer " .. te_float_buf)
+		end
+		vim.cmd("startinsert")
+	end
+	local function hide_float_terminal()
+		if vim.fn.win_gotoid(Global.te_float_win) == 1 then
+			vim.cmd("hide")
+		end
+		if previous_buf then
+			vim.cmd("buffer " .. previous_buf)
+			previous_buf = nil
+		end
+	end
+	local function toggle_float_terminal()
+		if vim.fn.win_gotoid(Global.te_float_win) == 1 then
+			hide_float_terminal()
+		else
+			open_float_terminal()
 		end
 	end
 	-- Function to convert spaces to tabs
@@ -1465,7 +1516,8 @@ now(function()
 	Map({ "x", "v", "n" }, "<leader>cx", '"+x', "Cut to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cy", '"+y', "Copy to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
-	Nmap("<C-Space>", toggle_terminal, "Toggle terminal")
+	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
+	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<Esc><Esc>", ":nohl<CR>", "Remove highlight")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
@@ -1473,8 +1525,8 @@ now(function()
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
-	Nmap("<Space><Space>", toggle_spaces, "Expand tabs")
-	Nmap("<Space><Tab>", toggle_tabs, "Contract tabs")
+	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
+	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1571,11 +1623,37 @@ end)
 -- Autocommands registration
 now(function()
 	-- Start treesitter and set omnifunc, indentexpr and folds
+	local special_file_types = {
+		netrw = true,
+		help = true,
+		nofile = true,
+		qf = true,
+		git = true,
+		diff = true,
+		["dap-repl"] = true,
+		["dap-view"] = true,
+		["dap-view-term"] = true,
+		["dap-float"] = true,
+		ministarter = true,
+	}
+	local filetype_patterns = Global.get_table_keys(Global.languages)
+	for key, _ in pairs(special_file_types) do
+		table.insert(filetype_patterns, key)
+	end
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = Global.languages,
-		callback = function()
+		pattern = filetype_patterns,
+		callback = function(args)
+			if Global.languages[args.match] then
+				-- Start treesitter
+				vim.treesitter.start()
+				-- Set foldexpr to treesitter provided folds
+				vim.o.foldmethod = "expr"
+				vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				-- Set indent expr
+				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end
+			-- Map jump2d
 			if vim.bo.buftype ~= "nofile" then
-				-- Map jump2d
 				Map(
 					{ "n", "x", "o" },
 					"<CR>",
@@ -1584,13 +1662,6 @@ now(function()
 					{ buffer = true }
 				)
 			end
-			-- Start treesitter
-			vim.treesitter.start()
-			-- Set foldexpr to treesitter provided folds
-			vim.o.foldmethod = "expr"
-			vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-			-- Set indent expr
-			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			-- Enable tag closing for html filetypes
 			local html_file_types = {
 				svelte = true,
@@ -1617,20 +1688,7 @@ now(function()
 					buffer = true,
 				})
 			end
-			local file_types = {
-				netrw = true,
-				help = true,
-				nofile = true,
-				qf = true,
-				git = true,
-				diff = true,
-				["dap-repl"] = true,
-				["dap-view"] = true,
-				["dap-view-term"] = true,
-				["dap-float"] = true,
-				ministarter = true,
-			}
-			if file_types[vim.bo.filetype] then
+			if special_file_types[vim.bo.filetype] then
 				-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
