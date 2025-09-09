@@ -483,7 +483,6 @@ now(function()
 			winblend = 0,
 		},
 	})
-	vim.notify = MiniNotify.make_notify()
 	-- Function to apply colorscheme
 	Global.apply_colorscheme = function()
 		require("mini.base16").setup({
@@ -526,7 +525,6 @@ now(function()
 		Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
 		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
 		Hi("MiniPickBorderBusy", { link = "Conditional" })
-		Hi("NamuFooter", { link = "FloatFooter" })
 		Hi("NormalFloat", { link = "Normal" })
 		Hi("Operator", { link = "Delimiter" })
 		Hi("QuickFixLineNr", { link = "SpecialKey" })
@@ -791,29 +789,6 @@ now(function()
 	require("mini.visits").setup()
 end)
 
--- Custom mini.nvim configuration
-now(function()
-	MiniPick.registry.git_hunks = function(local_opts)
-		MiniExtra.pickers.git_hunks(local_opts, {
-			source = {
-				choose_marked = function(items_marked)
-					vim.tbl_map(function(item)
-						local patch = vim.deepcopy(item.header)
-						vim.list_extend(patch, item.hunk)
-						local cmd
-						if local_opts.scope == "staged" then
-							cmd = { "git", "apply", "--cached", "--reverse", "-" }
-						else
-							cmd = { "git", "apply", "--cached", "-" }
-						end
-						vim.system(cmd, { stdin = patch }):wait()
-					end, items_marked)
-				end,
-			},
-		})
-	end
-end)
-
 -- Non lazy plugins registration
 now(function()
 	add({
@@ -967,41 +942,155 @@ now(function()
 			border = "thin",
 		},
 	})
-	add({
-		source = "bassamsdata/namu.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("namu").setup({
-		namu_symbols = {
-			options = {
-				AllowKinds = {
-					default = {
-						"Function",
-						"Method",
-						"Class",
-						"Module",
-						"Property",
-						"Variable",
-						"Constant",
-						"Enum",
-						"Interface",
-						"Field",
-						"Struct",
-					},
-				},
-				display = {
-					mode = "icon",
-					format = "tree_guides",
-				},
-			},
-		},
-	})
 end)
 
 -- Non lazy custom configuration
 now(function()
+	-- Custom actions for git_hunks picker
+	MiniPick.registry.git_hunks = function(local_opts)
+		MiniExtra.pickers.git_hunks(local_opts, {
+			source = {
+				choose_marked = function(items_marked)
+					vim.tbl_map(function(item)
+						local patch = vim.deepcopy(item.header)
+						vim.list_extend(patch, item.hunk)
+						local cmd
+						if local_opts.scope == "staged" then
+							cmd = { "git", "apply", "--cached", "--reverse", "-" }
+						else
+							cmd = { "git", "apply", "--cached", "-" }
+						end
+						vim.system(cmd, { stdin = patch }):wait()
+					end, items_marked)
+				end,
+			},
+		})
+	end
+	MiniPick.registry.treesitter_symbols = function(opts)
+		local has_ts, _ = pcall(require, "nvim-treesitter")
+		if not has_ts then
+			vim.notify("Treesitter_symbols picker requires nvim-treesitter.", vim.log.levels.ERROR)
+			return
+		end
+
+		local buf = vim.api.nvim_get_current_buf()
+		if not vim.bo.filetype then
+			vim.notify("Cannot determine filetype for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+
+		local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+		if not lang then
+			vim.notify("Cannot determine treesitter langugage for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+
+		local parser = vim.treesitter.get_parser(buf)
+		if not parser then
+			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+		parser:parse()
+
+		local root = parser:trees()[1]:root()
+		if not root then
+			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+
+		local query = (vim.treesitter.query.get(lang, "locals"))
+		if not query then
+			vim.notify("Cannot get locals queries for current buffer.", vim.log.levels.ERROR)
+			return
+		end
+
+		local get = function(bufnr)
+			local definitions = {}
+			local scopes = {}
+			local references = {}
+
+			for id, node, metadata in query:iter_captures(root, bufnr) do
+				local kind = query.captures[id]
+
+				local scope = "local"
+				for k, v in pairs(metadata) do
+					if type(k) == "string" and vim.endswith(k, "local.scope") then
+						scope = v
+					end
+				end
+				if node and vim.startswith(kind, "local.definition") then
+					table.insert(definitions, { kind = kind, node = node, scope = scope })
+				end
+				if node and kind == "local.scope" then
+					table.insert(scopes, node)
+				end
+				if node and kind == "local.reference" then
+					table.insert(references, { kind = kind, node = node, scope = scope })
+				end
+			end
+
+			return definitions, references, scopes
+		end
+
+		local function recurse_local_nodes(local_def, accumulator, full_match, last_match)
+			if type(local_def) ~= "table" then
+				return
+			end
+			if local_def.node then
+				accumulator(local_def, local_def.node, full_match, last_match)
+			else
+				for match_key, def in pairs(local_def) do
+					recurse_local_nodes(
+						def,
+						accumulator,
+						full_match and (full_match .. "." .. match_key) or match_key,
+						match_key
+					)
+				end
+			end
+		end
+
+		local get_local_nodes = function(local_def)
+			local result = {}
+			recurse_local_nodes(local_def, function(def, _, kind)
+				table.insert(result, vim.tbl_extend("keep", { kind = kind }, def))
+			end)
+			return result
+		end
+
+		local kind_map = {
+			var = "variable",
+			parameter = "typeparameter",
+			associated = "property",
+		}
+
+		local entries = {}
+		for _, definition in ipairs(get(buf)) do
+			local nodes = get_local_nodes(definition)
+			for _, node in ipairs(nodes) do
+				if node.node then
+					node.kind = node.kind and node.kind:gsub(".*%.", "")
+					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node.node)
+					local node_text = vim.treesitter.get_node_text(node.node, buf)
+					local node_kind = node.kind or ""
+					node_kind = kind_map[node_kind] or node_kind
+					local icon, _, _ = MiniIcons.get("lsp", node_kind)
+					entries[#entries + 1] = {
+						text = string.format("%s [%s %s]", node_text, icon, node_kind),
+						bufnr = buf,
+						lnum = lnum + 1,
+						col = col + 1,
+						end_lnum = end_lnum + 1,
+						end_col = end_col + 1,
+					}
+				end
+			end
+		end
+
+		MiniPick.start(
+			vim.tbl_deep_extend("force", opts or {}, { source = { items = entries, name = "Tree-sitter symbols" } })
+		)
+	end
 	Global.keys = {}
 	local max_length = 5
 	vim.on_key(function(_, typed)
@@ -1552,15 +1641,6 @@ now(function()
 	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
 	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
-	Nmap("<leader>tb", ":Namu call both<CR>", "Both calls treeview")
-	Nmap("<leader>tc", ":Namu ctags<CR>", "Ctags treeview")
-	Nmap("<leader>ti", ":Namu call in<CR>", "Incoming calls treeview")
-	Nmap("<leader>to", ":Namu call out<CR>", "Outgoing calls treeview")
-	Nmap("<leader>ts", ":Namu symbols<CR>", "Symbols treeview")
-	Nmap("<leader>ts", ":Namu watchtower<CR>", "Watchtower treeview")
-	Nmap("<leader>tt", ":Namu treesitter<CR>", "Treesitter treeview")
-	Nmap("<leader>tw", ":Namu watchtower<CR>", "Watchtower treeview")
-	Nmap("<leader>tw", ":Namu workspace<CR>", "Workspace treeview")
 	Nmap("<leader>vf", mini_pick_visits, "Core visits")
 	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
@@ -1806,7 +1886,11 @@ now(function()
 							if not vim.api.nvim_buf_is_valid(args.buf) then
 								return
 							end
-							if vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf)) and vim.bo.filetype ~= "help" then
+							if
+								vim.uv.fs_stat(vim.api.nvim_buf_get_name(args.buf))
+								and vim.bo.filetype ~= "help"
+								and vim.bo.buftype ~= "nofile"
+							then
 								vim.api.nvim_set_option_value("winbar", "%{%v:lua.Global.get_keys()%}", { win = win })
 								vim.api.nvim_create_autocmd("WinEnter", {
 									callback = function()
