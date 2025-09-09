@@ -1570,7 +1570,7 @@ end)
 
 -- Autocommands registration
 now(function()
-	-- Start treesitter on the supported language filetypes
+	-- Start treesitter and set omnifunc, indentexpr and folds
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = Global.languages,
 		callback = function()
@@ -1592,7 +1592,7 @@ now(function()
 			-- Set indent expr
 			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			-- Enable tag closing for html filetypes
-			local file_types = {
+			local html_file_types = {
 				svelte = true,
 				vue = true,
 				jsx = true,
@@ -1603,7 +1603,7 @@ now(function()
 				javascriptreact = true,
 				typescriptreact = true,
 			}
-			if file_types[vim.bo.filetype] then
+			if html_file_types[vim.bo.filetype] then
 				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
@@ -1616,6 +1616,50 @@ now(function()
 				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>", "Sameline cursor end html pairs", {
 					buffer = true,
 				})
+			end
+			local file_types = {
+				netrw = true,
+				help = true,
+				nofile = true,
+				qf = true,
+				git = true,
+				diff = true,
+				["dap-repl"] = true,
+				["dap-view"] = true,
+				["dap-view-term"] = true,
+				["dap-float"] = true,
+				ministarter = true,
+			}
+			if file_types[vim.bo.filetype] then
+				-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
+				vim.b.minicursorword_disable = true
+				vim.b.miniindentscope_disable = true
+				vim.b.minitrailspace_disable = true
+				vim.opt_local.listchars:remove("eol")
+				vim.opt_local.listchars:remove("nbsp")
+				vim.opt_local.listchars:remove("trail")
+				vim.opt_local.listchars:remove("leadmultispace")
+				vim.opt_local.listchars:remove("tab")
+				vim.opt_local.listchars:append({
+					leadmultispace = "  ",
+					tab = "  ",
+				})
+				MiniTrailspace.unhighlight()
+				-- Dap repl autocompletion setup
+				if vim.bo.filetype == "dap-repl" then
+					require("dap.ext.autocompl").attach()
+				end
+				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
+					-- Set foldexpr to mini.diff provided folds
+					vim.wo.signcolumn = "no"
+					vim.wo.foldmethod = "expr"
+					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				else
+					-- Hide statuscolumn
+					vim.wo.foldcolumn = "0"
+					vim.wo.signcolumn = "no"
+					vim.wo.statuscolumn = ""
+				end
 			end
 		end,
 	})
@@ -1691,67 +1735,6 @@ now(function()
 		callback = function(args)
 			if args.match == "background" then
 				Global.apply_colorscheme()
-			end
-		end,
-	})
-	-- Various settings for plugin filetypes
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = {
-			"netrw",
-			"help",
-			"nofile",
-			"qf",
-			"git",
-			"diff",
-			"fugitive",
-			"floggraph",
-			"dap-repl",
-			"dap-view",
-			"dap-view-term",
-			"dap-float",
-			"ministarter",
-			"copilot_chat",
-		},
-		callback = function(args)
-			-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
-			vim.b.minicursorword_disable = true
-			vim.b.miniindentscope_disable = true
-			vim.b.minitrailspace_disable = true
-			vim.opt_local.listchars:remove("eol")
-			vim.opt_local.listchars:remove("nbsp")
-			vim.opt_local.listchars:remove("trail")
-			vim.opt_local.listchars:remove("leadmultispace")
-			vim.opt_local.listchars:remove("tab")
-			vim.opt_local.listchars:append({
-				leadmultispace = "  ",
-				tab = "  ",
-			})
-			MiniTrailspace.unhighlight()
-			if vim.bo.filetype == "git" or vim.bo.filetype == "diff" or vim.bo.filetype == "fugitive" then
-				-- Set foldexpr to mini.diff provided folds
-				vim.wo.signcolumn = "no"
-				vim.wo.foldmethod = "expr"
-				vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-			elseif
-				vim.bo.filetype == "dap-float"
-				or vim.bo.filetype == "dap-repl"
-				or vim.bo.filetype == "dap-view"
-				or vim.bo.filetype == "dap-view-term"
-			then
-				-- Map q to quit window in dap filetypes
-				Nmap("q", "<C-w>q", "Quit window", { buffer = args.buf })
-				if vim.bo.filetype == "dap-repl" then
-					-- Dap repl autocompletion setup
-					require("dap.ext.autocompl").attach()
-				end
-				vim.wo.foldcolumn = "0"
-				vim.wo.signcolumn = "no"
-				vim.wo.statuscolumn = ""
-			else
-				-- Hide statuscolumn
-				vim.wo.foldcolumn = "0"
-				vim.wo.signcolumn = "no"
-				vim.wo.statuscolumn = ""
 			end
 		end,
 	})
