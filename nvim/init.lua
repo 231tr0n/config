@@ -465,7 +465,7 @@ now(function()
 	vim.o.undofile = false
 	vim.o.updatetime = 500
 	vim.o.wildmenu = true
-	vim.o.wildmode = "longest:full,full"
+	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
 	vim.o.winborder = "rounded"
@@ -756,7 +756,6 @@ now(function()
 	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	-- Snippets provider plugin
-	add("rafamadriz/friendly-snippets")
 	require("mini.snippets").setup({
 		snippets = {
 			require("mini.snippets").gen_loader.from_lang(),
@@ -837,6 +836,12 @@ now(function()
 	})
 	require("nvim-treesitter").setup()
 	require("nvim-treesitter").install(Global.get_table_keys(Global.languages)):wait(5 * 60 * 1000)
+	add({
+		source = "RRethy/nvim-treesitter-endwise",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
 	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
@@ -1622,8 +1627,6 @@ now(function()
 	map_multistep("i", "<C-u>", { "jump_after_close" })
 	map_multistep("i", "<C-y>", { "jump_before_open" })
 	map_multistep("i", "<CR>", { "pmenu_accept", "minipairs_cr" })
-	map_multistep("i", "<S-Tab>", { "pmenu_prev" })
-	map_multistep("i", "<Tab>", { "pmenu_next" })
 	map_multistep("n", "<S-Tab>", { "jump_before_tsnode" })
 	map_multistep("n", "<Tab>", { "jump_after_tsnode" })
 end)
