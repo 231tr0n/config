@@ -428,6 +428,7 @@ now(function()
 	vim.g.nerd_font = true
 	vim.o.background = "dark"
 	vim.o.breakindent = true
+	vim.o.cmdheight = 0
 	vim.o.completeopt = "menuone,noselect,fuzzy"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
@@ -497,6 +498,13 @@ now(function()
 		underline = false,
 		severity_sort = true,
 	})
+	if vim.fn.has("nvim-0.12") then
+		require("vim._extui").enable({
+			msg = {
+				target = "msg",
+			},
+		})
+	end
 end)
 
 -- Initial UI setup
@@ -754,7 +762,7 @@ now(function()
 			require("mini.snippets").gen_loader.from_lang(),
 		},
 	})
-	MiniSnippets.start_lsp_server()
+	-- MiniSnippets.start_lsp_server()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
 		header = table.concat({
@@ -1630,6 +1638,10 @@ now(function()
 		qf = true,
 		git = true,
 		diff = true,
+		msg = true,
+		pager = true,
+		cmd = true,
+		dialog = true,
 		["dap-repl"] = true,
 		["dap-view"] = true,
 		["dap-view-term"] = true,
@@ -1721,6 +1733,15 @@ now(function()
 			end
 		end,
 	})
+	if vim.fn.has("nvim-0.12") then
+		vim.api.nvim_create_autocmd("CmdlineChanged", {
+			desc = "Auto show command line completion",
+			pattern = "*",
+			callback = function()
+				vim.fn.wildtrigger()
+			end,
+		})
+	end
 	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
@@ -1803,7 +1824,7 @@ now(function()
 		end,
 	})
 	-- Set winbar for all windows
-	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter" }, {
+	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter", "BufEnter" }, {
 		pattern = "*",
 		callback = function()
 			local buftypes = {
@@ -2044,6 +2065,7 @@ now(function()
 			local arg = string.format("--jvm-arg=%s", a)
 			table.insert(args, arg)
 		end
+		table.insert(args, string.format("--jvm-arg=%s", "-javaagent:/usr/share/java/lombok/lombok.jar"))
 		return unpack(args)
 	end
 	local function get_jdtls_java_executable()
