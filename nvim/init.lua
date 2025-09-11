@@ -371,9 +371,6 @@ now(function()
 				return coroutine.yield()
 			end
 		end,
-		input_helper = function(prompt, default)
-			return vim.fn.input({ prompt = prompt, default = default })
-		end,
 		get_table_keys = function(t)
 			local ret = {}
 			for key, _ in pairs(t) do
@@ -1557,7 +1554,7 @@ now(function()
 	Nmap("<leader>df", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').frames)<CR>", "Frames")
 	Nmap("<leader>dh", ":lua require('dap.ui.widgets').hover()<CR>", "Hover value")
 	Nmap("<leader>dl", ":lua require('dap').run_last()<CR>", "Run Last")
-	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, Global.input_helper('Log: '))<CR>", "Log point")
+	Nmap("<leader>dlp", ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log: '))<CR>", "Log point")
 	Nmap("<leader>dp", ":lua require('dap.ui.widgets').preview()<CR>", "Preview")
 	Nmap("<leader>dr", ":lua require('dap').repl.open({}, 'vsplit new')<CR>", "Open Repl")
 	Nmap("<leader>dsO", ":lua require('dap').step_over()<CR>", "Step over")
@@ -1624,6 +1621,8 @@ now(function()
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
+	map_multistep("c", "<S-Tab>", { "pmenu_prev" })
+	map_multistep("c", "<Tab>", { "pmenu_next" })
 	map_multistep("i", "<BS>", { "minipairs_bs" })
 	map_multistep("i", "<C-u>", { "jump_after_close" })
 	map_multistep("i", "<C-y>", { "jump_before_open" })
@@ -1825,10 +1824,11 @@ now(function()
 	vim.api.nvim_create_autocmd("TermOpen", {
 		callback = function()
 			vim.wo.statuscolumn = ""
+			vim.wo.winbar = ""
 		end,
 	})
 	-- Set winbar for all windows
-	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter", "BufEnter" }, {
+	vim.api.nvim_create_autocmd({ "BufEnter" }, {
 		pattern = "*",
 		callback = function()
 			local buftypes = {
@@ -2695,10 +2695,10 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return Global.input_helper("Enter host: ", "127.0.0.1")
+				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return Global.input_helper("Enter port: ", 5678)
+				return vim.fn.input("Enter port: ", 5678)
 			end,
 		},
 	}
@@ -2711,10 +2711,10 @@ now(function()
 			request = "attach",
 			outputMode = "remote",
 			hostName = function()
-				return Global.input_helper("Enter host: ", "127.0.0.1")
+				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return Global.input_helper("Enter port: ", 38697)
+				return vim.fn.input("Enter port: ", 38697)
 			end,
 		},
 	}
@@ -2727,10 +2727,10 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return Global.input_helper("Enter host: ", "127.0.0.1")
+				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return Global.input_helper("Enter port: ", 8000)
+				return vim.fn.input("Enter port: ", 8000)
 			end,
 		},
 	}
@@ -2743,13 +2743,13 @@ now(function()
 			mode = "remote",
 			request = "attach",
 			hostName = function()
-				return Global.input_helper("Enter host: ", "127.0.0.1")
+				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return Global.input_helper("Enter port: ", 5005)
+				return vim.fn.input("Enter port: ", 5005)
 			end,
 			buildTarget = function()
-				return Global.input_helper(
+				return vim.fn.input(
 					"Enter build target[artifact id in pom.xml or name of the json file in .bloop folder]: ",
 					"example"
 				)
@@ -2765,10 +2765,10 @@ now(function()
 				mode = "remote",
 				request = "attach",
 				hostName = function()
-					return Global.input_helper("Enter host: ", "127.0.0.1")
+					return vim.fn.input("Enter host: ", "127.0.0.1")
 				end,
 				port = function()
-					return Global.input_helper("Enter port: ", 9229)
+					return vim.fn.input("Enter port: ", 9229)
 				end,
 			},
 		}
