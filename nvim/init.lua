@@ -386,7 +386,7 @@ now(function()
 				table.remove(Global.keys, #Global.keys)
 			end
 			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
-			vim.cmd("redrawstatus")
+			vim.api.nvim__redraw({ winbar = true })
 		end
 	end, vim.api.nvim_create_namespace("show-keys"))
 	-- Winbar setup
@@ -1621,8 +1621,6 @@ now(function()
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
-	map_multistep("c", "<S-Tab>", { "pmenu_prev" })
-	map_multistep("c", "<Tab>", { "pmenu_next" })
 	map_multistep("i", "<BS>", { "minipairs_bs" })
 	map_multistep("i", "<C-u>", { "jump_after_close" })
 	map_multistep("i", "<C-y>", { "jump_before_open" })
