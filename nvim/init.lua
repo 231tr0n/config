@@ -389,6 +389,7 @@ now(function()
 				table.remove(Global.keys, #Global.keys)
 			end
 			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
+			vim.cmd("redrawstatus")
 		end
 	end, vim.api.nvim_create_namespace("show-keys"))
 	-- Winbar setup
