@@ -496,7 +496,7 @@ now(function()
 		underline = false,
 		severity_sort = true,
 	})
-	if vim.fn.has("nvim-0.12") then
+	if vim.fn.has("nvim-0.12") == 1 then
 		require("vim._extui").enable({
 			msg = {
 				target = "msg",
@@ -1736,7 +1736,7 @@ now(function()
 			end
 		end,
 	})
-	if vim.fn.has("nvim-0.12") then
+	if vim.fn.has("nvim-0.12") == 1 then
 		vim.api.nvim_create_autocmd("CmdlineChanged", {
 			desc = "Auto show command line completion",
 			pattern = "*",
@@ -1873,6 +1873,7 @@ now(function()
 			vim.wo.foldcolumn = "0"
 			vim.wo.signcolumn = "no"
 			vim.wo.statuscolumn = ""
+			vim.wo.winbar = ""
 		end,
 	})
 	-- Highlight yanked text for 1 second
