@@ -365,6 +365,7 @@ now(function()
 								end
 							end
 						end
+						return false
 					end,
 					choose = function(choice)
 						for _, value in ipairs(options) do
@@ -372,6 +373,7 @@ now(function()
 								selected_items = { value }
 							end
 						end
+						return false
 					end,
 				},
 			})
@@ -2188,6 +2190,32 @@ now(function()
 				["metals/status"] = vim.schedule_wrap(function(_, results)
 					vim.notify(results.text, vim.log.levels.INFO)
 				end),
+				["metals/quickPick"] = function(_, result)
+					local ids = {}
+					local labels = {}
+					for i, item in pairs(result.items) do
+						table.insert(ids, item.id)
+						table.insert(labels, i .. " - " .. item.label)
+					end
+					local choice = vim.fn.inputlist(labels)
+					if choice == 0 then
+						return { cancelled = true }
+					else
+						return { itemId = ids[choice] }
+					end
+				end,
+				["metals/inputBox"] = function(_, result)
+					local args = { prompt = result.prompt .. "\n" }
+					if result.value then
+						args.default = result.value
+					end
+					local name = vim.fn.input(args)
+					if name == "" then
+						return { cancelled = true }
+					else
+						return { value = name }
+					end
+				end,
 			},
 		},
 		jdtls = {
