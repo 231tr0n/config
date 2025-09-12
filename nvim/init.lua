@@ -7,7 +7,6 @@
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/opt/mini.nvim"
----@diagnostic disable-next-line: undefined-field
 if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installing `mini.nvim`" | redraw')
 	local clone_cmd = {
@@ -20,14 +19,11 @@ if not vim.uv.fs_stat(mini_path) then
 	vim.fn.system(clone_cmd)
 	vim.cmd('echo "Installed `mini.nvim`" | redraw')
 end
--- Add mini.nvim to runtime
 vim.cmd("packadd mini.nvim | helptags ALL")
 
 -- Setup MiniDeps
 require("mini.deps").setup({ path = { package = path_package } })
--- Export add, now and later functions from MiniDeps
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
--- Track and update self
 add("nvim-mini/mini.nvim")
 
 -- Helper functions
@@ -176,36 +172,11 @@ end
 now(function()
 	Global = {
 		keys = {},
-		screenkey_max_length = 5,
-		winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# ",
-		lead_space = "·",
-		next_space = " ",
 		te_win = nil,
 		te_float_win = nil,
-		status_column_separator = "│", -- ▕
-		lead_tab_space = "›", -- »
 		fold_open = "▾", -- 
 		fold_close = "▸", -- 
-		float_multiplier = 0.8,
 		offset_encoding = "utf-16",
-		palette = {
-			base00 = "#282C34",
-			base01 = "#353B45",
-			base02 = "#3E4451",
-			base03 = "#545862",
-			base04 = "#565C64",
-			base05 = "#ABB2BF",
-			base06 = "#B6BDCA",
-			base07 = "#C8CCD4",
-			base08 = "#E06C75",
-			base09 = "#D19A66",
-			base0A = "#E5C07B",
-			base0B = "#98C379",
-			base0C = "#56B6C2",
-			base0D = "#61AFEF",
-			base0E = "#C678DD",
-			base0F = "#BE5046",
-		},
 		languages = {
 			angular = true,
 			awk = true,
@@ -276,16 +247,17 @@ now(function()
 		},
 		status_column_pad_and_fold = function()
 			local space = "⠀" -- The space here is a braille blank space "⠀"
+			local status_column_separator = "│" -- ▕
 			local lnum = vim.v.lnum
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return Global.fold_open .. Global.status_column_separator
+						return Global.fold_open .. status_column_separator
 					else
-						return Global.fold_close .. Global.status_column_separator
+						return Global.fold_close .. status_column_separator
 					end
 				end
-				return space .. Global.status_column_separator
+				return space .. status_column_separator
 			else
 				local count = #tostring(vim.fn.line("$"))
 				local temp
@@ -294,7 +266,7 @@ now(function()
 				else
 					temp = string.rep(space, count)
 				end
-				return temp .. space .. Global.status_column_separator
+				return temp .. space .. status_column_separator
 			end
 		end,
 		customized_hover = function(fn)
@@ -378,38 +350,25 @@ now(function()
 			end
 			return ret
 		end,
-	}
-	-- Winbar screenkey setup
-	vim.on_key(function(_, typed)
-		if typed ~= "" then
-			if #Global.keys >= Global.screenkey_max_length then
-				table.remove(Global.keys, #Global.keys)
+		winbar = function(win_id)
+			if win_id and not vim.api.nvim_win_is_valid(win_id) then
+				return
 			end
-			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
-			vim.api.nvim__redraw({ winbar = true })
-		end
-	end, vim.api.nvim_create_namespace("show-keys"))
-	-- Winbar setup
-	Global.winbar = function(win_id)
-		if win_id and not vim.api.nvim_win_is_valid(win_id) then
-			return
-		end
-		if vim.api.nvim_get_current_win() == win_id then
-			if #Global.keys > 0 then
-				return Global.winbar_append
-					.. "%#MiniTablineModifiedCurrent# "
-					.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
-					.. " %#WinBar#%<"
+			local winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# "
+			if vim.api.nvim_get_current_win() == win_id then
+				if #Global.keys > 0 then
+					return winbar_append
+						.. "%#MiniTablineModifiedCurrent# "
+						.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
+						.. " %#WinBar#%<"
+				else
+					return winbar_append
+				end
 			else
-				return Global.winbar_append
+				return winbar_append .. "%F"
 			end
-		else
-			return Global.winbar_append .. "%F"
-		end
-	end
-	-- Function to set leadmultispace correctly
-	Global.lead_multi_tab_space = Global.lead_tab_space .. Global.next_space
-	Global.lead_multi_space = Global.lead_space .. Global.next_space
+		end,
+	}
 end)
 
 -- Default settings
@@ -441,6 +400,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
+	vim.o.listchars = "tab:› ,leadmultispace:· ,trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:1,hor:1"
@@ -456,6 +416,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
+	vim.o.statuscolumn = "%s%l%{v:lua.Global.status_column_pad_and_fold()}"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -470,12 +431,6 @@ now(function()
 	vim.o.wrap = false
 	vim.opt.matchpairs:append("<:>")
 	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
-	vim.o.listchars = "tab:"
-		.. Global.lead_multi_tab_space
-		.. ",leadmultispace:"
-		.. Global.lead_multi_space
-		.. ",trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
-	vim.o.statuscolumn = "%s%l%{v:lua.Global.status_column_pad_and_fold()}"
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -516,10 +471,26 @@ now(function()
 			winblend = 0,
 		},
 	})
-	-- Function to apply colorscheme
 	Global.apply_colorscheme = function()
 		require("mini.base16").setup({
-			palette = Global.palette,
+			palette = {
+				base00 = "#282C34",
+				base01 = "#353B45",
+				base02 = "#3E4451",
+				base03 = "#545862",
+				base04 = "#565C64",
+				base05 = "#ABB2BF",
+				base06 = "#B6BDCA",
+				base07 = "#C8CCD4",
+				base08 = "#E06C75",
+				base09 = "#D19A66",
+				base0A = "#E5C07B",
+				base0B = "#98C379",
+				base0C = "#56B6C2",
+				base0D = "#61AFEF",
+				base0E = "#C678DD",
+				base0F = "#BE5046",
+			},
 			plugins = { default = true },
 		})
 		Hi("@constructor.lua", { link = "Delimiter" })
@@ -753,7 +724,6 @@ now(function()
 	})
 	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
-	-- Snippets provider plugin
 	require("mini.snippets").setup({
 		snippets = {
 			require("mini.snippets").gen_loader.from_lang(),
@@ -869,7 +839,6 @@ now(function()
 		trim_leading_whitespace = "all",
 	})
 	add("mfussenegger/nvim-dap")
-	-- Define custom signs for diagnostics and dap
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define(
@@ -1369,7 +1338,15 @@ end)
 
 -- Non lazy custom configuration
 now(function()
-	-- Peek line number
+	vim.on_key(function(_, typed)
+		if typed ~= "" then
+			if #Global.keys >= 5 then
+				table.remove(Global.keys, #Global.keys)
+			end
+			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
+			vim.api.nvim__redraw({ winbar = true })
+		end
+	end, vim.api.nvim_create_namespace("show-keys"))
 	Global.peek = function()
 		local win_states = {}
 		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
@@ -1450,17 +1427,15 @@ now(function()
 	local te_float_buf = nil
 	local previous_buf = nil
 	local function open_float_terminal()
-		local width = vim.o.columns * 0.8
-		local height = vim.o.lines * 0.6
-		local row = (vim.o.lines - height) / 2
-		local col = (vim.o.columns - width) / 2
 		previous_buf = vim.api.nvim_get_current_buf()
+		local height = math.floor(0.6 * vim.o.lines)
+		local width = math.floor(0.6 * vim.o.columns)
 		Global.te_float_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
 			relative = "editor",
-			row = math.floor(row),
-			col = math.floor(col),
-			width = math.floor(width),
-			height = math.floor(height),
+			row = math.floor(0.5 * (vim.o.lines - height)),
+			col = math.floor(0.5 * (vim.o.columns - width)),
+			width = math.floor(0.6 * vim.o.columns),
+			height = math.floor(0.6 * vim.o.lines),
 			focusable = true,
 			title = " Float Term ",
 			footer = " " .. vim.o.shell .. " ",
@@ -1491,23 +1466,19 @@ now(function()
 			open_float_terminal()
 		end
 	end
-	-- Function to convert spaces to tabs
 	local function toggle_tabs()
 		vim.o.expandtab = false
 		vim.cmd("retab!")
 	end
-	-- Function to convert tabs to spaces
 	local function toggle_spaces()
 		vim.o.expandtab = true
 		vim.cmd("retab!")
 	end
-	-- Function to toggle virtual text for diagnostics
 	local function diagnostic_virtual_text_toggle()
 		vim.diagnostic.config({
 			virtual_text = not vim.diagnostic.config().virtual_text,
 		})
 	end
-	-- Function to toggle virtual lines for diagnostics
 	local function diagnostic_virtual_lines_toggle()
 		vim.diagnostic.config({
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
@@ -1631,7 +1602,6 @@ end)
 
 -- Autocommands registration
 now(function()
-	-- Start treesitter and set omnifunc, indentexpr and folds
 	local special_file_types = {
 		netrw = true,
 		help = true,
@@ -1657,15 +1627,11 @@ now(function()
 		pattern = filetype_patterns,
 		callback = function(args)
 			if Global.languages[args.match] then
-				-- Start treesitter
 				vim.treesitter.start()
-				-- Set foldexpr to treesitter provided folds
 				vim.o.foldmethod = "expr"
 				vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-				-- Set indent expr
 				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			end
-			-- Map jump2d
 			if vim.bo.buftype ~= "nofile" then
 				Map(
 					{ "n", "x", "o" },
@@ -1675,7 +1641,6 @@ now(function()
 					{ buffer = true }
 				)
 			end
-			-- Enable tag closing for html filetypes
 			local html_file_types = {
 				svelte = true,
 				vue = true,
@@ -1688,7 +1653,6 @@ now(function()
 				typescriptreact = true,
 			}
 			if html_file_types[vim.bo.filetype] then
-				-- HTML tag completion with >, >> and >>>
 				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
 				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
@@ -1702,7 +1666,6 @@ now(function()
 				})
 			end
 			if special_file_types[vim.bo.filetype] then
-				-- Disable unwanted mini plugins in above filetypes and remove unwanted listchars
 				vim.b.minicursorword_disable = true
 				vim.b.miniindentscope_disable = true
 				vim.b.minitrailspace_disable = true
@@ -1716,17 +1679,14 @@ now(function()
 					tab = "  ",
 				})
 				MiniTrailspace.unhighlight()
-				-- Dap repl autocompletion setup
 				if vim.bo.filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
 				end
 				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
-					-- Set foldexpr to mini.diff provided folds
 					vim.wo.signcolumn = "no"
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 				else
-					-- Hide statuscolumn
 					vim.wo.foldcolumn = "0"
 					vim.wo.signcolumn = "no"
 					vim.wo.statuscolumn = ""
@@ -1743,7 +1703,6 @@ now(function()
 			end,
 		})
 	end
-	-- Auto command to add keymaps for mini.files and remove extra info added to mini.statusline by mini.git
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
 		callback = function(args)
@@ -1752,7 +1711,6 @@ now(function()
 				local summary = vim.b[args.buf].minigit_summary
 				vim.b[args.buf].minigit_summary_string = summary.head_name or ""
 			elseif args.match == "MiniFilesBufferCreate" then
-				-- Create mapping for setting current dir as pwd for neovim
 				local b = args.data.buf_id
 				Nmap("g~", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
@@ -1761,7 +1719,6 @@ now(function()
 					end
 					vim.fn.chdir(vim.fs.dirname(path))
 				end, "Set cwd", { buffer = b })
-				-- Create mapping for yanking path of entry
 				Nmap("gy", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
@@ -1769,7 +1726,6 @@ now(function()
 					end
 					vim.fn.setreg("", path)
 				end, "Yank path", { buffer = b })
-				-- Create mapping for yanking path of entry to clipboard
 				Nmap("gY", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
 					if path == nil then
@@ -1777,7 +1733,6 @@ now(function()
 					end
 					vim.fn.setreg("+", path)
 				end, "Yank path", { buffer = b })
-				-- Toggle dotfiles
 				local show_dotfiles = true
 				local filter_show = function(_)
 					return true
@@ -1791,7 +1746,6 @@ now(function()
 					MiniFiles.refresh({ content = { filter = new_filter } })
 				end
 				Nmap("g.", toggle_dotfiles, "Toggle dotfiles", { buffer = b })
-				-- Open files in horizontal or vertical pane
 				local map_split = function(buf_id, lhs, direction)
 					local rhs = function()
 						local cur_target = MiniFiles.get_explorer_state().target_window
@@ -1809,7 +1763,6 @@ now(function()
 			end
 		end,
 	})
-	-- Run colorscheme and multispace calc functions when respective options are changed
 	vim.api.nvim_create_autocmd("OptionSet", {
 		pattern = "background",
 		callback = function(args)
@@ -1818,14 +1771,12 @@ now(function()
 			end
 		end,
 	})
-	-- Remove statuscolumn for terminal
 	vim.api.nvim_create_autocmd("TermOpen", {
 		callback = function()
 			vim.wo.statuscolumn = ""
 			vim.wo.winbar = ""
 		end,
 	})
-	-- Set winbar for all windows
 	vim.api.nvim_create_autocmd({ "BufEnter" }, {
 		pattern = "*",
 		callback = function()
@@ -1843,19 +1794,15 @@ now(function()
 			end
 		end,
 	})
-	-- Lsp semanticTokensProvider disabling and foldexpr enabling setup
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(args)
-			-- Disable semantic highlighting
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
 			if client then
 				client.server_capabilities.semanticTokensProvider = nil
 			end
-			-- Set foldexpr to lsp provided folds
 			-- vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
 		end,
 	})
-	-- Trim files on save setup
 	vim.api.nvim_create_autocmd("BufWrite", {
 		pattern = "*",
 		callback = function()
@@ -1863,7 +1810,6 @@ now(function()
 			MiniTrailspace.trim_last_lines()
 		end,
 	})
-	-- Disable statuscolumn in command window
 	vim.api.nvim_create_autocmd("CmdwinEnter", {
 		callback = function()
 			vim.wo.number = false
@@ -1874,7 +1820,6 @@ now(function()
 			vim.wo.winbar = ""
 		end,
 	})
-	-- Highlight yanked text for 1 second
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		callback = function()
 			vim.hl.on_yank({
@@ -1883,14 +1828,13 @@ now(function()
 			})
 		end,
 	})
-	-- Send focus event to metals lsp
 	vim.api.nvim_create_autocmd("BufEnter", {
 		pattern = { "*.scala" },
 		callback = function()
+			---@diagnostic disable-next-line: param-type-mismatch
 			vim.lsp.buf_notify(0, "metals/didFocusTextDocument", vim.uri_from_bufnr(0))
 		end,
 	})
-	-- Handle jdt URIs and java class files differently
 	vim.api.nvim_create_autocmd("BufReadCmd", {
 		pattern = { "jdt://*", "*.class" },
 		callback = function(args)
@@ -1986,6 +1930,7 @@ now(function()
 				local params = {
 					uri = uri,
 				}
+				---@diagnostic disable-next-line: param-type-mismatch
 				client:request("java/classFileContents", params, handler, buf)
 			end
 			vim.wait(timeout_ms, function()
@@ -1997,19 +1942,16 @@ end)
 
 -- Lsp configurations setup
 now(function()
-	-- Make lsp capabilities
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	lsp_capabilities.general.positionEncodings = { Global.offset_encoding }
 	add("neovim/nvim-lspconfig")
-	-- Lua settings
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
 	for k, v in ipairs(lua_runtime_files) do
 		if v == vim.fn.stdpath("config") then
 			table.remove(lua_runtime_files, k)
 		end
 	end
-	-- Jdtls settings
 	local extra_code_action_literals = {
 		"source.generate.toString",
 		"source.generate.hashCodeEquals",
@@ -2044,7 +1986,6 @@ now(function()
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
 	local env = {
-		---@diagnostic disable-next-line: undefined-field
 		HOME = vim.uv.os_homedir(),
 		XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME"),
 		JDTLS_JVM_ARGS = os.getenv("JDTLS_JVM_ARGS"),
@@ -2301,7 +2242,6 @@ now(function()
 			},
 		},
 	}
-	-- Set capabilities and load lsps
 	vim.lsp.config("*", {
 		capabilities = lsp_capabilities,
 		root_markers = { ".git" },
@@ -2310,9 +2250,7 @@ now(function()
 		vim.lsp.config(server, config)
 		vim.lsp.enable(server)
 	end
-	-- Define client commands
 	local commands = {
-		-- Jdtls client commands
 		["java.apply.workspaceEdit"] = function(command)
 			for _, argument in ipairs(command.arguments) do
 				vim.lsp.util.apply_workspace_edit(argument, Global.offset_encoding)
@@ -2621,30 +2559,19 @@ now(function()
 				port = config.port,
 				buildTarget = config.buildTarget,
 			},
-		}, { bufnr = bufnr }, function(err, res)
-			if err then
-				vim.notify("Error starting scala debug adapter: " .. err.message, vim.log.levels.WARN)
-				return
+		}, { bufnr = bufnr }, function(_, res)
+			if res and res.uri then
+				callback({
+					type = "server",
+					hostName = "127.0.0.1",
+					port = vim.split(res.uri, ":", { trimempty = true })[3],
+					options = {
+						initialize_timeout_sec = 10,
+					},
+				})
+			else
+				vim.notify("Could not get uri to parse", vim.log.levels.ERROR)
 			end
-			local uri = res.uri
-			local results = {}
-			local idx = 1
-			local delim_from, delim_to = string.find(uri, ":", idx)
-			while delim_from do
-				table.insert(results, string.sub(uri, idx, delim_from - 1))
-				idx = delim_to + 1
-				delim_from, delim_to = string.find(uri, ":", idx)
-			end
-			table.insert(results, string.sub(uri, idx))
-			local res_port = results[3]
-			callback({
-				type = "server",
-				hostName = "127.0.0.1",
-				port = tonumber(res_port),
-				options = {
-					initialize_timeout_sec = 10,
-				},
-			})
 		end)
 	end
 	dap.adapters["jdtls-java-debug"] = function(callback, _)
@@ -2664,7 +2591,7 @@ now(function()
 				callback({
 					type = "server",
 					hostName = "127.0.0.1",
-					port = tonumber(res_port),
+					port = res_port,
 				})
 			end
 		)
@@ -2776,7 +2703,6 @@ end)
 
 -- Lazy loaded custom configuration
 later(function()
-	-- Custom actions for git_hunks picker
 	MiniPick.registry.git_hunks = function(local_opts)
 		MiniExtra.pickers.git_hunks(local_opts, {
 			source = {
@@ -2796,7 +2722,6 @@ later(function()
 			},
 		})
 	end
-	-- Treesitter symbols picker
 	MiniPick.registry.treesitter_symbols = function(opts)
 		local has_ts, _ = pcall(require, "nvim-treesitter")
 		if not has_ts then
