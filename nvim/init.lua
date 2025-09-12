@@ -283,13 +283,16 @@ now(function()
 		lsp_get_client = function(name, bufnr)
 			local clients
 			local buf = nil
-			if not bufnr then
-				buf = vim.api.nvim_get_current_buf()
+			if bufnr then
+				clients = vim.lsp.get_clients({
+					bufnr = buf,
+					name = name,
+				})
+			else
+				clients = vim.lsp.get_clients({
+					name = name,
+				})
 			end
-			clients = vim.lsp.get_clients({
-				bufnr = buf,
-				name = name,
-			})
 			if #clients == 0 then
 				vim.notify("No " .. name .. " client found", vim.log.levels.WARN)
 				return
@@ -342,6 +345,52 @@ now(function()
 			if co then
 				return coroutine.yield()
 			end
+		end,
+		multi_select = function(prompt, options, format)
+			local choices = {}
+			local selected_items = {}
+			for _, value in ipairs(options) do
+				table.insert(choices, format(value))
+			end
+			MiniPick.start({
+				source = {
+					items = choices,
+					name = prompt,
+					choose_marked = function(items)
+						for _, choice in ipairs(items) do
+							for _, value in ipairs(options) do
+								if format(value) == choice then
+									table.insert(selected_items, value)
+									break
+								end
+							end
+						end
+					end,
+					choose = function(choice)
+						for _, value in ipairs(options) do
+							if format(value) == choice then
+								selected_items = { value }
+							end
+						end
+					end,
+				},
+			})
+			return selected_items
+		end,
+		select = function(prompt, options, format)
+			local choices = {}
+			local selected = {}
+			for _, value in ipairs(options) do
+				table.insert(choices, format(value))
+			end
+			vim.ui.select(choices, { prompt = prompt }, function(choice)
+				for _, value in ipairs(options) do
+					if format(value) == choice then
+						selected = value
+					end
+				end
+			end)
+			return selected
 		end,
 		get_table_keys = function(t)
 			local ret = {}
@@ -1838,51 +1887,7 @@ now(function()
 	vim.api.nvim_create_autocmd("BufReadCmd", {
 		pattern = { "jdt://*", "*.class" },
 		callback = function(args)
-			local function is_jdtls_buf(buffer_nr)
-				if vim.bo[buffer_nr].filetype == "java" then
-					return true
-				end
-				local buf_name = vim.api.nvim_buf_get_name(buffer_nr)
-				return vim.endswith(buf_name, "build.gradle")
-					or vim.endswith(buf_name, "pom.xml")
-					or vim.startswith(buf_name, "jdt://")
-					or vim.endswith(buf_name, ".class")
-					or vim.endswith(buf_name, ".java")
-			end
-			local attached = false
-			local alt_buf = vim.fn.bufnr("#", -1)
-			if alt_buf and alt_buf > 0 then
-				if is_jdtls_buf(alt_buf) then
-					local client = Global.lsp_get_client("jdtls", alt_buf)
-					if not client then
-						return
-					end
-					vim.lsp.buf_attach_client(args.buf, client.id)
-					attached = true
-				end
-			end
-			if not attached then
-				for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
-					if vim.api.nvim_buf_is_loaded(buffer) then
-						if is_jdtls_buf(buffer) then
-							local client = Global.lsp_get_client("jdtls", buffer)
-							if not client then
-								return
-							end
-							vim.lsp.buf_attach_client(args.buf, client.id)
-							if client then
-								attached = true
-								break
-							end
-						end
-					end
-				end
-			end
-			if not attached then
-				vim.notify("Cannot attach jdtls to buffer", vim.log.levels.WARN)
-				return
-			end
-			local fname = vim.fn.expand("<amatch>")
+			local fname = args.match
 			local uri
 			local use_cmd
 			if vim.startswith(fname, "jdt://") then
@@ -1901,17 +1906,31 @@ now(function()
 			vim.bo[buf].buftype = "nofile"
 			vim.bo[buf].filetype = "java"
 			local timeout_ms = 5000
-			vim.wait(timeout_ms, function()
-				return Global.lsp_get_client("jdtls", buf) ~= nil
-			end)
-			local client = Global.lsp_get_client("jdtls", buf)
+			local alt_buf = vim.fn.bufnr("#", -1)
+			local client = Global.lsp_get_client("jdtls", alt_buf)
 			if not client then
+				client = Global.lsp_get_client("jdtls")
+			end
+			if not client then
+				vim.wait(timeout_ms, function()
+					return Global.lsp_get_client("jdtls", buf) ~= nil
+				end)
+				client = Global.lsp_get_client("jdtls", buf)
+			else
+				vim.lsp.buf_attach_client(buf, client.id)
+			end
+			if not client then
+				vim.notify("Jdtls client not active", vim.log.levels.WARN)
 				return
 			end
 			local content
 			local function handler(err, result)
 				if err then
-					vim.notify("Error decompiling class files: " .. err.message, vim.log.levels.WARN)
+					vim.notify("Error decompiling class files: " .. vim.inspect(err), vim.log.levels.ERROR)
+					return
+				end
+				if not result then
+					vim.notify("Jdtls did not return class file contents", vim.log.levels.ERROR)
 					return
 				end
 				content = result
@@ -2004,16 +2023,19 @@ now(function()
 		return get_jdtls_cache_dir() .. "/workspace"
 	end
 	local function get_jdtls_jvm_args()
+		local lombok_path = "/usr/share/java/lombok/lombok.jar"
 		local args = {}
 		for a in string.gmatch((env.JDTLS_JVM_ARGS or ""), "%S+") do
 			local arg = string.format("--jvm-arg=%s", a)
 			table.insert(args, arg)
 		end
-		table.insert(args, string.format("--jvm-arg=%s", "-javaagent:/usr/share/java/lombok/lombok.jar"))
+		if vim.uv.fs_stat(lombok_path) then
+			table.insert(args, string.format("--jvm-arg=-javaagent:%s", lombok_path))
+		end
 		return unpack(args)
 	end
 	local function get_jdtls_java_executable()
-		return env.JAVA_EXECUTABLE or "/usr/lib/jvm/default/bin/java"
+		return env.JAVA_EXECUTABLE or "/usr/lib/jvm/java-21-openjdk/bin/java"
 	end
 	local lsp_servers = {
 		lua_ls = {
@@ -2256,6 +2278,17 @@ now(function()
 				vim.lsp.util.apply_workspace_edit(argument, Global.offset_encoding)
 			end
 		end,
+		["java.show.references"] = function(args)
+			local arguments = args.arguments
+			local locations = arguments[3]
+			local items = vim.lsp.util.locations_to_items(locations, Global.offset_encoding)
+			local list = {
+				title = "References",
+				items = items,
+			}
+			vim.fn.setqflist({}, " ", list)
+			vim.cmd("botright copen")
+		end,
 		["java.action.generateToStringPrompt"] = function(_, ctx)
 			local params = ctx.params
 			if not ctx.bufnr then
@@ -2276,10 +2309,25 @@ now(function()
 				if not result then
 					return
 				end
+				if result.exists then
+					local prompt = string.format(
+						"Method toString() already exists in '%s'. Do you want to replace it?",
+						result.type
+					)
+					local choice = Global.select(prompt, { "Yes", "No" }, function(x)
+						return x
+					end)
+					if choice == "No" then
+						return
+					end
+				end
+				local items = Global.multi_select("Generate toString for which items?", result.fields, function(x)
+					return string.format("%s: %s", x.name, x.type)
+				end)
 				local err1, edit = Global.lsp_client_request(
 					client,
 					"java/generateToString",
-					{ context = params, fields = result.fields },
+					{ context = params, fields = items },
 					bufnr
 				)
 				if err1 then
@@ -2303,7 +2351,7 @@ now(function()
 			Global.coroutine_wrap(function()
 				local _, result = Global.lsp_client_request(client, "java/checkHashCodeEqualsStatus", params, bufnr)
 				if not result then
-					vim.notify("No result", vim.log.levels.INFO)
+					vim.notify("No result for java/checkHashCodeEqualsStatus", vim.log.levels.INFO)
 					return
 				elseif not result.fields or #result.fields == 0 then
 					vim.notify(
@@ -2312,10 +2360,13 @@ now(function()
 					)
 					return
 				end
+				local items = Global.multi_select("Generate hashCodeEquals for which items?", result.fields, function(x)
+					return string.format("%s: %s", x.name, x.type)
+				end)
 				local err1, edit = Global.lsp_client_request(
 					client,
 					"java/generateHashCodeEquals",
-					{ context = params, fields = result.fields },
+					{ context = params, fields = items },
 					bufnr
 				)
 				if err1 then
@@ -2376,13 +2427,32 @@ now(function()
 					vim.notify("Could not execute java/checkConstructorsStatus: " .. err.message, vim.log.levels.WARN)
 					return
 				end
-				if result then
-					vim.lsp.util.apply_workspace_edit(result, Global.offset_encoding)
+				if not result or not result.constructors or #result.constructors == 0 then
+					return
+				end
+				local constructors = result.constructors
+				if #result.constructors > 1 then
+					constructors = Global.multi_select(
+						"Include what super class constructor?",
+						result.constructors,
+						function(x)
+							return string.format("%s(%s)", x.name, table.concat(x.parameters, ","))
+						end
+					)
+					if not constructors or #constructors == 0 then
+						return
+					end
+				end
+				local fields = result.fields
+				if fields then
+					fields = Global.multi_select("Include what fields in constructor?", fields, function(x)
+						return string.format("%s: %s", x.name, x.type)
+					end)
 				end
 				local params = {
 					context = ctx.params,
-					constructors = result.constructors,
-					fields = result.fields,
+					constructors = constructors,
+					fields = fields,
 				}
 				local err1, edit = Global.lsp_client_request(client, "java/generateConstructors", params, bufnr)
 				if err1 then
@@ -2416,12 +2486,24 @@ now(function()
 					vim.notify("All delegatable fields are already implemented", vim.log.levels.INFO)
 					return
 				end
-				local fields = status.delegateFields
-				if #fields.delegateMethods == 0 then
+				local field = #status.delegateFields == 1 and status.delegateFields[1]
+					or Global.select("Select target to generate delegates for?", status.delegateFields, function(x)
+						return string.format("%s: %s", x.field.name, x.field.type)
+					end)
+				if not field then
+					return
+				end
+				if #field.delegateMethods == 0 then
 					vim.notify("All delegatable methods are already implemented", vim.log.levels.INFO)
 					return
 				end
-				local methods = fields.delegateMethods
+				local methods = Global.multi_select(
+					"Generate delegate for which methods?",
+					field.delegateMethods,
+					function(x)
+						return string.format("%s(%s)", x.name, table.concat(x.parameters, ","))
+					end
+				)
 				if not methods or #methods == 0 then
 					return
 				end
@@ -2429,7 +2511,7 @@ now(function()
 					context = ctx.params,
 					delegateEntries = vim.tbl_map(function(x)
 						return {
-							field = fields.field,
+							field = field.field,
 							delegateMethod = x,
 						}
 					end, methods),
@@ -2463,9 +2545,15 @@ now(function()
 					vim.notify("No methods to override", vim.log.levels.INFO)
 					return
 				end
+				local items = Global.multi_select("Methods to override?", result.methods, function(x)
+					return string.format("%s(%s) class: %s", x.name, table.concat(x.parameters, ", "), x.declaringClass)
+				end)
+				if #items < 1 then
+					return
+				end
 				local params = {
 					context = ctx.params,
-					overridableMethods = result.methods,
+					overridableMethods = items,
 				}
 				local err1, edit = Global.lsp_client_request(client, "java/addOverridableMethods", params, bufnr)
 				if err1 then
@@ -2500,20 +2588,8 @@ now(function()
 					vim.notify("Error getting super implementation: " .. err.message, vim.log.levels.WARN)
 					return
 				end
-				if not result then
-					vim.notify("No super implementations found", vim.log.levels.INFO)
-					return
-				end
-				if #result == 1 then
+				if result and #result == 1 then
 					vim.lsp.util.show_document(result[1], Global.offset_encoding, { focus = true })
-				elseif #result > 1 then
-					local items = vim.lsp.util.locations_to_items(result, Global.offset_encoding)
-					local list = {
-						title = "References",
-						items = items,
-					}
-					vim.fn.setqflist({}, " ", list)
-					vim.cmd("botright copen")
 				end
 			end)
 		elseif vim.bo.filetype == "scala" then
