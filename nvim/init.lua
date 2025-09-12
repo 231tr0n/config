@@ -2697,7 +2697,7 @@ now(function()
 				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return vim.fn.input("Enter port: ", 5678)
+				return vim.fn.input("Enter port: ", tostring(5678))
 			end,
 		},
 	}
@@ -2713,7 +2713,7 @@ now(function()
 				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return vim.fn.input("Enter port: ", 38697)
+				return vim.fn.input("Enter port: ", tostring(38697))
 			end,
 		},
 	}
@@ -2729,7 +2729,7 @@ now(function()
 				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return vim.fn.input("Enter port: ", 8000)
+				return vim.fn.input("Enter port: ", tostring(8000))
 			end,
 		},
 	}
@@ -2745,7 +2745,7 @@ now(function()
 				return vim.fn.input("Enter host: ", "127.0.0.1")
 			end,
 			port = function()
-				return vim.fn.input("Enter port: ", 5005)
+				return vim.fn.input("Enter port: ", tostring(5005))
 			end,
 			buildTarget = function()
 				return vim.fn.input(
@@ -2767,7 +2767,7 @@ now(function()
 					return vim.fn.input("Enter host: ", "127.0.0.1")
 				end,
 				port = function()
-					return vim.fn.input("Enter port: ", 9229)
+					return vim.fn.input("Enter port: ", tostring(9229))
 				end,
 			},
 		}
