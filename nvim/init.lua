@@ -349,7 +349,7 @@ now(function()
 		multi_select = function(prompt, options, format)
 			local choices = {}
 			local selected_items = {}
-			for _, value in ipairs(options) do
+			for _, value in pairs(options) do
 				table.insert(choices, format(value))
 			end
 			MiniPick.start({
@@ -357,8 +357,8 @@ now(function()
 					items = choices,
 					name = prompt,
 					choose_marked = function(items)
-						for _, choice in ipairs(items) do
-							for _, value in ipairs(options) do
+						for _, choice in pairs(items) do
+							for _, value in pairs(options) do
 								if format(value) == choice then
 									table.insert(selected_items, value)
 									break
@@ -368,7 +368,7 @@ now(function()
 						return false
 					end,
 					choose = function(choice)
-						for _, value in ipairs(options) do
+						for _, value in pairs(options) do
 							if format(value) == choice then
 								selected_items = { value }
 							end
@@ -382,11 +382,11 @@ now(function()
 		select = function(prompt, options, format)
 			local choices = {}
 			local selected = {}
-			for _, value in ipairs(options) do
+			for _, value in pairs(options) do
 				table.insert(choices, format(value))
 			end
 			vim.ui.select(choices, { prompt = prompt }, function(choice)
-				for _, value in ipairs(options) do
+				for _, value in pairs(options) do
 					if format(value) == choice then
 						selected = value
 					end
@@ -2193,15 +2193,22 @@ now(function()
 				["metals/quickPick"] = function(_, result)
 					local ids = {}
 					local labels = {}
-					for i, item in pairs(result.items) do
+					local selected
+					for _, item in pairs(result.items) do
 						table.insert(ids, item.id)
-						table.insert(labels, i .. " - " .. item.label)
+						table.insert(labels, item.label)
 					end
-					local choice = vim.fn.inputlist(labels)
-					if choice == 0 then
+					selected = Global.select("Pick", labels, function(x)
+						return x
+					end)
+					if not selected then
 						return { cancelled = true }
 					else
-						return { itemId = ids[choice] }
+						for i, item in pairs(labels) do
+							if selected == item then
+								return { itemId = ids[i] }
+							end
+						end
 					end
 				end,
 				["metals/inputBox"] = function(_, result)
