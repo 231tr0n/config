@@ -2212,7 +2212,7 @@ now(function()
 					end
 				end,
 				["metals/inputBox"] = function(_, result)
-					local args = { prompt = result.prompt .. "\n" }
+					local args = { prompt = result.prompt .. ": " }
 					if result.value then
 						args.default = result.value
 					end
