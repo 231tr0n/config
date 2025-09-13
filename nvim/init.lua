@@ -1,6 +1,6 @@
 -- luacheck global variables declaration
 -- luacheck: globals vim
--- luacheck: globals Global Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
+-- luacheck: globals G Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
@@ -168,9 +168,9 @@ if vim.g.vscode then
 	goto skip_neovim_config
 end
 
--- Globals variables and functions declared and used
+-- Global variables and functions declared and used
 now(function()
-	Global = {
+	G = {
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
@@ -252,9 +252,9 @@ now(function()
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return Global.fold_open .. status_column_separator
+						return G.fold_open .. status_column_separator
 					else
-						return Global.fold_close .. status_column_separator
+						return G.fold_close .. status_column_separator
 					end
 				end
 				return space .. status_column_separator
@@ -407,10 +407,10 @@ now(function()
 			end
 			local winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
-				if #Global.keys > 0 then
+				if #G.keys > 0 then
 					return winbar_append
 						.. "%#MiniTablineModifiedCurrent# "
-						.. table.concat(Global.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
+						.. table.concat(G.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
 						.. " %#WinBar#%<"
 				else
 					return winbar_append
@@ -441,7 +441,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldopen:" .. Global.fold_open .. ",foldsep: ,foldclose:" .. Global.fold_close
+	vim.o.fillchars = "eob: ,foldopen:" .. G.fold_open .. ",foldsep: ,foldclose:" .. G.fold_close
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -467,7 +467,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.statuscolumn = "%s%l%{v:lua.Global.status_column_pad_and_fold()}"
+	vim.o.statuscolumn = "%s%l%{v:lua.G.status_column_pad_and_fold()}"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -522,7 +522,7 @@ now(function()
 			winblend = 0,
 		},
 	})
-	Global.apply_colorscheme = function()
+	G.apply_colorscheme = function()
 		require("mini.base16").setup({
 			palette = {
 				base00 = "#282C34",
@@ -587,7 +587,7 @@ now(function()
 		Hi("TreesitterContext", { link = "Pmenu" })
 		Hi("WinSeparator", { link = "Normal" })
 	end
-	Global.apply_colorscheme()
+	G.apply_colorscheme()
 end)
 
 -- Mini plugins setup
@@ -854,7 +854,7 @@ now(function()
 		},
 	})
 	require("nvim-treesitter").setup()
-	require("nvim-treesitter").install(Global.get_table_keys(Global.languages)):wait(5 * 60 * 1000)
+	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
 	add({
 		source = "RRethy/nvim-treesitter-endwise",
 		depends = {
@@ -958,7 +958,7 @@ now(function()
 				hide = { "go", "delve" },
 			},
 			anchor = function()
-				return Global.te_win
+				return G.te_win
 			end,
 		},
 	})
@@ -1391,14 +1391,14 @@ end)
 now(function()
 	vim.on_key(function(_, typed)
 		if typed ~= "" then
-			if #Global.keys >= 5 then
-				table.remove(Global.keys, #Global.keys)
+			if #G.keys >= 5 then
+				table.remove(G.keys, #G.keys)
 			end
-			table.insert(Global.keys, 1, vim.fn.keytrans(typed))
+			table.insert(G.keys, 1, vim.fn.keytrans(typed))
 			vim.api.nvim__redraw({ winbar = true })
 		end
 	end, vim.api.nvim_create_namespace("show-keys"))
-	Global.peek = function()
+	G.peek = function()
 		local win_states = {}
 		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
 		local function save_win_state(winnr)
@@ -1445,7 +1445,7 @@ now(function()
 			end,
 		})
 	end
-	Global.peek()
+	G.peek()
 end)
 
 -- Non lazy keymaps registration
@@ -1455,21 +1455,21 @@ now(function()
 	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
-			Global.te_win = vim.fn.win_getid()
+			G.te_win = vim.fn.win_getid()
 			te_buf = vim.fn.bufnr("%")
-		elseif vim.fn.win_gotoid(Global.te_win) ~= 1 then
+		elseif vim.fn.win_gotoid(G.te_win) ~= 1 then
 			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
-			Global.te_win = vim.fn.win_getid()
+			G.te_win = vim.fn.win_getid()
 		end
 		vim.cmd("startinsert")
 	end
 	local function hide_terminal()
-		if vim.fn.win_gotoid(Global.te_win) == 1 then
+		if vim.fn.win_gotoid(G.te_win) == 1 then
 			vim.cmd("hide")
 		end
 	end
 	local function toggle_terminal()
-		if vim.fn.win_gotoid(Global.te_win) == 1 then
+		if vim.fn.win_gotoid(G.te_win) == 1 then
 			hide_terminal()
 		else
 			open_terminal()
@@ -1481,7 +1481,7 @@ now(function()
 		previous_buf = vim.api.nvim_get_current_buf()
 		local height = math.floor(0.6 * vim.o.lines)
 		local width = math.floor(0.6 * vim.o.columns)
-		Global.te_float_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
+		G.te_float_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
 			relative = "editor",
 			row = math.floor(0.5 * (vim.o.lines - height)),
 			col = math.floor(0.5 * (vim.o.columns - width)),
@@ -1492,7 +1492,7 @@ now(function()
 			footer = " " .. vim.o.shell .. " ",
 			footer_pos = "right",
 		})
-		vim.api.nvim_set_current_win(Global.te_float_win)
+		vim.api.nvim_set_current_win(G.te_float_win)
 		if vim.fn.bufexists(te_float_buf) ~= 1 then
 			vim.cmd("terminal")
 			te_float_buf = vim.api.nvim_get_current_buf()
@@ -1502,7 +1502,7 @@ now(function()
 		vim.cmd("startinsert")
 	end
 	local function hide_float_terminal()
-		if vim.fn.win_gotoid(Global.te_float_win) == 1 then
+		if vim.fn.win_gotoid(G.te_float_win) == 1 then
 			vim.cmd("hide")
 		end
 		if previous_buf then
@@ -1511,7 +1511,7 @@ now(function()
 		end
 	end
 	local function toggle_float_terminal()
-		if vim.fn.win_gotoid(Global.te_float_win) == 1 then
+		if vim.fn.win_gotoid(G.te_float_win) == 1 then
 			hide_float_terminal()
 		else
 			open_float_terminal()
@@ -1556,7 +1556,7 @@ now(function()
 	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
-	Nmap("<F6>", Global.apply_colorscheme, "Apply mini.base16 colorscheme")
+	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
@@ -1614,15 +1614,15 @@ now(function()
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
 	Nmap("<leader>ldT", diagnostic_virtual_lines_toggle, "Virtual lines toggle")
-	Nmap("<leader>ldh", ":lua Global.customized_hover(vim.diagnostic.open_float)<CR>", "Hover diagnostics")
+	Nmap("<leader>ldh", ":lua G.customized_hover(vim.diagnostic.open_float)<CR>", "Hover diagnostics")
 	Nmap("<leader>ldt", diagnostic_virtual_text_toggle, "Virtual text toggle")
 	Nmap("<leader>lgD", ":lua vim.lsp.buf.declaration()<CR>", "Goto declaration")
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
 	Nmap("<leader>lgi", ":lua vim.lsp.buf.implementation()<CR>", "Goto implementation")
 	Nmap("<leader>lgr", ":lua vim.lsp.buf.references()<CR>", "Goto references")
-	Nmap("<leader>lgs", ":lua Global.super_implementation()<CR>", "Goto super implementation")
+	Nmap("<leader>lgs", ":lua G.super_implementation()<CR>", "Goto super implementation")
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
-	Nmap("<leader>lh", ":lua Global.customized_hover(vim.lsp.buf.hover)<CR>", "Hover symbol")
+	Nmap("<leader>lh", ":lua G.customized_hover(vim.lsp.buf.hover)<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.buf.incoming_calls()<CR>", "Lsp incoming calls")
 	Nmap("<leader>lo", ":lua vim.lsp.buf.outgoing_calls()<CR>", "Lsp outgoing calls")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
@@ -1670,14 +1670,14 @@ now(function()
 		["dap-float"] = true,
 		ministarter = true,
 	}
-	local filetype_patterns = Global.get_table_keys(Global.languages)
+	local filetype_patterns = G.get_table_keys(G.languages)
 	for key, _ in pairs(special_file_types) do
 		table.insert(filetype_patterns, key)
 	end
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = filetype_patterns,
 		callback = function(args)
-			if Global.languages[args.match] then
+			if G.languages[args.match] then
 				vim.treesitter.start()
 				vim.o.foldmethod = "expr"
 				vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
@@ -1818,7 +1818,7 @@ now(function()
 		pattern = "background",
 		callback = function(args)
 			if args.match == "background" then
-				Global.apply_colorscheme()
+				G.apply_colorscheme()
 			end
 		end,
 	})
@@ -1841,7 +1841,7 @@ now(function()
 				nowrite = true,
 			}
 			if not buftypes[vim.bo.buftype] then
-				vim.opt_local.winbar = "%{%v:lua.Global.winbar(str2nr(g:actual_curwin))%}"
+				vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
 			end
 		end,
 	})
@@ -1909,15 +1909,15 @@ now(function()
 			vim.bo[buf].filetype = "java"
 			local timeout_ms = 5000
 			local alt_buf = vim.fn.bufnr("#", -1)
-			local client = Global.lsp_get_client("jdtls", alt_buf)
+			local client = G.lsp_get_client("jdtls", alt_buf)
 			if not client then
-				client = Global.lsp_get_client("jdtls")
+				client = G.lsp_get_client("jdtls")
 			end
 			if not client then
 				vim.wait(timeout_ms, function()
-					return Global.lsp_get_client("jdtls", buf) ~= nil
+					return G.lsp_get_client("jdtls", buf) ~= nil
 				end)
-				client = Global.lsp_get_client("jdtls", buf)
+				client = G.lsp_get_client("jdtls", buf)
 			else
 				vim.lsp.buf_attach_client(buf, client.id)
 			end
@@ -1965,7 +1965,7 @@ end)
 now(function()
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
-	lsp_capabilities.general.positionEncodings = { Global.offset_encoding }
+	lsp_capabilities.general.positionEncodings = { G.offset_encoding }
 	add("neovim/nvim-lspconfig")
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
 	for k, v in ipairs(lua_runtime_files) do
@@ -2198,7 +2198,7 @@ now(function()
 						table.insert(ids, item.id)
 						table.insert(labels, item.label)
 					end
-					selected = Global.select("Pick", labels, function(x)
+					selected = G.select("Pick", labels, function(x)
 						return x
 					end)
 					if not selected then
@@ -2310,13 +2310,13 @@ now(function()
 	local commands = {
 		["java.apply.workspaceEdit"] = function(command)
 			for _, argument in ipairs(command.arguments) do
-				vim.lsp.util.apply_workspace_edit(argument, Global.offset_encoding)
+				vim.lsp.util.apply_workspace_edit(argument, G.offset_encoding)
 			end
 		end,
 		["java.show.references"] = function(args)
 			local arguments = args.arguments
 			local locations = arguments[3]
-			local items = vim.lsp.util.locations_to_items(locations, Global.offset_encoding)
+			local items = vim.lsp.util.locations_to_items(locations, G.offset_encoding)
 			local list = {
 				title = "References",
 				items = items,
@@ -2331,12 +2331,12 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local err, result = Global.lsp_client_request(client, "java/checkToStringStatus", params, bufnr)
+			G.coroutine_wrap(function()
+				local err, result = G.lsp_client_request(client, "java/checkToStringStatus", params, bufnr)
 				if err then
 					vim.notify("Could not execute java/checkToStringStatus: " .. err.message, vim.log.levels.WARN)
 					return
@@ -2349,26 +2349,22 @@ now(function()
 						"Method toString() already exists in '%s'. Do you want to replace it?",
 						result.type
 					)
-					local choice = Global.select(prompt, { "Yes", "No" }, function(x)
+					local choice = G.select(prompt, { "Yes", "No" }, function(x)
 						return x
 					end)
 					if choice == "No" then
 						return
 					end
 				end
-				local items = Global.multi_select("Generate toString for which items?", result.fields, function(x)
+				local items = G.multi_select("Generate toString for which items?", result.fields, function(x)
 					return string.format("%s: %s", x.name, x.type)
 				end)
-				local err1, edit = Global.lsp_client_request(
-					client,
-					"java/generateToString",
-					{ context = params, fields = items },
-					bufnr
-				)
+				local err1, edit =
+					G.lsp_client_request(client, "java/generateToString", { context = params, fields = items }, bufnr)
 				if err1 then
 					vim.notify("Could not execute java/generateToString: " .. err1.message, vim.log.levels.WARN)
 				elseif edit then
-					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(edit, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2379,12 +2375,12 @@ now(function()
 			end
 			local bufnr = ctx.bufnr
 			local params = ctx.params
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local _, result = Global.lsp_client_request(client, "java/checkHashCodeEqualsStatus", params, bufnr)
+			G.coroutine_wrap(function()
+				local _, result = G.lsp_client_request(client, "java/checkHashCodeEqualsStatus", params, bufnr)
 				if not result then
 					vim.notify("No result for java/checkHashCodeEqualsStatus", vim.log.levels.INFO)
 					return
@@ -2395,10 +2391,10 @@ now(function()
 					)
 					return
 				end
-				local items = Global.multi_select("Generate hashCodeEquals for which items?", result.fields, function(x)
+				local items = G.multi_select("Generate hashCodeEquals for which items?", result.fields, function(x)
 					return string.format("%s: %s", x.name, x.type)
 				end)
-				local err1, edit = Global.lsp_client_request(
+				local err1, edit = G.lsp_client_request(
 					client,
 					"java/generateHashCodeEquals",
 					{ context = params, fields = items },
@@ -2407,7 +2403,7 @@ now(function()
 				if err1 then
 					vim.notify("Could not execute java/generateHashCodeEquals: " .. err1.message, vim.log.levels.WARN)
 				elseif edit then
-					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(edit, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2431,18 +2427,18 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local err, result = Global.lsp_client_request(client, "java/organizeImports", ctx.params, bufnr)
+			G.coroutine_wrap(function()
+				local err, result = G.lsp_client_request(client, "java/organizeImports", ctx.params, bufnr)
 				if err then
 					vim.notify("Error on organize imports: " .. err.message, vim.log.levels.WARN)
 					return
 				end
 				if result then
-					vim.lsp.util.apply_workspace_edit(result, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(result, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2452,12 +2448,12 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local err, result = Global.lsp_client_request(client, "java/checkConstructorsStatus", ctx.params, bufnr)
+			G.coroutine_wrap(function()
+				local err, result = G.lsp_client_request(client, "java/checkConstructorsStatus", ctx.params, bufnr)
 				if err then
 					vim.notify("Could not execute java/checkConstructorsStatus: " .. err.message, vim.log.levels.WARN)
 					return
@@ -2467,7 +2463,7 @@ now(function()
 				end
 				local constructors = result.constructors
 				if #result.constructors > 1 then
-					constructors = Global.multi_select(
+					constructors = G.multi_select(
 						"Include what super class constructor?",
 						result.constructors,
 						function(x)
@@ -2480,7 +2476,7 @@ now(function()
 				end
 				local fields = result.fields
 				if fields then
-					fields = Global.multi_select("Include what fields in constructor?", fields, function(x)
+					fields = G.multi_select("Include what fields in constructor?", fields, function(x)
 						return string.format("%s: %s", x.name, x.type)
 					end)
 				end
@@ -2489,11 +2485,11 @@ now(function()
 					constructors = constructors,
 					fields = fields,
 				}
-				local err1, edit = Global.lsp_client_request(client, "java/generateConstructors", params, bufnr)
+				local err1, edit = G.lsp_client_request(client, "java/generateConstructors", params, bufnr)
 				if err1 then
 					vim.notify("Could not execute java/generateConstructors: " .. err1.message, vim.log.levels.WARN)
 				elseif edit then
-					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(edit, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2503,13 +2499,12 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local err, status =
-					Global.lsp_client_request(client, "java/checkDelegateMethodsStatus", ctx.params, bufnr)
+			G.coroutine_wrap(function()
+				local err, status = G.lsp_client_request(client, "java/checkDelegateMethodsStatus", ctx.params, bufnr)
 				if err then
 					vim.notify(
 						"Could not execute java/checkDelegateMethodsStatus: " .. err.message,
@@ -2522,7 +2517,7 @@ now(function()
 					return
 				end
 				local field = #status.delegateFields == 1 and status.delegateFields[1]
-					or Global.select("Select target to generate delegates for?", status.delegateFields, function(x)
+					or G.select("Select target to generate delegates for?", status.delegateFields, function(x)
 						return string.format("%s: %s", x.field.name, x.field.type)
 					end)
 				if not field then
@@ -2532,7 +2527,7 @@ now(function()
 					vim.notify("All delegatable methods are already implemented", vim.log.levels.INFO)
 					return
 				end
-				local methods = Global.multi_select(
+				local methods = G.multi_select(
 					"Generate delegate for which methods?",
 					field.delegateMethods,
 					function(x)
@@ -2551,12 +2546,11 @@ now(function()
 						}
 					end, methods),
 				}
-				local err1, workspace_edit =
-					Global.lsp_client_request(client, "java/generateDelegateMethods", params, bufnr)
+				local err1, workspace_edit = G.lsp_client_request(client, "java/generateDelegateMethods", params, bufnr)
 				if err1 then
 					vim.notify("Could not execute java/generateDelegateMethods: " .. err1.message, vim.log.levels.WARN)
 				elseif workspace_edit then
-					vim.lsp.util.apply_workspace_edit(workspace_edit, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(workspace_edit, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2566,12 +2560,12 @@ now(function()
 				return
 			end
 			local bufnr = ctx.bufnr
-			local client = Global.lsp_get_client("jdtls", bufnr)
+			local client = G.lsp_get_client("jdtls", bufnr)
 			if not client then
 				return
 			end
-			Global.coroutine_wrap(function()
-				local err, result = Global.lsp_client_request(client, "java/listOverridableMethods", ctx.params, bufnr)
+			G.coroutine_wrap(function()
+				local err, result = G.lsp_client_request(client, "java/listOverridableMethods", ctx.params, bufnr)
 				if err then
 					vim.notify("Error getting overridable methods: " .. err.message, vim.log.levels.WARN)
 					return
@@ -2580,7 +2574,7 @@ now(function()
 					vim.notify("No methods to override", vim.log.levels.INFO)
 					return
 				end
-				local items = Global.multi_select("Methods to override?", result.methods, function(x)
+				local items = G.multi_select("Methods to override?", result.methods, function(x)
 					return string.format("%s(%s) class: %s", x.name, table.concat(x.parameters, ", "), x.declaringClass)
 				end)
 				if #items < 1 then
@@ -2590,13 +2584,13 @@ now(function()
 					context = ctx.params,
 					overridableMethods = items,
 				}
-				local err1, edit = Global.lsp_client_request(client, "java/addOverridableMethods", params, bufnr)
+				local err1, edit = G.lsp_client_request(client, "java/addOverridableMethods", params, bufnr)
 				if err1 then
 					print("Error getting workspace edits: " .. err1.message)
 					return
 				end
 				if edit then
-					vim.lsp.util.apply_workspace_edit(edit, Global.offset_encoding)
+					vim.lsp.util.apply_workspace_edit(edit, G.offset_encoding)
 				end
 			end)
 		end,
@@ -2606,32 +2600,29 @@ now(function()
 			vim.lsp.commands[k] = v
 		end
 	end
-	Global.super_implementation = function()
+	G.super_implementation = function()
 		if vim.bo.filetype == "java" then
-			Global.coroutine_wrap(function()
+			G.coroutine_wrap(function()
 				local params = {
 					type = "superImplementation",
-					position = vim.lsp.util.make_position_params(
-						vim.api.nvim_get_current_win(),
-						Global.offset_encoding
-					),
+					position = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), G.offset_encoding),
 				}
 				local bufnr = vim.api.nvim_get_current_buf()
 				local err, result =
-					Global.lsp_client_request(Global.lsp_get_client("jdtls", bufnr), "java/findLinks", params, bufnr)
+					G.lsp_client_request(G.lsp_get_client("jdtls", bufnr), "java/findLinks", params, bufnr)
 				if err then
 					vim.notify("Error getting super implementation: " .. err.message, vim.log.levels.WARN)
 					return
 				end
 				if result and #result == 1 then
-					vim.lsp.util.show_document(result[1], Global.offset_encoding, { focus = true })
+					vim.lsp.util.show_document(result[1], G.offset_encoding, { focus = true })
 				end
 			end)
 		elseif vim.bo.filetype == "scala" then
-			Global.coroutine_wrap(function()
-				local params = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), Global.offset_encoding)
+			G.coroutine_wrap(function()
+				local params = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), G.offset_encoding)
 				local bufnr = vim.api.nvim_get_current_buf()
-				Global.lsp_client_exec_cmd(Global.lsp_get_client("metals", bufnr), {
+				G.lsp_client_exec_cmd(G.lsp_get_client("metals", bufnr), {
 					command = "goto-super-method",
 					arguments = { params },
 				}, bufnr)
@@ -2658,7 +2649,7 @@ now(function()
 	end
 	dap.adapters["metals-scala-debug"] = function(callback, config)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.lsp_get_client("metals", bufnr)
+		local client = G.lsp_get_client("metals", bufnr)
 		if not client then
 			return
 		end
@@ -2687,7 +2678,7 @@ now(function()
 	end
 	dap.adapters["jdtls-java-debug"] = function(callback, _)
 		local bufnr = vim.api.nvim_get_current_buf()
-		local client = Global.lsp_get_client("jdtls", bufnr)
+		local client = G.lsp_get_client("jdtls", bufnr)
 		if not client then
 			return
 		end
