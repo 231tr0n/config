@@ -97,7 +97,8 @@ if ! command -v yay &>/dev/null; then
 	default_user_cmd 'git clone https://aur.archlinux.org/yay-bin.git $HOME/yay-bin'
 	default_user_cmd 'cd $HOME/yay-bin && makepkg -sic --noconfirm'
 	default_user_cmd 'rm -rf $HOME/yay-bin'
-	default_user_cmd 'echo "{\"answerdiff\": \"All\"}" > $HOME/.config/yay/config.json'
+	default_user_cmd 'mkdir -p $HOME/.config/yay'
+ 	default_user_cmd 'echo "{\"answerdiff\": \"All\"}" > $HOME/.config/yay/config.json'
 fi
 
 PACKAGES=(
