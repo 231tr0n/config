@@ -8,7 +8,7 @@ ROOT_PASSWORD="$DEFAULT_USER_PASSWORD"
 SSH_KEY_PASSWORD="$DEFAULT_USER_PASSWORD"
 WSL_CONFIG_CHANGED="No"
 
-while getopts 's:r:u:p:hw' opt; do
+while getopts 's:r:u:p:h' opt; do
 	case "$opt" in
 	r)
 		ROOT_PASSWORD="$OPTARG"
