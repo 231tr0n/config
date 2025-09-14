@@ -8,7 +8,7 @@ ROOT_PASSWORD="$DEFAULT_USER_PASSWORD"
 SSH_KEY_PASSWORD="$DEFAULT_USER_PASSWORD"
 WSL_CONFIG_CHANGED="No"
 
-while getopts 's:r:u:p:h' opt; do
+while getopts 's:r:u:p:hw' opt; do
 	case "$opt" in
 	r)
 		ROOT_PASSWORD="$OPTARG"
@@ -54,29 +54,28 @@ if [ "$WSL_CONFIG_CHANGED" = "No" ]; then
 		WSL_CONFIG_CHANGED="Yes"
 		printf "\n[user]\ndefault=%s" "$DEFAULT_USERNAME" >>/etc/wsl.conf
 	fi
+fi
 
-	sed -i 's/#Color/Color/g' /etc/pacman.conf
-	sed -i 's/NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
-	sed -i 's/ParallelDownloads = 5/ParallelDownloads = 3/g' /etc/pacman.conf
+sed -i 's/#Color/Color/g' /etc/pacman.conf
+sed -i 's/NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
+sed -i 's/ParallelDownloads = 5/ParallelDownloads = 3/g' /etc/pacman.conf
 
-	pacman -Syu --noconfirm --needed reflector
-	if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
-		mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
-	fi
-	reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
+pacman -Syu --noconfirm --needed reflector sudo fish
+if ! [ -f "/etc/pacman.d/mirrorlist.bak" ]; then
+	mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+fi
+reflector --fastest 5 --protocol https --country India --sort rate --save /etc/pacman.d/mirrorlist
 
-	pacman -Syu --noconfirm --needed sudo fish
-
+if ! id -u "$DEFAULT_USERNAME" &>/dev/null; then
 	echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)
-
 	echo '%wheel ALL=(ALL:ALL) ALL' | (EDITOR='tee -a' visudo)
 
-	echo "$ROOT_PASSWORD" | passwd -s
-
 	useradd -m -s /usr/bin/fish -G wheel "$DEFAULT_USERNAME"
-
-	passwd -s "$DEFAULT_USERNAME" <<<"$DEFAULT_USER_PASSWORD"
 fi
+
+passwd -s <<<"$ROOT_PASSWORD"
+
+passwd -s "$DEFAULT_USERNAME" <<<"$DEFAULT_USER_PASSWORD"
 
 function default_user_cmd {
 	local args=""
@@ -98,7 +97,7 @@ if ! command -v yay &>/dev/null; then
 	default_user_cmd 'cd $HOME/yay-bin && makepkg -sic --noconfirm'
 	default_user_cmd 'rm -rf $HOME/yay-bin'
 	default_user_cmd 'mkdir -p $HOME/.config/yay'
- 	default_user_cmd 'echo "{\"answerdiff\": \"All\"}" > $HOME/.config/yay/config.json'
+	default_user_cmd 'echo "{\"answerdiff\": \"All\"}" > $HOME/.config/yay/config.json'
 fi
 
 PACKAGES=(
@@ -226,7 +225,6 @@ PACKAGES=(
 	"python-black"
 	"yamlfmt"
 	"gofumpt"
-	"golines"
 	"shfmt"
 	"stylua"
 	"yamlfix"
