@@ -200,7 +200,6 @@ PACKAGES=(
 	"coursier"
 	"java-debug"
 	"jdtls"
-	"metals"
 	"pyright"
 	"basedpyright-bin"
 	"yaml-language-server"
@@ -283,6 +282,7 @@ default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/wsl
 default_user_cmd "rustup update stable"
 
 default_user_cmd "coursier setup -y"
+default_user_cmd "coursier install metals"
 
 groupadd -f docker
 usermod -aG docker "$DEFAULT_USERNAME"
