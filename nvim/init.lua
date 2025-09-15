@@ -1828,21 +1828,23 @@ now(function()
 			vim.wo.winbar = ""
 		end,
 	})
-	vim.api.nvim_create_autocmd({ "BufEnter" }, {
+	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 		pattern = "*",
-		callback = function()
-			local buftypes = {
-				nofile = true,
-				terminal = true,
-				quickfix = true,
-				prompt = true,
-				help = true,
-				acwrite = true,
-				nowrite = true,
-			}
-			if not buftypes[vim.bo.buftype] then
-				vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
-			end
+		callback = function(args)
+			vim.schedule(function()
+				local buftypes = {
+					nofile = true,
+					terminal = true,
+					quickfix = true,
+					prompt = true,
+					help = true,
+					acwrite = true,
+					nowrite = true,
+				}
+				if not buftypes[vim.api.nvim_get_option_value("buftype", { buf = args.buf })] then
+					vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
+				end
+			end)
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
