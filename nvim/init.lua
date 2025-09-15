@@ -7,6 +7,7 @@
 -- MiniDeps auto download setup
 local path_package = vim.fn.stdpath("data") .. "/site/"
 local mini_path = path_package .. "pack/deps/opt/mini.nvim"
+---@diagnostic disable-next-line: undefined-field
 if not vim.uv.fs_stat(mini_path) then
 	vim.cmd('echo "Installing `mini.nvim`" | redraw')
 	local clone_cmd = {
@@ -1683,15 +1684,6 @@ now(function()
 				vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			end
-			if vim.bo.buftype ~= "nofile" then
-				Map(
-					{ "n", "x", "o" },
-					"<CR>",
-					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-					"Start jump",
-					{ buffer = true }
-				)
-			end
 			local html_file_types = {
 				svelte = true,
 				vue = true,
@@ -1742,6 +1734,14 @@ now(function()
 					vim.wo.signcolumn = "no"
 					vim.wo.statuscolumn = ""
 				end
+			else
+				Map(
+					{ "n", "x", "o" },
+					"<CR>",
+					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+					"Start jump",
+					{ buffer = true }
+				)
 			end
 		end,
 	})
@@ -2009,6 +2009,7 @@ now(function()
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
 	local env = {
+		---@diagnostic disable-next-line: undefined-field
 		HOME = vim.uv.os_homedir(),
 		XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME"),
 		JDTLS_JVM_ARGS = os.getenv("JDTLS_JVM_ARGS"),
@@ -2033,6 +2034,7 @@ now(function()
 			local arg = string.format("--jvm-arg=%s", a)
 			table.insert(args, arg)
 		end
+		---@diagnostic disable-next-line: undefined-field
 		if vim.uv.fs_stat(lombok_path) then
 			table.insert(args, string.format("--jvm-arg=-javaagent:%s", lombok_path))
 		end
