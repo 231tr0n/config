@@ -1746,14 +1746,6 @@ now(function()
 					vim.wo.signcolumn = "no"
 					vim.wo.statuscolumn = ""
 				end
-			else
-				Map(
-					{ "n", "x", "o" },
-					"<CR>",
-					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-					"Start jump",
-					{ buffer = true }
-				)
 			end
 		end,
 	})
@@ -1855,6 +1847,13 @@ now(function()
 				}
 				if not buftypes[vim.api.nvim_get_option_value("buftype", { buf = args.buf })] then
 					vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
+					Map(
+						{ "n", "x", "o" },
+						"<CR>",
+						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+						"Start jump",
+						{ buffer = true }
+					)
 				end
 			end)
 		end,
