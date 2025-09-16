@@ -772,7 +772,6 @@ now(function()
 			end,
 		},
 	})
-	vim.ui.select = MiniPick.ui_select
 	require("mini.sessions").setup()
 	require("mini.snippets").setup({
 		snippets = {
@@ -1390,10 +1389,25 @@ end)
 now(function()
 	vim.on_key(function(_, typed)
 		if typed ~= "" then
-			if #G.keys >= 5 then
-				table.remove(G.keys, #G.keys)
+			local typed_key = vim.fn.keytrans(typed)
+			if #G.keys == 0 then
+				table.insert(G.keys, typed_key)
+			else
+				local key_string = vim.split(G.keys[#G.keys], " ", { plain = true })
+				local last_key = #key_string == 2 and key_string[2] or key_string[1]
+				if last_key == typed_key then
+					if #key_string == 2 then
+						G.keys[#G.keys] = tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
+					else
+						G.keys[#G.keys] = "2" .. " " .. typed_key
+					end
+				else
+					if #G.keys >= 5 then
+						table.remove(G.keys, 1)
+					end
+					table.insert(G.keys, typed_key)
+				end
 			end
-			table.insert(G.keys, 1, vim.fn.keytrans(typed))
 			vim.api.nvim__redraw({ winbar = true })
 		end
 	end, vim.api.nvim_create_namespace("show-keys"))
