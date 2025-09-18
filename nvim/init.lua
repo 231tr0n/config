@@ -1,6 +1,6 @@
 -- luacheck global variables declaration
 -- luacheck: globals vim
--- luacheck: globals G Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
+-- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
@@ -27,6 +27,10 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 add("nvim-mini/mini.nvim")
 
 -- Helper functions
+Unmap = function(modes, suffix, opts)
+	opts = opts or {}
+	vim.keymap.del(modes, suffix, opts)
+end
 Map = function(modes, suffix, rhs, desc, opts)
 	opts = opts or {}
 	opts.silent = true
@@ -1845,16 +1849,22 @@ now(function()
 					acwrite = true,
 					nowrite = true,
 				}
-				if not buftypes[vim.api.nvim_get_option_value("buftype", { buf = args.buf })] then
-					vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
-					Map(
-						{ "n", "x", "o" },
-						"<CR>",
-						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-						"Start jump",
-						{ buffer = true }
-					)
+				local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+				local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+				if buftype ~= "" or filetype ~= "" then
+					if not buftypes[buftype] and not special_file_types[filetype] then
+						vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
+						Map(
+							{ "n", "x", "o" },
+							"<CR>",
+							":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+							"Start jump",
+							{ buffer = true }
+						)
+						return
+					end
 				end
+				vim.opt_local.winbar = ""
 			end)
 		end,
 	})
