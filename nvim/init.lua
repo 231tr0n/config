@@ -2931,8 +2931,8 @@ later(function()
 		end
 		local kind_map = {
 			var = "variable",
-			parameter = "typeparameter",
-			associated = "property",
+			parameter = "constant",
+			associated = "object",
 		}
 		local entries = {}
 		for _, definition in ipairs(get(buf)) do
