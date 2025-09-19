@@ -2876,8 +2876,8 @@ later(function()
 			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
 			return
 		end
-		local query = (vim.treesitter.query.get(lang, "locals"))
-		if not query then
+		local locals_query = (vim.treesitter.query.get(lang, "locals"))
+		if not locals_query then
 			vim.notify("Cannot get locals queries for current buffer.", vim.log.levels.ERROR)
 			return
 		end
@@ -2885,8 +2885,8 @@ later(function()
 			local definitions = {}
 			local scopes = {}
 			local references = {}
-			for id, node, metadata in query:iter_captures(root, bufnr) do
-				local kind = query.captures[id]
+			for id, node, metadata in locals_query:iter_captures(root, bufnr) do
+				local kind = locals_query.captures[id]
 				local scope = "local"
 				for k, v in pairs(metadata) do
 					if type(k) == "string" and vim.endswith(k, "local.scope") then
@@ -2944,9 +2944,10 @@ later(function()
 					local node_text = vim.treesitter.get_node_text(node.node, buf)
 					local node_kind = node.kind or ""
 					node_kind = kind_map[node_kind] or node_kind
-					local icon, _, _ = MiniIcons.get("lsp", node_kind)
+					local icon, hl, _ = MiniIcons.get("lsp", node_kind)
 					entries[#entries + 1] = {
 						text = string.format("[%s %s] %s", icon, node_kind, node_text),
+						hl = hl,
 						bufnr = buf,
 						lnum = lnum + 1,
 						col = col + 1,
@@ -2956,8 +2957,26 @@ later(function()
 				end
 			end
 		end
+		local mini_extra_namespace = vim.api.nvim_get_namespaces()["MiniExtraPickers"]
+		local show = function(buf_id, items_to_show, query)
+			MiniPick.default_show(buf_id, items_to_show, query)
+			vim.api.nvim_buf_clear_namespace(buf_id, mini_extra_namespace, 0, -1)
+			for i, item in ipairs(items_to_show) do
+				vim.api.nvim_buf_set_extmark(
+					buf_id,
+					mini_extra_namespace,
+					i - 1,
+					0,
+					{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 199 }
+				)
+			end
+		end
 		MiniPick.start(
-			vim.tbl_deep_extend("force", opts or {}, { source = { items = entries, name = "Tree-sitter symbols" } })
+			vim.tbl_deep_extend(
+				"force",
+				opts or {},
+				{ source = { items = entries, name = "Tree-sitter symbols", show = show } }
+			)
 		)
 	end
 end)
