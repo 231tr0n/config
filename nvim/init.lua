@@ -780,6 +780,140 @@ now(function()
 	require("mini.sessions").setup()
 	require("mini.snippets").setup({
 		snippets = {
+			function(ctx)
+				local langs = {
+					lua = {
+						{
+							prefix = "if",
+							body = { "if ${1:true} then", "\t$0", "end" },
+							description = "if statement",
+						},
+						{
+							prefix = "for",
+							body = { "for $1 do", "\t$0", "end" },
+							description = "for statement",
+						},
+						{
+							prefix = "forn",
+							body = { "for ${1:i} = ${2:1}, ${3:10} do", "\t$0", "end" },
+							description = "for numeric range statement",
+						},
+						{
+							prefix = "fori",
+							body = { "for ${1:i}, ${2:x} in ipairs(${3:t}) do", "\t$0", "end" },
+							description = "for i, x in ipairs(t)",
+						},
+						{
+							prefix = "forp",
+							body = { "for ${1:k}, ${2:v} in pairs(${3:t}) do", "\t$0", "end" },
+							description = "for k, v in pairs(t)",
+						},
+						{
+							prefix = "fu",
+							body = { "function ${1:name}($2)", "\t${0}", "end" },
+							description = "Define a function",
+						},
+						{
+							prefix = "f=",
+							body = { "${1:name} = function($2)", "\t${0}", "end" },
+							description = "Assign a function to a variable",
+						},
+						{
+							prefix = "lfu",
+							body = { "local function ${1:name}($2)", "\t${0}", "end" },
+							description = "Define a local function",
+						},
+						{
+							prefix = "lf=",
+							body = { "local ${1:name} = function($2)", "\t${0}", "end" },
+							description = "Assign a function to a local variable",
+						},
+						{
+							prefix = "f)",
+							body = { "function($1)", "\t${0}", "end" },
+							description = "Create an anonymous function",
+						},
+						{
+							prefix = "f,",
+							body = { "${1:name} = function($2)", "\t${0}", "end," },
+							description = "Assign a function to a table key",
+						},
+						{
+							prefix = "p",
+							body = { "print(${0})" },
+							description = "print statement",
+						},
+						{
+							prefix = "while",
+							body = { "while ${1:true} do", "\t$0", "end" },
+							description = "while statement",
+						},
+					},
+					svelte = {
+						{
+							prefix = "if",
+							body = "{#if ${1:expression}}\n\t${0}\n{/if}",
+							description = "if statement",
+						},
+						{
+							prefix = "each",
+							body = "{#each ${1:name} as ${2:name}, ${3:index} (${4:_})}\n\t${0}\n{/each}",
+							description = "if statement",
+						},
+						{
+							prefix = "key",
+							body = "{#key ${1:expression}}\n\t${0}\n{/key}",
+							description = "key statement",
+						},
+						{
+							prefix = "await",
+							body = "{#await ${1:expression}}\n\t${0}\n{/await}",
+							description = "key statement",
+						},
+						{
+							prefix = "snippet",
+							body = "{#snippet ${1:expression}}\n\t${0}\n{/snippet}",
+							description = "key statement",
+						},
+					},
+					bash = {
+						{
+							prefix = "if",
+							body = "if [[ ${1:condition} ]]; then\n\t${0}\nfi",
+							description = "if statement",
+						},
+						{
+							prefix = "forin",
+							body = "for ${1:VAR} in ${2:LIST}\ndo\n\t${0}\ndone\n",
+							description = "for loop in list",
+						},
+						{
+							prefix = "fori",
+							body = "for ((${1:i} = 0; ${1:i} < ${2:10}; ${1:i}++)); do\n\t${0}\ndone\n",
+							description = "An index-based iteration for loop",
+						},
+						{
+							prefix = "while",
+							body = "while [[ ${1:condition} ]]; do\n\t${0}\ndone\n",
+							description = "A while loop by condition",
+						},
+						{
+							prefix = "until",
+							body = "until [[ ${1:condition} ]]; do\n\t${0}\ndone\n",
+							description = "until loop by condition",
+						},
+						{
+							prefix = "case",
+							body = {
+								'case "\\$${1:VAR}" in',
+								"\t${2:1}) $\n\t;;\n\t${3:2|3}) ${4}\n\t;;\n\t*) ${0}\n\t;;\nesac\n",
+							},
+							description = "A case command first expands word, and tries to match it against each pattern in turn.",
+						},
+					},
+				}
+				return langs[ctx.lang]
+			end,
 			require("mini.snippets").gen_loader.from_lang(),
 		},
 	})
@@ -858,12 +992,6 @@ now(function()
 	})
 	require("nvim-treesitter").setup()
 	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
-	add({
-		source = "RRethy/nvim-treesitter-endwise",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
 	add({
 		source = "stevearc/quicker.nvim",
 		depends = {
