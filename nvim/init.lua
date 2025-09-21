@@ -228,6 +228,7 @@ now(function()
 			php = true,
 			pug = true,
 			python = true,
+			query = true,
 			regex = true,
 			requirements = true,
 			ruby = true,
@@ -1681,6 +1682,7 @@ now(function()
 		pager = true,
 		cmd = true,
 		dialog = true,
+		query = true,
 		["dap-repl"] = true,
 		["dap-view"] = true,
 		["dap-view-term"] = true,
@@ -1745,6 +1747,8 @@ now(function()
 					vim.wo.signcolumn = "no"
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				elseif vim.bo.filetype == "query" and vim.bo.buftype == "nofile" then
+					vim.wo.signcolumn = "no"
 				else
 					vim.wo.foldcolumn = "0"
 					vim.wo.signcolumn = "no"
@@ -1861,10 +1865,8 @@ now(function()
 							"Start jump",
 							{ buffer = true }
 						)
-						return
 					end
 				end
-				vim.opt_local.winbar = ""
 			end)
 		end,
 	})
@@ -2958,29 +2960,25 @@ later(function()
 			end
 		end
 		local mini_extra_namespace = vim.api.nvim_get_namespaces()["MiniExtraPickers"]
-		MiniPick.start(vim.tbl_deep_extend(
-			"force",
-			opts or {},
-			{
-				source = {
-					items = entries,
-					name = "Tree-sitter symbols",
-					show = function(buf_id, items_to_show, query)
-						MiniPick.default_show(buf_id, items_to_show, query)
-						vim.api.nvim_buf_clear_namespace(buf_id, mini_extra_namespace, 0, -1)
-						for i, item in ipairs(items_to_show) do
-							vim.api.nvim_buf_set_extmark(
-								buf_id,
-								mini_extra_namespace,
-								i - 1,
-								0,
-								{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 199 }
-							)
-						end
-					end,
-				},
-			}
-		))
+		MiniPick.start(vim.tbl_deep_extend("force", opts or {}, {
+			source = {
+				items = entries,
+				name = "Tree-sitter symbols",
+				show = function(buf_id, items_to_show, query)
+					MiniPick.default_show(buf_id, items_to_show, query)
+					vim.api.nvim_buf_clear_namespace(buf_id, mini_extra_namespace, 0, -1)
+					for i, item in ipairs(items_to_show) do
+						vim.api.nvim_buf_set_extmark(
+							buf_id,
+							mini_extra_namespace,
+							i - 1,
+							0,
+							{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 199 }
+						)
+					end
+				end,
+			},
+		}))
 	end
 end)
 ::skip_neovim_config::
