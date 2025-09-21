@@ -2127,7 +2127,7 @@ now(function()
 		end
 	end
 	table.insert(lua_runtime_files, "${3rd}/luv/library")
-	table.insert(lua_runtime_files, "$${3rd}/busted/library")
+	-- table.insert(lua_runtime_files, "$${3rd}/busted/library")
 	local extra_code_action_literals = {
 		"source.generate.toString",
 		"source.generate.hashCodeEquals",
