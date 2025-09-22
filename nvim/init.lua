@@ -1020,7 +1020,7 @@ now(function()
 		},
 		trim_leading_whitespace = "all",
 	})
-	add("https://codeberg.org/mfussenegger/nvim-dap.git")
+	add("https://codeberg.org/mfussenegger/nvim-dap")
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define(
@@ -1036,7 +1036,7 @@ now(function()
 	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
-			"https://codeberg.org/mfussenegger/nvim-dap.git",
+			"https://codeberg.org/mfussenegger/nvim-dap",
 		},
 	})
 	require("dap-view").setup({
@@ -1109,9 +1109,9 @@ now(function()
 		dv.close()
 	end
 	add({
-		source = "https://codeberg.org/mfussenegger/nluarepl.git",
+		source = "https://codeberg.org/mfussenegger/nluarepl",
 		depends = {
-			"https://codeberg.org/mfussenegger/nvim-dap.git",
+			"https://codeberg.org/mfussenegger/nvim-dap",
 		},
 	})
 	add({
