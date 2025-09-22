@@ -75,12 +75,7 @@ if vim.g.vscode then
 	vim.g.loaded_matchparen = 1
 	vim.opt.matchpairs:append("<:>")
 	vim.notify = vscode.notify
-	-- Plugins installation
-	add("vscode-neovim/vscode-multi-cursor.nvim")
 	-- Plugins configuration
-	require("vscode-multi-cursor").setup({
-		default_mappings = true,
-	})
 	require("mini.ai").setup({
 		custom_textobjects = {
 			B = require("mini.extra").gen_ai_spec.buffer(),
