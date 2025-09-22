@@ -1020,7 +1020,7 @@ now(function()
 		},
 		trim_leading_whitespace = "all",
 	})
-	add("mfussenegger/nvim-dap")
+	add("https://codeberg.org/mfussenegger/nvim-dap.git")
 	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
 	vim.fn.sign_define(
@@ -1036,7 +1036,7 @@ now(function()
 	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
-			"mfussenegger/nvim-dap",
+			"https://codeberg.org/mfussenegger/nvim-dap.git",
 		},
 	})
 	require("dap-view").setup({
@@ -1108,6 +1108,12 @@ now(function()
 	dap.listeners.before.event_exited["dap-view-config"] = function()
 		dv.close()
 	end
+	add({
+		source = "https://codeberg.org/mfussenegger/nluarepl.git",
+		depends = {
+			"https://codeberg.org/mfussenegger/nvim-dap.git",
+		},
+	})
 	add({
 		source = "nvim-treesitter/nvim-treesitter-context",
 		depends = {
@@ -1715,6 +1721,7 @@ now(function()
 	Nmap("<leader>bz", MiniMisc.zoom, "Open current buffer in zoomed manner")
 	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
 	Nmap("<leader>dC", ":lua require('dap').clear_breakpoints()<CR>", "Clear breakpoints")
+	Nmap("<leader>dR", ":DapNew nluarepl<CR>", "Open lua Repl")
 	Nmap("<leader>dS", ":lua require('dap.ui.widgets').centered_float(require('dap.ui.widgets').scopes)<CR>", "Scopes")
 	Nmap("<leader>dT", ":DapViewToggle!<CR>", "Toggle dap view")
 	Nmap("<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", "Toggle breakpoint")
