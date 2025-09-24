@@ -73,7 +73,7 @@ if vim.g.vscode then
 	end
 	-- Settings
 	vim.g.loaded_matchparen = 1
-	vim.opt.matchpairs:append("<:>")
+	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
 	vim.notify = vscode.notify
 	-- Plugins configuration
 	require("mini.ai").setup({
@@ -400,7 +400,7 @@ now(function()
 			end
 			return ret
 		end,
-		winbar = function(win_id)
+		winbar = function(win_id, buf_id)
 			if win_id and not vim.api.nvim_win_is_valid(win_id) then
 				return
 			end
@@ -415,7 +415,9 @@ now(function()
 					return winbar_append
 				end
 			else
-				return winbar_append .. "%F"
+				if buf_id and vim.api.nvim_buf_is_valid(buf_id) then
+					return winbar_append .. "%F"
+				end
 			end
 		end,
 	}
@@ -451,6 +453,7 @@ now(function()
 	vim.o.laststatus = 3
 	vim.o.list = true
 	vim.o.listchars = "tab:› ,leadmultispace:· ,trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
+	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
 	vim.o.maxmempattern = 10000
 	vim.o.mouse = "a"
 	vim.o.mousescroll = "ver:1,hor:1"
@@ -473,14 +476,13 @@ now(function()
 	vim.o.textwidth = 0
 	vim.o.undofile = false
 	vim.o.updatetime = 500
+	vim.o.wildignore = "*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*"
 	vim.o.wildmenu = true
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
 	vim.o.winborder = "rounded"
 	vim.o.wrap = false
-	vim.opt.matchpairs:append("<:>")
-	vim.opt.wildignore:append("*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*")
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -1785,6 +1787,8 @@ now(function()
 	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wq", ":close<CR>", "Close window")
+	Nmap("<leader>ws", ":split<CR>", "Horizontal split")
+	Nmap("<leader>wv", ":vsplit<CR>", "Vertical split")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
 	Nmap("[g", ":norm gxiagxila<CR>", "Move arg left")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
@@ -1829,9 +1833,9 @@ now(function()
 		callback = function(args)
 			if G.languages[args.match] then
 				vim.treesitter.start()
-				vim.o.foldmethod = "expr"
-				vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+				vim.wo.foldmethod = "expr"
+				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			end
 			local html_file_types = {
 				svelte = true,
@@ -1844,8 +1848,8 @@ now(function()
 				javascriptreact = true,
 				typescriptreact = true,
 			}
-			if html_file_types[vim.bo.filetype] then
-				vim.bo.omnifunc = "htmlcomplete#CompleteTags"
+			if html_file_types[vim.bo[args.buf].filetype] then
+				vim.bo[args.buf].omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
 				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
 					buffer = true,
@@ -1857,28 +1861,20 @@ now(function()
 					buffer = true,
 				})
 			end
-			if special_file_types[vim.bo.filetype] then
-				vim.b.minicursorword_disable = true
-				vim.b.miniindentscope_disable = true
-				vim.b.minitrailspace_disable = true
-				vim.opt_local.listchars:remove("eol")
-				vim.opt_local.listchars:remove("nbsp")
-				vim.opt_local.listchars:remove("trail")
-				vim.opt_local.listchars:remove("leadmultispace")
-				vim.opt_local.listchars:remove("tab")
-				vim.opt_local.listchars:append({
-					leadmultispace = "  ",
-					tab = "  ",
-				})
+			if special_file_types[vim.bo[args.buf].filetype] then
+				vim.b[args.buf].minicursorword_disable = true
+				vim.b[args.buf].miniindentscope_disable = true
+				vim.b[args.buf].minitrailspace_disable = true
+				vim.wo.listchars = "extends:»,precedes:«,leadmultispace:  ,tab:  "
 				MiniTrailspace.unhighlight()
-				if vim.bo.filetype == "dap-repl" then
+				if vim.bo[args.buf].filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
 				end
-				if vim.bo.filetype == "git" or vim.bo.filetype == "diff" then
+				if vim.bo[args.buf].filetype == "git" or vim.bo[args.buf].filetype == "diff" then
 					vim.wo.signcolumn = "no"
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-				elseif vim.bo.filetype == "query" and vim.bo.buftype == "nofile" then
+				elseif vim.bo[args.buf].filetype == "query" and vim.bo[args.buf].buftype == "nofile" then
 					vim.wo.signcolumn = "no"
 				else
 					vim.wo.foldcolumn = "0"
@@ -1974,31 +1970,29 @@ now(function()
 	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 		pattern = "*",
 		callback = function(args)
-			vim.schedule(function()
-				local buftypes = {
-					nofile = true,
-					terminal = true,
-					quickfix = true,
-					prompt = true,
-					help = true,
-					acwrite = true,
-					nowrite = true,
-				}
-				local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
-				local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-				if buftype ~= "" or filetype ~= "" then
-					if not buftypes[buftype] and not special_file_types[filetype] then
-						vim.opt_local.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin))%}"
-						Map(
-							{ "n", "x", "o" },
-							"<CR>",
-							":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-							"Start jump",
-							{ buffer = true }
-						)
-					end
+			local buftypes = {
+				nofile = true,
+				terminal = true,
+				quickfix = true,
+				prompt = true,
+				help = true,
+				acwrite = true,
+				nowrite = true,
+			}
+			local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+			local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+			if buftype ~= "" or filetype ~= "" then
+				if not buftypes[buftype] and not special_file_types[filetype] then
+					vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
+					Map(
+						{ "n", "x", "o" },
+						"<CR>",
+						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+						"Start jump",
+						{ buffer = true }
+					)
 				end
-			end)
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
