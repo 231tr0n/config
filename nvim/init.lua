@@ -2983,11 +2983,11 @@ later(function()
 			return
 		end
 		local buf = vim.api.nvim_get_current_buf()
-		if not vim.bo.filetype then
+		if not vim.bo[buf].filetype then
 			vim.notify("Cannot determine filetype for current buffer.", vim.log.levels.ERROR)
 			return
 		end
-		local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+		local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
 		if not lang then
 			vim.notify("Cannot determine treesitter langugage for current buffer.", vim.log.levels.ERROR)
 			return
