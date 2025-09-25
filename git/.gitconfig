@@ -4,7 +4,7 @@
 [interactive]
 	diffFilter = diff-so-fancy --patch
 [merge]
-	conflictStyle = zdiff3
+	conflictStyle = diff3
 [user]
 	email = zeltronsrikar@gmail.com
 	name = 231tr0n
