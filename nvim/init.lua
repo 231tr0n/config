@@ -1,4 +1,3 @@
--- luacheck global variables declaration
 -- luacheck: globals vim
 -- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
@@ -162,7 +161,6 @@ if vim.g.vscode then
 	Map({ "n", "v", "x" }, "zp", '"+p', "Paste to clipboard")
 	Map({ "n", "v", "x" }, "zx", '"+x', "Cut to clipboard")
 	Map({ "n", "v", "x" }, "zy", '"+y', "Copy to clipboard")
-	-- Goto ending of file
 	goto skip_neovim_config
 end
 
@@ -279,22 +277,31 @@ now(function()
 				title_pos = "left",
 			})
 		end,
-		lsp_get_client = function(name, bufnr)
+		lsp_get_client = function(name, bufnr, all)
 			local clients
 			local buf = nil
-			if bufnr then
+			if name and bufnr then
 				clients = vim.lsp.get_clients({
 					bufnr = buf,
 					name = name,
 				})
-			else
+			elseif name and not bufnr then
 				clients = vim.lsp.get_clients({
 					name = name,
 				})
+			elseif bufnr and not name then
+				clients = vim.lsp.get_clients({
+					bufnr = buf,
+				})
+			else
+				clients = vim.lsp.get_clients()
 			end
 			if #clients == 0 then
 				vim.notify("No " .. name .. " client found", vim.log.levels.WARN)
 				return
+			end
+			if all then
+				return clients
 			end
 			return clients[1]
 		end,
@@ -1904,13 +1911,60 @@ now(function()
 		})
 	end
 	vim.api.nvim_create_autocmd("User", {
-		pattern = "MiniFilesBufferCreate,MiniGitUpdated",
+		pattern = {
+			"MiniFilesBufferCreate",
+			"MiniFilesActionCreate",
+			"MiniFilesActionDelete",
+			"MiniFilesActionRename",
+		},
 		callback = function(args)
-			if args.match == "MiniGitUpdated" then
-				-- Remove additional git information
-				local summary = vim.b[args.buf].minigit_summary
-				vim.b[args.buf].minigit_summary_string = summary.head_name or ""
-			elseif args.match == "MiniFilesBufferCreate" then
+			if args.match ~= "MiniFilesBufferCreate" then
+				local clients = G.lsp_get_client(nil, nil, true)
+				local willMethod
+				local didMethod
+				local changes
+				if clients and #clients > 0 then
+					if args.data.to and not args.data.from then
+						willMethod = "workspace/willCreateFiles"
+						didMethod = "workspace/didCreateFiles"
+						changes = {
+							files = {
+								uri = vim.uri_from_fname(args.data.to),
+							},
+						}
+					elseif args.data.from and not args.data.to then
+						willMethod = "workspace/willDeleteFiles"
+						didMethod = "workspace/didDeleteFiles"
+						changes = {
+							files = {
+								uri = vim.uri_from_fname(args.data.from),
+							},
+						}
+					else
+						willMethod = "workspace/willRenameFiles"
+						didMethod = "workspace/didRenameFiles"
+						changes = {
+							files = {
+								oldUri = vim.uri_from_fname(args.data.from),
+								newUri = vim.uri_from_fname(args.data.to),
+							},
+						}
+					end
+					for _, client in ipairs(clients) do
+						if client:supports_method(willMethod) then
+							local resp = client:request_sync(willMethod, changes, 1000)
+							if resp and resp.result then
+								vim.lsp.util.apply_workspace_edit(resp.result, G.offset_encoding)
+							end
+						end
+					end
+					for _, client in ipairs(clients) do
+						if client:supports_method(didMethod) then
+							client:notify(didMethod, changes)
+						end
+					end
+				end
+			else
 				local b = args.data.buf_id
 				Nmap("g~", function()
 					local path = (MiniFiles.get_fs_entry() or {}).path
