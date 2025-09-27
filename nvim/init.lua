@@ -578,6 +578,7 @@ now(function()
 		Hi("FloatFooter", { link = "MiniTablineCurrent" })
 		Hi("FloatTitle", { link = "MiniTablineCurrent" })
 		Hi("FoldColumn", { link = "Comment" })
+		Hi("Hlargs", { link = "@variable.parameter" })
 		Hi("LineNr", { link = "Comment" })
 		Hi("LineNrAbove", { link = "Comment" })
 		Hi("LineNrBelow", { link = "Comment" })
@@ -1148,6 +1149,22 @@ now(function()
 		completions = { lsp = { enabled = true } },
 		code = {
 			border = "thin",
+		},
+	})
+	add({
+		source = "231tr0n/hlargs.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("hlargs").setup({
+		paint_arg_declarations = true,
+		paint_arg_usages = true,
+		extras = {
+			named_parameters = true,
+		},
+		excluded_argnames = {
+			usages = {},
 		},
 	})
 end)
@@ -1898,6 +1915,29 @@ now(function()
 					vim.wo.statuscolumn = ""
 				end
 			end
+			local buftypes = {
+				nofile = true,
+				terminal = true,
+				quickfix = true,
+				prompt = true,
+				help = true,
+				acwrite = true,
+				nowrite = true,
+			}
+			local buftype = vim.bo[args.buf].buftype
+			local filetype = vim.bo[args.buf].filetype
+			if buftype ~= "" or filetype ~= "" then
+				if not buftypes[buftype] and not special_file_types[filetype] then
+					vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
+					Map(
+						{ "n", "x", "o" },
+						"<CR>",
+						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+						"Start jump",
+						{ buffer = true }
+					)
+				end
+			end
 		end,
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
@@ -2028,34 +2068,6 @@ now(function()
 		callback = function()
 			vim.wo.statuscolumn = ""
 			vim.wo.winbar = ""
-		end,
-	})
-	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-		pattern = "*",
-		callback = function(args)
-			local buftypes = {
-				nofile = true,
-				terminal = true,
-				quickfix = true,
-				prompt = true,
-				help = true,
-				acwrite = true,
-				nowrite = true,
-			}
-			local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
-			local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-			if buftype ~= "" or filetype ~= "" then
-				if not buftypes[buftype] and not special_file_types[filetype] then
-					vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
-					Map(
-						{ "n", "x", "o" },
-						"<CR>",
-						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-						"Start jump",
-						{ buffer = true }
-					)
-				end
-			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
@@ -2403,7 +2415,14 @@ now(function()
 			},
 			handlers = {
 				["metals/status"] = vim.schedule_wrap(function(_, results)
-					vim.notify(results.text, vim.log.levels.INFO)
+					if not G.metals_notify_id then
+						G.metals_notify_id = MiniNotify.add(results.text)
+						vim.defer_fn(function()
+							MiniNotify.remove(G.metals_notify_id)
+						end, 1000)
+					else
+						MiniNotify.update(G.metals_notify_id, { msg = results.text })
+					end
 				end),
 				["metals/quickPick"] = function(_, result)
 					local ids = {}
@@ -2509,7 +2528,14 @@ now(function()
 			},
 			handlers = {
 				["language/status"] = vim.schedule_wrap(function(_, results)
-					vim.notify(results.message, vim.log.levels.INFO)
+					if not G.jdtls_notify_id then
+						G.jdtls_notify_id = MiniNotify.add(results.message)
+						vim.defer_fn(function()
+							MiniNotify.remove(G.jdtls_notify_id)
+						end, 1000)
+					else
+						MiniNotify.update(G.jdtls_notify_id, { msg = results.message })
+					end
 				end),
 			},
 		},
