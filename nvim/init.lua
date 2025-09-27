@@ -170,8 +170,10 @@ now(function()
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
-		fold_open = "▾", -- 
-		fold_close = "▸", -- 
+		fold_open = "▾",
+		fold_close = "▸",
+		alternate_fold_open = "",
+		alternate_fold_close = "",
 		offset_encoding = "utf-16",
 		languages = {
 			angular = true,
@@ -242,19 +244,38 @@ now(function()
 			yuck = true,
 			zig = true,
 		},
-		status_column_pad_and_fold = function()
+		status_column_pad_and_fold = function(win_id, buf_id)
+			if win_id and not vim.api.nvim_win_is_valid(win_id) then
+				return
+			end
+			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
+				return
+			end
 			local space = "⠀" -- The space here is a braille blank space "⠀"
 			local status_column_separator = "│" -- ▕
+			local curwin = false
 			local lnum = vim.v.lnum
+			local stc = "%s%l"
+			if vim.api.nvim_get_current_win() == win_id then
+				curwin = true
+			end
+			local status_column_separator_appender = function(text)
+				if curwin then
+					return text .. status_column_separator
+				else
+					return text .. space
+				end
+			end
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return G.fold_open .. status_column_separator
+						return stc .. status_column_separator_appender(curwin and G.fold_open or G.alternate_fold_open)
 					else
-						return G.fold_close .. status_column_separator
+						return stc
+							.. status_column_separator_appender(curwin and G.fold_close or G.alternate_fold_close)
 					end
 				end
-				return space .. status_column_separator
+				return stc .. status_column_separator_appender(space)
 			else
 				local count = #tostring(vim.fn.line("$"))
 				local temp
@@ -263,7 +284,7 @@ now(function()
 				else
 					temp = string.rep(space, count)
 				end
-				return temp .. space .. status_column_separator
+				return stc .. status_column_separator_appender(temp .. space)
 			end
 		end,
 		customized_hover = function(fn)
@@ -411,6 +432,9 @@ now(function()
 			if win_id and not vim.api.nvim_win_is_valid(win_id) then
 				return
 			end
+			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
+				return
+			end
 			local winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
 				if #G.keys > 0 then
@@ -476,7 +500,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.statuscolumn = "%s%l%{v:lua.G.status_column_pad_and_fold()}"
+	vim.o.statuscolumn = "%{%v:lua.G.status_column_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -499,12 +523,6 @@ now(function()
 				[vim.diagnostic.severity.WARN] = "",
 				[vim.diagnostic.severity.HINT] = "",
 				[vim.diagnostic.severity.INFO] = "",
-			},
-			texthl = {
-				[vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-				[vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-				[vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-				[vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
 			},
 		},
 		underline = false,
@@ -720,7 +738,11 @@ now(function()
 	require("mini.icons").setup()
 	MiniIcons.mock_nvim_web_devicons()
 	MiniIcons.tweak_lsp_kind()
-	require("mini.indentscope").setup()
+	require("mini.indentscope").setup({
+		options = {
+			try_as_border = true,
+		},
+	})
 	require("mini.jump").setup()
 	require("mini.jump2d").setup({
 		labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
