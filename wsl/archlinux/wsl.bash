@@ -101,6 +101,7 @@ if ! command -v yay &>/dev/null; then
 fi
 
 PACKAGES=(
+	"angular-cli"
 	"aspell"
 	"axel"
 	"base-devel"
@@ -119,6 +120,7 @@ PACKAGES=(
 	"coursier"
 	"ctags"
 	"curl"
+	"delve"
 	"delve"
 	"diff-so-fancy"
 	"docker"
@@ -147,6 +149,7 @@ PACKAGES=(
 	"golangci-lint-langserver-bin"
 	"google-chrome"
 	"google-java-format"
+	"gopls"
 	"gradle"
 	"gup"
 	"helm"
@@ -262,6 +265,7 @@ default_user_cmd "yay -Syu --noconfirm --needed ${PACKAGES[*]}"
 mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 
 npm install -g npm-groovy-lint@latest
+npm install -g @angular/language-server@latest
 
 archlinux-java set java-21-openjdk
 
