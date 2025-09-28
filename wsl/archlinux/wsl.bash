@@ -101,6 +101,7 @@ if ! command -v yay &>/dev/null; then
 fi
 
 PACKAGES=(
+	"aspell"
 	"axel"
 	"base-devel"
 	"basedpyright-bin"
@@ -113,6 +114,7 @@ PACKAGES=(
 	"chromium"
 	"clang"
 	"cmake"
+	"codespell"
 	"codespell"
 	"coursier"
 	"ctags"
@@ -216,6 +218,7 @@ PACKAGES=(
 	"rustup"
 	"shellcheck"
 	"shfmt"
+	"spell"
 	"sql-language-server"
 	"sqlfluff"
 	"stylua"
