@@ -1233,11 +1233,21 @@ now(function()
 			local config_list = vim.fs.find({
 				".prettierrc",
 				".prettierrc.json",
-			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
+			}, {
+				upward = true,
+				type = "file",
+				path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)),
+			})
 			local co = assert(coroutine.running())
 			local args
 			if #config_list > 0 then
-				args = { "prettier", "--config", config_list[1], "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
+				args = {
+					"prettier",
+					"--config",
+					config_list[1],
+					"--stdin-filepath",
+					vim.api.nvim_buf_get_name(buf),
+				}
 			else
 				args = { "prettier", "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
 			end
@@ -1345,7 +1355,11 @@ now(function()
 				local config_list = vim.fs.find({
 					".golangci.yml",
 					".golangci.yaml",
-				}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })
+				}, {
+					upward = true,
+					type = "file",
+					path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)),
+				})
 				local co = assert(coroutine.running())
 				local args
 				if #config_list > 0 then
@@ -1433,7 +1447,11 @@ now(function()
 		fn = function(buf, _, acc)
 			local config_list = vim.fs.find({
 				".scalafmt.conf",
-			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)) })
+			}, {
+				upward = true,
+				type = "file",
+				path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)),
+			})
 			local co = assert(coroutine.running())
 			local args
 			if #config_list > 0 then
@@ -1861,6 +1879,10 @@ end)
 
 -- Autocommands registration
 now(function()
+	local filetypes_names_different_from_treesitter = {
+		tex = true,
+		sh = true,
+	}
 	local special_file_types = {
 		netrw = true,
 		help = true,
@@ -1881,6 +1903,9 @@ now(function()
 	}
 	local filetype_patterns = G.get_table_keys(G.languages)
 	for key, _ in pairs(special_file_types) do
+		table.insert(filetype_patterns, key)
+	end
+	for key, _ in pairs(filetypes_names_different_from_treesitter) do
 		table.insert(filetype_patterns, key)
 	end
 	vim.api.nvim_create_autocmd("FileType", {
@@ -3100,7 +3125,7 @@ later(function()
 		end
 		local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
 		if not lang then
-			vim.notify("Cannot determine treesitter langugage for current buffer.", vim.log.levels.ERROR)
+			vim.notify("Cannot determine treesitter language for current buffer.", vim.log.levels.ERROR)
 			return
 		end
 		local parser = vim.treesitter.get_parser(buf)
