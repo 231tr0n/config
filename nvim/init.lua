@@ -2466,6 +2466,7 @@ now(function()
 						G.metals_notify_id = MiniNotify.add(results.text)
 						vim.defer_fn(function()
 							MiniNotify.remove(G.metals_notify_id)
+							G.metals_notify_id = nil
 						end, 1000)
 					else
 						MiniNotify.update(G.metals_notify_id, { msg = results.text })
@@ -2579,6 +2580,7 @@ now(function()
 						G.jdtls_notify_id = MiniNotify.add(results.message)
 						vim.defer_fn(function()
 							MiniNotify.remove(G.jdtls_notify_id)
+							G.jdtls_notify_id = nil
 						end, 1000)
 					else
 						MiniNotify.update(G.jdtls_notify_id, { msg = results.message })
