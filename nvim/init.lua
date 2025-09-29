@@ -1882,6 +1882,7 @@ now(function()
 	local filetypes_names_different_from_treesitter = {
 		tex = true,
 		sh = true,
+		jproperties = true,
 	}
 	local special_file_types = {
 		netrw = true,
