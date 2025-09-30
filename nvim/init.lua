@@ -954,7 +954,7 @@ now(function()
 			require("mini.snippets").gen_loader.from_lang(),
 		},
 	})
-	-- MiniSnippets.start_lsp_server()
+	MiniSnippets.start_lsp_server()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
 		header = table.concat({
