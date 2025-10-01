@@ -1922,11 +1922,6 @@ end)
 
 -- Autocommands registration
 now(function()
-	local filetypes_names_different_from_treesitter = {
-		tex = true,
-		sh = true,
-		jproperties = true,
-	}
 	local special_file_types = {
 		netrw = true,
 		help = true,
@@ -1945,15 +1940,28 @@ now(function()
 		["dap-float"] = true,
 		ministarter = true,
 	}
-	local filetype_patterns = G.get_table_keys(G.languages)
-	for key, _ in pairs(special_file_types) do
-		table.insert(filetype_patterns, key)
-	end
-	for key, _ in pairs(filetypes_names_different_from_treesitter) do
-		table.insert(filetype_patterns, key)
-	end
+	local html_file_types = {
+		svelte = true,
+		vue = true,
+		jsx = true,
+		tsx = true,
+		html = true,
+		xml = true,
+		xsl = true,
+		javascriptreact = true,
+		typescriptreact = true,
+	}
+	local special_buftypes = {
+		nofile = true,
+		terminal = true,
+		quickfix = true,
+		prompt = true,
+		help = true,
+		acwrite = true,
+		nowrite = true,
+	}
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = filetype_patterns,
+		pattern = "*",
 		callback = function(args)
 			if G.languages[args.match] then
 				vim.treesitter.start()
@@ -1961,17 +1969,6 @@ now(function()
 				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 				vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 			end
-			local html_file_types = {
-				svelte = true,
-				vue = true,
-				jsx = true,
-				tsx = true,
-				html = true,
-				xml = true,
-				xsl = true,
-				javascriptreact = true,
-				typescriptreact = true,
-			}
 			if html_file_types[vim.bo[args.buf].filetype] then
 				vim.bo[args.buf].omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
@@ -2006,19 +2003,10 @@ now(function()
 					vim.wo.statuscolumn = ""
 				end
 			end
-			local buftypes = {
-				nofile = true,
-				terminal = true,
-				quickfix = true,
-				prompt = true,
-				help = true,
-				acwrite = true,
-				nowrite = true,
-			}
 			local buftype = vim.bo[args.buf].buftype
 			local filetype = vim.bo[args.buf].filetype
 			if buftype ~= "" or filetype ~= "" then
-				if not buftypes[buftype] and not special_file_types[filetype] then
+				if not special_buftypes[buftype] and not special_file_types[filetype] then
 					vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
 					Map(
 						{ "n", "x", "o" },
