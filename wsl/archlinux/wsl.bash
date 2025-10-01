@@ -101,8 +101,6 @@ if ! command -v yay &>/dev/null; then
 fi
 
 PACKAGES=(
-	"aider-chat"
-	"aider-chat-docs"
 	"angular-cli"
 	"aspell"
 	"axel"
@@ -120,6 +118,7 @@ PACKAGES=(
 	"codespell"
 	"codespell"
 	"coursier"
+	"crush-bin"
 	"ctags"
 	"curl"
 	"delve"
