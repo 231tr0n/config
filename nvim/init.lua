@@ -553,22 +553,40 @@ now(function()
 	})
 	G.apply_colorscheme = function()
 		require("mini.base16").setup({
+			-- palette = {
+			-- 	base00 = "#282C34",
+			-- 	base01 = "#353B45",
+			-- 	base02 = "#3E4451",
+			-- 	base03 = "#545862",
+			-- 	base04 = "#565C64",
+			-- 	base05 = "#ABB2BF",
+			-- 	base06 = "#B6BDCA",
+			-- 	base07 = "#C8CCD4",
+			-- 	base08 = "#E06C75",
+			-- 	base09 = "#D19A66",
+			-- 	base0A = "#E5C07B",
+			-- 	base0B = "#98C379",
+			-- 	base0C = "#56B6C2",
+			-- 	base0D = "#61AFEF",
+			-- 	base0E = "#C678DD",
+			-- 	base0F = "#BE5046",
+			-- },
 			palette = {
-				base00 = "#282C34",
-				base01 = "#353B45",
-				base02 = "#3E4451",
-				base03 = "#545862",
-				base04 = "#565C64",
-				base05 = "#ABB2BF",
-				base06 = "#B6BDCA",
-				base07 = "#C8CCD4",
-				base08 = "#E06C75",
-				base09 = "#D19A66",
-				base0A = "#E5C07B",
-				base0B = "#98C379",
-				base0C = "#56B6C2",
-				base0D = "#61AFEF",
-				base0E = "#C678DD",
+				base00 = "#2D353B",
+				base01 = "#343F44",
+				base02 = "#3D484D",
+				base03 = "#475258",
+				base04 = "#7A8478",
+				base05 = "#859289",
+				base06 = "#9DA9A0",
+				base07 = "#D3C6AA",
+				base08 = "#E67E80",
+				base09 = "#E69875",
+				base0A = "#DBBC7F",
+				base0B = "#A7C080",
+				base0C = "#83C092",
+				base0D = "#7FBBB3",
+				base0E = "#D699B6",
 				base0F = "#BE5046",
 			},
 			plugins = { default = true },
@@ -683,6 +701,7 @@ now(function()
 		},
 		clues = {
 			{
+				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
@@ -1802,6 +1821,12 @@ now(function()
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
+	Nmap("<leader>aa", "<cmd>lua require('sidekick.nes').apply()<CR>", "Apply nes suggestions")
+	Nmap("<leader>ac", "<cmd>lua require('sidekick').clear()<CR>", "Clear nes suggestions")
+	Nmap("<leader>aj", "<cmd>lua require('sidekick.nes').jump()<CR>", "Jump to nes suggestions")
+	Nmap("<leader>ap", "<cmd>lua require('sidekick.cli').select_prompt()<CR>", "Select ai prompt")
+	Nmap("<leader>at", "<cmd>lua require('sidekick.cli').toggle({ focus = true })<CR>", "Toggle cli ai agent")
+	Nmap("<leader>au", "<cmd>lua require('sidekick.nes').update()<CR>", "Update nes suggestions")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
