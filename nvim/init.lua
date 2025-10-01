@@ -501,7 +501,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.statuscolumn = "%{%v:lua.G.status_column_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%} "
+	vim.o.statuscolumn = "%{%v:lua.G.status_column_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
