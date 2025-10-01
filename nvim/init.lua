@@ -32,7 +32,9 @@ Unmap = function(modes, suffix, opts)
 end
 Map = function(modes, suffix, rhs, desc, opts)
 	opts = opts or {}
-	opts.silent = true
+	if not opts.silent then
+		opts.silent = true
+	end
 	opts.desc = desc
 	vim.keymap.set(modes, suffix, rhs, opts)
 end
@@ -514,6 +516,7 @@ now(function()
 	vim.o.winblend = 0
 	vim.o.winborder = "rounded"
 	vim.o.wrap = false
+	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -1189,6 +1192,20 @@ now(function()
 			usages = {},
 		},
 	})
+	add({
+		source = "folke/sidekick.nvim",
+		depends = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+	require("sidekick").setup({
+		cli = {
+			mux = {
+				backend = "tmux",
+				enabled = true,
+			},
+		},
+	})
 end)
 
 -- Linting and formatting setup
@@ -1765,6 +1782,8 @@ now(function()
 			{ source = { name = "Core visits" } }
 		)
 	end
+	Imap("<C-\\>", "<Cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
+	Imap("<C-]>", "<Cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "x", "v", "n" }, "<leader>cP", '"+P', "Paste to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cX", '"+X', "Cut to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cY", '"+Y', "Copy to clipboard")
@@ -2281,38 +2300,27 @@ now(function()
 	local bundles = {}
 	vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
 	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
-	local env = {
-		HOME = vim.uv.os_homedir(),
-		XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME"),
-		JDTLS_JVM_ARGS = os.getenv("JDTLS_JVM_ARGS"),
-		JAVA_EXECUTABLE = os.getenv("JAVA_EXECUTABLE"),
-	}
-	local function get_cache_dir()
-		return env.XDG_CACHE_HOME and env.XDG_CACHE_HOME or env.HOME .. "/.cache"
-	end
 	local function get_jdtls_cache_dir()
-		return get_cache_dir() .. "/jdtls"
-	end
-	local function get_jdtls_config_dir()
-		return get_jdtls_cache_dir() .. "/config"
+		return vim.fn.stdpath("cache") .. "/jdtls"
 	end
 	local function get_jdtls_workspace_dir()
 		return get_jdtls_cache_dir() .. "/workspace"
 	end
 	local function get_jdtls_jvm_args()
-		local lombok_path = "/usr/share/java/lombok/lombok.jar"
+		local env = os.getenv("JDTLS_JVM_ARGS")
 		local args = {}
-		for a in string.gmatch((env.JDTLS_JVM_ARGS or ""), "%S+") do
+		for a in string.gmatch((env or ""), "%S+") do
 			local arg = string.format("--jvm-arg=%s", a)
 			table.insert(args, arg)
 		end
+		local lombok_path = "/usr/share/java/lombok/lombok.jar"
 		if vim.uv.fs_stat(lombok_path) then
 			table.insert(args, string.format("--jvm-arg=-javaagent:%s", lombok_path))
 		end
 		return unpack(args)
 	end
 	local function get_jdtls_java_executable()
-		return env.JAVA_EXECUTABLE or "/usr/lib/jvm/java-21-openjdk/bin/java"
+		return "/usr/lib/jvm/java-21-openjdk/bin/java"
 	end
 	local lsp_servers = {
 		lua_ls = {
@@ -2336,6 +2344,7 @@ now(function()
 				},
 			},
 		},
+		copilot = {},
 		marksman = {},
 		texlab = {},
 		html = {},
@@ -2509,16 +2518,25 @@ now(function()
 			},
 		},
 		jdtls = {
-			cmd = {
-				"jdtls",
-				"--java-executable",
-				get_jdtls_java_executable(),
-				"-configuration",
-				get_jdtls_config_dir(),
-				"-data",
-				get_jdtls_workspace_dir(),
-				get_jdtls_jvm_args(),
-			},
+			cmd = function(dispatchers, config)
+				local data_dir = get_jdtls_workspace_dir()
+				if config.root_dir then
+					data_dir = data_dir .. "/" .. vim.fn.fnamemodify(config.root_dir, ":p:h:t")
+				end
+				local config_cmd = {
+					"jdtls",
+					"--java-executable",
+					get_jdtls_java_executable(),
+					"-data",
+					data_dir,
+					get_jdtls_jvm_args(),
+				}
+				return vim.lsp.rpc.start(config_cmd, dispatchers, {
+					cwd = config.cmd_cwd,
+					env = config.cmd_env,
+					detached = config.detached,
+				})
+			end,
 			capabilities = jdtls_capabilities,
 			settings = {
 				java = {
@@ -2561,7 +2579,6 @@ now(function()
 				},
 			},
 			init_options = {
-				workspace = get_jdtls_workspace_dir(),
 				bundles = bundles,
 				extendedClientCapabilities = {
 					classFileContentsSupport = true,
