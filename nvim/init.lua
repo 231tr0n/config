@@ -1783,7 +1783,7 @@ now(function()
 		)
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
-	Map({ "n", "x", "v" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
+	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
 	Map({ "x", "v", "n" }, "<leader>cP", '"+P', "Paste to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cX", '"+X', "Cut to clipboard")
 	Map({ "x", "v", "n" }, "<leader>cY", '"+Y', "Copy to clipboard")
