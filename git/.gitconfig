@@ -5,13 +5,14 @@
 	diffFilter = diff-so-fancy --patch
 [merge]
 	conflictStyle = diff3
+	tool = nvimdiff
 [user]
 	email = zeltronsrikar@gmail.com
 	name = 231tr0n
 [init]
 	defaultBranch = main
 [pull]
-	rebase = false
+	rebase = true
 [color]
 	ui = true
 [color "diff-highlight"]
