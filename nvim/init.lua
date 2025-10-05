@@ -262,6 +262,63 @@ now(function()
 			yuck = true,
 			zig = true,
 		},
+		apply_colorscheme = function()
+			require("mini.base16").setup({
+				palette = G.palette,
+				plugins = { default = true },
+			})
+			Hi("@constructor.lua", { link = "Delimiter" })
+			Hi("@function.builtin", { link = "Function" })
+			Hi("@lsp.type.parameter", { link = "Special" })
+			Hi("@markup.link.vimdoc", { link = "Keyword" })
+			Hi("@module.builtin", { link = "Type" })
+			Hi("@tag.attribute", { link = "Statement" })
+			Hi("@tag.builtin", { link = "Tag" })
+			Hi("@tag.delimiter", { link = "Delimiter" })
+			Hi("@type.builtin", { link = "Type" })
+			Hi("@variable.member", { link = "Identifier" })
+			Hi("@variable.parameter", { link = "Special" })
+			Hi("DiagnosticSignError", { link = "DiagnosticError" })
+			Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
+			Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
+			Hi("DiagnosticSignOk", { link = "DiagnosticOk" })
+			Hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
+			Hi("DiffAdd", { link = "MiniStatuslineModeVisual" })
+			Hi("DiffChange", { link = "MiniStatuslineModeInsert" })
+			Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
+			Hi("DiffText", { link = "MiniStatuslineModeReplace" })
+			Hi("FloatFooter", { link = "MiniTablineCurrent" })
+			Hi("FloatTitle", { link = "MiniTablineCurrent" })
+			Hi("FoldColumn", { link = "Comment" })
+			Hi("Hlargs", { link = "@variable.parameter" })
+			Hi("LineNr", { link = "Comment" })
+			Hi("LineNrAbove", { link = "Comment" })
+			Hi("LineNrBelow", { link = "Comment" })
+			Hi("MiniClueDescGroup", { link = "Keyword" })
+			Hi("MiniClueNextKey", { link = "Function" })
+			Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
+			Hi("MiniClueSeparator", { link = "FloatBorder" })
+			Hi("MiniClueTitle", { link = "FloatTitle" })
+			Hi("MiniCompletionInfoBorderOutdated", { link = "Conditional" })
+			Hi("MiniDiffOverAdd", { link = "MiniStatuslineModeVisual" })
+			Hi("MiniDiffOverChange", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniDiffOverChangeBuf", { link = "MiniStatuslineModeVisual" })
+			Hi("MiniDiffOverContext", { link = "MiniStatuslineModeInsert" })
+			Hi("MiniDiffOverDelete", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
+			Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
+			Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
+			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
+			Hi("MiniPickBorderBusy", { link = "Conditional" })
+			Hi("NormalFloat", { link = "Normal" })
+			Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
+			Hi("Operator", { link = "Delimiter" })
+			Hi("QuickFixLineNr", { link = "SpecialKey" })
+			Hi("SignColumn", { link = "Comment" })
+			Hi("TreesitterContext", { link = "Pmenu" })
+			Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
+			Hi("WinSeparator", { link = "Normal" })
+		end,
 		status_column_pad_and_fold = function(win_id, buf_id)
 			if win_id and not vim.api.nvim_win_is_valid(win_id) then
 				return
@@ -543,77 +600,6 @@ now(function()
 	end
 end)
 
--- Initial UI setup
-now(function()
-	require("mini.notify").setup({
-		window = {
-			config = {
-				row = 2,
-			},
-			max_width_share = 0.5,
-			winblend = 0,
-		},
-	})
-	G.apply_colorscheme = function()
-		require("mini.base16").setup({
-			palette = G.palette,
-			plugins = { default = true },
-		})
-		Hi("@constructor.lua", { link = "Delimiter" })
-		Hi("@function.builtin", { link = "Function" })
-		Hi("@lsp.type.parameter", { link = "Special" })
-		Hi("@markup.link.vimdoc", { link = "Keyword" })
-		Hi("@module.builtin", { link = "Type" })
-		Hi("@tag.attribute", { link = "Statement" })
-		Hi("@tag.builtin", { link = "Tag" })
-		Hi("@tag.delimiter", { link = "Delimiter" })
-		Hi("@type.builtin", { link = "Type" })
-		Hi("@variable.member", { link = "Identifier" })
-		Hi("@variable.parameter", { link = "Special" })
-		Hi("DiagnosticSignError", { link = "DiagnosticError" })
-		Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
-		Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
-		Hi("DiagnosticSignOk", { link = "DiagnosticOk" })
-		Hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
-		Hi("DiffAdd", { link = "MiniStatuslineModeVisual" })
-		Hi("DiffChange", { link = "MiniStatuslineModeInsert" })
-		Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
-		Hi("DiffText", { link = "MiniStatuslineModeReplace" })
-		Hi("FloatFooter", { link = "MiniTablineCurrent" })
-		Hi("FloatTitle", { link = "MiniTablineCurrent" })
-		Hi("FoldColumn", { link = "Comment" })
-		Hi("Hlargs", { link = "@variable.parameter" })
-		Hi("LineNr", { link = "Comment" })
-		Hi("LineNrAbove", { link = "Comment" })
-		Hi("LineNrBelow", { link = "Comment" })
-		Hi("MiniClueDescGroup", { link = "Keyword" })
-		Hi("MiniClueNextKey", { link = "Function" })
-		Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
-		Hi("MiniClueSeparator", { link = "FloatBorder" })
-		Hi("MiniClueTitle", { link = "FloatTitle" })
-		Hi("MiniCompletionInfoBorderOutdated", { link = "Conditional" })
-		Hi("MiniDiffOverAdd", { link = "MiniStatuslineModeVisual" })
-		Hi("MiniDiffOverChange", { link = "MiniStatuslineModeCommand" })
-		Hi("MiniDiffOverChangeBuf", { link = "MiniStatuslineModeVisual" })
-		Hi("MiniDiffOverContext", { link = "MiniStatuslineModeInsert" })
-		Hi("MiniDiffOverDelete", { link = "MiniStatuslineModeCommand" })
-		Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
-		Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
-		Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
-		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-		Hi("MiniPickBorderBusy", { link = "Conditional" })
-		Hi("NormalFloat", { link = "Normal" })
-		Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
-		Hi("Operator", { link = "Delimiter" })
-		Hi("QuickFixLineNr", { link = "SpecialKey" })
-		Hi("SignColumn", { link = "Comment" })
-		Hi("TreesitterContext", { link = "Pmenu" })
-		Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
-		Hi("WinSeparator", { link = "Normal" })
-	end
-	G.apply_colorscheme()
-end)
-
 -- Mini plugins setup
 now(function()
 	require("mini.ai").setup({
@@ -761,7 +747,7 @@ now(function()
 	})
 	require("mini.misc").setup()
 	MiniMisc.setup_restore_cursor()
-	MiniMisc.setup_termbg_sync()
+	-- MiniMisc.setup_termbg_sync()
 	MiniMisc.setup_auto_root({
 		"meson.build",
 		"CMakeLists.txt",
@@ -785,6 +771,15 @@ now(function()
 		},
 		options = {
 			reindent_linewise = true,
+		},
+	})
+	require("mini.notify").setup({
+		window = {
+			config = {
+				row = 2,
+			},
+			max_width_share = 0.5,
+			winblend = 0,
 		},
 	})
 	require("mini.operators").setup()
@@ -1003,6 +998,7 @@ now(function()
 	})
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
+	G.apply_colorscheme()
 end)
 
 -- Non lazy plugins registration
