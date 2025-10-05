@@ -171,6 +171,7 @@ now(function()
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
+		transparency = false,
 		fold_open = "▾",
 		fold_close = "▸",
 		offset_encoding = "utf-16",
@@ -262,6 +263,19 @@ now(function()
 			yuck = true,
 			zig = true,
 		},
+		apply_transparency = function(transparent)
+			if transparent then
+				Hi("Normal", { bg = "NONE" })
+				Hi("NormalNC", { bg = "NONE" })
+			else
+				Hi("Normal", { bg = G.palette.base00 })
+				Hi("NormalNC", { bg = G.palette.base00_dim })
+			end
+		end,
+		toggle_transparency = function()
+			G.transparency = not G.transparency
+			G.apply_transparency(G.transparency)
+		end,
 		apply_colorscheme = function()
 			require("mini.base16").setup({
 				palette = G.palette,
@@ -308,16 +322,22 @@ now(function()
 			Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
 			Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
 			Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
+			Hi("MiniFilesTitle", { link = "FloatTitle" })
+			Hi("MiniFilesTitleFocused", { link = "MiniTablineTabpagesection" })
 			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
 			Hi("MiniPickBorderBusy", { link = "Conditional" })
+			Hi("MiniPickBorderText", { link = "FloatTitle" })
+			Hi("MiniPickPrompt", { link = "MiniTablineTabpagesection" })
+			Hi("MiniPickPromptCaret", { link = "MiniTablineTabpagesection" })
+			Hi("MiniPickPromptPrefix", { link = "MiniTablineTabpagesection" })
 			Hi("NormalFloat", { link = "Normal" })
-			Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
 			Hi("Operator", { link = "Delimiter" })
 			Hi("QuickFixLineNr", { link = "SpecialKey" })
 			Hi("SignColumn", { link = "Comment" })
 			Hi("TreesitterContext", { link = "Pmenu" })
 			Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
 			Hi("WinSeparator", { link = "Normal" })
+			G.apply_transparency(G.transparency)
 		end,
 		status_column_pad_and_fold = function(win_id, buf_id)
 			if win_id and not vim.api.nvim_win_is_valid(win_id) then
@@ -1777,13 +1797,13 @@ now(function()
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<C-\\>", "<cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
-	Nmap("<Esc><Esc>", ":nohl<CR>", "Remove highlight")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContext toggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F8>", ":lua G.toggle_transparency()<CR>", "Toggle transparency")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
 	Nmap("<leader>aa", "<cmd>lua require('sidekick.nes').apply()<CR>", "Apply nes suggestions")
