@@ -120,7 +120,11 @@ if vim.g.vscode then
 			reindent_linewise = true,
 		},
 	})
-	require("mini.operators").setup()
+	require("mini.operators").setup({
+		exchange = {
+			prefix = "ge",
+		},
+	})
 	require("mini.splitjoin").setup()
 	require("mini.surround").setup()
 	-- Keymaps
@@ -808,7 +812,11 @@ now(function()
 			winblend = 0,
 		},
 	})
-	require("mini.operators").setup()
+	require("mini.operators").setup({
+		exchange = {
+			prefix = "ge",
+		},
+	})
 	require("mini.pairs").setup()
 	require("mini.pick").setup({
 		window = {
@@ -1792,13 +1800,8 @@ now(function()
 		)
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
+	Map({ "x", "v" }, "gx", '"+x', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
-	Map({ "x", "v", "n" }, "<leader>cP", '"+P', "Paste to clipboard")
-	Map({ "x", "v", "n" }, "<leader>cX", '"+X', "Cut to clipboard")
-	Map({ "x", "v", "n" }, "<leader>cY", '"+Y', "Copy to clipboard")
-	Map({ "x", "v", "n" }, "<leader>cp", '"+p', "Paste to clipboard")
-	Map({ "x", "v", "n" }, "<leader>cx", '"+x', "Cut to clipboard")
-	Map({ "x", "v", "n" }, "<leader>cy", '"+y', "Copy to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
@@ -1901,6 +1904,7 @@ now(function()
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
 	Nmap("]g", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
+	Nmap("gxx", '"+dd', "Cut line to clipboard")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
 	map_multistep("i", "<BS>", { "minipairs_bs" })
