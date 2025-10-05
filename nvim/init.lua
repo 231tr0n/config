@@ -532,7 +532,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "bold"
+	vim.o.winborder = "single"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
@@ -622,12 +622,13 @@ now(function()
 		Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
 		Hi("MiniPickBorderBusy", { link = "Conditional" })
 		Hi("NormalFloat", { link = "Normal" })
+		Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
 		Hi("Operator", { link = "Delimiter" })
 		Hi("QuickFixLineNr", { link = "SpecialKey" })
 		Hi("SignColumn", { link = "Comment" })
 		Hi("TreesitterContext", { link = "Pmenu" })
+		Hi("TreesitterContextLineNumber", { fg = G.palette.base03, bg = G.palette.base01 })
 		Hi("WinSeparator", { link = "Normal" })
-		Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
 	end
 	G.apply_colorscheme()
 end)
