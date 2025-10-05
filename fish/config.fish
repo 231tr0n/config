@@ -100,12 +100,12 @@ if grep -q -i microsoft /proc/sys/kernel/osrelease
     set -gx XDG_RUNTIME_DIR $HOME/.tmp/
 end
 
-# fish_config theme choose 'ayu Dark'
-set -g fish_term24bit 0
+# fish_config theme choose Nord
+# set -g fish_term24bit 0
 
 zoxide init --cmd cd fish | source
 
 if status is-interactive
     and not set -q TMUX
-    exec tmux -2u
+    sleep 1 && tmux -2u
 end

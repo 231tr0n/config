@@ -760,6 +760,8 @@ now(function()
 		},
 	})
 	require("mini.misc").setup()
+	MiniMisc.setup_restore_cursor()
+	MiniMisc.setup_termbg_sync()
 	MiniMisc.setup_auto_root({
 		"meson.build",
 		"CMakeLists.txt",
