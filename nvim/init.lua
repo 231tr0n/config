@@ -685,7 +685,6 @@ now(function()
 			{
 				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
-				{ mode = "n", keys = "<leader>c", desc = "+Clipboard" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<leader>e", desc = "+Explorer" },
 				{ mode = "n", keys = "<leader>f", desc = "+Find" },
