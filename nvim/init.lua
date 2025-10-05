@@ -173,8 +173,6 @@ now(function()
 		te_float_win = nil,
 		fold_open = "▾",
 		fold_close = "▸",
-		alternate_fold_open = "",
-		alternate_fold_close = "",
 		offset_encoding = "utf-16",
 		palette = {
 			base00_dim = "#232A2E",
@@ -272,30 +270,17 @@ now(function()
 				return
 			end
 			local space = "⠀" -- The space here is a braille blank space "⠀"
-			local status_column_separator = "│" -- ▕
-			local curwin = false
 			local lnum = vim.v.lnum
 			local stc = "%s%l"
-			if vim.api.nvim_get_current_win() == win_id then
-				curwin = true
-			end
-			local status_column_separator_appender = function(text)
-				if curwin then
-					return text .. status_column_separator
-				else
-					return text .. space
-				end
-			end
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return stc .. status_column_separator_appender(curwin and G.fold_open or G.alternate_fold_open)
+						return stc .. G.fold_open .. space
 					else
-						return stc
-							.. status_column_separator_appender(curwin and G.fold_close or G.alternate_fold_close)
+						return stc .. G.fold_close .. space
 					end
 				end
-				return stc .. status_column_separator_appender(space)
+				return stc .. space .. space
 			else
 				local count = #tostring(vim.fn.line("$"))
 				local temp
@@ -304,7 +289,7 @@ now(function()
 				else
 					temp = string.rep(space, count)
 				end
-				return stc .. status_column_separator_appender(temp .. space)
+				return stc .. temp .. space .. space
 			end
 		end,
 		customized_hover = function(fn)
@@ -585,9 +570,6 @@ now(function()
 		Hi("@type.builtin", { link = "Type" })
 		Hi("@variable.member", { link = "Identifier" })
 		Hi("@variable.parameter", { link = "Special" })
-		Hi("CursorLineFold", { link = "Normal" })
-		Hi("CursorLineNr", { link = "Normal" })
-		Hi("CursorLineSign", { link = "Normal" })
 		Hi("DiagnosticSignError", { link = "DiagnosticError" })
 		Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
 		Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
@@ -614,7 +596,6 @@ now(function()
 		Hi("MiniDiffOverChange", { link = "MiniStatuslineModeCommand" })
 		Hi("MiniDiffOverChangeBuf", { link = "MiniStatuslineModeVisual" })
 		Hi("MiniDiffOverContext", { link = "MiniStatuslineModeInsert" })
-		-- Hi("MiniDiffOverContextBuf", { link = "MiniStatuslineModeReplace" })
 		Hi("MiniDiffOverDelete", { link = "MiniStatuslineModeCommand" })
 		Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
 		Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
@@ -627,7 +608,7 @@ now(function()
 		Hi("QuickFixLineNr", { link = "SpecialKey" })
 		Hi("SignColumn", { link = "Comment" })
 		Hi("TreesitterContext", { link = "Pmenu" })
-		Hi("TreesitterContextLineNumber", { fg = G.palette.base03, bg = G.palette.base01 })
+		Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
 		Hi("WinSeparator", { link = "Normal" })
 	end
 	G.apply_colorscheme()
@@ -1800,7 +1781,7 @@ now(function()
 	Nmap("<C-\\>", "<cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
 	Nmap("<Esc><Esc>", ":nohl<CR>", "Remove highlight")
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F3>", ":TSContextToggle<CR>", "Toggle treesitter context")
+	Nmap("<F3>", ":TSContext toggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
