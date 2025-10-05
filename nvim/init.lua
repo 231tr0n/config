@@ -1800,7 +1800,7 @@ now(function()
 		)
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
-	Map({ "x", "v" }, "gx", '"+x', "Cut selection to clipboard")
+	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
 	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
