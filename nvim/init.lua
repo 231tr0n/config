@@ -171,7 +171,7 @@ now(function()
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
-		transparency = false,
+		transparency = true,
 		fold_open = "▾",
 		fold_close = "▸",
 		offset_encoding = "utf-16",
@@ -266,10 +266,8 @@ now(function()
 		apply_transparency = function(transparent)
 			if transparent then
 				Hi("Normal", { bg = "NONE" })
-				Hi("NormalNC", { bg = "NONE" })
 			else
 				Hi("Normal", { bg = G.palette.base00 })
-				Hi("NormalNC", { bg = G.palette.base00_dim })
 			end
 		end,
 		toggle_transparency = function()
@@ -292,6 +290,9 @@ now(function()
 			Hi("@type.builtin", { link = "Type" })
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
+			Hi("CursorLineFold", { link = "Comment" })
+			Hi("CursorLineNr", { link = "Comment" })
+			Hi("CursorLineSign", { link = "Comment" })
 			Hi("DiagnosticSignError", { link = "DiagnosticError" })
 			Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
 			Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
@@ -301,8 +302,8 @@ now(function()
 			Hi("DiffChange", { link = "MiniStatuslineModeInsert" })
 			Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
 			Hi("DiffText", { link = "MiniStatuslineModeReplace" })
-			Hi("FloatFooter", { link = "MiniTablineCurrent" })
-			Hi("FloatTitle", { link = "MiniTablineCurrent" })
+			Hi("FloatFooter", { link = "MiniTablineTabpagesection" })
+			Hi("FloatTitle", { link = "MiniTablineTabpagesection" })
 			Hi("FoldColumn", { link = "Comment" })
 			Hi("Hlargs", { link = "@variable.parameter" })
 			Hi("LineNr", { link = "Comment" })
@@ -323,13 +324,13 @@ now(function()
 			Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
 			Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
 			Hi("MiniFilesTitle", { link = "FloatTitle" })
-			Hi("MiniFilesTitleFocused", { link = "MiniTablineTabpagesection" })
+			Hi("MiniFilesTitleFocused", { link = "MiniStatuslineModeCommand" })
 			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
 			Hi("MiniPickBorderBusy", { link = "Conditional" })
 			Hi("MiniPickBorderText", { link = "FloatTitle" })
-			Hi("MiniPickPrompt", { link = "MiniTablineTabpagesection" })
-			Hi("MiniPickPromptCaret", { link = "MiniTablineTabpagesection" })
-			Hi("MiniPickPromptPrefix", { link = "MiniTablineTabpagesection" })
+			Hi("MiniPickPrompt", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeCommand" })
 			Hi("NormalFloat", { link = "Normal" })
 			Hi("Operator", { link = "Delimiter" })
 			Hi("QuickFixLineNr", { link = "SpecialKey" })
@@ -346,18 +347,23 @@ now(function()
 			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
 				return
 			end
+			local curwin = false
 			local space = "⠀" -- The space here is a braille blank space "⠀"
 			local lnum = vim.v.lnum
+			local separator = "│"
 			local stc = "%s%l"
+			if win_id == vim.api.nvim_get_current_win() then
+				curwin = true
+			end
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return stc .. G.fold_open .. space
+						return stc .. G.fold_open .. (curwin and separator or space)
 					else
-						return stc .. G.fold_close .. space
+						return stc .. G.fold_close .. (curwin and separator or space)
 					end
 				end
-				return stc .. space .. space
+				return stc .. space .. (curwin and separator or space)
 			else
 				local count = #tostring(vim.fn.line("$"))
 				local temp
@@ -366,7 +372,7 @@ now(function()
 				else
 					temp = string.rep(space, count)
 				end
-				return stc .. temp .. space .. space
+				return stc .. temp .. space .. (curwin and separator or space)
 			end
 		end,
 		customized_hover = function(fn)
