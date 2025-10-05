@@ -107,5 +107,5 @@ zoxide init --cmd cd fish | source
 
 if status is-interactive
     and not set -q TMUX
-    sleep 1 && exec tmux -2u
+    exec tmux -2u
 end
