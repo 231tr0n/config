@@ -176,6 +176,25 @@ now(function()
 		alternate_fold_open = "",
 		alternate_fold_close = "",
 		offset_encoding = "utf-16",
+		palette = {
+			base00_dim = "#232A2E",
+			base00 = "#2D353B",
+			base01 = "#343F44",
+			base02 = "#3D484D",
+			base03 = "#475258",
+			base04 = "#4F585E",
+			base05 = "#D3C6AA",
+			base06 = "#7A8478",
+			base07 = "#859289",
+			base08 = "#E67E80",
+			base09 = "#E69875",
+			base0A = "#DBBC7F",
+			base0B = "#A7C080",
+			base0C = "#83C092",
+			base0D = "#7FBBB3",
+			base0E = "#D699B6",
+			base0F = "#9DA9A0",
+		},
 		languages = {
 			angular = true,
 			awk = true,
@@ -292,7 +311,7 @@ now(function()
 			local width = math.floor(vim.o.columns * 0.8)
 			local height = math.floor(vim.o.lines * 0.5)
 			fn({
-				border = "rounded",
+				border = vim.o.winborder,
 				max_width = width,
 				max_height = height,
 				title = " Hover ",
@@ -513,7 +532,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "rounded"
+	vim.o.winborder = "bold"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
@@ -552,24 +571,7 @@ now(function()
 	})
 	G.apply_colorscheme = function()
 		require("mini.base16").setup({
-			palette = {
-				base00 = "#2D353B",
-				base01 = "#343F44",
-				base02 = "#3D484D",
-				base03 = "#475258",
-				base04 = "#4F585E",
-				base05 = "#9DA9A0",
-				base06 = "#7A8478",
-				base07 = "#859289",
-				base08 = "#E67E80",
-				base09 = "#E69875",
-				base0A = "#DBBC7F",
-				base0B = "#A7C080",
-				base0C = "#83C092",
-				base0D = "#7FBBB3",
-				base0E = "#D699B6",
-				base0F = "#BE5046",
-			},
+			palette = G.palette,
 			plugins = { default = true },
 		})
 		Hi("@constructor.lua", { link = "Delimiter" })
@@ -625,6 +627,7 @@ now(function()
 		Hi("SignColumn", { link = "Comment" })
 		Hi("TreesitterContext", { link = "Pmenu" })
 		Hi("WinSeparator", { link = "Normal" })
+		Hi("NormalNC", { bg = G.palette.base00_dim, fg = G.palette.base05 })
 	end
 	G.apply_colorscheme()
 end)
