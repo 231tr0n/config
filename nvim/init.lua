@@ -808,7 +808,7 @@ now(function()
 	require("mini.notify").setup({
 		window = {
 			config = {
-				row = 2,
+				row = 1,
 			},
 			max_width_share = 0.5,
 			winblend = 0,
