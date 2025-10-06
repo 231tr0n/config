@@ -270,8 +270,10 @@ now(function()
 		apply_transparency = function(transparent)
 			if transparent then
 				Hi("Normal", { bg = "NONE" })
+				Hi("NormalNC", { bg = "NONE" })
 			else
 				Hi("Normal", { bg = G.palette.base00 })
+				Hi("NormalNC", { bg = G.palette.base00_dim })
 			end
 		end,
 		toggle_transparency = function()
@@ -306,8 +308,8 @@ now(function()
 			Hi("DiffChange", { link = "MiniStatuslineModeInsert" })
 			Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
 			Hi("DiffText", { link = "MiniStatuslineModeReplace" })
-			Hi("FloatFooter", { link = "MiniTablineTabpagesection" })
-			Hi("FloatTitle", { link = "MiniTablineTabpagesection" })
+			Hi("FloatFooter", { link = "MiniStatuslineModeVisual" })
+			Hi("FloatTitle", { link = "MiniStatuslineModeVisual" })
 			Hi("FoldColumn", { link = "Comment" })
 			Hi("Hlargs", { link = "@variable.parameter" })
 			Hi("LineNr", { link = "Comment" })
@@ -335,6 +337,7 @@ now(function()
 			Hi("MiniPickPrompt", { link = "MiniStatuslineModeCommand" })
 			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeCommand" })
 			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniTablineTabpagesection", { link = "MiniStatuslineModeVisual" })
 			Hi("NormalFloat", { link = "Normal" })
 			Hi("Operator", { link = "Delimiter" })
 			Hi("QuickFixLineNr", { link = "SpecialKey" })
@@ -527,7 +530,7 @@ now(function()
 			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
 				return
 			end
-			local winbar_append = "%#MiniTablineTabpagesection#⠀⠀󰁔 %#WinBar# "
+			local winbar_append = "%#MiniStatuslineModeVisual#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
 				if #G.keys > 0 then
 					return winbar_append
@@ -1999,17 +2002,15 @@ now(function()
 			end
 			local buftype = vim.bo[args.buf].buftype
 			local filetype = vim.bo[args.buf].filetype
-			if buftype ~= "" or filetype ~= "" then
-				if not special_buftypes[buftype] and not special_file_types[filetype] then
-					vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
-					Map(
-						{ "n", "x", "o" },
-						"<CR>",
-						":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
-						"Start jump",
-						{ buffer = true }
-					)
-				end
+			if (buftype ~= "" or filetype ~= "") and not special_buftypes[buftype] then
+				vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
+				Map(
+					{ "n", "x", "o" },
+					"<CR>",
+					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
+					"Start jump",
+					{ buffer = true }
+				)
 			end
 		end,
 	})
