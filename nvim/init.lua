@@ -297,7 +297,7 @@ now(function()
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
 			Hi("CursorLineFold", { link = "Comment" })
-			Hi("CursorLineNr", { link = "Comment" })
+			Hi("CursorLineNr", { link = "Delimiter" })
 			Hi("CursorLineSign", { link = "Comment" })
 			Hi("DiagnosticSignError", { link = "DiagnosticError" })
 			Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
@@ -556,6 +556,9 @@ now(function()
 	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
 	vim.cmd("packadd cfilter")
+	if vim.fn.has("nvim-0.12") == 1 then
+		vim.cmd("packadd nvim.undotree")
+	end
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.mapleader = " "
