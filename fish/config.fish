@@ -104,8 +104,13 @@ end
 # set -g fish_term24bit 0
 
 zoxide init --cmd cd fish | source
+fzf --fish | source
+bat --completion fish | source
 
 if status is-interactive
     and not set -q TMUX
     exec tmux -2u
 end
+
+set -gx FZF_DEFAULT_OPTS "--style full --color 16"
+set -gx BAT_THEME ansi
