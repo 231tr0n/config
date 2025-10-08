@@ -344,7 +344,7 @@ now(function()
 			Hi("SignColumn", { link = "Comment" })
 			Hi("TreesitterContext", { link = "Pmenu" })
 			Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
-			Hi("WinSeparator", { link = "Normal" })
+			Hi("WinSeparator", { link = "Delimiter" })
 			G.apply_transparency(G.transparency)
 		end,
 		status_column_pad_and_fold = function(win_id, buf_id)
