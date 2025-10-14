@@ -112,5 +112,5 @@ if status is-interactive
     exec tmux -2u
 end
 
-set -gx FZF_DEFAULT_OPTS "--style full --color 16"
+set -gx FZF_DEFAULT_OPTS "--style full --color 16 --reverse"
 set -gx BAT_THEME ansi
