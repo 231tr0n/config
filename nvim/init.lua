@@ -558,12 +558,21 @@ now(function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
-	vim.cmd("packadd cfilter")
 	if vim.fn.has("nvim-0.12") == 1 then
+		vim.cmd("packadd cfilter")
+		vim.cmd("packadd justify")
+		vim.cmd("packadd nohlsearch")
+		vim.cmd("packadd nvim.difftool")
 		vim.cmd("packadd nvim.undotree")
 	end
+	vim.g.loaded_gzip = 1
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
+	vim.g.loaded_spellfile_plugin = 1
+	vim.g.loaded_tar = 1
+	vim.g.loaded_tarPlugin = 1
+	vim.g.loaded_zip = 1
+	vim.g.loaded_zipPlugin = 1
 	vim.g.mapleader = " "
 	vim.g.maplocalleader = " "
 	vim.g.nerd_font = true
