@@ -309,14 +309,12 @@ now(function()
 			Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
 			Hi("DiffText", { link = "MiniStatuslineModeReplace" })
 			Hi("FloatBorder", { link = "Delimiter" })
-			Hi("FloatFooter", { link = "MiniStatuslineModeVisual" })
-			Hi("FloatTitle", { link = "MiniStatuslineModeVisual" })
+			Hi("FloatFooter", { link = "FloatTitle" })
+			Hi("FloatTitle", { link = "MiniStatuslineModeNormal" })
 			Hi("FoldColumn", { link = "Comment" })
-			Hi("Hlargs", { link = "@variable.parameter" })
 			Hi("LineNr", { link = "Comment" })
 			Hi("LineNrAbove", { link = "Comment" })
 			Hi("LineNrBelow", { link = "Comment" })
-			Hi("MiniClueBorder", { link = "FloatBorder" })
 			Hi("MiniClueDescGroup", { link = "Keyword" })
 			Hi("MiniClueNextKey", { link = "Function" })
 			Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
@@ -331,21 +329,17 @@ now(function()
 			Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
 			Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
 			Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
-			Hi("MiniFilesBorder", { link = "Delimiter" })
 			Hi("MiniFilesTitle", { link = "FloatTitle" })
-			Hi("MiniFilesTitleFocused", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniFilesTitleFocused", { link = "MiniStatuslineModeVisual" })
 			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-			Hi("MiniNotifyBorder", { link = "FloatBorder" })
-			Hi("MiniPickBorder", { link = "Delimiter" })
 			Hi("MiniPickBorderBusy", { link = "Conditional" })
 			Hi("MiniPickBorderText", { link = "FloatTitle" })
-			Hi("MiniPickPrompt", { link = "MiniStatuslineModeCommand" })
-			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeCommand" })
-			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeCommand" })
+			Hi("MiniPickPrompt", { link = "MiniStatuslineModeVisual" })
+			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeVisual" })
+			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
 			Hi("MiniTablineTabpagesection", { link = "MiniStatuslineModeVisual" })
 			Hi("NormalFloat", { link = "Normal" })
 			Hi("Operator", { link = "Delimiter" })
-			Hi("QuickFixLineNr", { link = "SpecialKey" })
 			Hi("SignColumn", { link = "Comment" })
 			Hi("TreesitterContext", { link = "Pmenu" })
 			Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
@@ -535,7 +529,11 @@ now(function()
 			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
 				return
 			end
-			local winbar_append = "%#MiniStatuslineModeVisual#⠀⠀󰁔 %#WinBar# "
+			local highlight = "MiniStatuslineModeNormal"
+			if win_id == vim.api.nvim_get_current_win() then
+				highlight = "MiniStatuslineModeVisual"
+			end
+			local winbar_append = "%#" .. highlight .. "#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
 				if #G.keys > 0 then
 					return winbar_append
@@ -1198,22 +1196,6 @@ now(function()
 		completions = { lsp = { enabled = true } },
 		code = {
 			border = "thin",
-		},
-	})
-	add({
-		source = "231tr0n/hlargs.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("hlargs").setup({
-		paint_arg_declarations = true,
-		paint_arg_usages = true,
-		extras = {
-			named_parameters = true,
-		},
-		excluded_argnames = {
-			usages = {},
 		},
 	})
 	add({
