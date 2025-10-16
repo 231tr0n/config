@@ -616,7 +616,6 @@ now(function()
 	vim.o.termguicolors = true
 	vim.o.textwidth = 0
 	vim.o.undofile = false
-	vim.o.updatetime = 500
 	vim.o.wildignore = "*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*"
 	vim.o.wildmenu = true
 	vim.o.wildmode = "noselect:lastused,full"
