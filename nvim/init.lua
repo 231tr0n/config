@@ -2516,6 +2516,7 @@ now(function()
 			},
 		},
 		jdtls = {
+			filetypes = { "java", "jproperties" },
 			cmd = function(dispatchers, config)
 				local data_dir = get_jdtls_workspace_dir()
 				if config.root_dir then
