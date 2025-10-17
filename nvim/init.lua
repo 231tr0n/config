@@ -2036,12 +2036,10 @@ now(function()
 		callback = function(args)
 			if args.match ~= "MiniFilesBufferCreate" then
 				local clients = G.lsp_get_client(nil, nil, true)
-				local willMethod
 				local didMethod
 				local changes
 				if clients and #clients > 0 then
 					if args.data.to and not args.data.from then
-						willMethod = "workspace/willCreateFiles"
 						didMethod = "workspace/didCreateFiles"
 						changes = {
 							files = {
@@ -2049,7 +2047,6 @@ now(function()
 							},
 						}
 					elseif args.data.from and not args.data.to then
-						willMethod = "workspace/willDeleteFiles"
 						didMethod = "workspace/didDeleteFiles"
 						changes = {
 							files = {
@@ -2057,7 +2054,6 @@ now(function()
 							},
 						}
 					else
-						willMethod = "workspace/willRenameFiles"
 						didMethod = "workspace/didRenameFiles"
 						changes = {
 							files = {
@@ -2065,14 +2061,6 @@ now(function()
 								newUri = vim.uri_from_fname(args.data.to),
 							},
 						}
-					end
-					for _, client in ipairs(clients) do
-						if client:supports_method(willMethod) then
-							local resp = client:request_sync(willMethod, changes, 1000)
-							if resp and resp.result then
-								vim.lsp.util.apply_workspace_edit(resp.result, G.offset_encoding)
-							end
-						end
 					end
 					for _, client in ipairs(clients) do
 						if client:supports_method(didMethod) then
