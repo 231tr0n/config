@@ -77,29 +77,6 @@ set -gx PATH $PATH $HOME/.local/bin
 # Coursier path variables
 set -gx PATH $PATH $HOME/.local/share/coursier/bin
 
-# Hive path variables
-set -gx HIVE_HOME /opt/hive
-set -gx PATH $PATH $HIVE_HOME/bin
-
-# Hadoop path variables
-set -gx HADOOP_HOME /opt/hadoop
-set -gx HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
-set -gx PATH $PATH $HADOOP_HOME/bin
-set -gx PATH $PATH $HADOOP_HOME/sbin
-
-# Spark path variables
-set -gx SPARK_HOME /opt/spark
-set -gx PATH $PATH $SPARK_HOME/bin
-set -gx PATH $PATH $SPARK_HOME/sbin
-
-# Vscode variables
-set -gx DONT_PROMPT_WSL_INSTALL No_Prompt_please
-
-if grep -q -i microsoft /proc/sys/kernel/osrelease
-    mkdir -p $HOME/.tmp/
-    set -gx XDG_RUNTIME_DIR $HOME/.tmp/
-end
-
 # fish_config theme choose Nord
 # set -g fish_term24bit 0
 
@@ -107,10 +84,11 @@ zoxide init --cmd cd fish | source
 fzf --fish | source
 bat --completion fish | source
 
-if status is-interactive
-    and not set -q TMUX
-    exec tmux -2u
-end
-
 set -gx FZF_DEFAULT_OPTS "--style full --color 16 --reverse"
 set -gx BAT_THEME ansi
+
+if status is-interactive
+    and not set -q TMUX
+    # Dont use `exec` to start tmux as it causes wsl to quit
+    tmux -2u
+end
