@@ -644,6 +644,11 @@ now(function()
 				target = "msg",
 			},
 		})
+		vim.schedule(function()
+			vim.api.nvim_win_set_config(require("vim._extui.shared").wins.msg, {
+				title = " Msg ",
+			})
+		end)
 	end
 end)
 
