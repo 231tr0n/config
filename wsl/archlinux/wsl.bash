@@ -194,6 +194,7 @@ PACKAGES=(
 	"nodejs-nodemon"
 	"npm"
 	"ollama"
+	"opencode-bin"
 	"openjdk-doc"
 	"openjdk-src"
 	"openjdk11-doc"
@@ -286,6 +287,7 @@ default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fis
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o $HOME/.config/fish/functions/fish_user_key_bindings.fish'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o $HOME/.config/fish/functions/fish_mode_prompt.fish'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o $HOME/wsl.bash'
+default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o $HOME/.config/opencode/opencode.json'
 
 default_user_cmd "rustup update stable"
 
