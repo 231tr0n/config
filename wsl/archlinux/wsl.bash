@@ -159,6 +159,7 @@ PACKAGES=(
 	"inetutils"
 	"inxi"
 	"java-debug"
+	"java-lombok"
 	"jdk-openjdk"
 	"jdk11-openjdk"
 	"jdk17-openjdk"
