@@ -3017,7 +3017,7 @@ later(function()
 							mini_extra_namespace,
 							i - 1,
 							0,
-							{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 199 }
+							{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 100 }
 						)
 					end
 				end,
