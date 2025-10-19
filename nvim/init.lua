@@ -194,6 +194,8 @@ now(function()
 			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
 			Hi("NormalNC", { bg = G.palette.base00_dim })
 			Hi("Operator", { link = "Delimiter" })
+			Hi("TreesitterContext", { link = "Normal" })
+			Hi("TreesitterContextSeparator", { link = "CursorLine" })
 		end,
 		lsp_get_client = function(name, bufnr, all)
 			local clients
@@ -960,6 +962,7 @@ now(function()
 	})
 	require("treesitter-context").setup({
 		max_lines = 6,
+		separator = " ",
 	})
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
