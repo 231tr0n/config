@@ -994,60 +994,18 @@ now(function()
 	MiniSnippets.start_lsp_server()
 	require("mini.splitjoin").setup()
 	require("mini.starter").setup({
-		header = table.concat({
-			"██████╗░██████╗░░░███╗░░████████╗██████╗░░█████╗░███╗░░██╗",
-			"╚════██╗╚════██╗░████║░░╚══██╔══╝██╔══██╗██╔══██╗████╗░██║",
-			"░░███╔═╝░█████╔╝██╔██║░░░░░██║░░░██████╔╝██║░░██║██╔██╗██║",
-			"██╔══╝░░░╚═══██╗╚═╝██║░░░░░██║░░░██╔══██╗██║░░██║██║╚████║",
-			"███████╗██████╔╝███████╗░░░██║░░░██║░░██║╚█████╔╝██║░╚███║",
-			"╚══════╝╚═════╝░╚══════╝░░░╚═╝░░░╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝",
-			"",
-			"Pwd: " .. vim.fn.getcwd(),
-		}, "\n"),
 		query_updaters = "abcdefghijklmnopqrstuvwxyz0123456789_-.+",
 		items = {
 			require("mini.starter").sections.builtin_actions(),
 			require("mini.starter").sections.recent_files(3, false),
 			require("mini.starter").sections.recent_files(3, true),
 			require("mini.starter").sections.sessions(3, true),
+			require("mini.starter").sections.pick(),
 		},
-		footer = table.concat({
-			"███╗░░██╗███████╗░█████╗░██╗░░░██╗██╗███╗░░░███╗",
-			"████╗░██║██╔════╝██╔══██╗██║░░░██║██║████╗░████║",
-			"██╔██╗██║█████╗░░██║░░██║╚██╗░██╔╝██║██╔████╔██║",
-			"██║╚████║██╔══╝░░██║░░██║░╚████╔╝░██║██║╚██╔╝██║",
-			"██║░╚███║███████╗╚█████╔╝░░╚██╔╝░░██║██║░╚═╝░██║",
-			"╚═╝░░╚══╝╚══════╝░╚════╝░░░░╚═╝░░░╚═╝╚═╝░░░░░╚═╝",
-		}, "\n"),
 	})
-	require("mini.statusline").setup({
-		content = {
-			active = function()
-				local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-				local git = MiniStatusline.section_git({ trunc_width = 75 })
-				local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-				local filename = MiniStatusline.section_filename({ trunc_width = 1000 })
-				local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
-				local location = MiniStatusline.section_location({ trunc_width = 75 })
-				local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
-				local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
-				return MiniStatusline.combine_groups({
-					{ hl = mode_hl, strings = { mode } },
-					{ hl = "MiniStatuslineDevinfo", strings = { git, diagnostics, lsp } },
-					"%<",
-					{ hl = "MiniStatuslineFilename", strings = { filename } },
-					"%=",
-					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
-					{ hl = mode_hl, strings = { search, location } },
-				})
-			end,
-		},
-		set_vim_settings = false,
-	})
+	require("mini.statusline").setup()
 	require("mini.surround").setup()
-	require("mini.tabline").setup({
-		tabpage_section = "right",
-	})
+	require("mini.tabline").setup()
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
 	G.apply_colorscheme()
