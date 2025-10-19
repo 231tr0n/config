@@ -68,8 +68,6 @@ now(function()
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
-		fold_open = "›",
-		fold_close = "‹",
 		offset_encoding = "utf-16",
 		palette = {
 			base00 = "#2D353B",
@@ -176,12 +174,14 @@ now(function()
 			Hi("@type.builtin", { link = "Type" })
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
+			Hi("CursorLineFold", { link = "LineNr" })
 			Hi("DiffAdd", { bg = G.palette.base0C_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffChange", { bg = G.palette.base0D_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffDelete", { bg = G.palette.base08_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffText", { bg = G.palette.base0E_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("FloatFooter", { link = "FloatTitle" })
 			Hi("FloatTitle", { link = "MiniStatuslineModeNormal" })
+			Hi("FoldColumn", { link = "LineNr" })
 			Hi("MiniClueTitle", { link = "FloatTitle" })
 			Hi("MiniDiffOverChange", { link = "MiniDiffOverDelete" })
 			Hi("MiniDiffOverChangeBuf", { link = "MiniDiffOverAdd" })
@@ -194,47 +194,6 @@ now(function()
 			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
 			Hi("NormalNC", { bg = G.palette.base00_dim })
 			Hi("Operator", { link = "Delimiter" })
-		end,
-		statuscolumn_pad_and_fold = function(win_id, buf_id)
-			if win_id and not vim.api.nvim_win_is_valid(win_id) then
-				return
-			end
-			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
-				return
-			end
-			local space = "⠀" -- The space here is a braille blank space "⠀"
-			local lnum = vim.v.lnum
-			local stc = "%s%l"
-			if vim.v.virtnum == 0 then
-				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
-					if vim.fn.foldclosed(lnum) == -1 then
-						return stc .. G.fold_open
-					else
-						return stc .. G.fold_close
-					end
-				end
-				return stc .. space
-			else
-				local count = #tostring(vim.fn.line("$"))
-				local temp
-				if count < vim.wo.numberwidth then
-					temp = string.rep(space, vim.wo.numberwidth)
-				else
-					temp = string.rep(space, count)
-				end
-				return stc .. temp .. space
-			end
-		end,
-		customized_hover = function(fn)
-			local width = math.floor(vim.o.columns * 0.8)
-			local height = math.floor(vim.o.lines * 0.5)
-			fn({
-				border = vim.o.winborder,
-				max_width = width,
-				max_height = height,
-				title = " Hover ",
-				title_pos = "left",
-			})
 		end,
 		lsp_get_client = function(name, bufnr, all)
 			local clients
@@ -427,7 +386,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldopen:" .. G.fold_open .. ",foldsep: ,foldclose:" .. G.fold_close
+	vim.o.fillchars = "eob: ,foldinner: ,foldsep: "
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -454,7 +413,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.statuscolumn = "%{%v:lua.G.statuscolumn_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
+	vim.o.statuscolumn = "%s%l%C"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -1612,10 +1571,11 @@ now(function()
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<C-\\>", "<cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
-	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F3>", ":TSContext toggle<CR>", "Toggle treesitter context")
-	Nmap("<F4>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
+	Nmap("<F1>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
+	Nmap("<F2>", MiniNotify.clear, "Clear all notifications")
+	Nmap("<F3>", MiniNotify.show_history, "Show notification history")
+	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F5>", ":TSContext toggle<CR>", "Toggle treesitter context")
 	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
@@ -1683,7 +1643,7 @@ now(function()
 	Nmap("<leader>lI", ":lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<CR>", "Inlay hints toggle")
 	Nmap("<leader>lc", ":lua vim.lsp.buf.code_action()<CR>", "Code action")
 	Nmap("<leader>ldT", diagnostic_virtual_lines_toggle, "Virtual lines toggle")
-	Nmap("<leader>ldh", ":lua G.customized_hover(vim.diagnostic.open_float)<CR>", "Hover diagnostics")
+	Nmap("<leader>ldh", ":lua vim.diagnostic.open_float({title=' Hover ',title_pos='left'})<CR>", "Hover diagnostics")
 	Nmap("<leader>ldt", diagnostic_virtual_text_toggle, "Virtual text toggle")
 	Nmap("<leader>lgD", ":lua vim.lsp.buf.declaration()<CR>", "Goto declaration")
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
@@ -1691,7 +1651,7 @@ now(function()
 	Nmap("<leader>lgr", ":lua vim.lsp.buf.references()<CR>", "Goto references")
 	Nmap("<leader>lgs", ":lua G.super_implementation()<CR>", "Goto super implementation")
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
-	Nmap("<leader>lh", ":lua G.customized_hover(vim.lsp.buf.hover)<CR>", "Hover symbol")
+	Nmap("<leader>lh", ":lua vim.lsp.buf.hover({title=' Hover ',title_pos='left'})<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.buf.incoming_calls()<CR>", "Lsp incoming calls")
 	Nmap("<leader>lo", ":lua vim.lsp.buf.outgoing_calls()<CR>", "Lsp outgoing calls")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
