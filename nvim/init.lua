@@ -2367,6 +2367,25 @@ now(function()
 						MiniNotify.update(G.jdtls_notify_id, { msg = results.message })
 					end
 				end),
+				["workspace/executeClientCommand"] = function(_, params, ctx)
+					local client = vim.lsp.get_client_by_id(ctx.client_id) or {}
+					local commands = client.commands or {}
+					local global_commands = vim.lsp.commands or {}
+					local fn = commands[params.command] or global_commands[params.command]
+					if fn then
+						local ok, result = pcall(fn, params.arguments, ctx)
+						if ok then
+							return result
+						else
+							return vim.lsp.rpc_response_error(vim.lsp.protocol.ErrorCodes.InternalError, result)
+						end
+					else
+						return vim.lsp.rpc_response_error(
+							vim.lsp.protocol.ErrorCodes.MethodNotFound,
+							"Command " .. params.command .. " not supported on client"
+						)
+					end
+				end,
 			},
 		},
 	}
