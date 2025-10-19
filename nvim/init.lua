@@ -62,126 +62,18 @@ Hi = function(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- Vscode neovim settings
-if vim.g.vscode then
-	local vscode = require("vscode")
-	-- Helper functions
-	Vscode = function(cmd)
-		return function()
-			vscode.action(cmd)
-		end
-	end
-	-- Settings
-	vim.g.loaded_matchparen = 1
-	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
-	vim.notify = vscode.notify
-	-- Plugins configuration
-	require("mini.ai").setup({
-		custom_textobjects = {
-			B = require("mini.extra").gen_ai_spec.buffer(),
-			D = require("mini.extra").gen_ai_spec.diagnostic(),
-			I = require("mini.extra").gen_ai_spec.indent(),
-			L = require("mini.extra").gen_ai_spec.line(),
-			N = require("mini.extra").gen_ai_spec.number(),
-		},
-	})
-	require("mini.align").setup()
-	require("mini.bracketed").setup()
-	require("mini.extra").setup()
-	require("mini.indentscope").setup({
-		draw = {
-			animation = require("mini.indentscope").gen_animation.none(),
-		},
-	})
-	require("mini.jump").setup()
-	require("mini.jump2d").setup({
-		labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-		view = {
-			dim = true,
-			n_steps_ahead = 2,
-		},
-		mappings = {
-			start_jumping = "",
-		},
-	})
-	require("mini.keymap").setup()
-	require("mini.move").setup({
-		mappings = {
-			left = "H",
-			right = "L",
-			down = "J",
-			up = "K",
-			line_left = "H",
-			line_right = "L",
-			line_down = "J",
-			line_up = "K",
-		},
-		options = {
-			reindent_linewise = true,
-		},
-	})
-	require("mini.operators").setup({
-		exchange = {
-			prefix = "ge",
-		},
-	})
-	require("mini.splitjoin").setup()
-	require("mini.surround").setup()
-	-- Keymaps
-	local error_diagnostic_cycle = function(direction)
-		return function()
-			MiniBracketed.diagnostic(direction, { severity = vim.diagnostic.severity.ERROR })
-		end
-	end
-	Nmap("[e", error_diagnostic_cycle("backward"), "Error last")
-	Nmap("]e", error_diagnostic_cycle("forward"), "Error forward")
-	Nmap("gB", ":norm gxiagxila<CR>", "Move arg left")
-	Nmap("gb", ":norm gxiagxina<CR>", "Move arg right")
-	Nmap("<Space>D", Vscode("editor.action.peekDefinition"), "Peek definition")
-	Nmap("<Space>F", Vscode("editor.action.revealDeclaration"), "Show declaration")
-	Nmap("<Space>I", Vscode("editor.action.peekImplementation"), "Show implementations")
-	Nmap("<Space>R", Vscode("editor.action.rename"), "Rename")
-	Nmap("<Space>d", Vscode("editor.action.revealDefinition"), "Show definition")
-	Nmap("<Space>f", Vscode("editor.action.peekDeclaration"), "Peek declaration")
-	Nmap("<Space>h", Vscode("editor.showCallHierarchy"), "Show call hierarchy")
-	Nmap("<Space>i", Vscode("editor.action.goToImplementation"), "Show implementations")
-	Nmap("<Space>k", Vscode("editor.action.showHover"), "Show hover")
-	Nmap("<Space>o", Vscode("workbench.action.gotoSymbol"), "Goto symbol")
-	Nmap("<Space>r", Vscode("editor.action.referenceSearch.trigger"), "Show references")
-	Nmap("<Space>t", Vscode("editor.showTypeHierarchy"), "Show type hierarchy")
-	Nmap("<Space>tD", Vscode("editor.action.peekTypeDefinition"), "Peek type definition")
-	Nmap("<Space>td", Vscode("editor.action.goToTypeDefinition"), "Goto type definition")
-	Nmap("zC", Vscode("editor.foldRecursively"), "Fold")
-	Nmap("zM", Vscode("editor.foldAll"), "Fold")
-	Nmap("zO", Vscode("editor.unfoldRecursively"), "Unfold")
-	Nmap("zR", Vscode("editor.unfoldAll"), "Unfold")
-	Nmap("zc", Vscode("editor.fold"), "Fold")
-	Nmap("zc", Vscode("editor.fold"), "Fold")
-	Nmap("zo", Vscode("editor.unfold"), "Unfold")
-	Nmap("zo", Vscode("editor.unfold"), "Unfold")
-	Map({ "n", "v", "x" }, "<Space>F", Vscode("editor.action.formatDocument"), "Format document")
-	Map({ "n", "v", "x" }, "zP", '"+P', "Paste to clipboard")
-	Map({ "n", "v", "x" }, "zX", '"+X', "Cut to clipboard")
-	Map({ "n", "v", "x" }, "zY", '"+Y', "Copy to clipboard")
-	Map({ "n", "v", "x" }, "zp", '"+p', "Paste to clipboard")
-	Map({ "n", "v", "x" }, "zx", '"+x', "Cut to clipboard")
-	Map({ "n", "v", "x" }, "zy", '"+y', "Copy to clipboard")
-	goto skip_neovim_config
-end
-
 -- Global variables and functions declared and used
 now(function()
 	G = {
 		keys = {},
 		te_win = nil,
 		te_float_win = nil,
-		transparency = true,
-		fold_open = "▾",
-		fold_close = "▸",
+		fold_open = "›",
+		fold_close = "‹",
 		offset_encoding = "utf-16",
 		palette = {
-			base00_dim = "#232A2E",
 			base00 = "#2D353B",
+			base00_dim = "#232A2E",
 			base01 = "#343F44",
 			base02 = "#3D484D",
 			base03 = "#475258",
@@ -190,12 +82,16 @@ now(function()
 			base06 = "#7A8478",
 			base07 = "#859289",
 			base08 = "#E67E80",
+			base08_dim = "#514045",
 			base09 = "#E69875",
 			base0A = "#DBBC7F",
 			base0B = "#A7C080",
 			base0C = "#83C092",
+			base0C_dim = "#425047",
 			base0D = "#7FBBB3",
+			base0D_dim = "#3A515D",
 			base0E = "#D699B6",
+			base0E_dim = "#4A444E",
 			base0F = "#9DA9A0",
 		},
 		languages = {
@@ -267,24 +163,8 @@ now(function()
 			yuck = true,
 			zig = true,
 		},
-		apply_transparency = function(transparent)
-			if transparent then
-				Hi("Normal", { bg = "NONE" })
-				Hi("NormalNC", { bg = "NONE" })
-			else
-				Hi("Normal", { bg = G.palette.base00 })
-				Hi("NormalNC", { bg = G.palette.base00_dim })
-			end
-		end,
-		toggle_transparency = function()
-			G.transparency = not G.transparency
-			G.apply_transparency(G.transparency)
-		end,
 		apply_colorscheme = function()
-			require("mini.base16").setup({
-				palette = G.palette,
-				plugins = { default = true },
-			})
+			require("mini.base16").setup({ palette = G.palette })
 			Hi("@constructor.lua", { link = "Delimiter" })
 			Hi("@function.builtin", { link = "Function" })
 			Hi("@lsp.type.parameter", { link = "Special" })
@@ -296,80 +176,44 @@ now(function()
 			Hi("@type.builtin", { link = "Type" })
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
-			Hi("CursorLineFold", { link = "Comment" })
-			Hi("CursorLineNr", { link = "Delimiter" })
-			Hi("CursorLineSign", { link = "Comment" })
-			Hi("DiagnosticSignError", { link = "DiagnosticError" })
-			Hi("DiagnosticSignHint", { link = "DiagnosticHint" })
-			Hi("DiagnosticSignInfo", { link = "DiagnosticInfo" })
-			Hi("DiagnosticSignOk", { link = "DiagnosticOk" })
-			Hi("DiagnosticSignWarn", { link = "DiagnosticWarn" })
-			Hi("DiffAdd", { link = "MiniStatuslineModeVisual" })
-			Hi("DiffChange", { link = "MiniStatuslineModeInsert" })
-			Hi("DiffDelete", { link = "MiniStatuslineModeCommand" })
-			Hi("DiffText", { link = "MiniStatuslineModeReplace" })
-			Hi("FloatBorder", { link = "Delimiter" })
+			Hi("DiffAdd", { bg = G.palette.base0C_dim, fg = G.palette.base00_dim, bold = true })
+			Hi("DiffChange", { bg = G.palette.base0D_dim, fg = G.palette.base00_dim, bold = true })
+			Hi("DiffDelete", { bg = G.palette.base08_dim, fg = G.palette.base00_dim, bold = true })
+			Hi("DiffText", { bg = G.palette.base0E_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("FloatFooter", { link = "FloatTitle" })
 			Hi("FloatTitle", { link = "MiniStatuslineModeNormal" })
-			Hi("FoldColumn", { link = "Comment" })
-			Hi("LineNr", { link = "Comment" })
-			Hi("LineNrAbove", { link = "Comment" })
-			Hi("LineNrBelow", { link = "Comment" })
-			Hi("MiniClueDescGroup", { link = "Keyword" })
-			Hi("MiniClueNextKey", { link = "Function" })
-			Hi("MiniClueNextKeyWithPostkeys", { link = "Identifier" })
-			Hi("MiniClueSeparator", { link = "FloatBorder" })
 			Hi("MiniClueTitle", { link = "FloatTitle" })
-			Hi("MiniCompletionInfoBorderOutdated", { link = "Conditional" })
-			Hi("MiniDiffOverAdd", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniDiffOverChange", { link = "MiniStatuslineModeCommand" })
-			Hi("MiniDiffOverChangeBuf", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniDiffOverContext", { link = "MiniStatuslineModeInsert" })
-			Hi("MiniDiffOverDelete", { link = "MiniStatuslineModeCommand" })
-			Hi("MiniDiffSignAdd", { link = "DiagnosticOk" })
-			Hi("MiniDiffSignChange", { link = "DiagnosticHint" })
-			Hi("MiniDiffSignDelete", { link = "DiagnosticError" })
+			Hi("MiniDiffOverChange", { link = "MiniDiffOverDelete" })
+			Hi("MiniDiffOverChangeBuf", { link = "MiniDiffOverAdd" })
 			Hi("MiniFilesTitle", { link = "FloatTitle" })
 			Hi("MiniFilesTitleFocused", { link = "MiniStatuslineModeVisual" })
 			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-			Hi("MiniPickBorderBusy", { link = "Conditional" })
 			Hi("MiniPickBorderText", { link = "FloatTitle" })
 			Hi("MiniPickPrompt", { link = "MiniStatuslineModeVisual" })
 			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeVisual" })
 			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniTablineTabpagesection", { link = "MiniStatuslineModeVisual" })
-			Hi("NormalFloat", { link = "Normal" })
+			Hi("NormalNC", { bg = G.palette.base00_dim })
 			Hi("Operator", { link = "Delimiter" })
-			Hi("SignColumn", { link = "Comment" })
-			Hi("TreesitterContext", { link = "Pmenu" })
-			Hi("TreesitterContextLineNumber", { link = "MiniStatuslineFilename" })
-			Hi("WinSeparator", { link = "Delimiter" })
-			G.apply_transparency(G.transparency)
 		end,
-		status_column_pad_and_fold = function(win_id, buf_id)
+		statuscolumn_pad_and_fold = function(win_id, buf_id)
 			if win_id and not vim.api.nvim_win_is_valid(win_id) then
 				return
 			end
 			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
 				return
 			end
-			local curwin = false
 			local space = "⠀" -- The space here is a braille blank space "⠀"
 			local lnum = vim.v.lnum
-			local separator = "│"
 			local stc = "%s%l"
-			if win_id == vim.api.nvim_get_current_win() then
-				curwin = true
-			end
 			if vim.v.virtnum == 0 then
 				if vim.fn.foldlevel(lnum) and vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
 					if vim.fn.foldclosed(lnum) == -1 then
-						return stc .. G.fold_open .. (curwin and separator or space)
+						return stc .. G.fold_open
 					else
-						return stc .. G.fold_close .. (curwin and separator or space)
+						return stc .. G.fold_close
 					end
 				end
-				return stc .. space .. (curwin and separator or space)
+				return stc .. space
 			else
 				local count = #tostring(vim.fn.line("$"))
 				local temp
@@ -378,7 +222,7 @@ now(function()
 				else
 					temp = string.rep(space, count)
 				end
-				return stc .. temp .. space .. (curwin and separator or space)
+				return stc .. temp .. space
 			end
 		end,
 		customized_hover = function(fn)
@@ -610,7 +454,7 @@ now(function()
 	vim.o.smartcase = true
 	vim.o.splitbelow = true
 	vim.o.splitright = true
-	vim.o.statuscolumn = "%{%v:lua.G.status_column_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
+	vim.o.statuscolumn = "%{%v:lua.G.statuscolumn_pad_and_fold(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -621,7 +465,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "single"
+	vim.o.winborder = "solid"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
@@ -664,7 +508,6 @@ now(function()
 		},
 	})
 	require("mini.align").setup()
-	-- require("mini.animate").setup()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
@@ -752,12 +595,12 @@ now(function()
 	require("mini.git").setup()
 	require("mini.hipatterns").setup({
 		highlighters = {
-			fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
-			hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
-			todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
-			note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
-			hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
+			fixme = require("mini.extra").gen_highlighter.words({ "FIXME" }, "MiniHipatternsFixme"),
+			hack = require("mini.extra").gen_highlighter.words({ "HACK" }, "MiniHipatternsHack"),
+			todo = require("mini.extra").gen_highlighter.words({ "TODO" }, "MiniHipatternsTodo"),
+			note = require("mini.extra").gen_highlighter.words({ "NOTE" }, "MiniHipatternsNote"),
 			test = require("mini.extra").gen_highlighter.words({ "TEST" }, "MiniHipatternsNote"),
+			hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
 		},
 	})
 	require("mini.icons").setup()
@@ -826,6 +669,9 @@ now(function()
 	})
 	require("mini.notify").setup({
 		window = {
+			config = {
+				row = 2,
+			},
 			max_width_share = 0.5,
 			winblend = 0,
 		},
@@ -1772,7 +1618,6 @@ now(function()
 	Nmap("<F5>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
 	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
-	Nmap("<F8>", ":lua G.toggle_transparency()<CR>", "Toggle transparency")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
 	Nmap("<leader>aA", ":lua require('sidekick.cli').toggle({ focus = true })<CR>", "Toggle cli ai agent")
@@ -3219,4 +3064,3 @@ later(function()
 		}))
 	end
 end)
-::skip_neovim_config::
