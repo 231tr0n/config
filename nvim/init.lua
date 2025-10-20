@@ -197,24 +197,15 @@ now(function()
 			Hi("TreesitterContext", { link = "NormalNC" })
 		end,
 		lsp_get_client = function(name, bufnr, all)
-			local clients
 			local buf = nil
-			if name and bufnr then
-				clients = vim.lsp.get_clients({
-					bufnr = buf,
-					name = name,
-				})
-			elseif name and not bufnr then
-				clients = vim.lsp.get_clients({
-					name = name,
-				})
-			elseif bufnr and not name then
-				clients = vim.lsp.get_clients({
-					bufnr = buf,
-				})
-			else
-				clients = vim.lsp.get_clients()
+			local opts = {}
+			if name then
+				opts.name = name
 			end
+			if bufnr then
+				opts.bufnr = buf
+			end
+			local clients = vim.lsp.get_clients(opts)
 			if #clients == 0 then
 				vim.notify("No " .. name .. " client found", vim.log.levels.WARN)
 				return
