@@ -276,6 +276,7 @@ default_user_cmd 'mkdir -p $HOME/.config/nvim'
 default_user_cmd 'mkdir -p $HOME/.config/fish'
 default_user_cmd 'mkdir -p $HOME/.config/fish/functions'
 default_user_cmd 'mkdir -p $HOME/.config/tmux'
+default_user_cmd 'mkdir -p $HOME/.config/opencode'
 
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o $HOME/.gitconfig'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o $HOME/.config/nvim/init.lua'
