@@ -492,7 +492,6 @@ now(function()
 				{ mode = "n", keys = "<leader>l", desc = "+Lsp" },
 				{ mode = "n", keys = "<leader>m", desc = "+Map" },
 				{ mode = "n", keys = "<leader>q", desc = "+QuickFix" },
-				{ mode = "n", keys = "<leader>v", desc = "+Visits" },
 				{ mode = "n", keys = "<leader>w", desc = "+Window" },
 			},
 			require("mini.clue").gen_clues.builtin_completion(),
@@ -1493,13 +1492,6 @@ now(function()
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
 	end
-	local mini_pick_visits = function()
-		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
-		MiniExtra.pickers.visit_paths(
-			{ cwd = "", filter = "core", sort = sort_latest },
-			{ source = { name = "Core visits" } }
-		)
-	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
@@ -1596,9 +1588,6 @@ now(function()
 	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
 	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
 	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
-	Nmap("<leader>vf", mini_pick_visits, "Core visits")
-	Nmap("<leader>vr", "<cmd>lua MiniVisits.remove_label('core')<cr>", "Remove core label")
-	Nmap("<leader>vv", "<cmd>lua MiniVisits.add_label('core')<cr>", "Add core label")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("<leader>ws", ":split<CR>", "Horizontal split")
