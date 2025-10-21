@@ -84,6 +84,7 @@ now(function()
 			base08_visual = "#543A48",
 			base09 = "#E69875",
 			base0A = "#DBBC7F",
+			base0A_dim = "#4D4C43",
 			base0B = "#A7C080",
 			base0C = "#83C092",
 			base0C_dim = "#425047",
@@ -175,15 +176,12 @@ now(function()
 			Hi("@type.builtin", { link = "Type" })
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
-			Hi("CursorLine", { bg = G.palette.base00_dim })
-			Hi("CursorLineFold", { link = "LineNr" })
 			Hi("DiffAdd", { bg = G.palette.base0C_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffChange", { bg = G.palette.base0D_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffDelete", { bg = G.palette.base08_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffText", { bg = G.palette.base0E_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("FloatFooter", { link = "FloatTitle" })
 			Hi("FloatTitle", { link = "MiniStatuslineModeNormal" })
-			Hi("FoldColumn", { link = "LineNr" })
 			Hi("MiniClueTitle", { link = "FloatTitle" })
 			Hi("MiniDiffOverChange", { link = "MiniDiffOverDelete" })
 			Hi("MiniDiffOverChangeBuf", { link = "MiniDiffOverAdd" })
@@ -196,8 +194,6 @@ now(function()
 			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
 			Hi("NormalNC", { bg = G.palette.base00_dim })
 			Hi("Operator", { link = "Delimiter" })
-			Hi("TreesitterContext", { link = "NormalNC" })
-			Hi("Visual", { bg = G.palette.base08_visual })
 		end,
 		lsp_get_client = function(name, bufnr, all)
 			local buf = nil
@@ -378,7 +374,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldinner: ,foldsep: "
+	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:↓,foldclose:↑"
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -413,7 +409,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "solid"
+	vim.o.winborder = "single"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
