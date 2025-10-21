@@ -330,16 +330,14 @@ now(function()
 			end
 			local winbar_append = "%#" .. highlight .. "#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
-				if #G.keys > 0 then
-					return winbar_append
-						.. "%#MiniTablineModifiedCurrent# "
-						.. table.concat(G.keys, " %#WinBar# %#MiniTablineModifiedCurrent# ")
-						.. " %#WinBar#%<"
-				else
-					return winbar_append
-				end
+				return #G.keys > 0
+						and winbar_append .. "%#MiniTablineModifiedCurrent# " .. table.concat(
+							G.keys,
+							" %#WinBar# %#MiniTablineModifiedCurrent# "
+						) .. " %#WinBar#%<"
+					or winbar_append
 			else
-				if buf_id and vim.api.nvim_buf_is_valid(buf_id) then
+				if buf_id then
 					return winbar_append .. "%F"
 				end
 			end
@@ -370,7 +368,6 @@ now(function()
 	vim.g.loaded_zipPlugin = 1
 	vim.g.mapleader = " "
 	vim.g.maplocalleader = " "
-	vim.g.nerd_font = true
 	vim.o.background = "dark"
 	vim.o.breakindent = true
 	vim.o.cmdheight = 0
@@ -391,27 +388,21 @@ now(function()
 	vim.o.listchars = "tab:› ,leadmultispace:· ,trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
 	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
 	vim.o.maxmempattern = 10000
-	vim.o.mouse = "a"
-	vim.o.mousescroll = "ver:1,hor:1"
 	vim.o.number = true
 	vim.o.path = "**"
 	vim.o.pumblend = 0
 	vim.o.scrolloff = 999
 	vim.o.shiftwidth = 2
-	vim.o.showcmd = true
 	vim.o.showmatch = true
-	vim.o.showmode = false
 	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
-	vim.o.splitbelow = true
-	vim.o.splitright = true
 	vim.o.statuscolumn = "%s%l%C"
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
 	vim.o.textwidth = 0
 	vim.o.undofile = false
-	vim.o.wildignore = "*.png,*.jpg,*.jpeg,*.gif,*.wav,*.dll,*.so,*.swp,*.zip,*.gz,*.svg,*.cache,*/.git/*"
+	vim.o.wildignore = "*/.git/*"
 	vim.o.wildmenu = true
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
@@ -520,6 +511,10 @@ now(function()
 		},
 		window = {
 			delay = 0,
+			config = {
+				anchor = "NW",
+				row = 2,
+			},
 		},
 	})
 	require("mini.comment").setup()
@@ -618,6 +613,7 @@ now(function()
 			reindent_linewise = true,
 		},
 	})
+	local temp_notify = vim.notify
 	require("mini.notify").setup({
 		window = {
 			config = {
@@ -627,6 +623,7 @@ now(function()
 			winblend = 0,
 		},
 	})
+	vim.notify = temp_notify
 	require("mini.operators").setup({
 		exchange = {
 			prefix = "ge",
@@ -871,45 +868,7 @@ now(function()
 	})
 	require("dap-view").setup({
 		winbar = {
-			sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
 			default_section = "breakpoints",
-			base_sections = {
-				breakpoints = {
-					keymap = "B",
-					label = " [B]",
-					short_label = "[B]",
-				},
-				scopes = {
-					keymap = "S",
-					label = "󰂥 [S]",
-					short_label = "[S]",
-				},
-				exceptions = {
-					keymap = "E",
-					label = "󰢃 [E]",
-					short_label = "[E]",
-				},
-				watches = {
-					keymap = "W",
-					label = "󰛐 [W]",
-					short_label = "[W]",
-				},
-				threads = {
-					keymap = "T",
-					label = "󱉯 [T]",
-					short_label = "[T]",
-				},
-				repl = {
-					keymap = "R",
-					label = "󰯃 [R]",
-					short_label = "[R]",
-				},
-				console = {
-					keymap = "C",
-					label = "󰆍 [C]",
-					short_label = "[C]",
-				},
-			},
 			controls = {
 				enabled = true,
 			},
@@ -1397,11 +1356,8 @@ now(function()
 				local key_string = vim.split(G.keys[#G.keys], " ", { plain = true })
 				local last_key = #key_string == 2 and key_string[2] or key_string[1]
 				if last_key == typed_key then
-					if #key_string == 2 then
-						G.keys[#G.keys] = tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
-					else
-						G.keys[#G.keys] = "2" .. " " .. typed_key
-					end
+					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
+						or "2" .. " " .. typed_key
 				else
 					if #G.keys >= 5 then
 						table.remove(G.keys, 1)
@@ -1782,112 +1738,38 @@ now(function()
 		})
 	end
 	vim.api.nvim_create_autocmd("User", {
-		pattern = {
-			"MiniFilesBufferCreate",
-			"MiniFilesActionCreate",
-			"MiniFilesActionDelete",
-			"MiniFilesActionRename",
-		},
+		pattern = "MiniFilesBufferCreate",
 		callback = function(args)
-			if args.match ~= "MiniFilesBufferCreate" then
-				local clients = G.lsp_get_client(nil, nil, true)
-				local didMethod
-				local changes
-				if clients and #clients > 0 then
-					if args.data.to and not args.data.from then
-						didMethod = "workspace/didCreateFiles"
-						changes = {
-							files = {
-								uri = vim.uri_from_fname(args.data.to),
-							},
-						}
-					elseif args.data.from and not args.data.to then
-						didMethod = "workspace/didDeleteFiles"
-						changes = {
-							files = {
-								uri = vim.uri_from_fname(args.data.from),
-							},
-						}
-					else
-						didMethod = "workspace/didRenameFiles"
-						changes = {
-							files = {
-								oldUri = vim.uri_from_fname(args.data.from),
-								newUri = vim.uri_from_fname(args.data.to),
-							},
-						}
-					end
-					for _, client in ipairs(clients) do
-						if client:supports_method(didMethod) then
-							client:notify(didMethod, changes)
-						end
-					end
+			local b = args.data.buf_id
+			Nmap("~", function()
+				local path = (MiniFiles.get_fs_entry() or {}).path
+				if path == nil then
+					return vim.notify("Cursor is not on valid entry")
 				end
-			else
-				local b = args.data.buf_id
-				Nmap("g~", function()
-					local path = (MiniFiles.get_fs_entry() or {}).path
-					if path == nil then
-						return vim.notify("Cursor is not on valid entry")
-					end
-					vim.fn.chdir(vim.fs.dirname(path))
-				end, "Set cwd", { buffer = b })
-				Nmap("gy", function()
-					local path = (MiniFiles.get_fs_entry() or {}).path
-					if path == nil then
-						return vim.notify("Cursor is not on valid entry")
-					end
-					vim.fn.setreg("", path)
-				end, "Yank path", { buffer = b })
-				Nmap("gY", function()
-					local path = (MiniFiles.get_fs_entry() or {}).path
-					if path == nil then
-						return vim.notify("Cursor is not on valid entry")
-					end
-					vim.fn.setreg("+", path)
-				end, "Yank path", { buffer = b })
-				local show_dotfiles = true
-				local filter_show = function(_)
-					return true
+				vim.fn.chdir(vim.fs.dirname(path))
+			end, "Set cwd", { buffer = b })
+			Nmap("yy", function()
+				local path = (MiniFiles.get_fs_entry() or {}).path
+				if path == nil then
+					return vim.notify("Cursor is not on valid entry")
 				end
-				local filter_hide = function(fs_entry)
-					return not vim.startswith(fs_entry.name, ".")
+				vim.fn.setreg("", path)
+			end, "Yank path", { buffer = b })
+			Nmap("gy", function()
+				local path = (MiniFiles.get_fs_entry() or {}).path
+				if path == nil then
+					return vim.notify("Cursor is not on valid entry")
 				end
-				local toggle_dotfiles = function()
-					show_dotfiles = not show_dotfiles
-					local new_filter = show_dotfiles and filter_show or filter_hide
-					MiniFiles.refresh({ content = { filter = new_filter } })
+				vim.fn.setreg("+", path)
+			end, "Yank path", { buffer = b })
+			local show_dotfiles = true
+			Nmap(".", function()
+				show_dotfiles = not show_dotfiles
+				local new_filter = function(fs_entry)
+					return show_dotfiles and true or not vim.startswith(fs_entry.name, ".")
 				end
-				Nmap("g.", toggle_dotfiles, "Toggle dotfiles", { buffer = b })
-				local map_split = function(buf_id, lhs, direction)
-					local rhs = function()
-						local cur_target = MiniFiles.get_explorer_state().target_window
-						local new_target = vim.api.nvim_win_call(cur_target, function()
-							vim.cmd(direction .. " split")
-							return vim.api.nvim_get_current_win()
-						end)
-						MiniFiles.set_target_window(new_target)
-					end
-					local desc = "Split " .. direction
-					Nmap(lhs, rhs, desc, { buffer = buf_id })
-				end
-				map_split(b, "<C-s>", "belowright horizontal")
-				map_split(b, "<C-v>", "belowright vertical")
-			end
-		end,
-	})
-	vim.api.nvim_create_autocmd("OptionSet", {
-		pattern = "background",
-		callback = function(args)
-			if args.match == "background" then
-				G.apply_colorscheme()
-			end
-		end,
-	})
-	vim.api.nvim_create_autocmd("TermOpen", {
-		callback = function()
-			vim.wo.statuscolumn = ""
-			vim.wo.winbar = ""
+				MiniFiles.refresh({ content = { filter = new_filter } })
+			end, "Toggle dotfiles", { buffer = b })
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
@@ -1909,11 +1791,8 @@ now(function()
 	vim.api.nvim_create_autocmd("CmdwinEnter", {
 		callback = function()
 			vim.wo.number = false
-			vim.wo.relativenumber = false
 			vim.wo.foldcolumn = "0"
 			vim.wo.signcolumn = "no"
-			vim.wo.statuscolumn = ""
-			vim.wo.winbar = ""
 		end,
 	})
 	vim.api.nvim_create_autocmd("TextYankPost", {
