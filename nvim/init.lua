@@ -81,6 +81,7 @@ now(function()
 			base07 = "#859289",
 			base08 = "#E67E80",
 			base08_dim = "#514045",
+			base08_visual = "#543A48",
 			base09 = "#E69875",
 			base0A = "#DBBC7F",
 			base0B = "#A7C080",
@@ -174,6 +175,7 @@ now(function()
 			Hi("@type.builtin", { link = "Type" })
 			Hi("@variable.member", { link = "Identifier" })
 			Hi("@variable.parameter", { link = "Special" })
+			Hi("CursorLine", { bg = G.palette.base00_dim })
 			Hi("CursorLineFold", { link = "LineNr" })
 			Hi("DiffAdd", { bg = G.palette.base0C_dim, fg = G.palette.base00_dim, bold = true })
 			Hi("DiffChange", { bg = G.palette.base0D_dim, fg = G.palette.base00_dim, bold = true })
@@ -195,6 +197,7 @@ now(function()
 			Hi("NormalNC", { bg = G.palette.base00_dim })
 			Hi("Operator", { link = "Delimiter" })
 			Hi("TreesitterContext", { link = "NormalNC" })
+			Hi("Visual", { bg = G.palette.base08_visual })
 		end,
 		lsp_get_client = function(name, bufnr, all)
 			local buf = nil
