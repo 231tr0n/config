@@ -370,7 +370,7 @@ now(function()
 	vim.g.maplocalleader = " "
 	vim.o.background = "dark"
 	vim.o.breakindent = true
-	vim.o.cmdheight = 0
+	vim.o.cmdheight = 1
 	vim.o.completeopt = "menuone,noselect,fuzzy"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
@@ -385,7 +385,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:› ,leadmultispace:· ,trail:␣,extends:»,precedes:«,nbsp:⦸,eol:¬"
+	vim.o.listchars = "tab:» ,leadmultispace:› ,trail:·,nbsp:⦸,eol:¬"
 	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
 	vim.o.maxmempattern = 10000
 	vim.o.number = true
@@ -393,7 +393,10 @@ now(function()
 	vim.o.pumblend = 0
 	vim.o.scrolloff = 999
 	vim.o.shiftwidth = 2
+	vim.o.shortmess = "aoOtTcCF"
+	vim.o.showcmd = true
 	vim.o.showmatch = true
+	vim.o.showmode = true
 	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
 	vim.o.statuscolumn = "%s%l%C"
@@ -425,16 +428,7 @@ now(function()
 		severity_sort = true,
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
-		require("vim._extui").enable({
-			msg = {
-				target = "msg",
-			},
-		})
-		vim.schedule(function()
-			vim.api.nvim_win_set_config(require("vim._extui.shared").wins.msg, {
-				title = " Msg ",
-			})
-		end)
+		require("vim._extui").enable({})
 	end
 end)
 
@@ -511,10 +505,6 @@ now(function()
 		},
 		window = {
 			delay = 0,
-			config = {
-				anchor = "NW",
-				row = 2,
-			},
 		},
 	})
 	require("mini.comment").setup()
@@ -613,7 +603,6 @@ now(function()
 			reindent_linewise = true,
 		},
 	})
-	local temp_notify = vim.notify
 	require("mini.notify").setup({
 		window = {
 			config = {
@@ -623,7 +612,6 @@ now(function()
 			winblend = 0,
 		},
 	})
-	vim.notify = temp_notify
 	require("mini.operators").setup({
 		exchange = {
 			prefix = "ge",
