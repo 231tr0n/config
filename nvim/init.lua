@@ -163,38 +163,6 @@ now(function()
 			yuck = true,
 			zig = true,
 		},
-		apply_colorscheme = function()
-			require("mini.base16").setup({ palette = G.palette })
-			Hi("@constructor.lua", { link = "Delimiter" })
-			Hi("@function.builtin", { link = "Function" })
-			Hi("@lsp.type.parameter", { link = "Special" })
-			Hi("@markup.link.vimdoc", { link = "Keyword" })
-			Hi("@module.builtin", { link = "Type" })
-			Hi("@tag.attribute", { link = "Statement" })
-			Hi("@tag.builtin", { link = "Tag" })
-			Hi("@tag.delimiter", { link = "Delimiter" })
-			Hi("@type.builtin", { link = "Type" })
-			Hi("@variable.member", { link = "Identifier" })
-			Hi("@variable.parameter", { link = "Special" })
-			Hi("DiffAdd", { bg = G.palette.base0C_dim, fg = G.palette.base00_dim, bold = true })
-			Hi("DiffChange", { bg = G.palette.base0D_dim, fg = G.palette.base00_dim, bold = true })
-			Hi("DiffDelete", { bg = G.palette.base08_dim, fg = G.palette.base00_dim, bold = true })
-			Hi("DiffText", { bg = G.palette.base0E_dim, fg = G.palette.base00_dim, bold = true })
-			Hi("FloatFooter", { link = "FloatTitle" })
-			Hi("FloatTitle", { link = "MiniStatuslineModeNormal" })
-			Hi("MiniClueTitle", { link = "FloatTitle" })
-			Hi("MiniDiffOverChange", { link = "MiniDiffOverDelete" })
-			Hi("MiniDiffOverChangeBuf", { link = "MiniDiffOverAdd" })
-			Hi("MiniFilesTitle", { link = "FloatTitle" })
-			Hi("MiniFilesTitleFocused", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniIndentscopeSymbol", { link = "SpecialKey" })
-			Hi("MiniPickBorderText", { link = "FloatTitle" })
-			Hi("MiniPickPrompt", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniPickPromptCaret", { link = "MiniStatuslineModeVisual" })
-			Hi("MiniPickPromptPrefix", { link = "MiniStatuslineModeVisual" })
-			Hi("NormalNC", { bg = G.palette.base00_dim })
-			Hi("Operator", { link = "Delimiter" })
-		end,
 		lsp_get_client = function(name, bufnr, all)
 			local buf = nil
 			local opts = {}
@@ -323,9 +291,9 @@ now(function()
 			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
 				return
 			end
-			local highlight = "MiniStatuslineModeNormal"
+			local highlight = "MiniStatuslineModeInsert"
 			if win_id == vim.api.nvim_get_current_win() then
-				highlight = "MiniStatuslineModeVisual"
+				highlight = "MiniStatuslineModeNormal"
 			end
 			local winbar_append = "%#" .. highlight .. "#⠀⠀󰁔 %#WinBar# "
 			if vim.api.nvim_get_current_win() == win_id then
@@ -374,7 +342,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:↓,foldclose:↑"
+	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:,foldclose:"
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -384,7 +352,7 @@ now(function()
 	vim.o.incsearch = true
 	vim.o.laststatus = 3
 	vim.o.list = true
-	vim.o.listchars = "tab:» ,leadmultispace:› ,trail:·,nbsp:⦸,eol:¬"
+	vim.o.listchars = "tab:󰮺 ,leadmultispace:· ,trail:·,nbsp:⦸,eol:¬"
 	vim.o.matchpairs = vim.o.matchpairs .. ",<:>"
 	vim.o.maxmempattern = 10000
 	vim.o.number = true
@@ -398,7 +366,7 @@ now(function()
 	vim.o.showmode = true
 	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
-	vim.o.statuscolumn = "%s%l%C"
+	vim.o.statuscolumn = "%s%l%C "
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -789,11 +757,26 @@ now(function()
 	require("mini.tabline").setup()
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
-	G.apply_colorscheme()
 end)
 
 -- Non lazy plugins registration
 now(function()
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		pattern = "everforest",
+		callback = function()
+			Hi("@constructor.lua", { link = "Orange" })
+			Hi("@punctuation.bracket", { link = "Orange" })
+		end,
+	})
+	vim.g.everforest_background = "medium"
+	vim.g.everforest_transparent_background = 0
+	vim.g.everforest_dim_inactive_windows = 1
+	vim.g.everforest_float_style = "dim"
+	vim.g.everforest_diagnostic_virtual_text = "colored"
+	vim.g.everforest_current_word = "underline"
+	vim.g.everforest_better_performance = 1
+	add("sainnhe/everforest")
+	vim.cmd.colorscheme("everforest")
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		checkout = "main",
@@ -1504,8 +1487,7 @@ now(function()
 	Nmap("<F3>", MiniNotify.show_history, "Show notification history")
 	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F5>", ":TSContext toggle<CR>", "Toggle treesitter context")
-	Nmap("<F6>", G.apply_colorscheme, "Apply mini.base16 colorscheme")
-	Nmap("<F7>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
 	Nmap("<leader>aA", ":lua require('sidekick.cli').toggle({ focus = true })<CR>", "Toggle cli ai agent")
