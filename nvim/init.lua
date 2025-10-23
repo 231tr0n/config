@@ -771,7 +771,7 @@ now(function()
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
 	vim.g.everforest_dim_inactive_windows = 1
-	vim.g.everforest_float_style = "dim"
+	vim.g.everforest_float_style = "bright"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
