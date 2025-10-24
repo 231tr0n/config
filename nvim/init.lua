@@ -1950,18 +1950,18 @@ now(function()
 				},
 			},
 		},
-		-- pyright = {},
-		basedpyright = {
-			settings = {
-				basedpyright = {
-					analysis = {
-						autoSearchPaths = true,
-						diagnosticMode = "openFilesOnly",
-						useLibraryCodeForTypes = true,
-					},
-				},
-			},
-		},
+		pyright = {},
+		-- basedpyright = {
+		-- 	settings = {
+		-- 		basedpyright = {
+		-- 			analysis = {
+		-- 				autoSearchPaths = true,
+		-- 				diagnosticMode = "openFilesOnly",
+		-- 				useLibraryCodeForTypes = true,
+		-- 			},
+		-- 		},
+		-- 	},
+		-- },
 		vtsls = {
 			settings = {
 				typescript = {
