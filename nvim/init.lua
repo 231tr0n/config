@@ -386,10 +386,10 @@ now(function()
 		float = false,
 		signs = {
 			text = {
-				[vim.diagnostic.severity.ERROR] = "",
+				[vim.diagnostic.severity.ERROR] = "",
+				[vim.diagnostic.severity.HINT] = "",
+				[vim.diagnostic.severity.INFO] = "",
 				[vim.diagnostic.severity.WARN] = "",
-				[vim.diagnostic.severity.HINT] = "",
-				[vim.diagnostic.severity.INFO] = "",
 			},
 		},
 		underline = false,
@@ -818,18 +818,11 @@ now(function()
 		trim_leading_whitespace = "all",
 	})
 	add("https://codeberg.org/mfussenegger/nvim-dap")
-	vim.fn.sign_define("DiagnosticSignOk", { text = "✓", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
-	vim.fn.sign_define("DapBreakpoint", { text = "󰙧", texthl = "DiagnosticSignOk", linehl = "", numhl = "" })
-	vim.fn.sign_define(
-		"DapBreakpointRejected",
-		{ text = "✗", texthl = "DiagnosticSignError", linehl = "", numhl = "" }
-	)
-	vim.fn.sign_define(
-		"DapBreakpointCondition",
-		{ text = "●", texthl = "DiagnosticSignWarn", linehl = "", numhl = "" }
-	)
-	vim.fn.sign_define("DapLogPoint", { text = "→", texthl = "DiagnosticSignInfo", linehl = "", numhl = "" })
-	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint", linehl = "", numhl = "" })
+	vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignOk" })
+	vim.fn.sign_define("DapBreakpointCondition", { text = "󰯳", texthl = "DiagnosticSignWarn" })
+	vim.fn.sign_define("DapBreakpointRejected", { text = "", texthl = "DiagnosticSignError" })
+	vim.fn.sign_define("DapLogPoint", { text = "󰰎", texthl = "DiagnosticSignInfo" })
+	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint" })
 	add({
 		source = "igorlfs/nvim-dap-view",
 		depends = {
