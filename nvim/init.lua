@@ -1649,7 +1649,7 @@ now(function()
 				vim.b[args.buf].minicursorword_disable = true
 				vim.b[args.buf].miniindentscope_disable = true
 				vim.b[args.buf].minitrailspace_disable = true
-				vim.wo.listchars = "extends:»,precedes:«,leadmultispace:  ,tab:  "
+				vim.wo.listchars = "leadmultispace:  ,tab:  "
 				MiniTrailspace.unhighlight()
 				if vim.bo[args.buf].filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
