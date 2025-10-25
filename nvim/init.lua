@@ -396,6 +396,7 @@ now(function()
 		severity_sort = true,
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
+		vim.o.pumborder = "single"
 		require("vim._extui").enable({})
 	end
 end)
@@ -771,7 +772,7 @@ now(function()
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
 	vim.g.everforest_dim_inactive_windows = 0
-	vim.g.everforest_float_style = "none"
+	vim.g.everforest_float_style = "bright"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
