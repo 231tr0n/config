@@ -4,6 +4,7 @@ local config = wezterm.config_builder()
 
 config.font_size = 10
 config.enable_scroll_bar = false
+config.strikethrough_position = "0.5cell"
 config.enable_tab_bar = false
 config.font = wezterm.font_with_fallback({
 	"RobotoMono Nerd Font Propo",
