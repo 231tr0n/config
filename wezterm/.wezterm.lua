@@ -2,7 +2,7 @@ local wezterm = require("wezterm")
 
 local config = wezterm.config_builder()
 
-config.font_size = 12
+config.font_size = 10
 config.enable_scroll_bar = false
 config.enable_tab_bar = false
 config.font = wezterm.font_with_fallback({
