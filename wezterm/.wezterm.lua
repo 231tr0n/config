@@ -6,6 +6,7 @@ config.font_size = 12
 config.enable_scroll_bar = false
 config.enable_tab_bar = false
 config.font = wezterm.font_with_fallback({
+	"RobotoMono Nerd Font Propo",
 	"IosevkaTerm Nerd Font Propo",
 })
 config.colors = {
