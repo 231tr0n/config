@@ -769,6 +769,7 @@ now(function()
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
+	vim.g.everforest_sign_column_background = "none"
 	add("sainnhe/everforest")
 	vim.cmd.colorscheme("everforest")
 	add({
