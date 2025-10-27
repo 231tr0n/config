@@ -762,13 +762,6 @@ end)
 
 -- Non lazy plugins registration
 now(function()
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		pattern = "everforest",
-		callback = function()
-			Hi("@constructor.lua", { link = "Orange" })
-			Hi("@punctuation.bracket", { link = "Orange" })
-		end,
-	})
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
 	vim.g.everforest_dim_inactive_windows = 0
