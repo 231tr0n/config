@@ -89,6 +89,9 @@ set -gx BAT_THEME ansi
 
 if status is-interactive
     and not set -q TMUX
-    # Dont use `exec` to start tmux as it causes wsl to quit
-    tmux -2u
+    if wslinfo --networking-mode
+        tmux -2u
+    else
+        exec tmux -2u
+    end
 end
