@@ -284,31 +284,6 @@ now(function()
 			end
 			return ret
 		end,
-		winbar = function(win_id, buf_id)
-			if win_id and not vim.api.nvim_win_is_valid(win_id) then
-				return
-			end
-			if buf_id and not vim.api.nvim_buf_is_valid(buf_id) then
-				return
-			end
-			local highlight = "MiniStatuslineModeInsert"
-			if win_id == vim.api.nvim_get_current_win() then
-				highlight = "MiniStatuslineModeNormal"
-			end
-			local winbar_append = "%#" .. highlight .. "#⠀⠀󰁔 %#WinBar# "
-			if vim.api.nvim_get_current_win() == win_id then
-				return #G.keys > 0
-						and winbar_append .. "%#MiniTablineModifiedCurrent# " .. table.concat(
-							G.keys,
-							" %#WinBar# %#MiniTablineModifiedCurrent# "
-						) .. " %#WinBar#%<"
-					or winbar_append
-			else
-				if buf_id then
-					return winbar_append .. "%F"
-				end
-			end
-		end,
 	}
 end)
 
@@ -573,9 +548,6 @@ now(function()
 	})
 	require("mini.notify").setup({
 		window = {
-			config = {
-				row = 2,
-			},
 			max_width_share = 0.5,
 			winblend = 0,
 		},
@@ -753,7 +725,31 @@ now(function()
 			require("mini.starter").sections.pick(),
 		},
 	})
-	require("mini.statusline").setup()
+	require("mini.statusline").setup({
+		content = {
+			active = function()
+				local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+				local git = MiniStatusline.section_git({ trunc_width = 40 })
+				local diff = MiniStatusline.section_diff({ trunc_width = 75 })
+				local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+				local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+				local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+				local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+				local location = MiniStatusline.section_location({ trunc_width = 75 })
+				local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+				return MiniStatusline.combine_groups({
+					{ hl = mode_hl, strings = { mode } },
+					{ hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics, lsp } },
+					"%<",
+					{ hl = "MiniStatuslineFilename", strings = { filename } },
+					"%=",
+					{ hl = "MiniStatuslineFilename", strings = { table.concat(G.keys, " │ ") } },
+					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+					{ hl = mode_hl, strings = { search, location } },
+				})
+			end,
+		},
+	})
 	require("mini.surround").setup()
 	require("mini.tabline").setup()
 	require("mini.trailspace").setup()
@@ -1317,15 +1313,15 @@ now(function()
 					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
 						or "2" .. " " .. typed_key
 				else
-					if #G.keys >= 5 then
+					if #G.keys >= 4 then
 						table.remove(G.keys, 1)
 					end
 					table.insert(G.keys, typed_key)
 				end
 			end
-			vim.api.nvim__redraw({ winbar = true })
+			vim.api.nvim__redraw({ statusline = true })
 		end
-	end, vim.api.nvim_create_namespace("show-keys"))
+	end)
 	G.peek = function()
 		local win_states = {}
 		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
@@ -1664,7 +1660,6 @@ now(function()
 			local buftype = vim.bo[args.buf].buftype
 			local filetype = vim.bo[args.buf].filetype
 			if (buftype ~= "" or filetype ~= "") and not special_buftypes[buftype] then
-				vim.wo.winbar = "%{%v:lua.G.winbar(str2nr(g:actual_curwin), str2nr(g:actual_curbuf))%}"
 				Map(
 					{ "n", "x", "o" },
 					"<CR>",
