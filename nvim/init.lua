@@ -700,33 +700,11 @@ now(function()
 			require("mini.starter").sections.pick(),
 		},
 	})
-	require("mini.statusline").setup({
-		content = {
-			active = function()
-				local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-				local git = MiniStatusline.section_git({ trunc_width = 40 })
-				local diff = MiniStatusline.section_diff({ trunc_width = 75 })
-				local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-				local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
-				local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-				local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
-				local location = MiniStatusline.section_location({ trunc_width = 75 })
-				local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
-				return MiniStatusline.combine_groups({
-					{ hl = mode_hl, strings = { mode } },
-					{ hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics, lsp } },
-					"%<",
-					{ hl = "MiniStatuslineFilename", strings = { filename } },
-					"%=",
-					{ hl = "MiniStatuslineFilename", strings = { table.concat(G.keys, " │ ") } },
-					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
-					{ hl = mode_hl, strings = { search, location } },
-				})
-			end,
-		},
-	})
+	require("mini.statusline").setup()
 	require("mini.surround").setup()
-	require("mini.tabline").setup()
+	require("mini.tabline").setup({
+		tabpage_section = "right",
+	})
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
 end)
@@ -1288,7 +1266,7 @@ now(function()
 					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
 						or "2" .. " " .. typed_key
 				else
-					if #G.keys >= 4 then
+					if #G.keys >= 5 then
 						table.remove(G.keys, 1)
 					end
 					table.insert(G.keys, typed_key)
@@ -1589,14 +1567,15 @@ now(function()
 		acwrite = true,
 		nowrite = true,
 	}
+	local append = "⠀⠀󰁔"
 	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter" }, {
 		callback = function()
-			vim.wo.winbar = ""
+			vim.wo.winbar = append .. " %{ luaeval(\"table.concat(G.keys, ' ▏')\") }"
 		end,
 	})
 	vim.api.nvim_create_autocmd("WinLeave", {
 		callback = function()
-			vim.wo.winbar = "%#MiniStatuslineModeNormal#⠀⠀󰁔 %#WinBar# %F"
+			vim.wo.winbar = append .. " %F"
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
