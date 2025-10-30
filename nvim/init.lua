@@ -69,31 +69,6 @@ now(function()
 		te_win = nil,
 		te_float_win = nil,
 		offset_encoding = "utf-16",
-		palette = {
-			base00 = "#2D353B",
-			base00_dim = "#232A2E",
-			base01 = "#343F44",
-			base02 = "#3D484D",
-			base03 = "#475258",
-			base04 = "#4F585E",
-			base05 = "#D3C6AA",
-			base06 = "#7A8478",
-			base07 = "#859289",
-			base08 = "#E67E80",
-			base08_dim = "#514045",
-			base08_visual = "#543A48",
-			base09 = "#E69875",
-			base0A = "#DBBC7F",
-			base0A_dim = "#4D4C43",
-			base0B = "#A7C080",
-			base0C = "#83C092",
-			base0C_dim = "#425047",
-			base0D = "#7FBBB3",
-			base0D_dim = "#3A515D",
-			base0E = "#D699B6",
-			base0E_dim = "#4A444E",
-			base0F = "#9DA9A0",
-		},
 		languages = {
 			angular = true,
 			awk = true,
@@ -1614,6 +1589,16 @@ now(function()
 		acwrite = true,
 		nowrite = true,
 	}
+	vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter" }, {
+		callback = function()
+			vim.wo.winbar = ""
+		end,
+	})
+	vim.api.nvim_create_autocmd("WinLeave", {
+		callback = function()
+			vim.wo.winbar = "%#MiniStatuslineModeNormal#⠀⠀󰁔 %#WinBar# %F"
+		end,
+	})
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(args)
