@@ -327,7 +327,7 @@ now(function()
 	vim.o.wildmode = "noselect:lastused,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "single"
+	vim.o.winborder = "solid"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
@@ -738,10 +738,16 @@ end)
 
 -- Non lazy plugins registration
 now(function()
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		pattern = "everforest",
+		callback = function()
+			vim.api.nvim_set_hl(0, "WinSeparator", { link = "TabLine" })
+		end,
+	})
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
-	vim.g.everforest_dim_inactive_windows = 0
-	vim.g.everforest_float_style = "none"
+	vim.g.everforest_dim_inactive_windows = 1
+	vim.g.everforest_float_style = "bright"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
