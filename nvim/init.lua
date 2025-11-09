@@ -883,406 +883,59 @@ end)
 
 -- Linting and formatting setup
 now(function()
-	vim.g.guard_config = {
-		fmt_on_save = true,
-		lsp_as_default_formatter = true,
-		save_on_fmt = true,
-		auto_lint = true,
-		lint_interval = 500,
-		refresh_diagnostic = true,
+	add("mfussenegger/nvim-lint")
+	require("lint").linters_by_ft = {
+		c = { "clangtidy" },
+		css = { "eslint" },
+		go = { "golangcilint" },
+		html = { "eslint" },
+		java = { "checkstyle" },
+		javascript = { "eslint" },
+		javascriptreact = { "eslint" },
+		json = { "eslint" },
+		jsonc = { "eslint" },
+		lua = { "luacheck" },
+		python = { "pylint" },
+		sh = { "shellcheck" },
+		sql = { "sqlfluff" },
+		svelte = { "eslint" },
+		typescript = { "eslint" },
+		typescriptreact = { "eslint" },
+		yaml = { "eslint" },
 	}
-	add("nvimdev/guard.nvim")
-	local ft = require("guard.filetype")
-	local lint = require("guard.lint")
-	ft("c"):fmt({
-		cmd = "clang-format",
-		stdin = true,
-	}):lint({
-		cmd = "clang-tidy",
-		args = { "--quiet" },
-		fname = true,
-		parse = lint.from_regex({
-			source = "clang-tidy",
-			regex = ":(%d+):(%d+):%s+(%w+):%s+(.-)%s+%[(.-)%]",
-			groups = { "lnum", "col", "severity", "message", "code" },
-			severities = {
-				information = lint.severities.info,
-				hint = lint.severities.info,
-				note = lint.severities.style,
-			},
-		}),
+	add("stevearc/conform.nvim")
+	require("conform").setup({
+		formatters_by_ft = {
+			c = { "clang-format" },
+			css = { "prettier" },
+			fish = { "fish_indent" },
+			go = { "gofmt", "gofumpt" },
+			groovy = { "npm-groovy-lint" },
+			html = { "prettier" },
+			java = { "google-java-format" },
+			javascript = { "prettier" },
+			javascriptreact = { "prettier" },
+			json = { "prettier" },
+			jsonc = { "prettier" },
+			lua = { "stylua" },
+			python = { "black" },
+			scala = { "scalafmt" },
+			sh = { "shfmt" },
+			sql = { "sqlfluff" },
+			svelte = { "prettier" },
+			svg = { "xmllint" },
+			tex = { "latexindent" },
+			typescript = { "prettier" },
+			typescriptreact = { "prettier" },
+			xml = { "xmllint" },
+			yaml = { "prettier" },
+		},
+		format_on_save = {
+			timeout_ms = 1000,
+			lsp_format = "fallback",
+		},
 	})
-	ft("javascriptreact,typescriptreact,typescript,javascript,html,css,json,jsonc,yaml,svelte"):fmt({
-		health = function()
-			if vim.fn.executable("prettier") == 0 then
-				vim.health.error("prettier")
-			end
-			vim.health.ok("prettier")
-		end,
-		fn = function(buf, _, acc)
-			local config_list = vim.fs.find({
-				".prettierrc",
-				".prettierrc.json",
-			}, {
-				upward = true,
-				type = "file",
-				path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)),
-			})
-			local co = assert(coroutine.running())
-			local args
-			if #config_list > 0 then
-				args = {
-					"prettier",
-					"--config",
-					config_list[1],
-					"--stdin-filepath",
-					vim.api.nvim_buf_get_name(buf),
-				}
-			else
-				args = { "prettier", "--stdin-filepath", vim.api.nvim_buf_get_name(buf) }
-			end
-			local handle = vim.system(args, { stdin = true, text = true }, function(result)
-				if result.code ~= 0 then
-					coroutine.resume(co, result)
-				else
-					coroutine.resume(co, result.stdout)
-				end
-			end)
-			handle:write(acc)
-			handle:write(nil)
-			return coroutine.yield()
-		end,
-	}):lint({
-		health = function()
-			if vim.fn.executable("eslint") == 0 then
-				vim.health.error("eslint")
-			end
-			vim.health.ok("eslint")
-		end,
-		fn = function()
-			local config_list = vim.fs.find({
-				"eslint.config.js",
-				"eslint.config.ts",
-			}, { upward = true, type = "file", path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })
-			local co = assert(coroutine.running())
-			local args
-			if #config_list > 0 then
-				args = { "eslint", "--config", config_list[1], "--format", "json", vim.api.nvim_buf_get_name(0) }
-			else
-				args = { "eslint", "--format", "json", vim.api.nvim_buf_get_name(0) }
-			end
-			vim.system(args, {
-				text = true,
-			}, function(result)
-				if result.code ~= 0 and #result.stderr > 0 then
-					coroutine.resume(co, result)
-				else
-					coroutine.resume(co, result.stdout)
-				end
-			end)
-			return coroutine.yield()
-		end,
-		parse = lint.from_json({
-			source = "eslint",
-			get_diagnostics = function(...)
-				return vim.json.decode(...)[1].messages
-			end,
-			attributes = {
-				severity = function(line)
-					return tostring(line.severity)
-				end,
-				lnum = "line",
-				col = "column",
-				message = "message",
-				code = "ruleId",
-				lnum_end = "endLine",
-				col_end = "endColumn",
-			},
-			severities = {
-				["1"] = lint.severities.warning,
-				["2"] = lint.severities.error,
-			},
-		}),
-	})
-	ft("lua"):fmt({
-		cmd = "stylua",
-		args = { "-" },
-		stdin = true,
-	}):lint({
-		cmd = "luacheck",
-		args = { "--formatter", "plain", "--codes" },
-		fname = true,
-		parse = lint.from_regex({
-			regex = "(%d+):(%d+):%s%((%a)(%w+)%) (.+)",
-			severities = {
-				E = lint.severities.error,
-				W = lint.severities.warning,
-			},
-			source = "luacheck",
-		}),
-	})
-	ft("fish"):fmt({
-		cmd = "fish_indent",
-		stdin = true,
-	})
-	ft("go")
-		:fmt({
-			cmd = "gofmt",
-			stdin = true,
-		})
-		:append({
-			cmd = "gofumpt",
-			stdin = true,
-		})
-		:lint({
-			health = function()
-				if vim.fn.executable("golangci-lint") == 0 then
-					vim.health.error("golangci-lint")
-				end
-				vim.health.ok("golangci-lint")
-			end,
-			fn = function()
-				local config_list = vim.fs.find({
-					".golangci.yml",
-					".golangci.yaml",
-				}, {
-					upward = true,
-					type = "file",
-					path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)),
-				})
-				local co = assert(coroutine.running())
-				local args
-				if #config_list > 0 then
-					args = {
-						"golangci-lint",
-						"run",
-						"--show-stats=false",
-						"--output.json.path",
-						"stdout",
-						"--allow-parallel-runners",
-						"--config",
-						config_list[1],
-						vim.api.nvim_buf_get_name(0),
-					}
-				else
-					args = {
-						"golangci-lint",
-						"run",
-						"--show-stats=false",
-						"--output.json.path",
-						"stdout",
-						"--allow-parallel-runners",
-						vim.api.nvim_buf_get_name(0),
-					}
-				end
-				vim.system(args, {
-					text = true,
-				}, function(result)
-					if result.code ~= 0 and #result.stderr > 0 then
-						coroutine.resume(co, result)
-					else
-						coroutine.resume(co, result.stdout)
-					end
-				end)
-				return coroutine.yield()
-			end,
-			parse = lint.from_json({
-				source = "golangci-lint",
-				get_diagnostics = function(...)
-					return vim.json.decode(...).Issues
-				end,
-				attributes = {
-					severity = function(line)
-						return line.Severity or "refactor"
-					end,
-					lnum = function(line)
-						return line.Pos.Line
-					end,
-					col = function(line)
-						return line.Pos.Column
-					end,
-					message = "Text",
-					code = "FromLinter",
-				},
-				severities = {
-					error = lint.severities.error,
-					warning = lint.severities.warning,
-					refactor = lint.severities.info,
-					convention = lint.severities.style,
-				},
-			}),
-		})
-	ft("tex"):fmt({
-		cmd = "latexindent",
-		args = { "-" },
-		stdin = true,
-	})
-	ft("xml,svg"):fmt({
-		cmd = "xmllint",
-		args = { "--format", "-" },
-		stdin = true,
-	})
-	ft("groovy"):fmt({
-		cmd = "npm-groovy-lint",
-		args = { "--format", "-" },
-		stdin = true,
-	})
-	ft("scala"):fmt({
-		health = function()
-			if vim.fn.executable("scalafmt") == 0 then
-				vim.health.error("scalafmt not found")
-			end
-			vim.health.ok("scalafmt found")
-		end,
-		fn = function(buf, _, acc)
-			local config_list = vim.fs.find({
-				".scalafmt.conf",
-			}, {
-				upward = true,
-				type = "file",
-				path = vim.fs.dirname(vim.api.nvim_buf_get_name(buf)),
-			})
-			local co = assert(coroutine.running())
-			local args
-			if #config_list > 0 then
-				args = { "scalafmt", "--config", config_list[1], "--stdin" }
-			else
-				args = { "scalafmt", "--stdin" }
-			end
-			local handle = vim.system(args, { stdin = true, text = true }, function(result)
-				if result.code ~= 0 then
-					coroutine.resume(co, result)
-				else
-					coroutine.resume(co, result.stdout)
-				end
-			end)
-			handle:write(acc)
-			handle:write(nil)
-			return coroutine.yield()
-		end,
-	})
-	ft("python"):fmt({
-		cmd = "black",
-		args = { "--quiet", "-" },
-		stdin = true,
-	}):lint({
-		cmd = "pylint",
-		args = { "--output-format", "json", "--enable-all-extensions", "--exit-zero" },
-		fname = true,
-		parse = lint.from_json({
-			attributes = {
-				severity = "type",
-				lnum = "line",
-				col = "column",
-				message = "message",
-				code = "symbol",
-				lnum_end = "endLine",
-				col_end = "endColumn",
-			},
-			severities = {
-				error = lint.severities.error,
-				fatal = lint.severities.error,
-				warning = lint.severities.warning,
-				refactor = lint.severities.info,
-				info = lint.severities.info,
-				convention = lint.severities.style,
-			},
-			source = "pylint",
-		}),
-	})
-	ft("rust"):fmt({
-		cmd = "rustfmt",
-		args = { "--emit", "stdout" },
-		stdin = true,
-	})
-	ft("sh"):fmt({
-		cmd = "shfmt",
-		stdin = true,
-	}):lint({
-		cmd = "shellcheck",
-		args = { "--format", "json" },
-		fname = true,
-		parse = lint.from_json({
-			attributes = {
-				severity = "level",
-				lnum = "line",
-				col = "column",
-				message = "message",
-				code = "code",
-				lnum_end = "endLine",
-				col_end = "endColumn",
-			},
-			severities = {
-				error = lint.severities.error,
-				warning = lint.severities.warning,
-				info = lint.severities.info,
-				style = lint.severities.style,
-			},
-			source = "shellcheck",
-		}),
-	})
-	ft("sql"):fmt({
-		cmd = "sqlfluff",
-		args = { "format", "--dialect", "sparksql", "-" },
-		stdin = true,
-	}):lint({
-		cmd = "sqlfluff",
-		args = { "lint", "--dialect", "sparksql", "--format", "json" },
-		fname = true,
-		parse = lint.from_json({
-			get_diagnostics = function(...)
-				return vim.json.decode(...)[1].violations
-			end,
-			attributes = {
-				severity = function(line)
-					return line.code == "PRS" and "error" or "warning"
-				end,
-				lnum = "start_line_no",
-				col = "start_line_pos",
-				message = "description",
-				code = "name",
-				lnum_end = "end_line_no",
-				col_end = "end_line_pos",
-			},
-			severities = {
-				error = lint.severities.error,
-				warning = lint.severities.warning,
-			},
-			source = "sqlfluff",
-		}),
-	})
-	ft("java"):fmt({
-		cmd = "google-java-format",
-		args = { "-" },
-		stdin = true,
-	}):lint({
-		health = function()
-			if vim.fn.executable("checkstyle") == 0 then
-				vim.health.error("checkstyle")
-			end
-			vim.health.ok("checkstyle")
-		end,
-		fn = function()
-			local co = assert(coroutine.running())
-			vim.system({ "checkstyle", "-c", "google_checks.xml", vim.api.nvim_buf_get_name(0) }, {
-				text = true,
-			}, function(result)
-				coroutine.resume(co, result.stdout)
-			end)
-			return coroutine.yield()
-		end,
-		parse = lint.from_regex({
-			source = "checkstyle",
-			regex = "%[(%w+)%]%s+.-:(%d+):?(%d*):%s+(.-)%s+%[(.-)%]",
-			groups = { "severity", "lnum", "col", "message", "code" },
-			severities = {
-				ERROR = lint.severities.error,
-				WARN = lint.severities.warning,
-				INFO = lint.severities.info,
-				DEBUG = lint.severities.style,
-			},
-		}),
-	})
+	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 end)
 
 -- Non lazy custom configuration
@@ -1448,7 +1101,7 @@ now(function()
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
-	Map({ "x", "v", "n" }, "<leader>lf", "<cmd>Guard fmt<CR>", "Format code")
+	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<C-\\>", "<cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
@@ -1812,6 +1465,11 @@ now(function()
 			end)
 		end,
 	})
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		callback = function()
+			require("lint").try_lint()
+		end,
+	})
 end)
 
 -- Lsp configurations setup
@@ -1909,7 +1567,7 @@ now(function()
 		marksman = {},
 		texlab = {},
 		html = {},
-		eslint = {},
+		-- eslint = {},
 		cssls = {},
 		bashls = {},
 		gopls = {
