@@ -292,7 +292,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:,foldclose:"
+	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:,foldclose:"
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
