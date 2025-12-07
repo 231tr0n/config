@@ -425,6 +425,7 @@ now(function()
 			delay = 0,
 		},
 	})
+	require("mini.cmdline").setup()
 	require("mini.comment").setup()
 	require("mini.completion").setup()
 	require("mini.cursorword").setup()
@@ -721,7 +722,7 @@ now(function()
 					"%<",
 					{ hl = "MiniStatuslineFilename", strings = { filename } },
 					"%=",
-					{ hl = "MiniStatuslineFilename", strings = { table.concat(G.keys, " ▏") } },
+					{ hl = "MiniStatuslineDevinfo", strings = { table.concat(G.keys, " ▏") .. "  █" } },
 					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
 					{ hl = mode_hl, strings = { search, location } },
 				})
@@ -746,8 +747,8 @@ now(function()
 	})
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
-	vim.g.everforest_dim_inactive_windows = 1
-	vim.g.everforest_float_style = "bright"
+	vim.g.everforest_dim_inactive_windows = 0
+	vim.g.everforest_float_style = "dim"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
