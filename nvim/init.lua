@@ -324,7 +324,7 @@ now(function()
 	vim.o.undofile = false
 	vim.o.wildignore = "*/.git/*"
 	vim.o.wildmenu = true
-	vim.o.wildmode = "noselect:lastused,full"
+	vim.o.wildmode = "noselect,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
 	vim.o.winborder = "solid"
