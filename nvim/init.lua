@@ -722,7 +722,8 @@ now(function()
 					"%<",
 					{ hl = "MiniStatuslineFilename", strings = { filename } },
 					"%=",
-					{ hl = "MiniStatuslineDevinfo", strings = { table.concat(G.keys, " ▏") .. "  █" } },
+					{ hl = "MiniStatuslineDevinfo", strings = { table.concat(G.keys, " ▏") } },
+					"█",
 					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
 					{ hl = mode_hl, strings = { search, location } },
 				})
@@ -923,6 +924,7 @@ now(function()
 			lua = { "stylua" },
 			python = { "black" },
 			scala = { "scalafmt" },
+			scss = { "prettier" },
 			sh = { "shfmt" },
 			sql = { "sqlfluff" },
 			svelte = { "prettier" },
