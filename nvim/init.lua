@@ -916,6 +916,7 @@ now(function()
 			go = { "gofmt", "gofumpt" },
 			groovy = { "npm-groovy-lint" },
 			html = { "prettier" },
+			htmlangular = { "prettier" },
 			java = { "google-java-format" },
 			javascript = { "prettier" },
 			javascriptreact = { "prettier" },
