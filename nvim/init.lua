@@ -94,6 +94,7 @@ now(function()
 			graphql = true,
 			groovy = true,
 			html = true,
+			htmlangular = true,
 			http = true,
 			hurl = true,
 			ini = true,
