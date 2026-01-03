@@ -94,7 +94,6 @@ now(function()
 			graphql = true,
 			groovy = true,
 			html = true,
-			htmlangular = true,
 			http = true,
 			hurl = true,
 			ini = true,
@@ -868,20 +867,6 @@ now(function()
 			border = "thin",
 		},
 	})
-	add({
-		source = "folke/sidekick.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("sidekick").setup({
-		cli = {
-			mux = {
-				backend = "tmux",
-				enabled = true,
-			},
-		},
-	})
 end)
 
 -- Linting and formatting setup
@@ -1107,11 +1092,9 @@ now(function()
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
-	Map({ "x", "v", "n" }, "<leader>ap", "<cmd>lua require('sidekick.cli').prompt()<CR>", "Select ai prompt")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
-	Nmap("<C-\\>", "<cmd>lua require('sidekick').nes_jump_or_apply()<CR>", "Accept nes completion")
 	Nmap("<F1>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
 	Nmap("<F2>", MiniNotify.clear, "Clear all notifications")
 	Nmap("<F3>", MiniNotify.show_history, "Show notification history")
@@ -1120,14 +1103,6 @@ now(function()
 	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
-	Nmap("<leader>aA", ":lua require('sidekick.cli').toggle({ focus = true })<CR>", "Toggle cli ai agent")
-	Nmap("<leader>aa", ":lua require('sidekick.cli').toggle({ name='opencode', focus=true })<CR>", "Toggle opencode")
-	Nmap("<leader>ac", ":lua require('sidekick').clear()<CR>", "Clear nes suggestions")
-	Nmap("<leader>af", ":lua require('sidekick.cli').send({ msg = '{file}' })<CR>", "Send file context")
-	Nmap("<leader>ap", ":lua require('sidekick.cli').prompt()<CR>", "Send prompt")
-	Nmap("<leader>as", ":lua require('sidekick.cli').send({ msg = '{selection}' })<CR>", "Send selection context")
-	Nmap("<leader>at", ":lua require('sidekick.cli').send({ msg = '{this}' })<CR>", "Send this context")
-	Nmap("<leader>au", ":lua require('sidekick.nes').update()<CR>", "Update nes suggestions")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1250,6 +1225,7 @@ now(function()
 		xsl = true,
 		javascriptreact = true,
 		typescriptreact = true,
+		htmlangular = true,
 	}
 	local special_buftypes = {
 		nofile = true,
@@ -1263,7 +1239,7 @@ now(function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(args)
-			if G.languages[args.match] then
+			if G.languages[args.match] or html_file_types[args.match] then
 				vim.treesitter.start()
 				vim.wo.foldmethod = "expr"
 				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
