@@ -105,7 +105,6 @@ now(function()
 			json5 = true,
 			latex = true,
 			lua = true,
-			lua_patterns = true,
 			luadoc = true,
 			make = true,
 			markdown = true,
