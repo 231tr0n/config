@@ -866,6 +866,13 @@ now(function()
 			border = "thin",
 		},
 	})
+	vim.g.copilot_nes_debounce = 500
+	add("copilotlsp-nvim/copilot-lsp")
+	require("copilot-lsp").setup({
+		nes = {
+			move_count_threshold = 3,
+		},
+	})
 end)
 
 -- Linting and formatting setup
@@ -1102,6 +1109,7 @@ now(function()
 	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
+	Nmap("<leader>ac", require("copilot-lsp.nes").clear, "Clear inline suggestions")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1191,7 +1199,21 @@ now(function()
 	map_multistep("i", "<C-y>", { "jump_before_open" })
 	map_multistep("i", "<CR>", { "pmenu_accept", "minipairs_cr" })
 	map_multistep({ "n", "v" }, "<S-Tab>", { "jump_before_tsnode" })
-	map_multistep({ "n", "v" }, "<Tab>", { "jump_after_tsnode" })
+	map_multistep({ "n", "v" }, "<Tab>", {
+		[1] = {
+			condition = function()
+				return vim.b[vim.api.nvim_get_current_buf()].nes_state and true or false
+			end,
+			action = function()
+				local _ = require("copilot-lsp.nes").walk_cursor_start_edit()
+					or (
+						require("copilot-lsp.nes").apply_pending_nes()
+						and require("copilot-lsp.nes").walk_cursor_end_edit()
+					)
+			end,
+		},
+		[2] = "jump_after_tsnode",
+	})
 end)
 
 -- Autocommands registration
@@ -1545,7 +1567,7 @@ now(function()
 				},
 			},
 		},
-		copilot = {},
+		copilot_ls = {},
 		marksman = {},
 		texlab = {},
 		html = {},
