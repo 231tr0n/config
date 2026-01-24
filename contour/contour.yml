@@ -1,5 +1,6 @@
 profiles:
   main:
+    slow_scrolling_time: 50
     terminal_size:
       columns: 80
       lines: 25
