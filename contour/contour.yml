@@ -1,0 +1,57 @@
+profiles:
+  main:
+    terminal_size:
+      columns: 80
+      lines: 25
+    margins:
+      horizontal: 0
+      vertical: 0
+    scrollbar:
+      position: Hidden
+      hide_in_alt_screen: true
+    mouse:
+      hide_while_typing: true
+    font:
+      size: 12
+      builtin_box_drawing: false
+      strict_spacing: false
+      regular:
+        family: "IosevkaTerm Nerd Font Propo"
+        weight: regular
+        slant: normal
+    draw_bold_text_with_bright_colors: false
+    cursor:
+      shape: bar
+      blinking: false
+      blinking_interval: 500
+    status_line:
+      display: none
+    background:
+      blur: false
+    colors: default
+    hyperlink_decoration:
+      normal: dotted-underline
+      hover: underline
+color_schemes:
+  default:
+    default:
+      background: "#2D353B"
+      foreground: "#D3C6AA"
+    normal:
+      black: "#475258"
+      red: "#E67E80"
+      green: "#A7C080"
+      yellow: "#DBBC7F"
+      blue: "#7FBBB3"
+      magenta: "#D699B6"
+      cyan: "#83C092"
+      white: "#D3C6AA"
+    bright:
+      black: "#475258"
+      red: "#E67E80"
+      green: "#A7C080"
+      yellow: "#DBBC7F"
+      blue: "#7FBBB3"
+      magenta: "#D699B6"
+      cyan: "#83C092"
+      white: "#D3C6AA"
