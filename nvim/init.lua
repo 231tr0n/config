@@ -346,7 +346,7 @@ now(function()
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
 		vim.o.pumborder = "none"
-		require("vim._extui").enable({})
+		require("vim._core.ui2").enable({})
 	end
 end)
 
