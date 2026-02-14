@@ -1,9 +1,6 @@
 profiles:
   main:
     slow_scrolling_time: 50
-    terminal_size:
-      columns: 80
-      lines: 25
     margins:
       horizontal: 0
       vertical: 0
