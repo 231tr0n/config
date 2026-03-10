@@ -1,0 +1,26 @@
+[fonts]
+family = "RobotoMono Nerd Font Propo"
+size = 14
+
+[colors]
+background = '#2D353B'
+foreground = '#D3C6AA'
+selection-background = '#543A48'
+selection-foreground = '#D3C6AA'
+cursor = '#E69875'
+black = "#475258"
+red = "#E67E80"
+green = "#A7C080"
+yellow = "#DBBC7F"
+blue = "#7FBBB3"
+magenta = "#D699B6"
+cyan = "#83C092"
+white = "#D3C6AA"
+light_black = "#475258"
+light_red = "#E67E80"
+light_green = "#A7C080"
+light_yellow = "#DBBC7F"
+light_blue = "#7FBBB3"
+light_magenta = "#D699B6"
+light_cyan = "#83C092"
+light_white = "#D3C6AA"

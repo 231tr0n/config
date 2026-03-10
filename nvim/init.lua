@@ -560,27 +560,27 @@ now(function()
 						{
 							prefix = "if",
 							body = { "if ${1:true} then", "\t$0", "end" },
-							description = "if statement",
+							description = "If statement",
 						},
 						{
 							prefix = "for",
 							body = { "for $1 do", "\t$0", "end" },
-							description = "for statement",
+							description = "For statement",
 						},
 						{
 							prefix = "forn",
 							body = { "for ${1:i} = ${2:1}, ${3:10} do", "\t$0", "end" },
-							description = "for numeric range statement",
+							description = "For numeric range statement",
 						},
 						{
 							prefix = "fori",
 							body = { "for ${1:i}, ${2:x} in ipairs(${3:t}) do", "\t$0", "end" },
-							description = "for i, x in ipairs(t)",
+							description = "For loop using ipairs",
 						},
 						{
 							prefix = "forp",
 							body = { "for ${1:k}, ${2:v} in pairs(${3:t}) do", "\t$0", "end" },
-							description = "for k, v in pairs(t)",
+							description = "For loop using pairs",
 						},
 						{
 							prefix = "fu",
@@ -615,51 +615,51 @@ now(function()
 						{
 							prefix = "p",
 							body = { "print(${0})" },
-							description = "print statement",
+							description = "Print statement",
 						},
 						{
 							prefix = "while",
 							body = { "while ${1:true} do", "\t$0", "end" },
-							description = "while statement",
+							description = "While statement",
 						},
 					},
 					svelte = {
 						{
 							prefix = "if",
 							body = "{#if ${1:expression}}\n\t${0}\n{/if}",
-							description = "if statement",
+							description = "If statement",
 						},
 						{
 							prefix = "each",
 							body = "{#each ${1:name} as ${2:name}, ${3:index} (${4:_})}\n\t${0}\n{/each}",
-							description = "if statement",
+							description = "If statement",
 						},
 						{
 							prefix = "key",
 							body = "{#key ${1:expression}}\n\t${0}\n{/key}",
-							description = "key statement",
+							description = "Key statement",
 						},
 						{
 							prefix = "await",
 							body = "{#await ${1:expression}}\n\t${0}\n{/await}",
-							description = "key statement",
+							description = "Key statement",
 						},
 						{
 							prefix = "snippet",
 							body = "{#snippet ${1:expression}}\n\t${0}\n{/snippet}",
-							description = "key statement",
+							description = "Key statement",
 						},
 					},
 					bash = {
 						{
 							prefix = "if",
 							body = "if [[ ${1:condition} ]]; then\n\t${0}\nfi",
-							description = "if statement",
+							description = "If statement",
 						},
 						{
 							prefix = "forin",
 							body = "for ${1:VAR} in ${2:LIST}\ndo\n\t${0}\ndone\n",
-							description = "for loop in list",
+							description = "For loop in list",
 						},
 						{
 							prefix = "fori",
@@ -669,12 +669,12 @@ now(function()
 						{
 							prefix = "while",
 							body = "while [[ ${1:condition} ]]; do\n\t${0}\ndone\n",
-							description = "A while loop by condition",
+							description = "While loop by condition",
 						},
 						{
 							prefix = "until",
 							body = "until [[ ${1:condition} ]]; do\n\t${0}\ndone\n",
-							description = "until loop by condition",
+							description = "Until loop by condition",
 						},
 						{
 							prefix = "case",
@@ -767,34 +767,6 @@ now(function()
 	})
 	require("nvim-treesitter").setup()
 	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
-	add({
-		source = "stevearc/quicker.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
-	require("quicker").setup({
-		keys = {
-			{
-				">",
-				function()
-					require("quicker").expand({ before = 5, after = 5, add_to_existing = true })
-				end,
-				desc = "Expand quickfix context",
-			},
-			{
-				"<",
-				function()
-					require("quicker").collapse()
-				end,
-				desc = "Collapse quickfix context",
-			},
-		},
-		follow = {
-			enabled = true,
-		},
-		trim_leading_whitespace = "all",
-	})
 	add("https://codeberg.org/mfussenegger/nvim-dap")
 	vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignOk" })
 	vim.fn.sign_define("DapBreakpointCondition", { text = "󰯳", texthl = "DiagnosticSignWarn" })
@@ -959,54 +931,6 @@ now(function()
 			vim.api.nvim__redraw({ statusline = true })
 		end
 	end)
-	G.peek = function()
-		local win_states = {}
-		local options = { foldenable = false, cursorline = true, number = true, relativenumber = false }
-		local function save_win_state(winnr)
-			win_states[winnr] = {}
-			for option, _ in pairs(options) do
-				win_states[winnr][option] = vim.api.nvim_get_option_value(option, { win = winnr })
-			end
-			win_states[winnr].cursor = vim.api.nvim_win_get_cursor(winnr)
-		end
-		local function restore_win_state(winnr)
-			if not win_states[winnr] then
-				return
-			end
-			for option, _ in pairs(options) do
-				vim.api.nvim_set_option_value(option, win_states[winnr][option], { win = winnr })
-			end
-			vim.api.nvim_win_set_cursor(winnr, win_states[winnr].cursor)
-			win_states[winnr] = nil
-		end
-		local goto_linenr = function(winnr, linenr)
-			linenr = math.max(math.min(linenr, vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(winnr))), 1)
-			if not win_states[winnr] then
-				save_win_state(winnr)
-			end
-			for option, value in pairs(options) do
-				vim.api.nvim_set_option_value(option, value, { win = winnr })
-			end
-			vim.api.nvim_win_set_cursor(winnr, { linenr, 1 })
-			vim.cmd("redraw")
-		end
-		vim.api.nvim_create_autocmd("CmdlineChanged", {
-			pattern = "*",
-			callback = function()
-				local cmdline_str = vim.api.nvim_call_function("getcmdline", {})
-				if tonumber(cmdline_str) then
-					goto_linenr(vim.api.nvim_get_current_win(), tonumber(cmdline_str))
-				end
-			end,
-		})
-		vim.api.nvim_create_autocmd("CmdlineLeave", {
-			pattern = "*",
-			callback = function()
-				restore_win_state(vim.api.nvim_get_current_win())
-			end,
-		})
-	end
-	G.peek()
 end)
 
 -- Non lazy keymaps registration
@@ -1096,6 +1020,24 @@ now(function()
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
 	end
+	local function toggle_quickfix()
+		for _, win in ipairs(vim.fn.getwininfo()) do
+			if win["quickfix"] == 1 then
+				vim.cmd("cclose")
+				return
+			end
+			vim.cmd("copen")
+		end
+	end
+	local function toggle_loclist()
+		for _, win in ipairs(vim.fn.getwininfo()) do
+			if win["loclist"] == 1 then
+				vim.cmd("lclose")
+				return
+			end
+			vim.cmd("lopen")
+		end
+	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
@@ -1180,8 +1122,8 @@ now(function()
 	Nmap("<leader>ls", ":lua vim.lsp.buf.signature_help()<CR>", "Signature help")
 	Nmap("<leader>mT", ":lua MiniMap.toggle_focus(true)<CR>", "Toggle map focus")
 	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
-	Nmap("<leader>ql", ":lua require('quicker').toggle({ loclist = true })<CR>", "Toggle loclist")
-	Nmap("<leader>qq", require("quicker").toggle, "Toggle quickfix")
+	Nmap("<leader>ql", toggle_loclist, "Toggle loclist")
+	Nmap("<leader>qq", toggle_quickfix, "Toggle quickfix")
 	Nmap("<leader>wo", ":only<CR>", "Close other windows")
 	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("<leader>ws", ":split<CR>", "Horizontal split")
