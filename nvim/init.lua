@@ -402,7 +402,6 @@ now(function()
 		},
 		clues = {
 			{
-				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<leader>e", desc = "+Explorer" },
@@ -537,6 +536,10 @@ now(function()
 	})
 	require("mini.pairs").setup()
 	require("mini.pick").setup({
+		mappings = {
+			choose_marked = "<C-O>",
+			refine_marked = "<C-K>",
+		},
 		window = {
 			config = function()
 				local height = math.floor(0.6 * vim.o.lines)
@@ -838,13 +841,6 @@ now(function()
 			border = "thin",
 		},
 	})
-	vim.g.copilot_nes_debounce = 500
-	add("copilotlsp-nvim/copilot-lsp")
-	require("copilot-lsp").setup({
-		nes = {
-			move_count_threshold = 3,
-		},
-	})
 end)
 
 -- Linting and formatting setup
@@ -1051,7 +1047,6 @@ now(function()
 	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
-	Nmap("<leader>ac", require("copilot-lsp.nes").clear, "Clear inline suggestions")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1141,21 +1136,7 @@ now(function()
 	map_multistep("i", "<C-y>", { "jump_before_open" })
 	map_multistep("i", "<CR>", { "pmenu_accept", "minipairs_cr" })
 	map_multistep({ "n", "v" }, "<S-Tab>", { "jump_before_tsnode" })
-	map_multistep({ "n", "v" }, "<Tab>", {
-		[1] = {
-			condition = function()
-				return vim.b[vim.api.nvim_get_current_buf()].nes_state and true or false
-			end,
-			action = function()
-				local _ = require("copilot-lsp.nes").walk_cursor_start_edit()
-					or (
-						require("copilot-lsp.nes").apply_pending_nes()
-						and require("copilot-lsp.nes").walk_cursor_end_edit()
-					)
-			end,
-		},
-		[2] = "jump_after_tsnode",
-	})
+	map_multistep({ "n", "v" }, "<Tab>", { "jump_after_tsnode" })
 end)
 
 -- Autocommands registration
@@ -1358,7 +1339,16 @@ now(function()
 			vim.bo[buf].modifiable = true
 			vim.bo[buf].swapfile = false
 			vim.bo[buf].buftype = "nofile"
-			vim.bo[buf].filetype = "java"
+			local class_fn = uri:match("contents/[^/]+/[%a%d._-]+/([^?]+)") or ""
+			local class_ext = vim.fn.fnamemodify(class_fn, ":e")
+			local filetype = "java"
+			if class_ext ~= "class" and vim.filetype and vim.filetype.match then
+				local ok, ft = pcall(vim.filetype.match, { filename = class_fn })
+				if ok and ft then
+					filetype = ft
+				end
+			end
+			vim.bo[buf].filetype = filetype
 			local timeout_ms = 5000
 			local alt_buf = vim.fn.bufnr("#", -1)
 			local client = G.lsp_get_client("jdtls", alt_buf)
@@ -1509,7 +1499,6 @@ now(function()
 				},
 			},
 		},
-		copilot_ls = {},
 		marksman = {},
 		texlab = {},
 		html = {},
