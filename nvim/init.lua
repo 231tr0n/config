@@ -749,6 +749,7 @@ now(function()
 			Hi("Pmenu", { link = "NormalFloat" })
 			Hi("PmenuKind", { link = "Green" })
 			Hi("PmenuExtra", { link = "Blue" })
+			Hi("MsgSeparator", { fg = "grey", bg = "grey" })
 		end,
 	})
 	vim.g.everforest_background = "medium"
