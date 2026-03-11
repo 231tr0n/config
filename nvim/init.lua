@@ -286,7 +286,7 @@ now(function()
 	vim.g.maplocalleader = " "
 	vim.o.background = "dark"
 	vim.o.breakindent = true
-	vim.o.cmdheight = 1
+	vim.o.cmdheight = 0
 	vim.o.completeopt = "menuone,noselect,fuzzy"
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
@@ -326,7 +326,7 @@ now(function()
 	vim.o.wildmode = "noselect,full"
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
-	vim.o.winborder = "solid"
+	vim.o.winborder = "rounded"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	vim.diagnostic.config({
@@ -345,7 +345,7 @@ now(function()
 		severity_sort = true,
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
-		vim.o.pumborder = "none"
+		vim.o.pumborder = "rounded"
 		require("vim._core.ui2").enable({})
 	end
 end)
@@ -745,13 +745,16 @@ now(function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		pattern = "everforest",
 		callback = function()
-			vim.api.nvim_set_hl(0, "WinSeparator", { link = "TabLine" })
+			Hi("TreesitterContext", { link = "NormalFloat" })
+			Hi("Pmenu", { link = "NormalFloat" })
+			Hi("PmenuKind", { link = "Green" })
+			Hi("PmenuExtra", { link = "Blue" })
 		end,
 	})
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
 	vim.g.everforest_dim_inactive_windows = 0
-	vim.g.everforest_float_style = "dim"
+	vim.g.everforest_float_style = "blend"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
@@ -827,6 +830,7 @@ now(function()
 	})
 	require("treesitter-context").setup({
 		max_lines = 6,
+		separator = "─",
 	})
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
