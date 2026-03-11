@@ -1,6 +1,6 @@
 -- luacheck: globals vim
 -- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
--- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniNotify MiniCompletion MiniTrailspace
+-- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
 -- MiniDeps auto download setup
@@ -506,33 +506,12 @@ now(function()
 		".git",
 	})
 	require("mini.move").setup({
-		mappings = {
-			left = "<C-S-left>",
-			right = "<C-S-right>",
-			down = "<C-S-down>",
-			up = "<C-S-up>",
-			line_left = "<C-S-left>",
-			line_right = "<C-S-right>",
-			line_down = "<C-S-down>",
-			line_up = "<C-S-up>",
-		},
 		options = {
 			reindent_linewise = true,
 		},
 	})
-	require("mini.notify").setup({
-		window = {
-			max_width_share = 0.5,
-			winblend = 0,
-			config = {
-				row = 2,
-			},
-		},
-	})
 	require("mini.operators").setup({
-		exchange = {
-			prefix = "ge",
-		},
+		exchange = { prefix = "ge" },
 	})
 	require("mini.pairs").setup()
 	require("mini.pick").setup({
@@ -745,7 +724,6 @@ now(function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		pattern = "everforest",
 		callback = function()
-			Hi("TreesitterContext", { link = "NormalFloat" })
 			Hi("Pmenu", { link = "NormalFloat" })
 			Hi("PmenuKind", { link = "Green" })
 			Hi("PmenuExtra", { link = "Blue" })
@@ -831,7 +809,6 @@ now(function()
 	})
 	require("treesitter-context").setup({
 		max_lines = 6,
-		separator = "─",
 	})
 	add({
 		source = "MeanderingProgrammer/render-markdown.nvim",
@@ -1045,11 +1022,9 @@ now(function()
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<F1>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
-	Nmap("<F2>", MiniNotify.clear, "Clear all notifications")
-	Nmap("<F3>", MiniNotify.show_history, "Show notification history")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", ":TSContext toggle<CR>", "Toggle treesitter context")
-	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F3>", ":TSContext toggle<CR>", "Toggle treesitter context")
+	Nmap("<F4>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -1645,17 +1620,6 @@ now(function()
 				statusBarProvider = "off",
 			},
 			handlers = {
-				["metals/status"] = vim.schedule_wrap(function(_, results)
-					if not G.metals_notify_id then
-						G.metals_notify_id = MiniNotify.add(results.text)
-						vim.defer_fn(function()
-							MiniNotify.remove(G.metals_notify_id)
-							G.metals_notify_id = nil
-						end, 1000)
-					else
-						MiniNotify.update(G.metals_notify_id, { msg = results.text })
-					end
-				end),
 				["metals/quickPick"] = function(_, result)
 					local ids = {}
 					local labels = {}
@@ -1768,17 +1732,6 @@ now(function()
 				},
 			},
 			handlers = {
-				["language/status"] = vim.schedule_wrap(function(_, results)
-					if not G.jdtls_notify_id then
-						G.jdtls_notify_id = MiniNotify.add(results.message)
-						vim.defer_fn(function()
-							MiniNotify.remove(G.jdtls_notify_id)
-							G.jdtls_notify_id = nil
-						end, 1000)
-					else
-						MiniNotify.update(G.jdtls_notify_id, { msg = results.message })
-					end
-				end),
 				["workspace/executeClientCommand"] = function(_, params, ctx)
 					local client = vim.lsp.get_client_by_id(ctx.client_id) or {}
 					local commands = client.commands or {}
