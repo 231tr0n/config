@@ -291,7 +291,7 @@ now(function()
 	vim.o.conceallevel = 2
 	vim.o.cursorcolumn = false
 	vim.o.cursorline = true
-	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:,foldclose:"
+	vim.o.fillchars = "eob: ,foldinner: ,foldsep: ,foldopen:,foldclose:"
 	vim.o.foldcolumn = "1"
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
@@ -727,7 +727,6 @@ now(function()
 			Hi("Pmenu", { link = "NormalFloat" })
 			Hi("PmenuKind", { link = "Green" })
 			Hi("PmenuExtra", { link = "Blue" })
-			Hi("MsgSeparator", { fg = "grey", bg = "grey" })
 		end,
 	})
 	vim.g.everforest_background = "medium"
