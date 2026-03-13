@@ -4,7 +4,7 @@
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
--- MiniDeps auto download setup
+-- Vim pack setup
 if not vim.pack then
 	local path_package = vim.fn.stdpath("data") .. "/site/"
 	local mini_path = path_package .. "pack/deps/opt/mini.nvim"
@@ -738,7 +738,7 @@ MiniMisc.safely("now", function()
 	require("mini.visits").setup()
 end)
 
--- Hooks to be executed when package is added
+-- Plugin installation hooks setup
 MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("PackChanged", {
 		callback = function(args)
@@ -752,7 +752,7 @@ MiniMisc.safely("now", function()
 	})
 end)
 
--- Non lazy plugins registration
+-- Plugins setup
 MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		pattern = "everforest",
@@ -898,7 +898,7 @@ MiniMisc.safely("now", function()
 	})
 end)
 
--- Non lazy keymaps registration
+-- Keymaps registration
 MiniMisc.safely("now", function()
 	local map_multistep = require("mini.keymap").map_multistep
 	local map_combo = require("mini.keymap").map_combo
