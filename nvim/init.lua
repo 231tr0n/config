@@ -311,6 +311,7 @@ now(function()
 	vim.o.shiftwidth = 2
 	vim.o.shortmess = "aoOtTcCF"
 	vim.o.showcmd = true
+	vim.o.showcmdloc = "statusline"
 	vim.o.showmatch = true
 	vim.o.showmode = true
 	vim.o.signcolumn = "yes:1"
@@ -346,7 +347,11 @@ now(function()
 	})
 	if vim.fn.has("nvim-0.12") == 1 then
 		vim.o.pumborder = "rounded"
-		require("vim._core.ui2").enable({})
+		require("vim._core.ui2").enable({
+			msg = {
+				targets = "cmd",
+			},
+		})
 	end
 end)
 
@@ -402,6 +407,7 @@ now(function()
 		},
 		clues = {
 			{
+				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
 				{ mode = "n", keys = "<leader>e", desc = "+Explorer" },
@@ -697,16 +703,22 @@ now(function()
 				local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
 				local location = MiniStatusline.section_location({ trunc_width = 75 })
 				local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+				local macro = #vim.fn.reg_recording() > 0 and "@" .. vim.fn.reg_recording() or ""
 				return MiniStatusline.combine_groups({
 					{ hl = mode_hl, strings = { mode } },
-					{ hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics, lsp } },
+					{ hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics, lsp, fileinfo } },
 					"%<",
 					{ hl = "MiniStatuslineFilename", strings = { filename } },
 					"%=",
-					{ hl = "MiniStatuslineDevinfo", strings = { table.concat(G.keys, " ▏") } },
-					"█",
-					{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
-					{ hl = mode_hl, strings = { search, location } },
+					{
+						hl = "MiniStatuslineFileinfo",
+						strings = {
+							vim.trim(table.concat({ "%S", macro, search }, " ")),
+							#G.keys > 0 and "▕" or "",
+							table.concat(G.keys, " ▏"),
+						},
+					},
+					{ hl = mode_hl, strings = { location } },
 				})
 			end,
 		},
@@ -822,6 +834,72 @@ now(function()
 			border = "thin",
 		},
 	})
+	add("BlinkResearchLabs/blink-edit.nvim")
+	require("blink-edit").setup({
+		llm = {
+			provider = "generic",
+			backend = "openai",
+			url = "http://localhost:8080",
+			model = "granite4",
+			temperature = 0.0,
+			max_tokens = 256,
+			timeout_ms = 5000,
+		},
+		context = {
+			enabled = true,
+			lines_before = nil,
+			lines_after = nil,
+			max_tokens = 512,
+			selection = {
+				enabled = true,
+				max_lines = 10,
+			},
+			lsp = {
+				enabled = true,
+				max_definitions = 2,
+				max_references = 2,
+				timeout_ms = 100,
+			},
+			same_file = {
+				enabled = true,
+				max_lines_before = 20,
+				max_lines_after = 20,
+			},
+			history = {
+				enabled = false,
+				max_items = 5,
+				max_tokens = 512,
+				max_files = 2,
+				global = true,
+			},
+		},
+		ui = {
+			progress = false,
+			suppress_lsp_floats = true,
+		},
+		prefetch = {
+			enabled = false,
+			strategy = "n-1",
+		},
+		normal_mode = {
+			enabled = false,
+			debounce_ms = 200,
+		},
+		debounce_ms = 100,
+		keymaps = {
+			insert = {
+				accept = "<Tab>",
+				accept_line = "<S-Tab>",
+				clear = "<C-y>",
+				reject = "<Esc>",
+			},
+			normal = {
+				accept = "<Tab>",
+				accept_line = "<S-Tab>",
+			},
+		},
+	})
+	add("nickjvandyke/opencode.nvim")
 end)
 
 -- Linting and formatting setup
@@ -913,6 +991,7 @@ end)
 -- Non lazy keymaps registration
 now(function()
 	local map_multistep = require("mini.keymap").map_multistep
+	local map_combo = require("mini.keymap").map_combo
 	local te_buf = nil
 	local function open_terminal()
 		if vim.fn.bufexists(te_buf) ~= 1 then
@@ -1016,6 +1095,10 @@ now(function()
 		end
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
+	---@diagnostic disable-next-line: undefined-field
+	Map({ "x", "n" }, "<leader>as", require("opencode").select, "Send selected to opencode")
+	---@diagnostic disable-next-line: undefined-field
+	Map({ "x", "n" }, "<leader>at", require("opencode").toggle, "Toggle opencode")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
@@ -1024,8 +1107,8 @@ now(function()
 	Nmap("<F2>", ":Inspect<CR>", "Echo syntax group")
 	Nmap("<F3>", ":TSContext toggle<CR>", "Toggle treesitter context")
 	Nmap("<F4>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
-	Nmap("<Space><Space>", toggle_float_terminal, "Toggle float terminal")
-	Nmap("<Space><Tab>", toggle_terminal, "Toggle terminal")
+	Nmap("<Space><Space>", toggle_terminal, "Toggle terminal")
+	Nmap("<Space><Tab>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1102,20 +1185,22 @@ now(function()
 	Nmap("<leader>wq", ":close<CR>", "Close window")
 	Nmap("<leader>ws", ":split<CR>", "Horizontal split")
 	Nmap("<leader>wv", ":vsplit<CR>", "Vertical split")
+	Nmap("[a", ":norm gxiagxila<CR>", "Move arg left")
 	Nmap("[e", ":lua MiniBracketed.diagnostic('backward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error last")
-	Nmap("[g", ":norm gxiagxila<CR>", "Move arg left")
+	Nmap("]a", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
-	Nmap("]g", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
 	Nmap("gxx", '"+dd', "Cut line to clipboard")
 	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
+	map_combo("t", "kj", "<BS><BS><C-\\><C-n>")
+	map_combo({ "i", "c", "x", "s" }, "kj", "<BS><BS><Esc>")
 	map_multistep("i", "<BS>", { "minipairs_bs" })
-	map_multistep("i", "<C-u>", { "jump_after_close" })
-	map_multistep("i", "<C-y>", { "jump_before_open" })
+	map_multistep("i", "<C-h>", { "jump_before_open" })
+	map_multistep("i", "<C-l>", { "jump_after_close" })
 	map_multistep("i", "<CR>", { "pmenu_accept", "minipairs_cr" })
-	map_multistep({ "n", "v" }, "<S-Tab>", { "jump_before_tsnode" })
-	map_multistep({ "n", "v" }, "<Tab>", { "jump_after_tsnode" })
+	map_multistep({ "n", "v" }, "<C-n>", { "jump_after_tsnode" })
+	map_multistep({ "n", "v" }, "<C-p>", { "jump_before_tsnode" })
 end)
 
 -- Autocommands registration
