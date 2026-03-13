@@ -4,26 +4,35 @@
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
 -- MiniDeps auto download setup
-local path_package = vim.fn.stdpath("data") .. "/site/"
-local mini_path = path_package .. "pack/deps/opt/mini.nvim"
-if not vim.uv.fs_stat(mini_path) then
-	vim.cmd('echo "Installing `mini.nvim`" | redraw')
-	local clone_cmd = {
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/nvim-mini/mini.nvim",
-		mini_path,
-	}
-	vim.fn.system(clone_cmd)
-	vim.cmd('echo "Installed `mini.nvim`" | redraw')
-end
-vim.cmd("packadd mini.nvim | helptags ALL")
+if not vim.pack then
+	local path_package = vim.fn.stdpath("data") .. "/site/"
+	local mini_path = path_package .. "pack/deps/opt/mini.nvim"
+	if not vim.uv.fs_stat(mini_path) then
+		vim.cmd('echo "Installing `mini.nvim`" | redraw')
+		local clone_cmd = {
+			"git",
+			"clone",
+			"--filter=blob:none",
+			"https://github.com/nvim-mini/mini.nvim",
+			mini_path,
+		}
+		vim.fn.system(clone_cmd)
+		vim.cmd('echo "Installed `mini.nvim`" | redraw')
+	end
+	vim.cmd("packadd mini.nvim | helptags ALL")
 
--- Setup MiniDeps
-require("mini.deps").setup({ path = { package = path_package } })
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
-add("nvim-mini/mini.nvim")
+	-- Setup MiniDeps
+	require("mini.deps").setup({ path = { package = path_package } })
+	vim.pack = {
+		add = function(args)
+			for _, arg in ipairs(args) do
+				MiniDeps.add(arg)
+			end
+		end,
+	}
+end
+vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" })
+require("mini.misc").setup()
 
 -- Helper functions
 Unmap = function(modes, suffix, opts)
@@ -63,7 +72,7 @@ Hi = function(name, opts)
 end
 
 -- Global variables and functions declared and used
-now(function()
+MiniMisc.safely("now", function()
 	G = {
 		keys = {},
 		te_win = nil,
@@ -262,7 +271,7 @@ now(function()
 end)
 
 -- Default settings
-now(function()
+MiniMisc.safely("now", function()
 	-- vim.cmd("let g:python_recommended_style=0")
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.expandtab = true
@@ -356,7 +365,7 @@ now(function()
 end)
 
 -- Mini plugins setup
-now(function()
+MiniMisc.safely("now", function()
 	require("mini.ai").setup({
 		custom_textobjects = {
 			B = require("mini.extra").gen_ai_spec.buffer(),
@@ -498,7 +507,6 @@ now(function()
 			zindex = 100,
 		},
 	})
-	require("mini.misc").setup()
 	MiniMisc.setup_restore_cursor()
 	-- MiniMisc.setup_termbg_sync()
 	MiniMisc.setup_auto_root({
@@ -731,8 +739,22 @@ now(function()
 	require("mini.visits").setup()
 end)
 
+-- Hooks to be executed when package is added
+MiniMisc.safely("now", function()
+	vim.api.nvim_create_autocmd("PackChanged", {
+		callback = function(args)
+			if args.data.spec.name == "nvim-treesitter" and args.data.kind == "update" then
+				if not args.data.active then
+					vim.cmd.packadd("nvim-treesitter")
+				end
+				vim.cmd("TSUpdate")
+			end
+		end,
+	})
+end)
+
 -- Non lazy plugins registration
-now(function()
+MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		pattern = "everforest",
 		callback = function()
@@ -749,32 +771,28 @@ now(function()
 	vim.g.everforest_current_word = "underline"
 	vim.g.everforest_better_performance = 1
 	vim.g.everforest_sign_column_background = "none"
-	add("sainnhe/everforest")
+	vim.pack.add({ "https://github.com/sainnhe/everforest" })
 	vim.cmd.colorscheme("everforest")
-	add({
-		source = "nvim-treesitter/nvim-treesitter",
-		checkout = "main",
-		monitor = "main",
-		hooks = {
-			post_checkout = function()
-				vim.cmd("TSUpdate")
-			end,
-		},
+	vim.pack.add({
+		"https://github.com/nvim-treesitter/nvim-treesitter",
+		"https://codeberg.org/mfussenegger/nvim-dap",
+		"https://github.com/igorlfs/nvim-dap-view",
+		"https://codeberg.org/mfussenegger/nluarepl",
+		"https://github.com/nvim-treesitter/nvim-treesitter-context",
+		"https://github.com/MeanderingProgrammer/render-markdown.nvim",
+		"https://github.com/BlinkResearchLabs/blink-edit.nvim",
+		"https://github.com/nickjvandyke/opencode.nvim",
+		"https://github.com/neovim/nvim-lspconfig",
+		"https://codeberg.org/mfussenegger/nvim-lint",
+		"https://github.com/stevearc/conform.nvim",
 	})
 	require("nvim-treesitter").setup()
 	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
-	add("https://codeberg.org/mfussenegger/nvim-dap")
 	vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignOk" })
 	vim.fn.sign_define("DapBreakpointCondition", { text = "󰯳", texthl = "DiagnosticSignWarn" })
 	vim.fn.sign_define("DapBreakpointRejected", { text = "", texthl = "DiagnosticSignError" })
 	vim.fn.sign_define("DapLogPoint", { text = "󰰎", texthl = "DiagnosticSignInfo" })
 	vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticSignHint" })
-	add({
-		source = "igorlfs/nvim-dap-view",
-		depends = {
-			"https://codeberg.org/mfussenegger/nvim-dap",
-		},
-	})
 	require("dap-view").setup({
 		winbar = {
 			default_section = "breakpoints",
@@ -806,27 +824,8 @@ now(function()
 	dap.listeners.before.event_exited["dap-view-config"] = function()
 		dv.close()
 	end
-	add({
-		source = "https://codeberg.org/mfussenegger/nluarepl",
-		depends = {
-			"https://codeberg.org/mfussenegger/nvim-dap",
-		},
-	})
-	add({
-		source = "nvim-treesitter/nvim-treesitter-context",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-	})
 	require("treesitter-context").setup({
 		max_lines = 6,
-	})
-	add({
-		source = "MeanderingProgrammer/render-markdown.nvim",
-		depends = {
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-mini/mini.nvim",
-		},
 	})
 	require("render-markdown").setup({
 		completions = { lsp = { enabled = true } },
@@ -834,7 +833,6 @@ now(function()
 			border = "thin",
 		},
 	})
-	add("BlinkResearchLabs/blink-edit.nvim")
 	require("blink-edit").setup({
 		llm = {
 			provider = "generic",
@@ -899,97 +897,10 @@ now(function()
 			},
 		},
 	})
-	add("nickjvandyke/opencode.nvim")
-end)
-
--- Linting and formatting setup
-now(function()
-	add("mfussenegger/nvim-lint")
-	require("lint").linters_by_ft = {
-		-- ["javascript.jsx"] = { "eslint" },
-		-- ["typescript.tsx"] = { "eslint" },
-		-- astro = { "eslint" },
-		c = { "clangtidy" },
-		-- css = { "eslint" },
-		go = { "golangcilint" },
-		-- html = { "eslint" },
-		-- htmlangular = { "eslint" },
-		java = { "checkstyle" },
-		-- javascript = { "eslint" },
-		-- javascriptreact = { "eslint" },
-		lua = { "luacheck" },
-		python = { "pylint" },
-		sh = { "shellcheck" },
-		sql = { "sqlfluff" },
-		-- svelte = { "eslint" },
-		-- typescript = { "eslint" },
-		-- typescriptreact = { "eslint" },
-		-- vue = { "eslint" },
-	}
-	add("stevearc/conform.nvim")
-	require("conform").setup({
-		formatters_by_ft = {
-			c = { "clang-format" },
-			css = { "prettier" },
-			fish = { "fish_indent" },
-			go = { "gofmt", "gofumpt" },
-			groovy = { "npm-groovy-lint" },
-			html = { "prettier" },
-			htmlangular = { "prettier" },
-			java = { "google-java-format" },
-			javascript = { "prettier" },
-			javascriptreact = { "prettier" },
-			json = { "prettier" },
-			jsonc = { "prettier" },
-			lua = { "stylua" },
-			python = { "black" },
-			scala = { "scalafmt" },
-			scss = { "prettier" },
-			sh = { "shfmt" },
-			sql = { "sqlfluff" },
-			svelte = { "prettier" },
-			svg = { "xmllint" },
-			tex = { "latexindent" },
-			typescript = { "prettier" },
-			typescriptreact = { "prettier" },
-			xml = { "xmllint" },
-			yaml = { "prettier" },
-		},
-		format_on_save = {
-			timeout_ms = 1000,
-			lsp_format = "fallback",
-		},
-	})
-	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-end)
-
--- Non lazy custom configuration
-now(function()
-	vim.on_key(function(_, typed)
-		if typed ~= "" then
-			local typed_key = vim.fn.keytrans(typed)
-			if #G.keys == 0 then
-				table.insert(G.keys, typed_key)
-			else
-				local key_string = vim.split(G.keys[#G.keys], " ", { plain = true })
-				local last_key = #key_string == 2 and key_string[2] or key_string[1]
-				if last_key == typed_key then
-					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
-						or "2" .. " " .. typed_key
-				else
-					if #G.keys >= 5 then
-						table.remove(G.keys, 1)
-					end
-					table.insert(G.keys, typed_key)
-				end
-			end
-			vim.api.nvim__redraw({ statusline = true })
-		end
-	end)
 end)
 
 -- Non lazy keymaps registration
-now(function()
+MiniMisc.safely("now", function()
 	local map_multistep = require("mini.keymap").map_multistep
 	local map_combo = require("mini.keymap").map_combo
 	local te_buf = nil
@@ -1204,7 +1115,7 @@ now(function()
 end)
 
 -- Autocommands registration
-now(function()
+MiniMisc.safely("now", function()
 	local special_file_types = {
 		netrw = true,
 		help = true,
@@ -1301,15 +1212,6 @@ now(function()
 			end
 		end,
 	})
-	if vim.fn.has("nvim-0.12") == 1 then
-		vim.api.nvim_create_autocmd("CmdlineChanged", {
-			desc = "Auto show command line completion",
-			pattern = "*",
-			callback = function()
-				vim.fn.wildtrigger()
-			end,
-		})
-	end
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "MiniFilesBufferCreate",
 		callback = function(args)
@@ -1473,11 +1375,10 @@ now(function()
 end)
 
 -- Lsp configurations setup
-now(function()
+MiniMisc.safely("now", function()
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	lsp_capabilities.general.positionEncodings = { G.offset_encoding }
-	add("neovim/nvim-lspconfig")
 	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
 	for k, v in ipairs(lua_runtime_files) do
 		if v == vim.fn.stdpath("config") then
@@ -2172,8 +2073,67 @@ now(function()
 	end
 end)
 
+-- Linting and formatting setup
+MiniMisc.safely("later", function()
+	require("lint").linters_by_ft = {
+		-- ["javascript.jsx"] = { "eslint" },
+		-- ["typescript.tsx"] = { "eslint" },
+		-- astro = { "eslint" },
+		c = { "clangtidy" },
+		-- css = { "eslint" },
+		go = { "golangcilint" },
+		-- html = { "eslint" },
+		-- htmlangular = { "eslint" },
+		java = { "checkstyle" },
+		-- javascript = { "eslint" },
+		-- javascriptreact = { "eslint" },
+		lua = { "luacheck" },
+		python = { "pylint" },
+		sh = { "shellcheck" },
+		sql = { "sqlfluff" },
+		-- svelte = { "eslint" },
+		-- typescript = { "eslint" },
+		-- typescriptreact = { "eslint" },
+		-- vue = { "eslint" },
+	}
+	require("conform").setup({
+		formatters_by_ft = {
+			c = { "clang-format" },
+			css = { "prettier" },
+			fish = { "fish_indent" },
+			go = { "gofmt", "gofumpt" },
+			groovy = { "npm-groovy-lint" },
+			html = { "prettier" },
+			htmlangular = { "prettier" },
+			java = { "google-java-format" },
+			javascript = { "prettier" },
+			javascriptreact = { "prettier" },
+			json = { "prettier" },
+			jsonc = { "prettier" },
+			lua = { "stylua" },
+			python = { "black" },
+			scala = { "scalafmt" },
+			scss = { "prettier" },
+			sh = { "shfmt" },
+			sql = { "sqlfluff" },
+			svelte = { "prettier" },
+			svg = { "xmllint" },
+			tex = { "latexindent" },
+			typescript = { "prettier" },
+			typescriptreact = { "prettier" },
+			xml = { "xmllint" },
+			yaml = { "prettier" },
+		},
+		format_on_save = {
+			timeout_ms = 1000,
+			lsp_format = "fallback",
+		},
+	})
+	vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+end)
+
 -- Dap configurations setup
-now(function()
+MiniMisc.safely("later", function()
 	local dap = require("dap")
 	-- Adapter definitions
 	dap.adapters.debugpy = function(callback, config)
@@ -2343,7 +2303,7 @@ now(function()
 end)
 
 -- Lazy loaded custom configuration
-later(function()
+MiniMisc.safely("later", function()
 	MiniPick.registry.git_hunks = function(local_opts)
 		MiniExtra.pickers.git_hunks(local_opts, {
 			source = {
@@ -2492,4 +2452,25 @@ later(function()
 			},
 		}))
 	end
+	vim.on_key(function(_, typed)
+		if typed ~= "" then
+			local typed_key = vim.fn.keytrans(typed)
+			if #G.keys == 0 then
+				table.insert(G.keys, typed_key)
+			else
+				local key_string = vim.split(G.keys[#G.keys], " ", { plain = true })
+				local last_key = #key_string == 2 and key_string[2] or key_string[1]
+				if last_key == typed_key then
+					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
+						or "2" .. " " .. typed_key
+				else
+					if #G.keys >= 5 then
+						table.remove(G.keys, 1)
+					end
+					table.insert(G.keys, typed_key)
+				end
+			end
+			vim.api.nvim__redraw({ statusline = true })
+		end
+	end)
 end)
