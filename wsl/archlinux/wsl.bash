@@ -276,7 +276,7 @@ default_user_cmd 'mkdir -p $HOME/.config/nvim'
 default_user_cmd 'mkdir -p $HOME/.config/fish'
 default_user_cmd 'mkdir -p $HOME/.config/fish/functions'
 default_user_cmd 'mkdir -p $HOME/.config/tmux'
-default_user_cmd 'mkdir -p $HOME/.local/state/opencode'
+default_user_cmd 'mkdir -p $HOME/.config/opencode'
 
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o $HOME/.gitconfig'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o $HOME/.config/nvim/init.lua'
@@ -287,7 +287,8 @@ default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fis
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o $HOME/.config/fish/functions/fish_user_key_bindings.fish'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o $HOME/.config/fish/functions/fish_mode_prompt.fish'
 default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/wsl/archlinux/wsl.bash -o $HOME/wsl.bash'
-default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/kv.json -o $HOME/.local/state/opencode/kv.json'
+default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o $HOME/.config/opencode/tui.json'
+default_user_cmd 'curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o $HOME/.config/opencode/opencode.json'
 
 default_user_cmd "rustup update stable"
 
