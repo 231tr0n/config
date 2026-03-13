@@ -20,8 +20,6 @@ if not vim.pack then
 		vim.cmd('echo "Installed `mini.nvim`" | redraw')
 	end
 	vim.cmd("packadd mini.nvim | helptags ALL")
-
-	-- Setup MiniDeps
 	require("mini.deps").setup({ path = { package = path_package } })
 	vim.pack = {
 		add = function(args)
