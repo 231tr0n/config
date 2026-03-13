@@ -1,3 +1,4 @@
+-- Globals declaration
 -- luacheck: globals vim
 -- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
