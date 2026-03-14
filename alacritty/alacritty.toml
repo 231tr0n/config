@@ -1,0 +1,39 @@
+[window]
+dynamic_padding = true
+decorations = "Full"
+startup_mode = "Maximized"
+
+[font]
+normal = { family = "RobotoMono Nerd Font Propo", style = "Regular" }
+size = 12
+
+[colors]
+cursor = { text = "#232A2E", cursor = "#E69875" }
+draw_bold_text_with_bright_colors = false
+
+[colors.primary]
+background = "#2D353B"
+foreground = "#D3C6AA"
+
+[colors.normal]
+black = "#475258"
+red = "#E67E80"
+green = "#A7C080"
+yellow = "#DBBC7F"
+blue = "#7FBBB3"
+magenta = "#D699B6"
+cyan = "#83C092"
+white = "#D3C6AA"
+
+[colors.bright]
+black = "#475258"
+red = "#E67E80"
+green = "#A7C080"
+yellow = "#DBBC7F"
+blue = "#7FBBB3"
+magenta = "#D699B6"
+cyan = "#83C092"
+white = "#D3C6AA"
+
+[bell]
+duration = 1
