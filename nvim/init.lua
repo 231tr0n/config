@@ -1005,9 +1005,7 @@ MiniMisc.safely("now", function()
 		end
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
-	---@diagnostic disable-next-line: undefined-field
 	Map({ "x", "n" }, "<leader>as", require("opencode").select, "Send selected to opencode")
-	---@diagnostic disable-next-line: undefined-field
 	Map({ "x", "n" }, "<leader>at", require("opencode").toggle, "Toggle opencode")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
@@ -1443,6 +1441,7 @@ MiniMisc.safely("now", function()
 	end
 	local lsp_servers = {
 		lua_ls = {
+			---@type lspconfig.settings.lua_ls
 			settings = {
 				Lua = {
 					hint = {
@@ -1485,6 +1484,7 @@ MiniMisc.safely("now", function()
 		cssls = {},
 		bashls = {},
 		gopls = {
+			---@type lspconfig.settings.gopls
 			settings = {
 				gopls = {
 					hints = {
@@ -1501,6 +1501,7 @@ MiniMisc.safely("now", function()
 		},
 		pyright = {},
 		-- basedpyright = {
+		-- 	---@type lspconfig.settings.basedpyright
 		-- 	settings = {
 		-- 		basedpyright = {
 		-- 			analysis = {
@@ -1512,6 +1513,7 @@ MiniMisc.safely("now", function()
 		-- 	},
 		-- },
 		vtsls = {
+			---@type lspconfig.settings.vtsls
 			settings = {
 				typescript = {
 					inlayHints = {
@@ -1526,6 +1528,7 @@ MiniMisc.safely("now", function()
 			},
 		},
 		-- ts_ls = {
+		-- 	---@type lspconfig.settings.ts_ls
 		-- 	settings = {
 		-- 		typescript = {
 		-- 			inlayHints = {
@@ -1554,6 +1557,7 @@ MiniMisc.safely("now", function()
 		-- 	},
 		-- },
 		svelte = {
+			---@type lspconfig.settings.svelte
 			settings = {
 				typescript = {
 					inlayHints = {
@@ -1572,6 +1576,7 @@ MiniMisc.safely("now", function()
 		lemminx = {},
 		angularls = {},
 		metals = {
+			---@type lspconfig.settings.metals
 			settings = {
 				metals = {
 					-- mavenScript = "/usr/local/bin/mvn",
@@ -1661,6 +1666,7 @@ MiniMisc.safely("now", function()
 				})
 			end,
 			capabilities = jdtls_capabilities,
+			---@type lspconfig.settings.jdtls
 			settings = {
 				java = {
 					references = {
