@@ -784,6 +784,32 @@ MiniMisc.safely("now", function()
 		"https://github.com/neovim/nvim-lspconfig",
 		"https://codeberg.org/mfussenegger/nvim-lint",
 		"https://github.com/stevearc/conform.nvim",
+		"https://github.com/Jezda1337/nvim-html-css",
+	})
+	require("html-css").setup({
+		enable_on = {
+			"html",
+			"htmldjango",
+			"tsx",
+			"jsx",
+			"erb",
+			"svelte",
+			"vue",
+			"blade",
+			"php",
+			"templ",
+			"astro",
+		},
+		handlers = {
+			definition = nil,
+			hover = nil,
+		},
+		documentation = {
+			auto_show = true,
+		},
+		style_sheets = {
+			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css",
+		},
 	})
 	require("nvim-treesitter").setup()
 	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
@@ -835,9 +861,9 @@ MiniMisc.safely("now", function()
 	require("blink-edit").setup({
 		llm = {
 			provider = "generic",
-			backend = "openai",
-			url = "http://localhost:8080",
-			model = "granite4",
+			backend = "ollama",
+			url = "http://localhost:11434",
+			model = "granite4:350m-h",
 			temperature = 0.0,
 			max_tokens = 256,
 			timeout_ms = 5000,
@@ -1011,11 +1037,11 @@ MiniMisc.safely("now", function()
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
-	Nmap("<F1>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
-	Nmap("<F2>", vim.pack.update, "Update vim plugins")
-	Nmap("<F3>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F4>", ":TSContext toggle<CR>", "Toggle treesitter context")
-	Nmap("<F5>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F2>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
+	Nmap("<F3>", vim.pack.update, "Update vim plugins")
+	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F5>", ":TSContext toggle<CR>", "Toggle treesitter context")
+	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<Space><Tab>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
@@ -1140,8 +1166,6 @@ MiniMisc.safely("now", function()
 		html = true,
 		xml = true,
 		xsl = true,
-		javascriptreact = true,
-		typescriptreact = true,
 		htmlangular = true,
 	}
 	local special_buftypes = {
@@ -1473,12 +1497,10 @@ MiniMisc.safely("now", function()
 				"html",
 				"htmlangular",
 				"javascript",
-				"javascript.jsx",
-				"javascriptreact",
+				"jsx",
 				"svelte",
 				"typescript",
-				"typescript.tsx",
-				"typescriptreact",
+				"tsx",
 				"vue",
 			},
 		},
@@ -2082,8 +2104,6 @@ end)
 -- Linting and formatting setup
 MiniMisc.safely("later", function()
 	require("lint").linters_by_ft = {
-		-- ["javascript.jsx"] = { "eslint" },
-		-- ["typescript.tsx"] = { "eslint" },
 		-- astro = { "eslint" },
 		c = { "clangtidy" },
 		-- css = { "eslint" },
@@ -2092,14 +2112,14 @@ MiniMisc.safely("later", function()
 		-- htmlangular = { "eslint" },
 		java = { "checkstyle" },
 		-- javascript = { "eslint" },
-		-- javascriptreact = { "eslint" },
+		-- jsx = { "eslint" },
 		lua = { "luacheck" },
 		python = { "pylint" },
 		sh = { "shellcheck" },
 		sql = { "sqlfluff" },
 		-- svelte = { "eslint" },
+		-- tsx = { "eslint" },
 		-- typescript = { "eslint" },
-		-- typescriptreact = { "eslint" },
 		-- vue = { "eslint" },
 	}
 	require("conform").setup({
@@ -2113,9 +2133,9 @@ MiniMisc.safely("later", function()
 			htmlangular = { "prettier" },
 			java = { "google-java-format" },
 			javascript = { "prettier" },
-			javascriptreact = { "prettier" },
 			json = { "prettier" },
 			jsonc = { "prettier" },
+			jsx = { "prettier" },
 			lua = { "stylua" },
 			python = { "black" },
 			scala = { "scalafmt" },
@@ -2125,8 +2145,8 @@ MiniMisc.safely("later", function()
 			svelte = { "prettier" },
 			svg = { "xmllint" },
 			tex = { "latexindent" },
+			tsx = { "prettier" },
 			typescript = { "prettier" },
-			typescriptreact = { "prettier" },
 			xml = { "xmllint" },
 			yaml = { "prettier" },
 		},
