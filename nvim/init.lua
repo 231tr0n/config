@@ -1235,8 +1235,16 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("User", {
-		pattern = "MiniFilesBufferCreate",
+		pattern = "MiniFilesBufferCreate,MiniFilesWindowOpen,MiniFilesWindowUpdate",
 		callback = function(args)
+			if args.match == "MiniFilesWindowOpen" or args.match == "MiniFilesWindowUpdate" then
+				local win_id = args.data.win_id
+				local win_config = vim.api.nvim_win_get_config(win_id)
+				win_config.row = 2
+				win_config.height = win_config.height - 1
+				vim.api.nvim_win_set_config(win_id, win_config)
+				return
+			end
 			local b = args.data.buf_id
 			Nmap("~", function()
 				local path = (MiniFiles.get_fs_entry() or {}).path
