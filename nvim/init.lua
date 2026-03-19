@@ -444,10 +444,6 @@ MiniMisc.safely("now", function()
 	require("mini.diff").setup()
 	require("mini.extra").setup()
 	require("mini.files").setup({
-		windows = {
-			preview = true,
-			width_preview = 75,
-		},
 		mappings = {
 			go_in = "L",
 			go_in_plus = "l",
@@ -1240,8 +1236,10 @@ MiniMisc.safely("now", function()
 			if args.match == "MiniFilesWindowOpen" or args.match == "MiniFilesWindowUpdate" then
 				local win_id = args.data.win_id
 				local win_config = vim.api.nvim_win_get_config(win_id)
-				win_config.row = 2
-				win_config.height = win_config.height - 1
+				win_config.anchor = "SW"
+				win_config.row = vim.o.lines - 1
+				local height = math.floor(0.6 * vim.o.lines)
+				win_config.height = win_config.height < height and win_config.height or height
 				vim.api.nvim_win_set_config(win_id, win_config)
 				return
 			end
@@ -2507,4 +2505,152 @@ MiniMisc.safely("later", function()
 			vim.api.nvim__redraw({ statusline = true })
 		end
 	end)
+	local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
+	local function diff_highlight()
+		if vim.bo.filetype ~= "diff" and vim.bo.filetype ~= "patch" then
+			return
+		end
+		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
+		table.insert(lines, " ")
+		local total_changes = {}
+		local minus = {}
+		local plus = {}
+		local i = 1
+		while i <= #lines do
+			if lines[i]:sub(1, 1) == "@" then
+				local minus_content_char_count = 0
+				local plus_content_char_count = 0
+				while i <= #lines and lines[i]:sub(1, 5) ~= "index" do
+					if lines[i]:sub(1, 1) == "-" then
+						local content = "@" .. lines[i]:sub(2)
+						local minus_change = {
+							line = i,
+							content = content,
+							char_count_pre = minus_content_char_count,
+							char_count_post = minus_content_char_count + #content,
+						}
+						table.insert(minus, minus_change)
+						minus_content_char_count = minus_change.char_count_post
+					elseif lines[i]:sub(1, 1) == "+" then
+						local content = "@" .. lines[i]:sub(2)
+						local plus_change = {
+							line = i,
+							content = content,
+							char_count_pre = plus_content_char_count,
+							char_count_post = plus_content_char_count + #content,
+						}
+						table.insert(plus, plus_change)
+						plus_content_char_count = plus_change.char_count_post
+					else
+						if #minus ~= 0 and #plus ~= 0 then
+							table.insert(total_changes, {
+								minus = minus,
+								plus = plus,
+							})
+						end
+						minus = {}
+						plus = {}
+						minus_content_char_count = 0
+						plus_content_char_count = 0
+					end
+					i = i + 1
+				end
+				i = i + 2
+			end
+			i = i + 1
+		end
+		for _, changes in ipairs(total_changes) do
+			local minus_string = ""
+			local plus_string = ""
+			for _, minus_change in ipairs(changes.minus) do
+				minus_string = minus_string .. table.concat(vim.split(minus_change.content, ""), "\n") .. "\n"
+			end
+			for _, plus_change in ipairs(changes.plus) do
+				plus_string = plus_string .. table.concat(vim.split(plus_change.content, ""), "\n") .. "\n"
+			end
+			local hunk = vim.text.diff(minus_string, plus_string, { result_type = "indices" })
+			if hunk ~= nil then
+				for _, diff in ipairs(hunk) do
+					if diff[2] ~= 0 then
+						for _, change in ipairs(changes.minus) do
+							if change.char_count_post >= diff[1] then
+								local cur_line = change.line
+								local col = diff[1] - change.char_count_pre - 1
+								local remaining = diff[2]
+								while remaining > 0 and cur_line <= #lines do
+									local line_len = #lines[cur_line]
+									local end_col = col + remaining
+									if end_col > line_len then
+										vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+											end_row = cur_line - 1,
+											end_col = line_len,
+											hl_mode = "blend",
+											hl_group = "DiffDelete",
+											priority = 100,
+										})
+										remaining = remaining - (line_len - col)
+										col = 0
+										cur_line = cur_line + 1
+									else
+										vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+											end_row = cur_line - 1,
+											end_col = end_col,
+											hl_mode = "blend",
+											hl_group = "DiffDelete",
+											priority = 100,
+										})
+										remaining = 0
+									end
+								end
+								break
+							end
+						end
+					end
+					if diff[4] ~= 0 then
+						for _, change in ipairs(changes.plus) do
+							if change.char_count_post >= diff[3] then
+								local cur_line = change.line
+								local col = diff[3] - change.char_count_pre - 1
+								local remaining = diff[4]
+								while remaining > 0 and cur_line <= #lines do
+									local line_len = #lines[cur_line]
+									local end_col = col + remaining
+									if end_col > line_len then
+										vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+											end_row = cur_line - 1,
+											end_col = line_len,
+											hl_mode = "blend",
+											hl_group = "DiffAdd",
+											priority = 100,
+										})
+										remaining = remaining - (line_len - col)
+										col = 0
+										cur_line = cur_line + 1
+									else
+										vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+											end_row = cur_line - 1,
+											end_col = end_col,
+											hl_mode = "blend",
+											hl_group = "DiffAdd",
+											priority = 100,
+										})
+										remaining = 0
+									end
+								end
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	Nmap("gZ", diff_highlight, "Highlight word diff in diff files")
+	-- MiniMisc.put(diff)
+	-- MiniMisc.put({
+	-- 	line = line,
+	-- 	col = col,
+	-- 	end_lines = line,
+	-- 	end_col = col + diff[4],
+	-- })
 end)
