@@ -753,9 +753,12 @@ MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		pattern = "everforest",
 		callback = function()
+			Hi("@constructor.lua", { link = "Orange" })
+			Hi("@punctuation.bracket", { link = "Orange" })
 			Hi("Pmenu", { link = "NormalFloat" })
-			Hi("PmenuKind", { link = "Green" })
 			Hi("PmenuExtra", { link = "Blue" })
+			Hi("PmenuExtra", { link = "Blue" })
+			Hi("PmenuKind", { link = "Green" })
 		end,
 	})
 	vim.g.everforest_background = "medium"
