@@ -2380,7 +2380,7 @@ MiniMisc.safely("later", function()
 			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
 			return
 		end
-		parser:parse()
+		parser:parse(true)
 		local root = parser:trees()[1]:root()
 		if not root then
 			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
