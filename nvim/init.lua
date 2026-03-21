@@ -396,7 +396,7 @@ MiniMisc.safely("now", function()
 			{ mode = "i", keys = "<C-x>" },
 			{ mode = "n", keys = "'" },
 			{ mode = "n", keys = "<C-w>" },
-			{ mode = "n", keys = "<Leader>" },
+			{ mode = "n", keys = "<leader>" },
 			{ mode = "n", keys = "[" },
 			{ mode = "n", keys = "\\" },
 			{ mode = "n", keys = "]" },
@@ -405,7 +405,7 @@ MiniMisc.safely("now", function()
 			{ mode = "n", keys = "z" },
 			{ mode = "n", keys = '"' },
 			{ mode = "x", keys = "'" },
-			{ mode = "x", keys = "<Leader>" },
+			{ mode = "x", keys = "<leader>" },
 			{ mode = "x", keys = "[" },
 			{ mode = "x", keys = "]" },
 			{ mode = "x", keys = "`" },
@@ -779,11 +779,11 @@ MiniMisc.safely("now", function()
 		"https://github.com/nvim-treesitter/nvim-treesitter-context",
 		"https://github.com/MeanderingProgrammer/render-markdown.nvim",
 		"https://github.com/BlinkResearchLabs/blink-edit.nvim",
-		"https://github.com/nickjvandyke/opencode.nvim",
 		"https://github.com/neovim/nvim-lspconfig",
 		"https://codeberg.org/mfussenegger/nvim-lint",
 		"https://github.com/stevearc/conform.nvim",
 		"https://github.com/Jezda1337/nvim-html-css",
+		"https://github.com/carlos-algms/agentic.nvim",
 	})
 	require("html-css").setup({
 		enable_on = {
@@ -857,12 +857,15 @@ MiniMisc.safely("now", function()
 			border = "thin",
 		},
 	})
+	require("agentic").setup({
+		provider = "opencode-acp",
+	})
 	require("blink-edit").setup({
 		llm = {
-			provider = "generic",
-			backend = "ollama",
+			provider = "sweep",
+			backend = "openai",
 			url = "http://localhost:11434",
-			model = "granite4:350m-h",
+			model = "hf.co/sweepai/sweep-next-edit-0.5B:latest",
 			temperature = 0.0,
 			max_tokens = 256,
 			timeout_ms = 5000,
@@ -1030,8 +1033,7 @@ MiniMisc.safely("now", function()
 		end
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
-	Map({ "x", "n" }, "<leader>as", require("opencode").select, "Send selected to opencode")
-	Map({ "x", "n" }, "<leader>at", require("opencode").toggle, "Toggle opencode")
+	Map({ "n", "x" }, "<leader>aa", require("agentic").add_selection_or_file_to_context, "Add selection or file")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
@@ -1043,6 +1045,11 @@ MiniMisc.safely("now", function()
 	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<Space><Tab>", toggle_float_terminal, "Toggle float terminal")
+	Nmap("<leader>aD", require("agentic").add_buffer_diagnostics, "Add buffer diagnostics")
+	Nmap("<leader>ad", require("agentic").add_current_line_diagnostics, "Add line diagnostics")
+	Nmap("<leader>an", require("agentic").new_session, "New session")
+	Nmap("<leader>ar", require("agentic").restore_session, "Restore session")
+	Nmap("<leader>at", require("agentic").toggle, "Toggle agent")
 	Nmap("<leader>bD", ":lua MiniBufremove.delete(0, true)<CR>", "Delete!")
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
@@ -1070,12 +1077,13 @@ MiniMisc.safely("now", function()
 	Nmap("<leader>dw", ":DapViewWatch<CR>", "Add a new expression watcher")
 	Nmap("<leader>ef", ":lua if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0)) end<CR>", "Buf")
 	Nmap("<leader>et", ":lua if not MiniFiles.close() then MiniFiles.open() end<CR>", "Toggle file explorer")
+	Nmap("<leader>fD", ':Pick diagnostic scope="all"<CR>', "Search workspace diagnostics")
 	Nmap("<leader>fM", ':Pick marks scope="all"<CR>', "Search workspace marks")
 	Nmap("<leader>fS", ":Pick grep_live<CR>", "Search content live")
 	Nmap("<leader>fT", ":Pick treesitter<CR>", "Search treesitter tree")
-	Nmap("<leader>fX", ':Pick diagnostic scope="all"<CR>', "Search workspace diagnostics")
 	Nmap("<leader>fY", ':Pick lsp scope="workspace_symbol"<CR>', "Search workspace symbols")
 	Nmap("<leader>fb", ":Pick buffers<CR>", "Search buffers")
+	Nmap("<leader>fd", ':Pick diagnostic scope="current"<CR>', "Search document diagnostics")
 	Nmap("<leader>ff", ":Pick files<CR>", "Search files")
 	Nmap("<leader>fgC", ":Pick git_commits<CR>", "Search commits")
 	Nmap("<leader>fgb", ":Pick git_branches<CR>", "Search branches")
@@ -1092,7 +1100,6 @@ MiniMisc.safely("now", function()
 	Nmap("<leader>fr", ":Pick resume<CR>", "Resume latest picker")
 	Nmap("<leader>fs", ":Pick grep<CR>", "Search content")
 	Nmap("<leader>ft", ":Pick treesitter_symbols<CR>", "Search treesitter symbols")
-	Nmap("<leader>fx", ':Pick diagnostic scope="current"<CR>', "Search document diagnostics")
 	Nmap("<leader>fy", ':Pick lsp scope="document_symbol"<CR>', "Search document symbols")
 	Nmap("<leader>lC", ":lua vim.lsp.codelens.run()<CR>", "Code lens run")
 	Nmap("<leader>lF", ":lua vim.lsp.buf.format()<CR>", "Lsp Format")
@@ -1125,8 +1132,9 @@ MiniMisc.safely("now", function()
 	Nmap("]a", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
+	Nmap("gD", ":lua G.toggle_diff_highlight()<CR>", "Highlight word diff in diff files")
+	Nmap("gd", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Nmap("gxx", '"+dd', "Cut line to clipboard")
-	Nmap("gz", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
 	map_combo("t", "kj", "<BS><BS><C-\\><C-n>")
 	map_combo({ "i", "c", "x", "s" }, "kj", "<BS><BS><Esc>")
@@ -2509,14 +2517,18 @@ MiniMisc.safely("later", function()
 			vim.api.nvim__redraw({ statusline = true })
 		end
 	end)
-	local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
-	local function diff_highlight()
+	G.toggle_diff_highlight = function()
 		if vim.bo.filetype ~= "diff" and vim.bo.filetype ~= "patch" then
+			return
+		end
+		local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
+		if #vim.api.nvim_buf_get_extmarks(0, diff_highlight_namespace, 0, -1, {}) > 0 then
+			vim.api.nvim_buf_clear_namespace(0, diff_highlight_namespace, 0, -1)
 			return
 		end
 		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
 		table.insert(lines, " ")
-		local function apply_partial_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority, hl_mode)
+		local function apply_partial_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
 			if diff_lines ~= 0 then
 				for _, change in ipairs(changes) do
 					if change.char_count_post >= diff_start then
@@ -2530,7 +2542,7 @@ MiniMisc.safely("later", function()
 								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
 									end_row = cur_line - 1,
 									end_col = line_len,
-									hl_mode = hl_mode,
+									hl_mode = "blend",
 									hl_group = highlight,
 									priority = priority,
 								})
@@ -2541,7 +2553,7 @@ MiniMisc.safely("later", function()
 								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
 									end_row = cur_line - 1,
 									end_col = end_col,
-									hl_mode = hl_mode,
+									hl_mode = "blend",
 									hl_group = highlight,
 									priority = priority,
 								})
@@ -2553,7 +2565,7 @@ MiniMisc.safely("later", function()
 				end
 			end
 		end
-		local function apply_hunk_ext_marks(changes)
+		local function apply_hunk_ext_marks(changes, diff_delete_highlight_group, diff_add_highlight_group, priority)
 			local minus_string = ""
 			local plus_string = ""
 			for _, minus_change in ipairs(changes.minus) do
@@ -2569,8 +2581,8 @@ MiniMisc.safely("later", function()
 			local hunk = vim.text.diff(minus_string, plus_string, { result_type = "indices" })
 			if type(hunk) == "table" then
 				for _, diff in ipairs(hunk) do
-					apply_partial_hunk_ext_marks(changes.minus, diff[1], diff[2], "DiffDelete", 100, "blend")
-					apply_partial_hunk_ext_marks(changes.plus, diff[3], diff[4], "DiffAdd", 100, "blend")
+					apply_partial_hunk_ext_marks(changes.minus, diff[1], diff[2], diff_delete_highlight_group, priority)
+					apply_partial_hunk_ext_marks(changes.plus, diff[3], diff[4], diff_add_highlight_group, priority)
 				end
 			end
 		end
@@ -2607,7 +2619,7 @@ MiniMisc.safely("later", function()
 							apply_hunk_ext_marks({
 								minus = minus,
 								plus = plus,
-							})
+							}, "DiffDelete", "DiffAdd", 100)
 						end
 						minus = {}
 						plus = {}
@@ -2621,5 +2633,4 @@ MiniMisc.safely("later", function()
 			i = i + 1
 		end
 	end
-	Nmap("gZ", diff_highlight, "Highlight word diff in diff files")
 end)
