@@ -2528,7 +2528,7 @@ MiniMisc.safely("later", function()
 		end
 		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
 		table.insert(lines, " ")
-		local function apply_partial_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
+		local function apply_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
 			if diff_lines ~= 0 then
 				for _, change in ipairs(changes) do
 					if change.char_count_post >= diff_start then
@@ -2565,27 +2565,6 @@ MiniMisc.safely("later", function()
 				end
 			end
 		end
-		local function apply_hunk_ext_marks(changes, diff_delete_highlight_group, diff_add_highlight_group, priority)
-			local minus_string = ""
-			local plus_string = ""
-			for _, minus_change in ipairs(changes.minus) do
-				for char in minus_change.content:gmatch(".") do
-					minus_string = minus_string .. char .. "\n"
-				end
-			end
-			for _, plus_change in ipairs(changes.plus) do
-				for char in plus_change.content:gmatch(".") do
-					plus_string = plus_string .. char .. "\n"
-				end
-			end
-			local hunk = vim.text.diff(minus_string, plus_string, { result_type = "indices" })
-			if type(hunk) == "table" then
-				for _, diff in ipairs(hunk) do
-					apply_partial_hunk_ext_marks(changes.minus, diff[1], diff[2], diff_delete_highlight_group, priority)
-					apply_partial_hunk_ext_marks(changes.plus, diff[3], diff[4], diff_add_highlight_group, priority)
-				end
-			end
-		end
 		local minus = {}
 		local plus = {}
 		local i = 1
@@ -2616,10 +2595,32 @@ MiniMisc.safely("later", function()
 						plus_content_char_count = plus_change.char_count_post
 					else
 						if #minus ~= 0 and #plus ~= 0 then
-							apply_hunk_ext_marks({
-								minus = minus,
-								plus = plus,
-							}, "DiffDelete", "DiffAdd", 100)
+							local minus_string = ""
+							local plus_string = ""
+							for _, minus_change in ipairs(minus) do
+								for char in minus_change.content:gmatch(".") do
+									minus_string = minus_string .. char .. "\n"
+								end
+							end
+							for _, plus_change in ipairs(plus) do
+								for char in plus_change.content:gmatch(".") do
+									plus_string = plus_string .. char .. "\n"
+								end
+							end
+							vim.text.diff(minus_string, plus_string, {
+								result_type = "indices",
+								algorithm = "minimal",
+								ignore_whitespace = true,
+								ignore_whitespace_change = true,
+								ignore_whitespace_change_at_eol = true,
+								ignore_cr_at_eol = true,
+								ignore_blank_lines = true,
+								indent_heuristic = true,
+								on_hunk = function(start_d, count_d, start_a, count_a)
+									apply_hunk_ext_marks(minus, start_d, count_d, "DiffDelete", 100)
+									apply_hunk_ext_marks(plus, start_a, count_a, "DiffAdd", 100)
+								end,
+							})
 						end
 						minus = {}
 						plus = {}
