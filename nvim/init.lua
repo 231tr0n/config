@@ -2526,17 +2526,16 @@ MiniMisc.safely("later", function()
 			vim.api.nvim_buf_clear_namespace(0, diff_highlight_namespace, 0, -1)
 			return
 		end
-		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
-		table.insert(lines, " ")
 		local function apply_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
 			if diff_lines ~= 0 then
-				for _, change in ipairs(changes) do
-					if change.char_count_post >= diff_start then
-						local cur_line = change.line
-						local col = diff_start - change.char_count_pre - 1
+				for i = 1, #changes do
+					if changes[i].char_count_post >= diff_start then
+						local cur_change_index = i
+						local col = diff_start - changes[i].char_count_pre - 1
 						local remaining = diff_lines
-						while remaining > 0 and cur_line <= #lines do
-							local line_len = #lines[cur_line]
+						while remaining > 0 and cur_change_index <= #changes do
+							local cur_line = changes[cur_change_index].line
+							local line_len = #changes[cur_change_index].content
 							local end_col = col + remaining
 							if end_col > line_len then
 								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
@@ -2548,7 +2547,7 @@ MiniMisc.safely("later", function()
 								})
 								remaining = remaining - (line_len - col)
 								col = 0
-								cur_line = cur_line + 1
+								cur_change_index = cur_change_index + 1
 							else
 								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
 									end_row = cur_line - 1,
@@ -2565,6 +2564,8 @@ MiniMisc.safely("later", function()
 				end
 			end
 		end
+		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
+		table.insert(lines, " ")
 		local minus = {}
 		local plus = {}
 		local i = 1
