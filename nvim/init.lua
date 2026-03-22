@@ -2538,9 +2538,9 @@ MiniMisc.safely("later", function()
 							local line_len = #changes[cur_change_index].content
 							local end_col = col + remaining
 							if end_col > line_len then
-								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col + 1, {
 									end_row = cur_line - 1,
-									end_col = line_len,
+									end_col = line_len + 1,
 									hl_mode = "blend",
 									hl_group = highlight,
 									priority = priority,
@@ -2549,9 +2549,9 @@ MiniMisc.safely("later", function()
 								col = 0
 								cur_change_index = cur_change_index + 1
 							else
-								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col, {
+								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col + 1, {
 									end_row = cur_line - 1,
-									end_col = end_col,
+									end_col = end_col + 1,
 									hl_mode = "blend",
 									hl_group = highlight,
 									priority = priority,
@@ -2575,7 +2575,7 @@ MiniMisc.safely("later", function()
 				local plus_content_char_count = 0
 				while i <= #lines and lines[i]:sub(1, 5) ~= "index" do
 					if lines[i]:sub(1, 1) == "-" then
-						local content = "@" .. lines[i]:sub(2)
+						local content = lines[i]:sub(2)
 						minus_content_char_count = minus_content_char_count + #content
 						local minus_change = {
 							line = i,
@@ -2584,7 +2584,7 @@ MiniMisc.safely("later", function()
 						}
 						table.insert(minus, minus_change)
 					elseif lines[i]:sub(1, 1) == "+" then
-						local content = "@" .. lines[i]:sub(2)
+						local content = lines[i]:sub(2)
 						plus_content_char_count = plus_content_char_count + #content
 						local plus_change = {
 							line = i,
