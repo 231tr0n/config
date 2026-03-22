@@ -2529,9 +2529,9 @@ MiniMisc.safely("later", function()
 		local function apply_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
 			if diff_lines ~= 0 then
 				for i = 1, #changes do
-					if changes[i].char_count_post >= diff_start then
+					if changes[i].char_count >= diff_start then
 						local cur_change_index = i
-						local col = diff_start - changes[i].char_count_pre - 1
+						local col = diff_start - (changes[i].char_count - #changes[i].content) - 1
 						local remaining = diff_lines
 						while remaining > 0 and cur_change_index <= #changes do
 							local cur_line = changes[cur_change_index].line
@@ -2576,24 +2576,22 @@ MiniMisc.safely("later", function()
 				while i <= #lines and lines[i]:sub(1, 5) ~= "index" do
 					if lines[i]:sub(1, 1) == "-" then
 						local content = "@" .. lines[i]:sub(2)
+						minus_content_char_count = minus_content_char_count + #content
 						local minus_change = {
 							line = i,
 							content = content,
-							char_count_pre = minus_content_char_count,
-							char_count_post = minus_content_char_count + #content,
+							char_count = minus_content_char_count,
 						}
 						table.insert(minus, minus_change)
-						minus_content_char_count = minus_change.char_count_post
 					elseif lines[i]:sub(1, 1) == "+" then
 						local content = "@" .. lines[i]:sub(2)
+						plus_content_char_count = plus_content_char_count + #content
 						local plus_change = {
 							line = i,
 							content = content,
-							char_count_pre = plus_content_char_count,
-							char_count_post = plus_content_char_count + #content,
+							char_count = plus_content_char_count,
 						}
 						table.insert(plus, plus_change)
-						plus_content_char_count = plus_change.char_count_post
 					else
 						if #minus ~= 0 and #plus ~= 0 then
 							local minus_string = ""
