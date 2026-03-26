@@ -372,6 +372,7 @@ MiniMisc.safely("now", function()
 			I = require("mini.extra").gen_ai_spec.indent(),
 			L = require("mini.extra").gen_ai_spec.line(),
 			N = require("mini.extra").gen_ai_spec.number(),
+			t = { "<([%p%w]-)%f[^<%w][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
 		},
 	})
 	require("mini.align").setup()
