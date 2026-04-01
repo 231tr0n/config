@@ -192,7 +192,7 @@ PACKAGES=(
 	"nodejs-lts"
 	"nodejs-nodemon"
 	"npm"
-	"ollama"
+	"ollama-cuda"
 	"opencode-bin"
 	"openjdk-doc"
 	"openjdk-src"
