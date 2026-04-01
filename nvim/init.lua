@@ -866,7 +866,7 @@ MiniMisc.safely("now", function()
 			provider = "sweep",
 			backend = "openai",
 			url = "http://localhost:11434",
-			model = "hf.co/sweepai/sweep-next-edit-0.5B:latest",
+			model = "huggingface.co/sweepai/sweep-next-edit-0.5B:latest",
 			temperature = 0.0,
 			max_tokens = 256,
 			timeout_ms = 5000,
