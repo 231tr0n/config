@@ -757,15 +757,12 @@ MiniMisc.safely("now", function()
 		callback = function()
 			Hi("@constructor.lua", { link = "Orange" })
 			Hi("@punctuation.bracket", { link = "Orange" })
-			Hi("Pmenu", { link = "NormalFloat" })
-			Hi("PmenuExtra", { link = "Blue" })
-			Hi("PmenuExtra", { link = "Blue" })
-			Hi("PmenuKind", { link = "Green" })
 		end,
 	})
 	vim.g.everforest_background = "medium"
 	vim.g.everforest_transparent_background = 0
 	vim.g.everforest_dim_inactive_windows = 0
+	vim.g.everforest_pmenu_style = "blend"
 	vim.g.everforest_float_style = "blend"
 	vim.g.everforest_diagnostic_virtual_text = "colored"
 	vim.g.everforest_current_word = "underline"
