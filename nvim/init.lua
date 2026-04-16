@@ -338,6 +338,7 @@ MiniMisc.safely("now", function()
 	vim.o.winborder = "rounded"
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
+	-- vim.lsp.codelens.enable(true)
 	vim.diagnostic.config({
 		virtual_text = true,
 		virtual_lines = false,
@@ -779,7 +780,7 @@ MiniMisc.safely("now", function()
 		"https://codeberg.org/mfussenegger/nluarepl",
 		"https://github.com/nvim-treesitter/nvim-treesitter-context",
 		"https://github.com/MeanderingProgrammer/render-markdown.nvim",
-		"https://github.com/BlinkResearchLabs/blink-edit.nvim",
+		"https://github.com/milanglacier/minuet-ai.nvim",
 		"https://github.com/neovim/nvim-lspconfig",
 		"https://codeberg.org/mfussenegger/nvim-lint",
 		"https://github.com/stevearc/conform.nvim",
@@ -861,67 +862,29 @@ MiniMisc.safely("now", function()
 	require("agentic").setup({
 		provider = "opencode-acp",
 	})
-	require("blink-edit").setup({
-		llm = {
-			provider = "sweep",
-			backend = "openai",
-			url = "http://localhost:11434",
-			model = "huggingface.co/sweepai/sweep-next-edit-0.5B:latest",
-			temperature = 0.0,
-			max_tokens = 256,
-			timeout_ms = 5000,
-		},
-		context = {
-			enabled = true,
-			lines_before = nil,
-			lines_after = nil,
-			max_tokens = 512,
-			selection = {
-				enabled = true,
-				max_lines = 10,
-			},
-			lsp = {
-				enabled = true,
-				max_definitions = 2,
-				max_references = 2,
-				timeout_ms = 100,
-			},
-			same_file = {
-				enabled = true,
-				max_lines_before = 20,
-				max_lines_after = 20,
-			},
-			history = {
-				enabled = false,
-				max_items = 5,
-				max_tokens = 512,
-				max_files = 2,
-				global = true,
+	require("minuet").setup({
+		virtualtext = {
+			auto_trigger_ft = { "*" },
+			keymap = {
+				accept = "<A-a>",
+				accept_line = "<A-A>",
+				accept_n_lines = "<A-z>",
+				prev = "<A-[>",
+				next = "<A-]>",
+				dismiss = "<A-e>",
 			},
 		},
-		ui = {
-			progress = false,
-			suppress_lsp_floats = true,
-		},
-		prefetch = {
-			enabled = false,
-			strategy = "n-1",
-		},
-		normal_mode = {
-			enabled = false,
-			debounce_ms = 200,
-		},
-		debounce_ms = 100,
-		keymaps = {
-			insert = {
-				accept = "<Tab>",
-				accept_line = "<S-Tab>",
-				clear = "<C-y>",
-				reject = "<Esc>",
-			},
-			normal = {
-				accept = "<Tab>",
-				accept_line = "<S-Tab>",
+		provider = "openai_fim_compatible",
+		provider_options = {
+			openai_fim_compatible = {
+				api_key = "TERM",
+				name = "Ollama",
+				end_point = "http://localhost:11434/v1/completions",
+				model = "sweepai/sweep-next-edit:latest",
+				optional = {
+					max_tokens = 128,
+					top_p = 0.9,
+				},
 			},
 		},
 	})
