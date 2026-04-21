@@ -86,6 +86,7 @@ bat --completion fish | source
 
 set -gx FZF_DEFAULT_OPTS "--style full --color 16 --reverse"
 set -gx BAT_THEME ansi
+set -x INCEPTION_API_KEY ""
 
 if status is-interactive
     and not set -q TMUX

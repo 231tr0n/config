@@ -873,15 +873,21 @@ MiniMisc.safely("now", function()
 		},
 		provider = "openai_fim_compatible",
 		provider_options = {
+			-- openai_fim_compatible = {
+			-- 	api_key = "TERM",
+			-- 	name = "Ollama",
+			-- 	end_point = "http://localhost:11434/v1/completions",
+			-- 	model = "qwen3.5:0.8b",
+			-- 	optional = {
+			-- 		max_tokens = 128,
+			-- 		top_p = 0.9,
+			-- 	},
+			-- },
 			openai_fim_compatible = {
-				api_key = "TERM",
-				name = "Ollama",
-				end_point = "http://localhost:11434/v1/completions",
-				model = "sweepai/sweep-next-edit:latest",
-				optional = {
-					max_tokens = 128,
-					top_p = 0.9,
-				},
+				model = "mercury-coder",
+				end_point = "https://api.inceptionlabs.ai/v1/fim/completions",
+				api_key = "INCEPTION_API_KEY", -- environment variable name
+				stream = true,
 			},
 		},
 	})
