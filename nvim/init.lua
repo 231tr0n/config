@@ -783,7 +783,32 @@ MiniMisc.safely("now", function()
 		"https://github.com/stevearc/conform.nvim",
 		"https://github.com/Jezda1337/nvim-html-css",
 		"https://github.com/carlos-algms/agentic.nvim",
+		"https://github.com/Wansmer/symbol-usage.nvim",
+		"https://github.com/romus204/go-tagger.nvim",
 	})
+	---@diagnostic disable-next-line: missing-fields
+	require("symbol-usage").setup({
+		kinds = {
+			vim.lsp.protocol.SymbolKind.Function,
+			vim.lsp.protocol.SymbolKind.Method,
+			vim.lsp.protocol.SymbolKind.Constant,
+		},
+		text_format = function(symbol)
+			local fragments = {}
+			local stacked_functions = symbol.stacked_count > 0 and (" | +%s"):format(symbol.stacked_count) or ""
+			if symbol.references then
+				table.insert(fragments, symbol.references .. " refs")
+			end
+			if symbol.definition then
+				table.insert(fragments, symbol.definition .. " defs")
+			end
+			if symbol.implementation then
+				table.insert(fragments, symbol.implementation .. " impls")
+			end
+			return table.concat(fragments, ", ") .. stacked_functions
+		end,
+	})
+	require("go-tagger").setup()
 	require("html-css").setup({
 		enable_on = {
 			"html",
