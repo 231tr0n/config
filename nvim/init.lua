@@ -4,32 +4,7 @@
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
 -- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
--- Vim pack setup
-if not vim.pack then
-	local path_package = vim.fn.stdpath("data") .. "/site/"
-	local mini_path = path_package .. "pack/deps/opt/mini.nvim"
-	if not vim.uv.fs_stat(mini_path) then
-		vim.cmd('echo "Installing `mini.nvim`" | redraw')
-		local clone_cmd = {
-			"git",
-			"clone",
-			"--filter=blob:none",
-			"https://github.com/nvim-mini/mini.nvim",
-			mini_path,
-		}
-		vim.fn.system(clone_cmd)
-		vim.cmd('echo "Installed `mini.nvim`" | redraw')
-	end
-	vim.cmd("packadd mini.nvim | helptags ALL")
-	require("mini.deps").setup({ path = { package = path_package } })
-	vim.pack = {
-		add = function(args)
-			for _, arg in ipairs(args) do
-				MiniDeps.add(arg)
-			end
-		end,
-	}
-end
+-- Vim pack mini.misc setup
 vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" })
 require("mini.misc").setup()
 
