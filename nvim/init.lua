@@ -785,6 +785,29 @@ MiniMisc.safely("now", function()
 		"https://github.com/carlos-algms/agentic.nvim",
 		"https://github.com/Wansmer/symbol-usage.nvim",
 		"https://github.com/romus204/go-tagger.nvim",
+		"https://github.com/stevearc/quicker.nvim",
+	})
+	require("quicker").setup({
+		keys = {
+			{
+				">",
+				function()
+					require("quicker").expand({ before = 5, after = 5, add_to_existing = true })
+				end,
+				desc = "Expand quickfix context",
+			},
+			{
+				"<",
+				function()
+					require("quicker").collapse()
+				end,
+				desc = "Collapse quickfix context",
+			},
+		},
+		follow = {
+			enabled = true,
+		},
+		trim_leading_whitespace = "all",
 	})
 	---@diagnostic disable-next-line: missing-fields
 	require("symbol-usage").setup({
