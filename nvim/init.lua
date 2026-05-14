@@ -52,74 +52,6 @@ MiniMisc.safely("now", function()
 		te_win = nil,
 		te_float_win = nil,
 		offset_encoding = "utf-16",
-		languages = {
-			angular = true,
-			awk = true,
-			bash = true,
-			bibtex = true,
-			c = true,
-			cmake = true,
-			cpp = true,
-			css = true,
-			csv = true,
-			diff = true,
-			dockerfile = true,
-			doxygen = true,
-			fish = true,
-			git_config = true,
-			git_rebase = true,
-			gitcommit = true,
-			gitignore = true,
-			go = true,
-			gomod = true,
-			gosum = true,
-			gowork = true,
-			graphql = true,
-			groovy = true,
-			html = true,
-			http = true,
-			hurl = true,
-			ini = true,
-			java = true,
-			javascript = true,
-			jq = true,
-			jsdoc = true,
-			json = true,
-			json5 = true,
-			latex = true,
-			lua = true,
-			luadoc = true,
-			make = true,
-			markdown = true,
-			markdown_inline = true,
-			meson = true,
-			ninja = true,
-			nix = true,
-			perl = true,
-			php = true,
-			pug = true,
-			python = true,
-			query = true,
-			regex = true,
-			requirements = true,
-			ruby = true,
-			rust = true,
-			scala = true,
-			scss = true,
-			sql = true,
-			ssh_config = true,
-			starlark = true,
-			svelte = true,
-			toml = true,
-			typescript = true,
-			vim = true,
-			vimdoc = true,
-			vue = true,
-			xml = true,
-			yaml = true,
-			yuck = true,
-			zig = true,
-		},
 		lsp_get_client = function(name, bufnr, all)
 			local buf = nil
 			local opts = {}
@@ -279,6 +211,7 @@ MiniMisc.safely("now", function()
 	vim.o.foldenable = true
 	vim.o.foldlevel = 99
 	vim.o.foldlevelstart = 99
+	vim.o.foldmethod = "indent"
 	vim.o.hlsearch = true
 	vim.o.ignorecase = true
 	vim.o.incsearch = true
@@ -711,20 +644,6 @@ MiniMisc.safely("now", function()
 	require("mini.visits").setup()
 end)
 
--- Plugin installation hooks setup
-MiniMisc.safely("now", function()
-	vim.api.nvim_create_autocmd("PackChanged", {
-		callback = function(args)
-			if args.data.spec.name == "nvim-treesitter" and args.data.kind == "update" then
-				if not args.data.active then
-					vim.cmd.packadd("nvim-treesitter")
-				end
-				vim.cmd("TSUpdate")
-			end
-		end,
-	})
-end)
-
 -- Plugins setup
 MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("ColorScheme", {
@@ -746,7 +665,7 @@ MiniMisc.safely("now", function()
 	vim.pack.add({ "https://github.com/sainnhe/everforest" })
 	vim.cmd.colorscheme("everforest")
 	vim.pack.add({
-		"https://github.com/nvim-treesitter/nvim-treesitter",
+		"https://github.com/arborist-ts/arborist.nvim",
 		"https://codeberg.org/mfussenegger/nvim-dap",
 		"https://github.com/igorlfs/nvim-dap-view",
 		"https://codeberg.org/mfussenegger/nluarepl",
@@ -761,6 +680,9 @@ MiniMisc.safely("now", function()
 		"https://github.com/Wansmer/symbol-usage.nvim",
 		"https://github.com/romus204/go-tagger.nvim",
 		"https://github.com/stevearc/quicker.nvim",
+	})
+	require("arborist").setup({
+		update_cadence = "daily",
 	})
 	require("quicker").setup({
 		keys = {
@@ -791,6 +713,7 @@ MiniMisc.safely("now", function()
 			vim.lsp.protocol.SymbolKind.Method,
 			vim.lsp.protocol.SymbolKind.Constant,
 		},
+		vt_position = "end_of_line",
 		text_format = function(symbol)
 			local fragments = {}
 			local stacked_functions = symbol.stacked_count > 0 and (" | +%s"):format(symbol.stacked_count) or ""
@@ -832,8 +755,6 @@ MiniMisc.safely("now", function()
 			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css",
 		},
 	})
-	require("nvim-treesitter").setup()
-	require("nvim-treesitter").install(G.get_table_keys(G.languages)):wait(5 * 60 * 1000)
 	vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignOk" })
 	vim.fn.sign_define("DapBreakpointCondition", { text = "󰯳", texthl = "DiagnosticSignWarn" })
 	vim.fn.sign_define("DapBreakpointRejected", { text = "", texthl = "DiagnosticSignError" })
@@ -1030,9 +951,11 @@ MiniMisc.safely("now", function()
 	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
 	Nmap("<F2>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
 	Nmap("<F3>", vim.pack.update, "Update vim plugins")
-	Nmap("<F4>", ":Inspect<CR>", "Echo syntax group")
-	Nmap("<F5>", ":TSContext toggle<CR>", "Toggle treesitter context")
-	Nmap("<F6>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
+	Nmap("<F4>", require("symbol-usage").toggle, "Toggle symbol usage")
+	Nmap("<F5>", require("symbol-usage").refresh, "Refresh symbol usage")
+	Nmap("<F6>", ":Inspect<CR>", "Echo syntax group")
+	Nmap("<F7>", ":TSContext toggle<CR>", "Toggle treesitter context")
+	Nmap("<F8>", ":RenderMarkdown toggle<CR>", "Toggle markdown preview")
 	Nmap("<Space><Space>", toggle_terminal, "Toggle terminal")
 	Nmap("<Space><Tab>", toggle_float_terminal, "Toggle float terminal")
 	Nmap("<leader>aD", require("agentic").add_buffer_diagnostics, "Add buffer diagnostics")
@@ -1178,12 +1101,6 @@ MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(args)
-			if G.languages[args.match] or html_file_types[args.match] then
-				vim.treesitter.start()
-				vim.wo.foldmethod = "expr"
-				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-				vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-			end
 			if html_file_types[vim.bo[args.buf].filetype] then
 				vim.bo[args.buf].omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
@@ -2358,9 +2275,9 @@ MiniMisc.safely("later", function()
 		})
 	end
 	MiniPick.registry.treesitter_symbols = function(opts)
-		local has_ts, _ = pcall(require, "nvim-treesitter")
+		local has_ts, _ = pcall(require, "arborist")
 		if not has_ts then
-			vim.notify("Treesitter_symbols picker requires nvim-treesitter.", vim.log.levels.ERROR)
+			vim.notify("Treesitter_symbols picker requires arborist.", vim.log.levels.ERROR)
 			return
 		end
 		local buf = vim.api.nvim_get_current_buf()
