@@ -713,6 +713,7 @@ MiniMisc.safely("now", function()
 			vim.lsp.protocol.SymbolKind.Method,
 			vim.lsp.protocol.SymbolKind.Constant,
 		},
+		request_pending_text = " loading...",
 		vt_position = "end_of_line",
 		text_format = function(symbol)
 			local fragments = {}
@@ -726,7 +727,7 @@ MiniMisc.safely("now", function()
 			if symbol.implementation then
 				table.insert(fragments, symbol.implementation .. " impls")
 			end
-			return table.concat(fragments, ", ") .. stacked_functions
+			return " " .. table.concat(fragments, ", ") .. stacked_functions
 		end,
 	})
 	require("go-tagger").setup()
