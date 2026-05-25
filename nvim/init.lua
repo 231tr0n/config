@@ -698,12 +698,13 @@ MiniMisc.safely("now", function()
 		"https://github.com/romus204/go-tagger.nvim",
 		"https://github.com/stevearc/quicker.nvim",
 		"https://gitlab.com/HiPhish/rainbow-delimiters.nvim",
+		"https://github.com/nvimdev/visualizer.nvim",
 	})
 	require("arborist").setup({
 		update_cadence = "daily",
 		fold = true,
 		overrides = {
-			my_language = { url = "https://github.com/alienvspredator/tree-sitter-go" },
+			go = { url = "https://github.com/alienvspredator/tree-sitter-go" },
 		},
 	})
 	require("quicker").setup({
