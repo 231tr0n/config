@@ -2,7 +2,7 @@
 -- luacheck: globals vim
 -- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
--- luacheck: globals MiniDeps MiniMap MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
+-- luacheck: globals MiniDeps MiniMap MiniInput MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
 
 -- Vim pack mini.misc setup
 vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" })
@@ -382,6 +382,11 @@ MiniMisc.safely("now", function()
 	require("mini.indentscope").setup({
 		options = {
 			try_as_border = true,
+		},
+	})
+	require("mini.input").setup({
+		handlers = {
+			view = require("mini.input").gen_view.floatwin({ scope = "tabpage", style = "MM" }),
 		},
 	})
 	require("mini.jump").setup()
