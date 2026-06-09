@@ -183,7 +183,7 @@ PACKAGES=(
 	"marksman"
 	"maven"
 	"meson"
-	"minikube"
+	"kind"
 	"mpv"
 	"ncdu"
 	"neovim"
