@@ -184,6 +184,7 @@ PACKAGES=(
 	"maven"
 	"meson"
 	"kind"
+	"istio"
 	"mpv"
 	"ncdu"
 	"neovim"
