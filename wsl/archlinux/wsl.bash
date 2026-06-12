@@ -156,7 +156,6 @@ PACKAGES=(
 	"hurl"
 	"inetutils"
 	"inxi"
-	"istio"
 	"java-debug"
 	"java-lombok"
 	"jdk-openjdk"
