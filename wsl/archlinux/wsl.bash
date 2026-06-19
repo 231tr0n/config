@@ -223,6 +223,7 @@ PACKAGES=(
 	"rustup"
 	"shellcheck"
 	"shfmt"
+	"sops"
 	"spell"
 	"sql-language-server"
 	"sqlfluff"
