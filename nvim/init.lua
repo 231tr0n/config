@@ -285,6 +285,7 @@ MiniMisc.safely("now", function()
 		},
 	})
 	require("mini.align").setup()
+	require("mini.animate").setup()
 	require("mini.basics").setup({
 		options = {
 			extra_ui = true,
@@ -686,7 +687,8 @@ MiniMisc.safely("now", function()
 		},
 	}
 	vim.pack.add({
-		"https://github.com/arborist-ts/arborist.nvim",
+		"https://github.com/romus204/tree-sitter-manager.nvim",
+		"https://github.com/themixednuts/nvim-treesitter-svelte",
 		"https://codeberg.org/mfussenegger/nvim-dap",
 		"https://github.com/igorlfs/nvim-dap-view",
 		"https://codeberg.org/mfussenegger/nvim-jdtls",
@@ -705,12 +707,80 @@ MiniMisc.safely("now", function()
 		"https://gitlab.com/HiPhish/rainbow-delimiters.nvim",
 		"https://github.com/nvimdev/visualizer.nvim",
 	})
-	require("arborist").setup({
-		update_cadence = "daily",
-		fold = true,
-		overrides = {
-			go = { url = "https://github.com/alienvspredator/tree-sitter-go" },
+	require("tree-sitter-manager").setup({
+		auto_install = true,
+		noauto_install = { "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" },
+		ensure_installed = {
+			"bash",
+			"cpp",
+			"css",
+			"diff",
+			"dockerfile",
+			"go",
+			"html",
+			"ini",
+			"java",
+			"javascript",
+			"json",
+			"latex",
+			"make",
+			"python",
+			"regex",
+			"ruby",
+			"rust",
+			"toml",
+			"tsx",
+			"typescript",
+			"xml",
+			"yaml",
 		},
+		languages = {
+			go = {
+				install_info = {
+					url = "https://github.com/alienvspredator/tree-sitter-go",
+				},
+			},
+			svelte5 = {
+				install_info = {
+					url = "https://github.com/themixednuts/tree-sitter-htmlx",
+					location = "crates/tree-sitter-svelte",
+					revision = "c9b9cc35709fff494a3a9e41cd9471b633649e45",
+				},
+			},
+		},
+	})
+	vim.treesitter.language.register("svelte5", { "svelte" })
+	vim.filetype.add({
+		extension = { svelte = "svelte" },
+		pattern = {
+			[".+%.svelte%.js"] = "svelte",
+			[".+%.svelte%.ts"] = "svelte",
+		},
+	})
+	vim.api.nvim_create_autocmd("WinEnter", {
+		callback = function()
+			local win = vim.api.nvim_get_current_win()
+			local cfg = vim.api.nvim_win_get_config(win)
+			if cfg.relative ~= "" and cfg.title then
+				for _, t in ipairs(cfg.title) do
+					if t[1] and t[1]:find("Tree%-sitter Parser Manager") then
+						local height = math.floor(0.6 * vim.o.lines)
+						local width = math.floor(0.6 * vim.o.columns)
+						local row = math.floor(0.5 * (vim.o.lines - height))
+						local col = math.floor(0.5 * (vim.o.columns - width))
+						vim.api.nvim_win_set_config(win, {
+							relative = "editor",
+							anchor = "NW",
+							height = height,
+							width = width,
+							row = row,
+							col = col,
+						})
+						return
+					end
+				end
+			end
+		end,
 	})
 	require("quicker").setup({
 		keys = {
@@ -1651,9 +1721,9 @@ MiniMisc.safely("later", function()
 		})
 	end
 	MiniPick.registry.treesitter_symbols = function(opts)
-		local has_ts, _ = pcall(require, "arborist")
+		local has_ts, _ = pcall(require, "tree-sitter-manager")
 		if not has_ts then
-			vim.notify("Treesitter_symbols picker requires arborist.", vim.log.levels.ERROR)
+			vim.notify("Treesitter_symbols picker requires tree-sitter-manager.", vim.log.levels.ERROR)
 			return
 		end
 		local buf = vim.api.nvim_get_current_buf()
