@@ -687,8 +687,7 @@ MiniMisc.safely("now", function()
 		},
 	}
 	vim.pack.add({
-		"https://github.com/romus204/tree-sitter-manager.nvim",
-		"https://github.com/themixednuts/nvim-treesitter-svelte",
+		{ src = "https://github.com/romus204/tree-sitter-manager.nvim", version = "svelte-patch" },
 		"https://codeberg.org/mfussenegger/nvim-dap",
 		"https://github.com/igorlfs/nvim-dap-view",
 		"https://codeberg.org/mfussenegger/nvim-jdtls",
@@ -728,6 +727,7 @@ MiniMisc.safely("now", function()
 			"regex",
 			"ruby",
 			"rust",
+			"svelte",
 			"toml",
 			"tsx",
 			"typescript",
@@ -740,23 +740,29 @@ MiniMisc.safely("now", function()
 					url = "https://github.com/alienvspredator/tree-sitter-go",
 				},
 			},
-			svelte5 = {
-				install_info = {
-					url = "https://github.com/themixednuts/tree-sitter-htmlx",
-					location = "crates/tree-sitter-svelte",
-					revision = "c9b9cc35709fff494a3a9e41cd9471b633649e45",
-				},
-			},
 		},
 	})
-	vim.treesitter.language.register("svelte5", { "svelte" })
-	vim.filetype.add({
-		extension = { svelte = "svelte" },
-		pattern = {
-			[".+%.svelte%.js"] = "svelte",
-			[".+%.svelte%.ts"] = "svelte",
-		},
+	---@type function|table
+	local original_get = vim.treesitter.query.get
+	local svelte_context
+	local get_wrapper = setmetatable({}, {
+		__call = function(_, lang, query_name)
+			if lang == "svelte" and query_name == "context" then
+				if not svelte_context then
+					local path = vim.fn.stdpath("data")
+						.. "/site/pack/core/opt/tree-sitter-manager.nvim/runtime/queries/svelte/context.scm"
+					svelte_context = vim.treesitter.query.parse("svelte", table.concat(vim.fn.readfile(path), "\n"))
+				end
+				return svelte_context
+			end
+			return original_get(lang, query_name)
+		end,
 	})
+	---@cast original_get table
+	for k, v in pairs(original_get) do
+		get_wrapper[k] = v
+	end
+	vim.treesitter.query.get = get_wrapper
 	vim.api.nvim_create_autocmd("WinEnter", {
 		callback = function()
 			local win = vim.api.nvim_get_current_win()
