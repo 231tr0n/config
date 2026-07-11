@@ -742,27 +742,23 @@ MiniMisc.safely("now", function()
 			},
 		},
 	})
-	---@type function|table
-	local original_get = vim.treesitter.query.get
-	local svelte_context
-	local get_wrapper = setmetatable({}, {
-		__call = function(_, lang, query_name)
-			if lang == "svelte" and query_name == "context" then
-				if not svelte_context then
-					local path = vim.fn.stdpath("data")
-						.. "/site/pack/core/opt/tree-sitter-manager.nvim/runtime/queries/svelte/context.scm"
-					svelte_context = vim.treesitter.query.parse("svelte", table.concat(vim.fn.readfile(path), "\n"))
-				end
-				return svelte_context
-			end
-			return original_get(lang, query_name)
-		end,
-	})
-	---@cast original_get table
-	for k, v in pairs(original_get) do
-		get_wrapper[k] = v
-	end
-	vim.treesitter.query.get = get_wrapper
+	vim.treesitter.query.set(
+		"svelte",
+		"context",
+		[[
+[
+  (element)
+  (if_block)
+  (else_if_clause)
+  (else_clause)
+  (each_block)
+  (await_block)
+  (await_branch)
+  (key_block)
+  (snippet_block)
+] @context
+]]
+	)
 	vim.api.nvim_create_autocmd("WinEnter", {
 		callback = function()
 			local win = vim.api.nvim_get_current_win()
