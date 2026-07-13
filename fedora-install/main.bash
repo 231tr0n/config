@@ -61,6 +61,7 @@ sudo dnf install htop inxi ncdu btop util-linux
 sudo dnf install qadwaitadecorations-qt5
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common
+sudo dnf install --setopt=install_weak_deps=false plasma-integration
 
 sudo dnf autoremove
 flatpak uninstall --unused
