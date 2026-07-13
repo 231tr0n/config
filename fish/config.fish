@@ -6,25 +6,8 @@ if status is-interactive
     set fish_cursor_replace_one block
     set fish_cursor_replace line
     set fish_cursor_visual block
-    function findfile
-        find . -name $argv[1] -type f,d
-    end
-    # function nvim
-    #   /usr/bin/nvim -u ~/.vimrc $argv
-    # end
-    # function vim
-    #   /usr/bin/nvim $argv
-    # end
-    function findword
-        grep $argv[1] -rnwH . --exclude-dir=node_modules --exclude-dir=.git --exclude=package-lock.json
-    end
     function vman
         man $argv | vim -RM -c ':set syntax=man' -
-    end
-    function c
-        set filenamewithoutextension (echo $argv[1] | cut -f 1 -d '.')
-        gcc $argv[1] -o $filenamewithoutextension
-        chmod +x $filenamewithoutextension
     end
     function rr
         rm -r $argv
@@ -59,23 +42,9 @@ end
 # Go path variables
 set -gx GOPATH $HOME/go
 set -gx PATH $PATH $GOPATH/bin
-set -gx PATH $PATH /usr/local/go/bin
-
-# Java variables
-set -gx JAVA_HOME /usr/lib/jvm/default
-# set -gx JDK_JAVA_OPTIONS
-
-# Maven variables
-# set -gx MAVEN_OPTS
-
-# Rust path variables
-set -gx PATH $PATH $HOME/.cargo/bin
 
 # Additional user bin path variables
 set -gx PATH $PATH $HOME/.local/bin
-
-# Coursier path variables
-set -gx PATH $PATH $HOME/.local/share/coursier/bin
 
 # fish_config theme choose Nord
 # set -g fish_term24bit 0

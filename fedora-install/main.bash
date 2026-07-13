@@ -62,7 +62,7 @@ if [ ! -f "/home/$DEFAULT_USERNAME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa
 fi
 
-sudo dnf install tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide
+sudo dnf install tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat
 sudo dnf install go delve nodejs npm gcc gdb make meson java maven
 sudo dnf install shfmt shellcheck gofumpt clang-format clang-tools-extra
 sudo dnf install yt-dlp ffmpeg ImageMagick
