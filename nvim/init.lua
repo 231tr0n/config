@@ -687,7 +687,7 @@ MiniMisc.safely("now", function()
 		},
 	}
 	vim.pack.add({
-		{ src = "https://github.com/romus204/tree-sitter-manager.nvim", version = "svelte-patch" },
+		{ src = "https://github.com/romus204/tree-sitter-manager.nvim", version = "develop" },
 		"https://codeberg.org/mfussenegger/nvim-dap",
 		"https://github.com/igorlfs/nvim-dap-view",
 		"https://codeberg.org/mfussenegger/nvim-jdtls",
