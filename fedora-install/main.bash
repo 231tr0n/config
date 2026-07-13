@@ -58,10 +58,9 @@ sudo dnf install go delve nodejs npm gcc gdb make meson java maven
 sudo dnf install shfmt shellcheck gofumpt clang-format clang-tools-extra
 sudo dnf install yt-dlp ffmpeg ImageMagick
 sudo dnf install htop inxi ncdu btop util-linux
-sudo dnf install qadwaitadecorations-qt5
-sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
-sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common
+sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install --setopt=install_weak_deps=false plasma-integration
+sudo dnf install ollama
 
 sudo dnf autoremove
 flatpak uninstall --unused
