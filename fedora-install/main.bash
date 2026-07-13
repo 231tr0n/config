@@ -69,11 +69,11 @@ sudo dnf install yt-dlp ffmpeg ImageMagick
 sudo dnf install htop inxi ncdu btop util-linux
 sudo dnf install qadwaitadecorations-qt5 qt6ct
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
-sudo dnf install openrgb gnome-tweaks gnome-extensions-app gnome-music
+sudo dnf install openrgb gnome-tweaks gnome-extensions-app gnome-music gpick
 
 sudo npm install -g opencode-ai prettier
 
-chsh -s /usr/bin/fish
+[ "$SHELL" != "/usr/bin/fish" ] && chsh -s /usr/bin/fish
 
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/nvim"
@@ -81,6 +81,7 @@ mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
+mkdir -p "$HOME/.config/qt6ct"
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
@@ -92,3 +93,14 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_u
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o "$HOME/.config/opencode/tui.json"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o "$HOME/.config/opencode/opencode.json"
+
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 15"
+
+grep -qF '[Appearance]' "$HOME/.config/qt6ct/qt6ct.conf" 2>/dev/null || cat >>"$HOME/.config/qt6ct/qt6ct.conf" <<'EOF'
+[Appearance]
+style=Fusion
+color_scheme_path=/usr/share/qt6ct/colors/darker.conf
+standard_dialogs=desktop
+EOF
