@@ -71,6 +71,8 @@ sudo dnf install qadwaitadecorations-qt5 qt6ct
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install openrgb gnome-tweaks gnome-extensions-app gnome-music
 
+sudo npm install -g opencode-ai prettier
+
 chsh -s /usr/bin/fish
 
 mkdir -p "$HOME/.config"
