@@ -29,9 +29,6 @@ if [ -z "$DEFAULT_USERNAME" ]; then
 	exit 1
 fi
 
-sudo modprobe i2c-i801
-sudo modprobe i2c-dev
-
 if [ ! -f "/usr/lib/systemd/system-sleep/iwlwifi.bash" ]; then
 	sudo tee /usr/lib/systemd/system-sleep/iwlwifi.bash >/dev/null <<'EOF'
 #!/bin/bash
@@ -61,9 +58,9 @@ sudo dnf install go delve nodejs npm gcc gdb make meson java maven
 sudo dnf install shfmt shellcheck gofumpt clang-format clang-tools-extra
 sudo dnf install yt-dlp ffmpeg ImageMagick
 sudo dnf install htop inxi ncdu btop util-linux
-sudo dnf install qadwaitadecorations-qt5 qt6ct
+sudo dnf install qadwaitadecorations-qt5
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
-sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser
+sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common
 
 sudo dnf autoremove
 flatpak uninstall --unused
@@ -78,7 +75,6 @@ mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
-mkdir -p "$HOME/.config/qt6ct"
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
@@ -93,11 +89,13 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.jso
 
 gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 15"
 
-grep -qxF 'QT_QPA_PLATFORMTHEME=qt6ct' /etc/environment || echo 'QT_QPA_PLATFORMTHEME=qt6ct' | sudo tee -a /etc/environment >/dev/null
+grep -qxF 'QT_QPA_PLATFORMTHEME=kde' /etc/environment || echo 'QT_QPA_PLATFORMTHEME=kde' | sudo tee -a /etc/environment >/dev/null
+grep -qxF 'QT_STYLE_OVERRIDE=Fusion' /etc/environment || echo 'QT_STYLE_OVERRIDE=Fusion' | sudo tee -a /etc/environment >/dev/null
 
-grep -qF '[Appearance]' "$HOME/.config/qt6ct/qt6ct.conf" >/dev/null || cat >>"$HOME/.config/qt6ct/qt6ct.conf" <<'EOF'
-[Appearance]
-style=Fusion
-color_scheme_path=/usr/share/qt6ct/colors/darker.conf
-standard_dialogs=desktop
+if [ ! -f "$HOME/.config/kdeglobals" ]; then
+	cat >"$HOME/.config/kdeglobals" <<'EOF'
+[General]
+widgetStyle=Fusion
+ColorScheme=BreezeDark
 EOF
+fi
