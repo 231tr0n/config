@@ -71,7 +71,7 @@ sudo dnf install qadwaitadecorations-qt5 qt6ct
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install openrgb gnome-tweaks gnome-extensions-app gnome-music
 
-chsh -s /bin/fish
+chsh -s /usr/bin/fish
 
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/nvim"
