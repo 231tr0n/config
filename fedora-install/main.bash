@@ -32,12 +32,6 @@ fi
 sudo modprobe i2c-i801
 sudo modprobe i2c-dev
 
-grep -qxF 'export QT_QPA_PLATFORMTHEME=qt6ct' ~/.bash_profile || echo 'export QT_QPA_PLATFORMTHEME=qt6ct' >>~/.bash_profile
-
-sudo touch /etc/modules-load.d/i2c.conf
-grep -qxF 'i2c-dev' /etc/modules-load.d/i2c.conf || echo 'i2c-dev' | sudo tee -a /etc/modules-load.d/i2c.conf >/dev/null
-grep -qxF 'i2c-i801' /etc/modules-load.d/i2c.conf || echo 'i2c-i801' | sudo tee -a /etc/modules-load.d/i2c.conf >/dev/null
-
 if [ ! -f "/usr/lib/systemd/system-sleep/iwlwifi.bash" ]; then
 	sudo tee /usr/lib/systemd/system-sleep/iwlwifi.bash >/dev/null <<'EOF'
 #!/bin/bash
@@ -69,7 +63,10 @@ sudo dnf install yt-dlp ffmpeg ImageMagick
 sudo dnf install htop inxi ncdu btop util-linux
 sudo dnf install qadwaitadecorations-qt5 qt6ct
 sudo dnf install cascadia-code-nf-fonts cascadia-mono-nf-fonts
-sudo dnf install openrgb gnome-tweaks gnome-extensions-app gnome-music gpick
+sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser
+
+sudo dnf autoremove
+flatpak uninstall --unused
 
 sudo npm install -g opencode-ai prettier
 
@@ -94,11 +91,11 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_m
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o "$HOME/.config/opencode/tui.json"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o "$HOME/.config/opencode/opencode.json"
 
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
-gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 15"
 
-grep -qF '[Appearance]' "$HOME/.config/qt6ct/qt6ct.conf" 2>/dev/null || cat >>"$HOME/.config/qt6ct/qt6ct.conf" <<'EOF'
+grep -qxF 'QT_QPA_PLATFORMTHEME=qt6ct' /etc/environment || echo 'QT_QPA_PLATFORMTHEME=qt6ct' | sudo tee -a /etc/environment >/dev/null
+
+grep -qF '[Appearance]' "$HOME/.config/qt6ct/qt6ct.conf" >/dev/null || cat >>"$HOME/.config/qt6ct/qt6ct.conf" <<'EOF'
 [Appearance]
 style=Fusion
 color_scheme_path=/usr/share/qt6ct/colors/darker.conf
