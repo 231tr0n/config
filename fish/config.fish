@@ -59,7 +59,7 @@ set -x INCEPTION_API_KEY ""
 
 if status is-interactive
     and not set -q TMUX
-    if wslinfo --networking-mode
+    if type -q wslinfo
         tmux -2u
     else
         exec tmux -2u
