@@ -53,19 +53,23 @@ if [ ! -f "/home/$DEFAULT_USERNAME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa
 fi
 
+sudo dnf update
+
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat
-sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven
-sudo dnf install -y shfmt shellcheck gofumpt clang-format clang-tools-extra
+sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven rustup
+sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop util-linux
 sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
 sudo dnf install -y ollama llama-cpp
+sudo dnf install -y docker-cli
 
 sudo dnf autoremove -y
 flatpak uninstall --unused
 
-sudo npm install -g opencode-ai prettier
+rustup-init --profile complete -y
+sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript
 
 [ "$SHELL" != "/usr/bin/fish" ] && chsh -s /usr/bin/fish
 
