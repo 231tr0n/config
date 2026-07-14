@@ -69,7 +69,7 @@ sudo dnf autoremove -y
 flatpak uninstall --unused -y
 
 rustup-init --profile complete -y
-sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript
+sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript svelte-language-server
 
 [ "$SHELL" != "/usr/bin/fish" ] && chsh -s /usr/bin/fish
 
