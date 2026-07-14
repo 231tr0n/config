@@ -90,13 +90,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/background.p
 curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/grub.png -o "$HOME/Pictures/grub.png"
 curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/profile.png -o "$HOME/Pictures/profile.png"
 
-gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Pictures/background.png"
-gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Pictures/background.png"
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-gsettings set org.gnome.desktop.interface accent-color 'green'
-
 sudo mkdir -p /usr/share/backgrounds/gdm
-sudo cp "$HOME/Pictures/profile.png" "/var/lib/AccountsService/icons/$DEFAULT_USERNAME"
 sudo cp "$HOME/Pictures/grub.png" /usr/share/backgrounds/gdm/grub.png
 sudo chown root:root /usr/share/backgrounds/gdm/grub.png
 sudo chmod 644 /usr/share/backgrounds/gdm/grub.png
