@@ -93,7 +93,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.p
 SET_GDM="/usr/local/bin/set-gdm-wallpaper"
 sudo curl -sSLo "$SET_GDM" https://raw.githubusercontent.com/kem-a/gnome-gdm-wallpaper/main/set-gdm-wallpaper
 sudo chmod +x "$SET_GDM"
-sudo "$SET_GDM" -i "$HOME/Pictures/background.png" -b 8 || true
+sudo "$SET_GDM" -i "$HOME/Pictures/grub.png" -b 8 || true
 
 sudo sed -i 's/^GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
 grep -qxF 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' /etc/default/grub ||
