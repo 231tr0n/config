@@ -53,16 +53,16 @@ if [ ! -f "/home/$DEFAULT_USERNAME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa
 fi
 
-sudo dnf install tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat
-sudo dnf install go delve nodejs npm gcc gdb make meson java maven
-sudo dnf install shfmt shellcheck gofumpt clang-format clang-tools-extra
-sudo dnf install yt-dlp ffmpeg ImageMagick
-sudo dnf install htop inxi ncdu btop util-linux
-sudo dnf install gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
-sudo dnf install --setopt=install_weak_deps=false plasma-integration
-sudo dnf install ollama
+sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat
+sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven
+sudo dnf install -y shfmt shellcheck gofumpt clang-format clang-tools-extra
+sudo dnf install -y yt-dlp ffmpeg ImageMagick
+sudo dnf install -y htop inxi ncdu btop util-linux
+sudo dnf install -y grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
+sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
+sudo dnf install -y ollama
 
-sudo dnf autoremove
+sudo dnf autoremove -y
 flatpak uninstall --unused
 
 sudo npm install -g opencode-ai prettier
@@ -86,6 +86,31 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_u
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o "$HOME/.config/opencode/tui.json"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o "$HOME/.config/opencode/opencode.json"
+curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/background.png -o "$HOME/Pictures/background.png"
+curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/grub.png -o "$HOME/Pictures/grub.png"
+curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/profile.png -o "$HOME/Pictures/profile.png"
+
+gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Pictures/background.png"
+gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Pictures/background.png"
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+gsettings set org.gnome.desktop.interface accent-color 'green'
+
+sudo mkdir -p /usr/share/backgrounds/gdm
+sudo cp "$HOME/Pictures/profile.png" "/var/lib/AccountsService/icons/$DEFAULT_USERNAME"
+sudo cp "$HOME/Pictures/grub.png" /usr/share/backgrounds/gdm/grub.png
+sudo chown root:root /usr/share/backgrounds/gdm/grub.png
+sudo chmod 644 /usr/share/backgrounds/gdm/grub.png
+
+if ! grep -q '^Background=' /etc/gdm/custom.conf 2>/dev/null; then
+	sudo sed -i '/^\[daemon\]/a Background=/usr/share/backgrounds/gdm/grub.png' /etc/gdm/custom.conf
+else
+	sudo sed -i 's|^Background=.*|Background=/usr/share/backgrounds/gdm/grub.png|' /etc/gdm/custom.conf
+fi
+
+sudo sed -i 's/^GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
+grep -qxF 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' /etc/default/grub ||
+	echo 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' | sudo tee -a /etc/default/grub >/dev/null
+sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 
 gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 15"
 
@@ -97,5 +122,6 @@ if [ ! -f "$HOME/.config/kdeglobals" ]; then
 [General]
 widgetStyle=Fusion
 ColorScheme=BreezeDark
+AccentColor=Green
 EOF
 fi
