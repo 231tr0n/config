@@ -58,7 +58,7 @@ sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven
 sudo dnf install -y shfmt shellcheck gofumpt clang-format clang-tools-extra
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop util-linux
-sudo dnf install -y grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
+sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
 sudo dnf install -y ollama
 
@@ -90,16 +90,10 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/backgroun
 curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png"
 curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png"
 
-sudo mkdir -p /usr/share/backgrounds/gdm
-sudo cp "$HOME/Pictures/grub.png" /usr/share/backgrounds/gdm/grub.png
-sudo chown root:root /usr/share/backgrounds/gdm/grub.png
-sudo chmod 644 /usr/share/backgrounds/gdm/grub.png
-
-if ! grep -q '^Background=' /etc/gdm/custom.conf 2>/dev/null; then
-	sudo sed -i '/^\[daemon\]/a Background=/usr/share/backgrounds/gdm/grub.png' /etc/gdm/custom.conf
-else
-	sudo sed -i 's|^Background=.*|Background=/usr/share/backgrounds/gdm/grub.png|' /etc/gdm/custom.conf
-fi
+SET_GDM="/usr/local/bin/set-gdm-wallpaper"
+sudo curl -sSLo "$SET_GDM" https://raw.githubusercontent.com/kem-a/gnome-gdm-wallpaper/main/set-gdm-wallpaper
+sudo chmod +x "$SET_GDM"
+sudo "$SET_GDM" -i "$HOME/Pictures/background.png" -b 8 || true
 
 sudo sed -i 's/^GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
 grep -qxF 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' /etc/default/grub ||
