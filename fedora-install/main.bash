@@ -60,7 +60,7 @@ sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop util-linux
 sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music kcolorchooser plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
-sudo dnf install -y ollama
+sudo dnf install -y ollama llama-cpp
 
 sudo dnf autoremove -y
 flatpak uninstall --unused
