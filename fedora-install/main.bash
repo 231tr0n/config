@@ -86,9 +86,9 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_u
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o "$HOME/.config/opencode/tui.json"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/opencode.json -o "$HOME/.config/opencode/opencode.json"
-curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/background.png -o "$HOME/Pictures/background.png"
-curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/grub.png -o "$HOME/Pictures/grub.png"
-curl https://raw.githubusercontent.com/231tr0n/config/main/pictures/profile.png -o "$HOME/Pictures/profile.png"
+curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png"
+curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png"
+curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png"
 
 sudo mkdir -p /usr/share/backgrounds/gdm
 sudo cp "$HOME/Pictures/grub.png" /usr/share/backgrounds/gdm/grub.png
