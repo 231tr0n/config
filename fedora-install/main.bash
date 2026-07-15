@@ -60,7 +60,7 @@ sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop util-linux
-sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music mpv plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts gnome-shell-extension-forge gnome-shell-extension-common gnome-shell-extension-appindicator gnome-shell-extension-just-perfection mpd ncmpc
+sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music mpv plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts gnome-shell-extension-forge gnome-shell-extension-common gnome-shell-extension-appindicator gnome-shell-extension-just-perfection mpd ncmpc firefox google-chrome-stable
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli
