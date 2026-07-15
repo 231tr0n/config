@@ -55,7 +55,7 @@ fi
 
 sudo dnf update
 
-sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat
+sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat patch
 sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
