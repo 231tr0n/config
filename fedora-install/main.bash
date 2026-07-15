@@ -66,6 +66,7 @@ sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli
 
 flatpak install -y flathub com.github.finefindus.eyedropper
+flatpak install -y flathub org.gtk.Gtk3theme.Adwaita-dark
 
 sudo dnf autoremove -y
 flatpak uninstall --unused -y
