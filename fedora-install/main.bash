@@ -76,6 +76,8 @@ sudo npm install -g opencode-ai prettier eslint typescript-language-server types
 
 [ "$SHELL" != "/usr/bin/fish" ] && chsh -s /usr/bin/fish
 
+sudo usermod -aG docker "$USER"
+
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/nvim"
 mkdir -p "$HOME/.config/fish"
