@@ -334,60 +334,33 @@ ShellTheme=Everforest-Shell
 INDEXEOF
 
 {
-	printf '%s\n' '@media (prefers-color-scheme: light) {'
-	gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
-		/org/gnome/shell/theme/gnome-shell-light.css
-	printf '%s\n' '}'
-	printf '%s\n' '@media (prefers-color-scheme: dark) {'
 	gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
 		/org/gnome/shell/theme/gnome-shell-dark.css
-	printf '%s\n' '}'
 	cat <<'SHELLEOF'
 /* Everforest Medium — Shell overrides */
-@media (prefers-color-scheme: light) {
-  #panel { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-  #panel .panel-button { color: #5c6a72 !important; }
-  .panel-button .clock { color: #5c6a72 !important; }
-  #dash, .dash-background { background-color: #f4f0d9 !important; }
-  .popup-menu, .popup-sub-menu { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-  .popup-menu-item { color: #5c6a72 !important; }
-  .notification-banner, .notification-banner:hover { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
-  .notification-banner .notification-button { color: #5c6a72 !important; }
-  .workspace-background { background-color: #fdf6e3 !important; }
-  .workspace-switcher { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-  .workspace-thumbnails { background-color: #fdf6e3 !important; }
-  .quick-settings { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-  .quick-toggle, .quick-toggle-has-menu { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
-  .quick-slider { background-color: #f4f0d9 !important; }
-  .overview-tile .overview-icon { color: #5c6a72 !important; }
-  .app-folder { background-color: #e6e2cc !important; }
-  .switcher-list { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-}
-
-@media (prefers-color-scheme: dark) {
-  #panel { background-color: #232a2e !important; color: #d3c6aa !important; }
-  #panel .panel-button { color: #d3c6aa !important; }
-  .panel-button .clock { color: #d3c6aa !important; }
-  #dash, .dash-background { background-color: #232a2e !important; }
-  .popup-menu, .popup-sub-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
-  .popup-menu-item { color: #d3c6aa !important; }
-  .notification-banner, .notification-banner:hover { background-color: #343f44 !important; color: #d3c6aa !important; }
-  .notification-banner .notification-button { color: #d3c6aa !important; }
-  .workspace-background { background-color: #2d353b !important; }
-  .workspace-switcher { background-color: #2d353b !important; color: #d3c6aa !important; }
-  .workspace-thumbnails { background-color: #2d353b !important; }
-  .quick-settings { background-color: #2d353b !important; color: #d3c6aa !important; }
-  .quick-toggle, .quick-toggle-has-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
-  .quick-slider { background-color: #343f44 !important; }
-  .overview-tile .overview-icon { color: #d3c6aa !important; }
-  .app-folder { background-color: #3d484d !important; }
-  .switcher-list { background-color: #2d353b !important; color: #d3c6aa !important; }
-}
+#panel { background-color: #232a2e !important; color: #d3c6aa !important; }
+#panel .panel-button { color: #d3c6aa !important; }
+.panel-button .clock { color: #d3c6aa !important; }
+#dash, .dash-background { background-color: #232a2e !important; }
+.popup-menu, .popup-sub-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
+.popup-menu-item { color: #d3c6aa !important; }
+.notification-banner, .notification-banner:hover { background-color: #343f44 !important; color: #d3c6aa !important; }
+.notification-banner .notification-button { color: #d3c6aa !important; }
+.workspace-background { background-color: #2d353b !important; }
+.workspace-switcher { background-color: #2d353b !important; color: #d3c6aa !important; }
+.workspace-thumbnails { background-color: #2d353b !important; }
+.quick-settings { background-color: #2d353b !important; color: #d3c6aa !important; }
+.quick-toggle, .quick-toggle-has-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
+.quick-slider { background-color: #343f44 !important; }
+.overview-tile .overview-icon { color: #d3c6aa !important; }
+.app-folder { background-color: #3d484d !important; }
+.switcher-list { background-color: #2d353b !important; color: #d3c6aa !important; }
 SHELLEOF
 } >"$SHELL_CSS"
 
 gnome-extensions enable user-theme 2>/dev/null || true
 gsettings set org.gnome.shell.extensions.user-theme name 'Everforest-Shell'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
 sudo flatpak override --filesystem=xdg-config/gtk-4.0
 sudo flatpak override --filesystem=xdg-config/gtk-3.0
