@@ -104,12 +104,16 @@ sudo curl -sSLo "$SET_GDM" https://raw.githubusercontent.com/kem-a/gnome-gdm-wal
 sudo chmod +x "$SET_GDM"
 sudo "$SET_GDM" -i "$HOME/Pictures/grub.png" -b 8 || true
 
+echo -e 'user-db:user\nsystem-db:gdm\nfile-db:/usr/share/gdm/greeter-dconf-defaults' | sudo tee /etc/dconf/profile/gdm >/dev/null
+echo -e '[org/gnome/desktop/interface]\naccent-color='\''green'\''' | sudo tee /etc/dconf/db/gdm.d/01-accent-color >/dev/null
+sudo dconf update
+
+gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 12"
+
 sudo sed -i 's/^GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
 grep -qxF 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' /etc/default/grub ||
 	echo 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' | sudo tee -a /etc/default/grub >/dev/null
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-
-gsettings set org.gnome.desktop.interface monospace-font-name "Cascadia Code NF 15"
 
 grep -qxF 'QT_QPA_PLATFORMTHEME=kde' /etc/environment || echo 'QT_QPA_PLATFORMTHEME=kde' | sudo tee -a /etc/environment >/dev/null
 grep -qxF 'QT_STYLE_OVERRIDE=Fusion' /etc/environment || echo 'QT_STYLE_OVERRIDE=Fusion' | sudo tee -a /etc/environment >/dev/null
