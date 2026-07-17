@@ -63,7 +63,7 @@ sudo dnf install -y htop inxi ncdu btop util-linux bleachbit
 sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts gnome-shell-extension-common gnome-shell-extension-appindicator gnome-shell-extension-just-perfection gnome-shell-extension-user-theme gnome-shell-extension-apps-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-window-list gtk-murrine-engine mpd ncmpc firefox google-chrome-stable
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
 sudo dnf install -y ollama llama-cpp
-sudo dnf install -y docker-cli runc
+sudo dnf install -y docker-cli runc toolbox
 
 flatpak install -y flathub com.github.finefindus.eyedropper
 flatpak install -y flathub org.gtk.Gtk3theme.Adwaita-dark
