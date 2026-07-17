@@ -348,6 +348,14 @@ INDEXEOF
   .notification-banner, .notification-banner:hover { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
   .notification-banner .notification-button { color: #5c6a72 !important; }
   .workspace-background { background-color: #fdf6e3 !important; }
+  .workspace-switcher { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
+  .workspace-thumbnails { background-color: #fdf6e3 !important; }
+  .quick-settings { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
+  .quick-toggle, .quick-menu-toggle, .quick-toggle-has-menu { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
+  .quick-slider { background-color: #f4f0d9 !important; }
+  .app-well-app .overview-icon { color: #5c6a72 !important; }
+  .app-well-app.app-folder { background-color: #e6e2cc !important; }
+  .switcher-list { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -360,9 +368,20 @@ INDEXEOF
   .notification-banner, .notification-banner:hover { background-color: #343f44 !important; color: #d3c6aa !important; }
   .notification-banner .notification-button { color: #d3c6aa !important; }
   .workspace-background { background-color: #2d353b !important; }
+  .workspace-switcher { background-color: #2d353b !important; color: #d3c6aa !important; }
+  .workspace-thumbnails { background-color: #2d353b !important; }
+  .quick-settings { background-color: #2d353b !important; color: #d3c6aa !important; }
+  .quick-toggle, .quick-menu-toggle, .quick-toggle-has-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
+  .quick-slider { background-color: #343f44 !important; }
+  .app-well-app .overview-icon { color: #d3c6aa !important; }
+  .app-well-app.app-folder { background-color: #3d484d !important; }
+  .switcher-list { background-color: #2d353b !important; color: #d3c6aa !important; }
 }
 SHELLEOF
 } >"$SHELL_CSS"
+
+gnome-extensions enable user-theme 2>/dev/null || true
+gsettings set org.gnome.shell.extensions.user-theme name 'Everforest-Shell'
 
 ensure_everforest_terminal_profile() {
 	local name="$1"
@@ -396,6 +415,14 @@ ensure_everforest_terminal_profile() {
 	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/scrollbar-policy" "'never'"
 	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/cursor-shape" "'ibeam'"
 	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/font" "'Cascadia Code NF 12'"
+
+	# Add the new profile UUID to the profile list so it's discoverable
+	list=$(dconf read /org/gnome/terminal/legacy/profiles:/list 2>/dev/null)
+	if [ -z "$list" ] || [ "$list" = "@as []" ]; then
+		dconf write /org/gnome/terminal/legacy/profiles:/list "['$uuid']"
+	else
+		dconf write /org/gnome/terminal/legacy/profiles:/list "${list%]}, '$uuid']"
+	fi
 
 	echo "$uuid"
 }
