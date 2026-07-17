@@ -383,58 +383,6 @@ SHELLEOF
 gnome-extensions enable user-theme 2>/dev/null || true
 gsettings set org.gnome.shell.extensions.user-theme name 'Everforest-Shell'
 
-ensure_everforest_terminal_profile() {
-	local name="$1"
-	local palette="$2"
-	local bg="$3"
-	local fg="$4"
-	local uuid
-
-	# Check if profile with this name already exists
-	existing=$(dconf read /org/gnome/terminal/legacy/profiles:/list 2>/dev/null | tr -d '[]' | tr ',' '\n' | tr -d " '" | while read -r id; do
-		if [ -n "$id" ] && [ "$(dconf read "/org/gnome/terminal/legacy/profiles:/:$id/visible-name" 2>/dev/null)" = "'$name'" ]; then
-			echo "$id"
-			break
-		fi
-	done)
-
-	if [ -n "$existing" ]; then
-		echo "$existing"
-		return
-	fi
-
-	uuid=$(uuidgen)
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/visible-name" "'$name'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/palette" "$palette"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/background-color" "'$bg'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/foreground-color" "'$fg'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/bold-color" "'$fg'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/cursor-color" "'$fg'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/use-theme-colors" "false"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/bold-color-same-as-fg" "true"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/scrollbar-policy" "'never'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/cursor-shape" "'ibeam'"
-	dconf write "/org/gnome/terminal/legacy/profiles:/:$uuid/font" "'Cascadia Code NF 12'"
-
-	# Add the new profile UUID to the profile list so it's discoverable
-	list=$(dconf read /org/gnome/terminal/legacy/profiles:/list 2>/dev/null)
-	if [ -z "$list" ] || [ "$list" = "@as []" ]; then
-		dconf write /org/gnome/terminal/legacy/profiles:/list "['$uuid']"
-	else
-		dconf write /org/gnome/terminal/legacy/profiles:/list "${list%]}, '$uuid']"
-	fi
-
-	echo "$uuid"
-}
-
-DARK_PALETTE="['#475258', '#e67e80', '#a7c080', '#dbbc7f', '#7fbbb3', '#d699b6', '#83c092', '#d3c6aa', '#7a8478', '#e67e80', '#a7c080', '#dbbc7f', '#7fbbb3', '#d699b6', '#83c092', '#9da9a0']"
-LIGHT_PALETTE="['#5c6a72', '#f85552', '#8da101', '#dfa000', '#3a94c5', '#df69ba', '#35a77c', '#e6e2cc', '#a6b0a0', '#f85552', '#8da101', '#dfa000', '#3a94c5', '#df69ba', '#35a77c', '#829181']"
-
-DARK_ID=$(ensure_everforest_terminal_profile "Everforest Dark" "$DARK_PALETTE" "#2d353b" "#d3c6aa")
-ensure_everforest_terminal_profile "Everforest Light" "$LIGHT_PALETTE" "#fdf6e3" "#5c6a72" >/dev/null
-
-dconf write /org/gnome/terminal/legacy/profiles:/default "'$DARK_ID'"
-
 sudo flatpak override --filesystem=xdg-config/gtk-4.0
 sudo flatpak override --filesystem=xdg-config/gtk-3.0
 
