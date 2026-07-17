@@ -334,12 +334,18 @@ ShellTheme=Everforest-Shell
 INDEXEOF
 
 {
+	printf '%s\n' '@media (prefers-color-scheme: light) {'
 	gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
-		/org/gnome/shell/theme/gnome-shell.css
+		/org/gnome/shell/theme/gnome-shell-light.css
+	printf '%s\n' '}'
+	printf '%s\n' '@media (prefers-color-scheme: dark) {'
+	gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
+		/org/gnome/shell/theme/gnome-shell-dark.css
+	printf '%s\n' '}'
 	cat <<'SHELLEOF'
 /* Everforest Medium — Shell overrides */
 @media (prefers-color-scheme: light) {
-  #panel, .panel { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
+  #panel { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
   #panel .panel-button { color: #5c6a72 !important; }
   .panel-button .clock { color: #5c6a72 !important; }
   #dash, .dash-background { background-color: #f4f0d9 !important; }
@@ -351,15 +357,15 @@ INDEXEOF
   .workspace-switcher { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
   .workspace-thumbnails { background-color: #fdf6e3 !important; }
   .quick-settings { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
-  .quick-toggle, .quick-menu-toggle, .quick-toggle-has-menu { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
+  .quick-toggle, .quick-toggle-has-menu { background-color: #f4f0d9 !important; color: #5c6a72 !important; }
   .quick-slider { background-color: #f4f0d9 !important; }
-  .app-well-app .overview-icon { color: #5c6a72 !important; }
-  .app-well-app.app-folder { background-color: #e6e2cc !important; }
+  .overview-tile .overview-icon { color: #5c6a72 !important; }
+  .app-folder { background-color: #e6e2cc !important; }
   .switcher-list { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
 }
 
 @media (prefers-color-scheme: dark) {
-  #panel, .panel { background-color: #232a2e !important; color: #d3c6aa !important; }
+  #panel { background-color: #232a2e !important; color: #d3c6aa !important; }
   #panel .panel-button { color: #d3c6aa !important; }
   .panel-button .clock { color: #d3c6aa !important; }
   #dash, .dash-background { background-color: #232a2e !important; }
@@ -371,10 +377,10 @@ INDEXEOF
   .workspace-switcher { background-color: #2d353b !important; color: #d3c6aa !important; }
   .workspace-thumbnails { background-color: #2d353b !important; }
   .quick-settings { background-color: #2d353b !important; color: #d3c6aa !important; }
-  .quick-toggle, .quick-menu-toggle, .quick-toggle-has-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
+  .quick-toggle, .quick-toggle-has-menu { background-color: #343f44 !important; color: #d3c6aa !important; }
   .quick-slider { background-color: #343f44 !important; }
-  .app-well-app .overview-icon { color: #d3c6aa !important; }
-  .app-well-app.app-folder { background-color: #3d484d !important; }
+  .overview-tile .overview-icon { color: #d3c6aa !important; }
+  .app-folder { background-color: #3d484d !important; }
   .switcher-list { background-color: #2d353b !important; color: #d3c6aa !important; }
 }
 SHELLEOF
