@@ -333,10 +333,10 @@ Comment=Everforest Medium color scheme for GNOME Shell
 ShellTheme=Everforest-Shell
 INDEXEOF
 
-gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
-	/org/gnome/shell/theme/gnome-shell.css >"$SHELL_CSS"
-
-cat >>"$SHELL_CSS" <<'SHELLEOF'
+{
+	gresource extract /usr/share/gnome-shell/gnome-shell-theme.gresource \
+		/org/gnome/shell/theme/gnome-shell.css
+	cat <<'SHELLEOF'
 /* Everforest Medium — Shell overrides */
 @media (prefers-color-scheme: light) {
   #panel, .panel { background-color: #fdf6e3 !important; color: #5c6a72 !important; }
@@ -362,6 +362,7 @@ cat >>"$SHELL_CSS" <<'SHELLEOF'
   .workspace-background { background-color: #2d353b !important; }
 }
 SHELLEOF
+} >"$SHELL_CSS"
 
 ensure_everforest_terminal_profile() {
 	local name="$1"
