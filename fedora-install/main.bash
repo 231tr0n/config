@@ -59,7 +59,7 @@ sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf 
 sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
-sudo dnf install -y htop inxi ncdu btop util-linux
+sudo dnf install -y htop inxi ncdu btop util-linux bleachbit
 sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts gnome-shell-extension-common gnome-shell-extension-appindicator gnome-shell-extension-just-perfection gnome-shell-extension-user-theme gnome-shell-extension-apps-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-window-list gtk-murrine-engine mpd ncmpc firefox google-chrome-stable
 sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
 sudo dnf install -y ollama llama-cpp
