@@ -59,6 +59,7 @@ if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 fi
 
 sudo dnf update -y
+flatpak update -y
 
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch
 sudo dnf install -y go delve nodejs npm gcc make gdb meson java maven rustup
