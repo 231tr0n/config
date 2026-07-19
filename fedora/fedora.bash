@@ -234,4 +234,4 @@ gsettings set org.gnome.system.location enabled true
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
 
 gnome-extensions disable background-logo@fedorahosted.org
-gsettings set org.gnome.shell enabled-extensions "['panel-dim@oled-protect']"
+gnome-extensions enable panel-dim@oled-protect
