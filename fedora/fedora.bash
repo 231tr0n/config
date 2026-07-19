@@ -66,7 +66,7 @@ sudo dnf install -y go delve nodejs npm gcc make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
-sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable
+sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox
 
