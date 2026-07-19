@@ -230,7 +230,7 @@ gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
 gsettings set org.gnome.system.location enabled true
 
-gnome-extensions disable background-logo@fedorahosted.org
-gnome-extensions enable panel-dim@oled-protect
-
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
+
+gnome-extensions disable background-logo@fedorahosted.org
+gsettings set org.gnome.shell enabled-extensions "['panel-dim@oled-protect']"
