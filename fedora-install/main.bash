@@ -3,15 +3,20 @@
 set -xe
 
 DEFAULT_USERNAME=""
+SSH_PASSPHRASE=""
 
-while getopts 'u:h' opt; do
+while getopts 'u:s:h' opt; do
 	case "$opt" in
 	u)
 		DEFAULT_USERNAME="$OPTARG"
 		;;
+	s)
+		SSH_PASSPHRASE="$OPTARG"
+		;;
 	h | ?)
 		printf "Help\n
     -u: system username
+    -s: SSH key passphrase
     -h: print help
     \n"
 		exit
@@ -49,24 +54,25 @@ EOF
 	chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
 fi
 
-if [ ! -f "/home/$DEFAULT_USERNAME/.ssh/id_rsa" ]; then
-	ssh-keygen -t rsa
+if [ ! -f "$HOME/.ssh/id_rsa" ]; then
+	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
 
 sudo dnf update
 
-sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish bash fzf ripgrep fd-find git jq yq zoxide bat patch
-sudo dnf install -y go delve nodejs npm gcc gdb make meson java maven rustup
+sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch
+sudo dnf install -y go delve nodejs npm gcc gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
-sudo dnf install -y htop inxi ncdu btop util-linux bleachbit
-sudo dnf install -y glib2-devel grub2-breeze-theme xdg-desktop-portal xdg-desktop-portal-gnome gnome-tweaks gnome-extensions-app gnome-music plasma-breeze-common qadwaitadecorations-qt5 cascadia-code-nf-fonts cascadia-mono-nf-fonts gnome-shell-extension-common gnome-shell-extension-appindicator gnome-shell-extension-just-perfection gnome-shell-extension-user-theme gnome-shell-extension-apps-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-window-list gtk-murrine-engine mpd ncmpc firefox google-chrome-stable
-sudo dnf install -y --setopt=install_weak_deps=false plasma-integration
+sudo dnf install -y htop inxi ncdu btop telnet bleachbit
+sudo dnf install -y wl-clipboard gnome-tweaks cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable
 sudo dnf install -y ollama llama-cpp
-sudo dnf install -y docker-cli runc toolbox
+sudo dnf install -y docker-cli runc toolbox distrobox
 
 flatpak install -y flathub com.github.finefindus.eyedropper
-flatpak install -y flathub org.gtk.Gtk3theme.Adwaita-dark
+flatpak install -y flathub io.github.cmus.cmus
+flatpak install -y flathub org.telegram.desktop
+flatpak install -y flathub com.discordapp.Discord
 
 sudo dnf autoremove -y
 flatpak uninstall --unused -y
@@ -74,9 +80,9 @@ flatpak uninstall --unused -y
 rustup-init --profile complete -y
 sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript svelte-language-server
 
-[ "$SHELL" != "/usr/bin/fish" ] && chsh -s /usr/bin/fish
+sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 
-sudo usermod -aG docker "$USER"
+sudo usermod -aG docker "$DEFAULT_USERNAME"
 
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/nvim"
@@ -84,6 +90,73 @@ mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
+mkdir -p "$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect"
+
+cat >"$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect/extension.js" <<'EOF'
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+
+const MIN_BRIGHTNESS = 0x77;
+const MAX_BRIGHTNESS = 0xff;
+const INTERVAL = 1000;
+const STEP_DELTA = (MAX_BRIGHTNESS - MIN_BRIGHTNESS) / 720;
+
+export default class OledProtect extends Extension {
+  enable() {
+    this._brightness = MIN_BRIGHTNESS;
+    this._direction = 1;
+    this._apply();
+    this._timer = setTimeout(() => this._cycle(), INTERVAL);
+  }
+
+  disable() {
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+
+    for (let widget of Object.values(Main.panel.statusArea)) {
+      widget?.set_style?.("");
+    }
+  }
+
+  _cycle() {
+    this._brightness += this._direction * STEP_DELTA;
+    if (this._brightness >= MAX_BRIGHTNESS) {
+      this._brightness = MAX_BRIGHTNESS;
+      this._direction = -1;
+    } else if (this._brightness <= MIN_BRIGHTNESS) {
+      this._brightness = MIN_BRIGHTNESS;
+      this._direction = 1;
+    }
+    this._apply();
+    this._timer = setTimeout(() => this._cycle(), INTERVAL);
+  }
+
+  _apply() {
+    let level = Math.round(this._brightness);
+    let hex = `#${level.toString(16).padStart(2, "0").repeat(3)}`;
+    for (let widget of Object.values(Main.panel.statusArea)) {
+      widget?.set_style?.(`color: ${hex};`);
+    }
+    let activitiesBtn = Main.panel.statusArea.activities;
+    if (activitiesBtn?.first_child) {
+      for (let child of activitiesBtn.first_child.get_children()) {
+        if (child._dot) child._dot.set_style(`background-color: ${hex};`);
+      }
+    }
+  }
+}
+EOF
+
+cat >"$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect/metadata.json" <<'EOF'
+{
+	"name": "OLED Panel Protect",
+	"description": "Cycles panel text brightness to prevent OLED burn-in",
+	"uuid": "panel-dim@oled-protect",
+	"shell-version": ["50", "51"]
+}
+EOF
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
@@ -112,8 +185,6 @@ gsettings set org.gnome.Ptyxis inhibit-logout false
 gsettings set org.gnome.desktop.a11y always-show-universal-access-status true
 gsettings set org.gnome.desktop.a11y.interface show-status-shapes true
 gsettings set org.gnome.desktop.a11y.keyboard togglekeys-enable true
-gsettings set org.gnome.desktop.background color-shading-type 'solid'
-gsettings set org.gnome.desktop.background picture-options 'zoom'
 gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Pictures/background.png"
 gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Pictures/background.png"
 gsettings set org.gnome.desktop.background primary-color '#000000000000'
@@ -133,13 +204,10 @@ gsettings set org.gnome.desktop.interface monospace-font-name 'Cascadia Code NF 
 gsettings set org.gnome.desktop.interface overlay-scrolling false
 gsettings set org.gnome.desktop.interface show-battery-percentage true
 gsettings set org.gnome.desktop.privacy report-technical-problems true
-gsettings set org.gnome.desktop.screensaver color-shading-type 'solid'
-gsettings set org.gnome.desktop.screensaver picture-options 'zoom'
 gsettings set org.gnome.desktop.screensaver picture-uri "file://$HOME/Pictures/background.png"
 gsettings set org.gnome.desktop.screensaver primary-color '#000000000000'
 gsettings set org.gnome.desktop.screensaver secondary-color '#000000000000'
-gsettings set org.gnome.desktop.search-providers enabled "['org.gnome.Weather.desktop', 'com.github.finefindus.eyedropper.desktop']"
-gsettings set org.gnome.desktop.session idle-delay 120
+gsettings set org.gnome.desktop.session idle-delay 30
 gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Super>Tab']"
 gsettings set org.gnome.desktop.wm.keybindings switch-applications-backward "['<Shift><Super>Tab']"
 gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
@@ -152,40 +220,10 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-automatic false
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from 0.0
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to 0.0
-gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 3700
-gsettings set org.gnome.shell disabled-extensions "['window-list@gnome-shell-extensions.gcampax.github.com']"
-gsettings set org.gnome.shell enabled-extensions "['places-menu@gnome-shell-extensions.gcampax.github.com', 'launch-new-instance@gnome-shell-extensions.gcampax.github.com', 'apps-menu@gnome-shell-extensions.gcampax.github.com', 'just-perfection-desktop@just-perfection', 'appindicatorsupport@rgcjonas.gmail.com', 'user-theme@gnome-shell-extensions.gcampax.github.com']"
+gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 4500
+gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
+gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
-gsettings set org.gnome.shell last-selected-power-profile 'power-saver'
-gsettings set org.gnome.shell.extensions.appindicator compact-mode-enabled false
-gsettings set org.gnome.shell.extensions.just-perfection panel false
-gsettings set org.gnome.shell.extensions.just-perfection panel-in-overview true
-gsettings set org.gnome.shell.extensions.just-perfection support-notifier-type 0
-gsettings set org.gnome.shell.extensions.user-theme name ''
 gsettings set org.gnome.system.location enabled true
 
-SET_GDM="/usr/local/bin/set-gdm-wallpaper"
-sudo curl -sSLo "$SET_GDM" https://raw.githubusercontent.com/kem-a/gnome-gdm-wallpaper/main/set-gdm-wallpaper
-sudo chmod +x "$SET_GDM"
-sudo "$SET_GDM" -i "$HOME/Pictures/grub.png" -b 8 || true
-
-echo -e 'user-db:user\nsystem-db:gdm\nfile-db:/usr/share/gdm/greeter-dconf-defaults' | sudo tee /etc/dconf/profile/gdm >/dev/null
-echo -e '[org/gnome/desktop/interface]\naccent-color='\''green'\''' | sudo tee /etc/dconf/db/gdm.d/01-accent-color >/dev/null
-sudo dconf update
-
-sudo sed -i 's/^GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
-grep -qxF 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' /etc/default/grub ||
-	echo 'GRUB_THEME="/boot/grub2/themes/breeze/theme.txt"' | sudo tee -a /etc/default/grub >/dev/null
-sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-
-grep -qxF 'QT_QPA_PLATFORMTHEME=kde' /etc/environment || echo 'QT_QPA_PLATFORMTHEME=kde' | sudo tee -a /etc/environment >/dev/null
-grep -qxF 'QT_STYLE_OVERRIDE=Fusion' /etc/environment || echo 'QT_STYLE_OVERRIDE=Fusion' | sudo tee -a /etc/environment >/dev/null
-
-if [ ! -f "$HOME/.config/kdeglobals" ]; then
-	cat >"$HOME/.config/kdeglobals" <<'EOF'
-[General]
-widgetStyle=Fusion
-ColorScheme=BreezeDark
-AccentColor=Green
-EOF
-fi
+busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
