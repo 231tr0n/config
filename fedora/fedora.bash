@@ -51,7 +51,7 @@ post)
 	;;
 esac
 EOF
-	chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
+	sudo chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
 fi
 
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
