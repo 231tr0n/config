@@ -58,7 +58,7 @@ if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
 
-sudo dnf update
+sudo dnf update -y
 
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch
 sudo dnf install -y go delve nodejs npm gcc make gdb meson java maven rustup
