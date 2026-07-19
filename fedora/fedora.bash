@@ -65,7 +65,7 @@ sudo dnf install -y go delve nodejs npm gcc make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt golangci-lint gopls clang-format clang-tools-extra clangd
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
-sudo dnf install -y wl-clipboard gnome-tweaks cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable
+sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox
 
@@ -191,14 +191,16 @@ gsettings set org.gnome.desktop.background primary-color '#000000000000'
 gsettings set org.gnome.desktop.background secondary-color '#000000000000'
 gsettings set org.gnome.desktop.break-reminders selected-breaks "['eyesight']"
 gsettings set org.gnome.desktop.break-reminders.eyesight play-sound true
-gsettings set org.gnome.desktop.break-reminders.movement duration-seconds uint32 300
-gsettings set org.gnome.desktop.break-reminders.movement interval-seconds uint32 1800
+gsettings set org.gnome.desktop.break-reminders.movement duration-seconds 300
+gsettings set org.gnome.desktop.break-reminders.movement interval-seconds 1800
 gsettings set org.gnome.desktop.break-reminders.movement play-sound true
 gsettings set org.gnome.desktop.calendar show-weekdate true
 gsettings set org.gnome.desktop.interface accent-color 'green'
+gsettings set org.gnome.desktop.interface clock-format '24h'
 gsettings set org.gnome.desktop.interface clock-show-seconds true
 gsettings set org.gnome.desktop.interface clock-show-weekday true
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.interface locate-pointer true
 gsettings set org.gnome.desktop.interface monospace-font-name 'Cascadia Code NF 12'
 gsettings set org.gnome.desktop.interface overlay-scrolling false
@@ -212,8 +214,10 @@ gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Super>Tab
 gsettings set org.gnome.desktop.wm.keybindings switch-applications-backward "['<Shift><Super>Tab']"
 gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
 gsettings set org.gnome.desktop.wm.keybindings switch-windows-backward "['<Shift><Alt>Tab']"
+gsettings set org.gnome.desktop.wm.preferences num-workspaces 9
 gsettings set org.gnome.desktop.wm.preferences visual-bell true
 gsettings set org.gnome.desktop.wm.preferences visual-bell-type 'frame-flash'
+gsettings set org.gnome.mutter dynamic-workspaces false
 gsettings set org.gnome.nautilus.list-view use-tree-view true
 gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
@@ -225,5 +229,8 @@ gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
 gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
 gsettings set org.gnome.system.location enabled true
+
+gnome-extensions disable background-logo@fedorahosted.org
+gnome-extensions enable panel-dim@oled-protect
 
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
