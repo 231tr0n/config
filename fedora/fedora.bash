@@ -34,8 +34,7 @@ if [ -z "$DEFAULT_USERNAME" ]; then
 	exit 1
 fi
 
-if [ ! -f "/usr/lib/systemd/system-sleep/iwlwifi.bash" ]; then
-	sudo tee /usr/lib/systemd/system-sleep/iwlwifi.bash >/dev/null <<'SHSCRIPT'
+sudo tee /usr/lib/systemd/system-sleep/iwlwifi.bash >/dev/null <<'SHSCRIPT'
 #!/bin/bash
 
 WIFI_PCI=$(grep -l iwlmld /sys/bus/pci/devices/*/driver 2>/dev/null | head -1)
@@ -61,15 +60,12 @@ post)
 	;;
 esac
 SHSCRIPT
-	sudo chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
-fi
+sudo chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
 
-if [ ! -f "/etc/udev/rules.d/80-disable-wifi-d3cold.rules" ]; then
-	sudo tee /etc/udev/rules.d/80-disable-wifi-d3cold.rules >/dev/null <<'SHSCRIPT'
+sudo tee /etc/udev/rules.d/80-disable-wifi-d3cold.rules >/dev/null <<'SHSCRIPT'
 ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x272b", ATTR{d3cold_allowed}="0"
 SHSCRIPT
-	sudo udevadm control --reload
-fi
+sudo udevadm control --reload
 
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
