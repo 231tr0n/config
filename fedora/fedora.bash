@@ -218,7 +218,6 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.interface locate-pointer true
 gsettings set org.gnome.desktop.interface monospace-font-name 'Cascadia Code NF 12'
 gsettings set org.gnome.desktop.interface overlay-scrolling false
-gsettings set org.gnome.desktop.interface scaling-factor 2
 gsettings set org.gnome.desktop.interface show-battery-percentage true
 gsettings set org.gnome.desktop.privacy report-technical-problems true
 gsettings set org.gnome.desktop.screensaver picture-uri "file://$HOME/Pictures/background.png"
@@ -246,6 +245,8 @@ gsettings set org.gnome.shell favorite-apps "@as []"
 gsettings set org.gnome.system.location enabled true
 
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
+
+gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
 gnome-extensions disable background-logo@fedorahosted.org
 gnome-extensions enable panel-dim@oled-protect
