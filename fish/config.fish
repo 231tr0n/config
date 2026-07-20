@@ -46,6 +46,9 @@ set -gx PATH $PATH $GOPATH/bin
 # Additional user bin path variables
 set -gx PATH $PATH $HOME/.local/bin
 
+# Additional luarocks bin path variables
+set -gx PATH $PATH $HOME/.luarocks/bin
+
 # fish_config theme choose Nord
 # set -g fish_term24bit 0
 

@@ -92,7 +92,12 @@ sudo dnf autoremove -y
 flatpak uninstall --unused -y
 
 rustup-init --profile complete -y
+
 sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript svelte-language-server
+
+luarocks install --local luacheck
+
+cargo install stylua
 
 sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 
