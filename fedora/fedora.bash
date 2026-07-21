@@ -82,7 +82,7 @@ sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv
 sudo dnf install -y ollama llama-cpp
-sudo dnf install -y docker-cli runc toolbox distrobox
+sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
 flatpak install -y flathub com.github.finefindus.eyedropper
 flatpak install -y flathub io.github.cmus.cmus
