@@ -78,6 +78,7 @@ sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgr
 sudo dnf install -y go luajit delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
+sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv
@@ -93,12 +94,35 @@ sudo dnf autoremove -y
 flatpak uninstall --unused -y
 
 rustup-init --profile complete -y
+rustup update
 
-sudo npm install -g opencode-ai prettier eslint typescript-language-server typescript svelte-language-server
+sudo npm install -g opencode-ai@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 
 luarocks install --local luacheck
 
-cargo install stylua
+cargo install stylua cargo-update
+cargo install-update -a
+
+mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle}
+
+LUA_LS_VER=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')
+rm -rf "$HOME/.local/share/lua-language-server"
+mkdir -p "$HOME/.local/share/lua-language-server"
+curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" | tar xz -C "$HOME/.local/share/lua-language-server"
+ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
+
+GJF_VER=$(curl -sL https://api.github.com/repos/google/google-java-format/releases/latest | jq -r '.tag_name' | cut -c2-)
+rm -f "$HOME/.local/share/google-java-format/"*.jar
+curl -sL "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" -o "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
+printf '#!/bin/bash\nexec java -jar %s "$@"' "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar" >"$HOME/.local/bin/google-java-format"
+chmod +x "$HOME/.local/bin/google-java-format"
+
+CS_TAG=$(curl -sL https://api.github.com/repos/checkstyle/checkstyle/releases/latest | jq -r '.tag_name')
+CS_VER=${CS_TAG#checkstyle-}
+rm -f "$HOME/.local/share/checkstyle/"*.jar
+curl -sL "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" -o "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
+printf '#!/bin/bash\nexec java -jar %s "$@"' "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar" >"$HOME/.local/bin/checkstyle"
+chmod +x "$HOME/.local/bin/checkstyle"
 
 sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 
