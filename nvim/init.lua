@@ -1564,6 +1564,7 @@ MiniMisc.safely("later", function()
 		sh = { "shellcheck" },
 		sql = { "sqlfluff" },
 		-- svelte = { "eslint" },
+		tex = { "chktex" },
 		-- tsx = { "eslint" },
 		-- typescript = { "eslint" },
 		-- vue = { "eslint" },
