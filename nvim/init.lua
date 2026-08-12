@@ -1576,6 +1576,7 @@ MiniMisc.safely("later", function()
 		formatters_by_ft = {
 			c = { "clang-format" },
 			css = { "prettier" },
+			dockerfile = { "dockerfmt" },
 			fish = { "fish_indent" },
 			go = { "gofmt", "gofumpt" },
 			groovy = { "npm-groovy-lint" },
