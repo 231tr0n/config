@@ -103,6 +103,10 @@ luarocks install --local luacheck
 cargo install stylua cargo-update
 cargo install-update -a
 
+go install github.com/nao1215/gup@latest
+go install github.com/reteps/dockerfmt@latest
+gup update
+
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle}
 
 LUA_LS_VER=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')

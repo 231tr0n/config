@@ -40,8 +40,7 @@ if status is-interactive
 end
 
 # Go path variables
-set -gx GOPATH $HOME/go
-set -gx PATH $PATH $GOPATH/bin
+set -gx PATH $PATH $HOME/go/bin
 
 # Additional user bin path variables
 set -gx PATH $PATH $HOME/.local/bin
