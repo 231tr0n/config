@@ -34,39 +34,6 @@ if [ -z "$DEFAULT_USERNAME" ]; then
 	exit 1
 fi
 
-sudo tee /usr/lib/systemd/system-sleep/iwlwifi.bash >/dev/null <<'SHSCRIPT'
-#!/bin/bash
-
-WIFI_PCI=$(grep -l iwlmld /sys/bus/pci/devices/*/driver 2>/dev/null | head -1)
-WIFI_PCI=${WIFI_PCI%/driver}
-WIFI_PCI=${WIFI_PCI##*/}
-
-d3cold_off() {
-	[ -n "$WIFI_PCI" ] && [ -w "/sys/bus/pci/devices/$WIFI_PCI/d3cold_allowed" ] && echo 0 > "/sys/bus/pci/devices/$WIFI_PCI/d3cold_allowed"
-}
-
-case $1 in
-pre)
-	d3cold_off
-	rfkill block wifi
-	modprobe -r iwlmld iwlwifi 2>/dev/null
-	;;
-post)
-	d3cold_off
-	sleep 2
-	modprobe iwlwifi
-	modprobe iwlmld
-	rfkill unblock wifi
-	;;
-esac
-SHSCRIPT
-sudo chmod +x /usr/lib/systemd/system-sleep/iwlwifi.bash
-
-sudo tee /etc/udev/rules.d/80-disable-wifi-d3cold.rules >/dev/null <<'SHSCRIPT'
-ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x272b", ATTR{d3cold_allowed}="0"
-SHSCRIPT
-sudo udevadm control --reload
-
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
