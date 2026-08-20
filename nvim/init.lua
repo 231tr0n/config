@@ -1588,6 +1588,7 @@ MiniMisc.safely("later", function()
 			jsonc = { "prettier" },
 			jsx = { "prettier" },
 			lua = { "stylua" },
+			make = { "bake" },
 			markdown = { "prettier" },
 			python = { "black" },
 			scss = { "prettier" },
