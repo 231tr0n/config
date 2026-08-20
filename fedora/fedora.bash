@@ -77,6 +77,16 @@ gup update
 pipx install mbake
 pipx upgrade-all
 
+mbake init --force
+sed -i 's/auto_insert_phony_declarations = false/auto_insert_phony_declarations = true/' "$HOME/.bake.toml"
+sed -i 's/group_phony_declarations = false/group_phony_declarations = true/' "$HOME/.bake.toml"
+sed -i 's/phony_at_top = false/phony_at_top = true/' "$HOME/.bake.toml"
+sed -i 's/max_consecutive_empty_lines = 2/max_consecutive_empty_lines = 1/' "$HOME/.bake.toml"
+sed -i 's/indent_nested_conditionals = false/indent_nested_conditionals = true/' "$HOME/.bake.toml"
+sed -i 's/tab_width = 2/tab_width = 4/' "$HOME/.bake.toml"
+sed -i 's/align_variable_assignments = false/align_variable_assignments = true/' "$HOME/.bake.toml"
+sed -i 's/align_across_comments = false/align_across_comments = true/' "$HOME/.bake.toml"
+
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle}
 
 LUA_LS_VER=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')
