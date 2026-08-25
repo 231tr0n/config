@@ -38,9 +38,6 @@ if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
 
-sudo dnf update -y
-flatpak update -y
-
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch ctags
 sudo dnf install -y go luajit delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
@@ -48,14 +45,18 @@ sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wra
 sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
-sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv celluloid
+sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app gnome-shell-extension-user-theme gnome-shell-extension-app-indicator cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv celluloid
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
+
+sudo dnf update -y
 
 flatpak install -y flathub com.github.finefindus.eyedropper
 flatpak install -y flathub io.github.cmus.cmus
 flatpak install -y flathub org.telegram.desktop
 flatpak install -y flathub com.discordapp.Discord
+
+flatpak update -y
 
 sudo dnf autoremove -y
 flatpak uninstall --unused -y
@@ -264,4 +265,7 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
 gnome-extensions disable background-logo@fedorahosted.org
+gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
+gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
+gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable panel-dim@oled-protect
