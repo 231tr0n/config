@@ -182,6 +182,7 @@ MiniMisc.safely("now", function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
+	-- vim.o.statuscolumn = "%s%l%C "
 	if vim.fn.has("nvim-0.12") == 1 then
 		vim.cmd("packadd cfilter")
 		vim.cmd("packadd justify")
@@ -232,7 +233,6 @@ MiniMisc.safely("now", function()
 	vim.o.showmode = true
 	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
-	vim.o.statuscolumn = "%s%l%C "
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
 	vim.o.termguicolors = true
@@ -610,6 +610,7 @@ MiniMisc.safely("now", function()
 			require("mini.starter").sections.pick(),
 		},
 	})
+	require("mini.statuscolumn").setup()
 	require("mini.statusline").setup({
 		content = {
 			active = function()
