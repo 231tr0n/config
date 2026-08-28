@@ -182,6 +182,7 @@ MiniMisc.safely("now", function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
+	-- vim.o.signcolumn = "yes:1"
 	-- vim.o.statuscolumn = "%s%l%C "
 	if vim.fn.has("nvim-0.12") == 1 then
 		vim.cmd("packadd cfilter")
@@ -231,7 +232,6 @@ MiniMisc.safely("now", function()
 	vim.o.showcmdloc = "statusline"
 	vim.o.showmatch = true
 	vim.o.showmode = true
-	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
@@ -1226,15 +1226,8 @@ MiniMisc.safely("now", function()
 					require("dap.ext.autocompl").attach()
 				end
 				if vim.bo[args.buf].filetype == "git" or vim.bo[args.buf].filetype == "diff" then
-					vim.wo.signcolumn = "no"
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-				elseif vim.bo[args.buf].filetype == "query" and vim.bo[args.buf].buftype == "nofile" then
-					vim.wo.signcolumn = "no"
-				else
-					vim.wo.foldcolumn = "0"
-					vim.wo.signcolumn = "no"
-					vim.wo.statuscolumn = ""
 				end
 			end
 			local buftype = vim.bo[args.buf].buftype
@@ -1310,21 +1303,6 @@ MiniMisc.safely("now", function()
 		callback = function()
 			MiniTrailspace.trim()
 			MiniTrailspace.trim_last_lines()
-		end,
-	})
-	vim.api.nvim_create_autocmd("CmdwinEnter", {
-		callback = function()
-			vim.wo.number = false
-			vim.wo.foldcolumn = "0"
-			vim.wo.signcolumn = "no"
-		end,
-	})
-	vim.api.nvim_create_autocmd("TextYankPost", {
-		callback = function()
-			vim.hl.on_yank({
-				timeout = 1000,
-				on_macro = true,
-			})
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePost", {
