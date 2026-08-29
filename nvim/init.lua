@@ -182,7 +182,6 @@ MiniMisc.safely("now", function()
 	-- vim.o.colorcolumn = "150"
 	-- vim.o.expandtab = true
 	-- vim.o.relativenumber = true
-	-- vim.o.signcolumn = "yes:1"
 	-- vim.o.statuscolumn = "%s%l%C "
 	if vim.fn.has("nvim-0.12") == 1 then
 		vim.cmd("packadd cfilter")
@@ -232,6 +231,7 @@ MiniMisc.safely("now", function()
 	vim.o.showcmdloc = "statusline"
 	vim.o.showmatch = true
 	vim.o.showmode = true
+	vim.o.signcolumn = "yes:1"
 	vim.o.smartcase = true
 	vim.o.synmaxcol = 10000
 	vim.o.tabstop = 2
