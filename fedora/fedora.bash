@@ -114,6 +114,9 @@ sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 sudo usermod -aG docker "$DEFAULT_USERNAME"
 
 mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.config/environment.d"
+mkdir -p "$HOME/.config/gtk-3.0"
+mkdir -p "$HOME/.config/gtk-4.0"
 mkdir -p "$HOME/.config/nvim"
 mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
@@ -185,6 +188,20 @@ cat >"$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect/metadata.
 	"uuid": "panel-dim@oled-protect",
 	"shell-version": ["50", "51"]
 }
+EOF
+
+cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
+QT_QPA_PLATFORMTHEME=gtk3
+EOF
+
+cat >"$HOME/.config/gtk-3.0/settings.ini" <<'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=1
+EOF
+
+cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=1
 EOF
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
