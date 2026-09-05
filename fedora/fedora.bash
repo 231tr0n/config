@@ -46,7 +46,7 @@ sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable
-sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-apps-menu gnome-shell-extension-drive-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-status-icons gnome-shell-extension-system-monitor gnome-shell-extension-user-theme gnome-shell-extension-appindicator
+sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-apps-menu gnome-shell-extension-drive-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-status-icons gnome-shell-extension-user-theme gnome-shell-extension-appindicator
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
@@ -229,6 +229,7 @@ fi
 
 gsettings set org.gnome.Ptyxis enable-a11y true
 gsettings set org.gnome.Ptyxis inhibit-logout false
+gsettings set org.gnome.desktop.a11y always-show-universal-access-status true
 gsettings set org.gnome.desktop.a11y.interface show-status-shapes true
 gsettings set org.gnome.desktop.a11y.keyboard togglekeys-enable true
 gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Pictures/background.png"
@@ -281,20 +282,14 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
+gnome-extensions disable background-logo@fedorahosted.org
 gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
 gnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable background-logo@fedorahosted.org
 gnome-extensions enable drive-menu@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable panel-dim@oled-protect
 gnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable status-icons@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable system-monitor@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
 
-gsettings set org.fedorahosted.background-logo-extension logo-always-visible true
-gsettings set org.fedorahosted.background-logo-extension logo-border 100
-gsettings set org.fedorahosted.background-logo-extension logo-file "$HOME/Pictures/background.png"
-gsettings set org.fedorahosted.background-logo-extension logo-file-dark "$HOME/Pictures/background.png"
-gsettings set org.fedorahosted.background-logo-extension logo-size 15.0
 gsettings set org.gnome.shell.extensions.appindicator tray-pos 'left'
