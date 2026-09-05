@@ -45,7 +45,7 @@ sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wra
 sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
-sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app gnome-shell-extension-user-theme gnome-shell-extension-app-indicator cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv celluloid
+sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app gnome-shell-extension-user-theme gnome-shell-extension-appindicator cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable mpv celluloid
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
