@@ -291,5 +291,3 @@ gnome-extensions enable panel-dim@oled-protect
 gnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable status-icons@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
-
-gsettings set org.gnome.shell.extensions.appindicator tray-pos 'left'
