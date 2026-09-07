@@ -71,9 +71,10 @@ rustup update
 
 sudo npm install -g opencode-ai@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 
-luarocks install --local luacheck
+luarocks install --local --force https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec
 
-cargo install stylua cargo-update
+cargo install cargo-update
+cargo install stylua --features luajit
 cargo install-update -a
 
 go install github.com/nao1215/gup@latest
