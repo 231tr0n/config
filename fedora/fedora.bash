@@ -154,7 +154,7 @@ cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
 	"accent-tabs": true
 }
 EOF
-nohup flatpak run io.github.swordpuffin.rewaita &
+nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
