@@ -218,20 +218,8 @@ cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
 	"light-theme": "Everforest 🌲.css",
 	"dark-theme": "Everforest 🌲.css",
 	"window-controls": "colored",
-	"modify-gtk3-theme": true,
-	"modify-gnome-shell": true,
-	"run-in-background": true,
-	"transparency": false,
-	"window": false,
 	"sharp": true,
-	"accent-fg": false,
-	"accent-tabs": true,
-	"firefox-theme": false,
-	"light-text": false,
-	"dark-panel": false,
-	"trans-panel": false,
-	"no-pills": false,
-	"accent": "'blue'"
+	"accent-tabs": true
 }
 EOF
 
