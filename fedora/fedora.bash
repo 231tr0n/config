@@ -294,6 +294,7 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 45
 gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
 gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
+gsettings set org.gnome.shell.extensions.user-theme name 'rewaita'
 gsettings set org.gnome.system.location enabled true
 
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
