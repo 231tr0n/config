@@ -50,7 +50,7 @@ sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable brave-browser
-sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-apps-menu gnome-shell-extension-drive-menu gnome-shell-extension-launch-new-instance gnome-shell-extension-places-menu gnome-shell-extension-status-icons gnome-shell-extension-user-theme gnome-shell-extension-appindicator
+sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
@@ -288,11 +288,6 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
 gnome-extensions disable background-logo@fedorahosted.org
-gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
-gnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable drive-menu@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable panel-dim@oled-protect
-gnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable status-icons@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
