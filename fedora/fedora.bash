@@ -56,10 +56,11 @@ sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
 sudo dnf update -y
 
+flatpak install -y flathub com.discordapp.Discord
 flatpak install -y flathub com.github.finefindus.eyedropper
 flatpak install -y flathub io.github.cmus.cmus
+flatpak install -y flathub io.github.swordpuffin.rewaita
 flatpak install -y flathub org.telegram.desktop
-flatpak install -y flathub com.discordapp.Discord
 
 flatpak update -y
 
@@ -208,6 +209,30 @@ EOF
 cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 [Settings]
 gtk-application-prefer-dark-theme=1
+EOF
+
+flatpak run io.github.swordpuffin.rewaita --theme=everforest
+mkdir -p "$HOME/.var/app/io.github.swordpuffin.rewaita/data"
+cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
+{
+	"light-theme": "Everforest 🌲.css",
+	"dark-theme": "Everforest 🌲.css",
+	"window-controls": "colored",
+	"modify-gtk3-theme": true,
+	"modify-gnome-shell": true,
+	"run-in-background": true,
+	"transparency": false,
+	"window": false,
+	"sharp": true,
+	"accent-fg": false,
+	"accent-tabs": true,
+	"firefox-theme": false,
+	"light-text": false,
+	"dark-panel": false,
+	"trans-panel": false,
+	"no-pills": false,
+	"accent": "'blue'"
+}
 EOF
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
