@@ -40,7 +40,7 @@ fi
 
 sudo dnf install -y dnf-plugins-core
 
-sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo --overwrite
 
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch ctags
 sudo dnf install -y go luajit delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
@@ -129,73 +129,6 @@ mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
-mkdir -p "$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect"
-
-cat >"$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect/extension.js" <<'EOF'
-import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
-import * as Main from "resource:///org/gnome/shell/ui/main.js";
-
-const MIN_BRIGHTNESS = 0x77;
-const MAX_BRIGHTNESS = 0xff;
-const INTERVAL = 1000;
-const STEP_DELTA = (MAX_BRIGHTNESS - MIN_BRIGHTNESS) / 720;
-
-export default class OledProtect extends Extension {
-  enable() {
-    this._brightness = MIN_BRIGHTNESS;
-    this._direction = 1;
-    this._apply();
-    this._timer = setTimeout(() => this._cycle(), INTERVAL);
-  }
-
-  disable() {
-    if (this._timer) {
-      clearTimeout(this._timer);
-      this._timer = null;
-    }
-
-    for (let widget of Object.values(Main.panel.statusArea)) {
-      widget?.set_style?.("");
-    }
-  }
-
-  _cycle() {
-    this._brightness += this._direction * STEP_DELTA;
-    if (this._brightness >= MAX_BRIGHTNESS) {
-      this._brightness = MAX_BRIGHTNESS;
-      this._direction = -1;
-    } else if (this._brightness <= MIN_BRIGHTNESS) {
-      this._brightness = MIN_BRIGHTNESS;
-      this._direction = 1;
-    }
-    this._apply();
-    this._timer = setTimeout(() => this._cycle(), INTERVAL);
-  }
-
-  _apply() {
-    let level = Math.round(this._brightness);
-    let hex = `#${level.toString(16).padStart(2, "0").repeat(3)}`;
-    for (let widget of Object.values(Main.panel.statusArea)) {
-      widget?.set_style?.(`color: ${hex};`);
-    }
-    let activitiesBtn = Main.panel.statusArea.activities;
-    if (activitiesBtn?.first_child) {
-      for (let child of activitiesBtn.first_child.get_children()) {
-        if (child._dot) child._dot.set_style(`background-color: ${hex};`);
-      }
-    }
-  }
-}
-EOF
-
-cat >"$HOME/.local/share/gnome-shell/extensions/panel-dim@oled-protect/metadata.json" <<'EOF'
-{
-	"name": "OLED Panel Protect",
-	"description": "Cycles panel text brightness to prevent OLED burn-in",
-	"uuid": "panel-dim@oled-protect",
-	"shell-version": ["50", "51"]
-}
-EOF
 
 cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
 QT_QPA_PLATFORMTHEME=gtk3
@@ -211,7 +144,6 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 gtk-application-prefer-dark-theme=1
 EOF
 
-flatpak run io.github.swordpuffin.rewaita --theme=everforest
 mkdir -p "$HOME/.var/app/io.github.swordpuffin.rewaita/data"
 cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
 {
@@ -222,6 +154,7 @@ cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
 	"accent-tabs": true
 }
 EOF
+nohup flatpak run io.github.swordpuffin.rewaita &
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
 curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
@@ -303,5 +236,4 @@ gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary
 
 gnome-extensions disable background-logo@fedorahosted.org
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable panel-dim@oled-protect
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
