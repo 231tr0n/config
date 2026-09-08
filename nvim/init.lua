@@ -1866,36 +1866,68 @@ MiniMisc.safely("later", function()
 			vim.api.nvim_buf_clear_namespace(0, diff_highlight_namespace, 0, -1)
 			return
 		end
+		local function utf8_chars(str)
+			local n = vim.fn.strchars(str)
+			local i = 0
+			return function()
+				if i < n then
+					local ch = vim.fn.strcharpart(str, i, 1)
+					i = i + 1
+					return ch
+				end
+			end
+		end
+		local function char_count(str)
+			return vim.fn.strchars(str)
+		end
 		local function apply_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
 			if diff_lines ~= 0 then
 				for i = 1, #changes do
 					if changes[i].char_count >= diff_start then
 						local cur_change_index = i
-						local col = diff_start - (changes[i].char_count - #changes[i].content) - 1
+						local prev_chars = changes[i].char_count - changes[i].content_chars
+						local char_offset = diff_start - prev_chars - 1
 						local remaining = diff_lines
 						while remaining > 0 and cur_change_index <= #changes do
 							local cur_line = changes[cur_change_index].line
-							local line_len = #changes[cur_change_index].content
-							local end_col = col + remaining
-							if end_col > line_len then
-								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col + 1, {
-									end_row = cur_line - 1,
-									end_col = line_len + 1,
-									hl_mode = "blend",
-									hl_group = highlight,
-									priority = priority,
-								})
-								remaining = remaining - (line_len - col)
-								col = 0
+							local content = changes[cur_change_index].content
+							local content_chars = changes[cur_change_index].content_chars
+							local chars_available = content_chars - char_offset
+							if remaining >= chars_available then
+								local start_byte = vim.fn.byteidx(content, char_offset)
+								local end_byte = #content
+								vim.api.nvim_buf_set_extmark(
+									0,
+									diff_highlight_namespace,
+									cur_line - 1,
+									start_byte + 1,
+									{
+										end_row = cur_line - 1,
+										end_col = end_byte + 1,
+										hl_mode = "blend",
+										hl_group = highlight,
+										priority = priority,
+									}
+								)
+								remaining = remaining - chars_available
+								char_offset = 0
 								cur_change_index = cur_change_index + 1
 							else
-								vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, cur_line - 1, col + 1, {
-									end_row = cur_line - 1,
-									end_col = end_col + 1,
-									hl_mode = "blend",
-									hl_group = highlight,
-									priority = priority,
-								})
+								local start_byte = vim.fn.byteidx(content, char_offset)
+								local end_byte = vim.fn.byteidx(content, char_offset + remaining)
+								vim.api.nvim_buf_set_extmark(
+									0,
+									diff_highlight_namespace,
+									cur_line - 1,
+									start_byte + 1,
+									{
+										end_row = cur_line - 1,
+										end_col = end_byte + 1,
+										hl_mode = "blend",
+										hl_group = highlight,
+										priority = priority,
+									}
+								)
 								remaining = 0
 							end
 						end
@@ -1916,33 +1948,35 @@ MiniMisc.safely("later", function()
 				while i <= #lines and lines[i]:sub(1, 5) ~= "index" do
 					if lines[i]:sub(1, 1) == "-" then
 						local content = lines[i]:sub(2)
-						minus_content_char_count = minus_content_char_count + #content
-						local minus_change = {
+						local cc = char_count(content)
+						minus_content_char_count = minus_content_char_count + cc
+						table.insert(minus, {
 							line = i,
 							content = content,
 							char_count = minus_content_char_count,
-						}
-						table.insert(minus, minus_change)
+							content_chars = cc,
+						})
 					elseif lines[i]:sub(1, 1) == "+" then
 						local content = lines[i]:sub(2)
-						plus_content_char_count = plus_content_char_count + #content
-						local plus_change = {
+						local cc = char_count(content)
+						plus_content_char_count = plus_content_char_count + cc
+						table.insert(plus, {
 							line = i,
 							content = content,
 							char_count = plus_content_char_count,
-						}
-						table.insert(plus, plus_change)
+							content_chars = cc,
+						})
 					else
 						if #minus ~= 0 and #plus ~= 0 then
 							local minus_string = ""
 							local plus_string = ""
 							for _, minus_change in ipairs(minus) do
-								for char in minus_change.content:gmatch(".") do
+								for char in utf8_chars(minus_change.content) do
 									minus_string = minus_string .. char .. "\n"
 								end
 							end
 							for _, plus_change in ipairs(plus) do
-								for char in plus_change.content:gmatch(".") do
+								for char in utf8_chars(plus_change.content) do
 									plus_string = plus_string .. char .. "\n"
 								end
 							end
