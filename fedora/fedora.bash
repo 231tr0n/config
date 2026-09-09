@@ -50,7 +50,7 @@ sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable brave-browser
-sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme
+sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 
@@ -144,16 +144,6 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 gtk-application-prefer-dark-theme=1
 EOF
 
-mkdir -p "$HOME/.var/app/io.github.swordpuffin.rewaita/data"
-cat >"$HOME/.var/app/io.github.swordpuffin.rewaita/data/prefs.json" <<'EOF'
-{
-	"light-theme": "Everforest 🌲.css",
-	"dark-theme": "Everforest 🌲.css",
-	"window-controls": "colored",
-	"sharp": true,
-	"accent-tabs": true
-}
-EOF
 nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
@@ -198,7 +188,7 @@ gsettings set org.gnome.desktop.interface clock-format '24h'
 gsettings set org.gnome.desktop.interface clock-show-seconds true
 gsettings set org.gnome.desktop.interface clock-show-weekday true
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-gsettings set org.gnome.desktop.interface enable-hot-corners false
+gsettings set org.gnome.desktop.interface enable-hot-corners true
 gsettings set org.gnome.desktop.interface locate-pointer true
 gsettings set org.gnome.desktop.interface monospace-font-name 'Cascadia Code NF 12'
 gsettings set org.gnome.desktop.interface overlay-scrolling false
@@ -227,6 +217,8 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 45
 gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
 gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
+gsettings set org.gnome.shell.extensions.just-perfection panel false
+gsettings set org.gnome.shell.extensions.just-perfection panel-in-overview true
 gsettings set org.gnome.shell.extensions.user-theme name 'rewaita'
 gsettings set org.gnome.system.location enabled true
 
@@ -237,3 +229,4 @@ gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary
 gnome-extensions disable background-logo@fedorahosted.org
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
+gnome-extensions enable just-perfection-desktop@just-perfection
