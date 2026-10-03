@@ -53,6 +53,7 @@ sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
 sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
+sudo dnf install -y nginx haproxy
 
 sudo dnf update -y
 
