@@ -80,6 +80,7 @@ cargo install-update -a
 
 go install github.com/nao1215/gup@latest
 go install github.com/reteps/dockerfmt@latest
+go install sigs.k8s.io/yaml/yamlfmt@latest
 gup update
 
 pipx install mbake
