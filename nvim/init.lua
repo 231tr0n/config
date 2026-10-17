@@ -1,8 +1,8 @@
 -- Globals declaration
 -- luacheck: globals vim
--- luacheck: globals G Unmap Map Vscode Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
+-- luacheck: globals G Unmap Map Tmap Cmap Nmap Vmap Imap Smap Xmap Hi
 -- luacheck: globals MiniPick MiniBracketed MiniIcons MiniMisc MiniCompletion MiniTrailspace
--- luacheck: globals MiniDeps MiniMap MiniInput MiniStatusline MiniVisits MiniSnippets MiniExtra MiniFiles
+-- luacheck: globals MiniMap MiniStatusline MiniSnippets MiniExtra MiniFiles
 
 -- Vim pack mini.misc setup
 vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" })
@@ -14,9 +14,7 @@ Unmap = function(modes, suffix, opts)
 end
 Map = function(modes, suffix, rhs, desc, opts)
 	opts = opts or {}
-	if not opts.silent then
-		opts.silent = true
-	end
+	opts.silent = opts.silent ~= false
 	opts.desc = desc
 	vim.keymap.set(modes, suffix, rhs, opts)
 end
@@ -45,44 +43,32 @@ Hi = function(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- Global variables and functions declared and used
+-- Global state
 MiniMisc.safely("now", function()
 	G = {
-		keys = {},
-		te_win = nil,
-		te_float_win = nil,
+		recent_keys = {},
+		terminal_win = nil,
+		float_terminal_win = nil,
 		offset_encoding = "utf-16",
 		lsp_get_client = function(name, bufnr, all)
-			local buf = nil
-			local opts = {}
-			if name then
-				opts.name = name
-			end
-			if bufnr then
-				opts.bufnr = buf
-			end
-			local clients = vim.lsp.get_clients(opts)
+			local clients = vim.lsp.get_clients({ name = name, bufnr = bufnr })
 			if #clients == 0 then
-				vim.notify("No " .. name .. " client found", vim.log.levels.WARN)
+				vim.notify(("%s client not found"):format(name or "LSP"), vim.log.levels.WARN)
 				return
 			end
-			if all then
-				return clients
-			end
-			return clients[1]
+			return all and clients or clients[1]
 		end,
 		coroutine_wrap = function(fn)
-			local co, is_main = coroutine.running()
-			if co and not is_main then
+			local _, is_main = coroutine.running()
+			if not is_main then
 				fn()
-			else
-				coroutine.wrap(function()
-					xpcall(fn, function(err)
-						local msg = debug.traceback(err, 2)
-						vim.notify(msg, vim.log.levels.ERROR)
-					end)
-				end)()
+				return
 			end
+			coroutine.wrap(function()
+				xpcall(fn, function(err)
+					vim.notify(debug.traceback(err, 2), vim.log.levels.ERROR)
+				end)
+			end)()
 		end,
 		lsp_client_exec_cmd = function(client, command, bufnr, handler)
 			local co
@@ -94,11 +80,7 @@ MiniMisc.safely("now", function()
 					end
 				end
 			end
-			local context = nil
-			if bufnr then
-				context = { bufnr = bufnr }
-			end
-			client:exec_cmd(command, context, handler)
+			client:exec_cmd(command, bufnr and { bufnr = bufnr } or nil, handler)
 			if co then
 				return coroutine.yield()
 			end
@@ -120,70 +102,38 @@ MiniMisc.safely("now", function()
 		end,
 		multi_select = function(prompt, options, format)
 			local choices = {}
-			local selected_items = {}
+			local value_by_choice = {}
 			for _, value in pairs(options) do
-				table.insert(choices, format(value))
+				local choice = format(value)
+				choices[#choices + 1] = choice
+				value_by_choice[choice] = value
 			end
+			local selected = {}
 			MiniPick.start({
 				source = {
 					items = choices,
 					name = prompt,
 					choose_marked = function(items)
-						for _, choice in pairs(items) do
-							for _, value in pairs(options) do
-								if format(value) == choice then
-									table.insert(selected_items, value)
-									break
-								end
-							end
-						end
+						selected = vim.tbl_map(function(choice)
+							return value_by_choice[choice]
+						end, items)
 						return false
 					end,
 					choose = function(choice)
-						for _, value in pairs(options) do
-							if format(value) == choice then
-								selected_items = { value }
-							end
-						end
+						selected = { value_by_choice[choice] }
 						return false
 					end,
 				},
 			})
-			return selected_items
-		end,
-		select = function(prompt, options, format)
-			local choices = {}
-			local selected = {}
-			for _, value in pairs(options) do
-				table.insert(choices, format(value))
-			end
-			vim.ui.select(choices, { prompt = prompt }, function(choice)
-				for _, value in pairs(options) do
-					if format(value) == choice then
-						selected = value
-					end
-				end
-			end)
 			return selected
-		end,
-		get_table_keys = function(t)
-			local ret = {}
-			for key, _ in pairs(t) do
-				table.insert(ret, key)
-			end
-			return ret
 		end,
 	}
 end)
 
 -- Default settings
 MiniMisc.safely("now", function()
-	-- vim.cmd("let g:python_recommended_style=0")
-	-- vim.o.colorcolumn = "150"
-	-- vim.o.expandtab = true
-	-- vim.o.relativenumber = true
-	-- vim.o.statuscolumn = "%s%l%C "
-	if vim.fn.has("nvim-0.12") == 1 then
+	local is_nvim_012 = vim.fn.has("nvim-0.12") == 1
+	if is_nvim_012 then
 		vim.cmd("packadd cfilter")
 		vim.cmd("packadd justify")
 		vim.cmd("packadd nohlsearch")
@@ -262,7 +212,7 @@ MiniMisc.safely("now", function()
 		underline = false,
 		severity_sort = true,
 	})
-	if vim.fn.has("nvim-0.12") == 1 then
+	if is_nvim_012 then
 		vim.o.pumborder = "rounded"
 		require("vim._core.ui2").enable({
 			msg = {
@@ -419,7 +369,7 @@ MiniMisc.safely("now", function()
 		},
 	})
 	MiniMisc.setup_restore_cursor()
-	-- MiniMisc.setup_termbg_sync()
+	MiniMisc.setup_termbg_sync()
 	MiniMisc.setup_auto_root({
 		"meson.build",
 		"CMakeLists.txt",
@@ -634,8 +584,8 @@ MiniMisc.safely("now", function()
 						hl = "MiniStatuslineFileinfo",
 						strings = {
 							vim.trim(table.concat({ "%S", macro, search }, " ")),
-							#G.keys > 0 and "▕" or "",
-							table.concat(G.keys, " ▏"),
+							#G.recent_keys > 0 and "▕" or "",
+							table.concat(G.recent_keys, " ▏"),
 						},
 					},
 					{ hl = mode_hl, strings = { location } },
@@ -750,10 +700,11 @@ MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("FileType", {
 		callback = function(args)
 			local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
-			if not lang then
-				return
-			end
-			if not pcall(vim.treesitter.start, args.buf, lang) and require("nvim-treesitter.parsers")[lang] then
+			if
+				lang
+				and not pcall(vim.treesitter.start, args.buf, lang)
+				and require("nvim-treesitter.parsers")[lang]
+			then
 				require("nvim-treesitter").install(lang)
 			end
 		end,
@@ -847,7 +798,7 @@ MiniMisc.safely("now", function()
 				hide = { "go", "delve" },
 			},
 			anchor = function()
-				return G.te_win
+				return G.terminal_win
 			end,
 		},
 	})
@@ -916,58 +867,58 @@ end)
 MiniMisc.safely("now", function()
 	local map_multistep = require("mini.keymap").map_multistep
 	local map_combo = require("mini.keymap").map_combo
-	local te_buf = nil
+	local terminal_buf = nil
 	local function open_terminal()
-		if vim.fn.bufexists(te_buf) ~= 1 then
+		if vim.fn.bufexists(terminal_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
-			G.te_win = vim.fn.win_getid()
-			te_buf = vim.fn.bufnr("%")
-		elseif vim.fn.win_gotoid(G.te_win) ~= 1 then
-			vim.cmd("sbuffer " .. te_buf .. "| wincmd J | resize 10")
-			G.te_win = vim.fn.win_getid()
+			G.terminal_win = vim.fn.win_getid()
+			terminal_buf = vim.fn.bufnr("%")
+		elseif vim.fn.win_gotoid(G.terminal_win) ~= 1 then
+			vim.cmd("sbuffer " .. terminal_buf .. "| wincmd J | resize 10")
+			G.terminal_win = vim.fn.win_getid()
 		end
 		vim.cmd("startinsert")
 	end
 	local function hide_terminal()
-		if vim.fn.win_gotoid(G.te_win) == 1 then
+		if vim.fn.win_gotoid(G.terminal_win) == 1 then
 			vim.cmd("hide")
 		end
 	end
 	local function toggle_terminal()
-		if vim.fn.win_gotoid(G.te_win) == 1 then
+		if vim.fn.win_gotoid(G.terminal_win) == 1 then
 			hide_terminal()
 		else
 			open_terminal()
 		end
 	end
-	local te_float_buf = nil
+	local float_terminal_buf = nil
 	local previous_buf = nil
 	local function open_float_terminal()
 		previous_buf = vim.api.nvim_get_current_buf()
 		local height = math.floor(0.6 * vim.o.lines)
 		local width = math.floor(0.6 * vim.o.columns)
-		G.te_float_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
+		G.float_terminal_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
 			relative = "editor",
 			row = math.floor(0.5 * (vim.o.lines - height)),
 			col = math.floor(0.5 * (vim.o.columns - width)),
-			width = math.floor(0.6 * vim.o.columns),
-			height = math.floor(0.6 * vim.o.lines),
+			width = width,
+			height = height,
 			focusable = true,
 			title = " Float Term ",
 			footer = " " .. vim.o.shell .. " ",
 			footer_pos = "right",
 		})
-		vim.api.nvim_set_current_win(G.te_float_win)
-		if vim.fn.bufexists(te_float_buf) ~= 1 then
+		vim.api.nvim_set_current_win(G.float_terminal_win)
+		if vim.fn.bufexists(float_terminal_buf) ~= 1 then
 			vim.cmd("terminal")
-			te_float_buf = vim.api.nvim_get_current_buf()
+			float_terminal_buf = vim.api.nvim_get_current_buf()
 		else
-			vim.cmd("buffer " .. te_float_buf)
+			vim.cmd("buffer " .. float_terminal_buf)
 		end
 		vim.cmd("startinsert")
 	end
 	local function hide_float_terminal()
-		if vim.fn.win_gotoid(G.te_float_win) == 1 then
+		if vim.fn.win_gotoid(G.float_terminal_win) == 1 then
 			vim.cmd("hide")
 		end
 		if previous_buf then
@@ -976,7 +927,7 @@ MiniMisc.safely("now", function()
 		end
 	end
 	local function toggle_float_terminal()
-		if vim.fn.win_gotoid(G.te_float_win) == 1 then
+		if vim.fn.win_gotoid(G.float_terminal_win) == 1 then
 			hide_float_terminal()
 		else
 			open_float_terminal()
@@ -1000,23 +951,19 @@ MiniMisc.safely("now", function()
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
 	end
-	local function toggle_quickfix()
+	local function window_type_open(field)
 		for _, win in ipairs(vim.fn.getwininfo()) do
-			if win["quickfix"] == 1 then
-				vim.cmd("cclose")
-				return
+			if win[field] == 1 then
+				return true
 			end
-			vim.cmd("copen")
 		end
+		return false
+	end
+	local function toggle_quickfix()
+		vim.cmd(window_type_open("quickfix") and "cclose" or "copen")
 	end
 	local function toggle_loclist()
-		for _, win in ipairs(vim.fn.getwininfo()) do
-			if win["loclist"] == 1 then
-				vim.cmd("lclose")
-				return
-			end
-			vim.cmd("lopen")
-		end
+		vim.cmd(window_type_open("loclist") and "lclose" or "lopen")
 	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "n", "x" }, "<leader>aa", require("agentic").add_selection_or_file_to_context, "Add selection or file")
@@ -1100,7 +1047,6 @@ MiniMisc.safely("now", function()
 	Nmap("<leader>lgd", ":lua vim.lsp.buf.definition()<CR>", "Goto definition")
 	Nmap("<leader>lgi", ":lua vim.lsp.buf.implementation()<CR>", "Goto implementation")
 	Nmap("<leader>lgr", ":lua vim.lsp.buf.references()<CR>", "Goto references")
-	Nmap("<leader>lgs", ":lua G.super_implementation()<CR>", "Goto super implementation")
 	Nmap("<leader>lgtd", ":lua vim.lsp.buf.type_definition()<CR>", "Goto type definition")
 	Nmap("<leader>lh", ":lua vim.lsp.buf.hover({title=' Hover ',title_pos='left'})<CR>", "Hover symbol")
 	Nmap("<leader>li", ":lua vim.lsp.buf.incoming_calls()<CR>", "Lsp incoming calls")
@@ -1136,7 +1082,7 @@ end)
 
 -- Autocommands registration
 MiniMisc.safely("now", function()
-	local special_file_types = {
+	local non_text_filetypes = {
 		netrw = true,
 		help = true,
 		nofile = true,
@@ -1154,7 +1100,7 @@ MiniMisc.safely("now", function()
 		["dap-float"] = true,
 		ministarter = true,
 	}
-	local html_file_types = {
+	local html_like_filetypes = {
 		svelte = true,
 		vue = true,
 		jsx = true,
@@ -1164,7 +1110,7 @@ MiniMisc.safely("now", function()
 		xsl = true,
 		htmlangular = true,
 	}
-	local special_buftypes = {
+	local non_file_buftypes = {
 		nofile = true,
 		terminal = true,
 		quickfix = true,
@@ -1176,8 +1122,11 @@ MiniMisc.safely("now", function()
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(args)
-			if html_file_types[vim.bo[args.buf].filetype] then
-				vim.bo[args.buf].omnifunc = "htmlcomplete#CompleteTags"
+			local buf = args.buf
+			local filetype = vim.bo[buf].filetype
+			local buftype = vim.bo[buf].buftype
+			if html_like_filetypes[filetype] then
+				vim.bo[buf].omnifunc = "htmlcomplete#CompleteTags"
 				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
 				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
 					buffer = true,
@@ -1189,23 +1138,21 @@ MiniMisc.safely("now", function()
 					buffer = true,
 				})
 			end
-			if special_file_types[vim.bo[args.buf].filetype] then
-				vim.b[args.buf].minicursorword_disable = true
-				vim.b[args.buf].miniindentscope_disable = true
-				vim.b[args.buf].minitrailspace_disable = true
+			if non_text_filetypes[filetype] then
+				vim.b[buf].minicursorword_disable = true
+				vim.b[buf].miniindentscope_disable = true
+				vim.b[buf].minitrailspace_disable = true
 				vim.wo.listchars = "leadmultispace:  ,tab:  "
 				MiniTrailspace.unhighlight()
-				if vim.bo[args.buf].filetype == "dap-repl" then
+				if filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
 				end
-				if vim.bo[args.buf].filetype == "git" or vim.bo[args.buf].filetype == "diff" then
+				if filetype == "git" or filetype == "diff" then
 					vim.wo.foldmethod = "expr"
 					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
 				end
 			end
-			local buftype = vim.bo[args.buf].buftype
-			local filetype = vim.bo[args.buf].filetype
-			if (buftype ~= "" or filetype ~= "") and not special_buftypes[buftype] then
+			if (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype] then
 				vim.wo.winbar = "⠀⠀󰁔 %F"
 				Map(
 					{ "n", "x", "o" },
@@ -1230,36 +1177,36 @@ MiniMisc.safely("now", function()
 				vim.api.nvim_win_set_config(win_id, win_config)
 				return
 			end
-			local b = args.data.buf_id
+			local bufnr = args.data.buf_id
 			Nmap("~", function()
 				local path = (MiniFiles.get_fs_entry() or {}).path
 				if path == nil then
 					return vim.notify("Cursor is not on valid entry")
 				end
 				vim.fn.chdir(vim.fs.dirname(path))
-			end, "Set cwd", { buffer = b })
+			end, "Set cwd", { buffer = bufnr })
 			Nmap("yy", function()
 				local path = (MiniFiles.get_fs_entry() or {}).path
 				if path == nil then
 					return vim.notify("Cursor is not on valid entry")
 				end
 				vim.fn.setreg("", path)
-			end, "Yank path", { buffer = b })
+			end, "Yank path", { buffer = bufnr })
 			Nmap("gy", function()
 				local path = (MiniFiles.get_fs_entry() or {}).path
 				if path == nil then
 					return vim.notify("Cursor is not on valid entry")
 				end
 				vim.fn.setreg("+", path)
-			end, "Yank path", { buffer = b })
+			end, "Yank path to clipboard", { buffer = bufnr })
 			local show_dotfiles = true
 			Nmap(".", function()
 				show_dotfiles = not show_dotfiles
-				local new_filter = function(fs_entry)
+				local dotfile_filter = function(fs_entry)
 					return show_dotfiles and true or not vim.startswith(fs_entry.name, ".")
 				end
-				MiniFiles.refresh({ content = { filter = new_filter } })
-			end, "Toggle dotfiles", { buffer = b })
+				MiniFiles.refresh({ content = { filter = dotfile_filter } })
+			end, "Toggle dotfiles", { buffer = bufnr })
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
@@ -1293,17 +1240,11 @@ MiniMisc.safely("now", function()
 	local lsp_capabilities =
 		vim.tbl_extend("force", vim.lsp.protocol.make_client_capabilities(), MiniCompletion.get_lsp_capabilities())
 	lsp_capabilities.general.positionEncodings = { G.offset_encoding }
-	local lua_runtime_files = vim.api.nvim_get_runtime_file("", true)
-	for k, v in ipairs(lua_runtime_files) do
-		if v == vim.fn.stdpath("config") then
-			table.remove(lua_runtime_files, k)
-		end
-	end
+	local lua_runtime_files = vim.tbl_filter(function(path)
+		return path ~= vim.fn.stdpath("config")
+	end, vim.api.nvim_get_runtime_file("", true))
 	table.insert(lua_runtime_files, "${3rd}/luv/library")
-	-- table.insert(lua_runtime_files, "$${3rd}/busted/library")
-	local jdtls_bundles = {}
-	vim.list_extend(jdtls_bundles, vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n"))
-	-- vim.list_extend(bundles, vim.split(vim.fn.glob("/usr/share/java-test/*.jar", true), "\n"))
+	local jdtls_bundles = vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n")
 	local lsp_servers = {
 		lua_ls = {
 			---@type lspconfig.settings.lua_ls
@@ -1505,7 +1446,6 @@ end)
 -- Linting and formatting setup
 MiniMisc.safely("later", function()
 	require("lint").linters_by_ft = {
-		-- astro = { "eslint" },
 		c = { "clangtidy" },
 		-- css = { "eslint" },
 		go = { "golangcilint" },
@@ -1522,7 +1462,6 @@ MiniMisc.safely("later", function()
 		tex = { "chktex" },
 		-- tsx = { "eslint" },
 		-- typescript = { "eslint" },
-		-- vue = { "eslint" },
 	}
 	require("conform").setup({
 		formatters_by_ft = {
@@ -1641,8 +1580,8 @@ MiniMisc.safely("later", function()
 		},
 	}
 	-- node --inspect-brk=127.0.0.1:9229 main.js
-	for _, language in ipairs({ "typescript", "javascript" }) do
-		dap.configurations[language] = {
+	for _, filetype in ipairs({ "typescript", "javascript" }) do
+		dap.configurations[filetype] = {
 			{
 				type = "pwa-node",
 				name = "Attach remote",
@@ -1662,6 +1601,7 @@ end)
 -- Lazy loaded custom configuration
 MiniMisc.safely("later", function()
 	MiniPick.registry.git_hunks = function(local_opts)
+		local_opts = local_opts or {}
 		MiniExtra.pickers.git_hunks(local_opts, {
 			source = {
 				choose_marked = function(items_marked)
@@ -1682,97 +1622,44 @@ MiniMisc.safely("later", function()
 	end
 	MiniPick.registry.treesitter_symbols = function(opts)
 		opts = opts or {}
-		local buf = opts.bufnr or vim.api.nvim_get_current_buf()
-		local ft = vim.bo[buf].filetype
-		local lang = vim.treesitter.language.get_lang(ft) or ft
+		local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+		local filetype = vim.bo[bufnr].filetype
+		local lang = vim.treesitter.language.get_lang(filetype) or filetype
 		if not pcall(vim.treesitter.language.add, lang) or #vim.treesitter.query.get_files(lang, "locals") == 0 then
-			vim.notify(("No treesitter parser or no 'locals.scm' found for '%s'"):format(ft), vim.log.levels.WARN)
+			vim.notify(("No treesitter parser or no 'locals.scm' found for '%s'"):format(filetype), vim.log.levels.WARN)
 			return
 		end
-		local ok, parser = pcall(vim.treesitter.get_parser, buf, lang)
-		if not ok or not parser then
-			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
+		local parser = vim.treesitter.get_parser(bufnr, lang)
+		local query = vim.treesitter.query.get(lang, "locals")
+		if not (parser and query) then
+			vim.notify(("Cannot get treesitter symbols for '%s'"):format(filetype), vim.log.levels.ERROR)
 			return
 		end
 		parser:parse(true)
 		local root = parser:trees()[1]:root()
 		if not root then
-			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
+			vim.notify(("Cannot parse treesitter symbols for '%s'"):format(filetype), vim.log.levels.ERROR)
 			return
 		end
-		local query = vim.treesitter.query.get(lang, "locals")
-		if not query then
-			vim.notify(("ts.query.get('%s', 'locals') returned nil"):format(lang), vim.log.levels.WARN)
-			return
-		end
-		local get = function(bufnr)
-			local definitions = {}
-			local scopes = {}
-			local references = {}
-			for id, node, metadata in query:iter_captures(root, bufnr) do
-				local kind = query.captures[id]
-				local scope = "local"
-				for k, v in pairs(metadata) do
-					if k and vim.endswith(k, "local.scope") and type(v) == "string" then
-						scope = v
-					end
-				end
-				if node and kind and vim.startswith(kind, "local.definition") then
-					table.insert(definitions, { kind = kind, node = node, scope = scope })
-				end
-				if node and kind == "local.scope" then
-					table.insert(scopes, node)
-				end
-				if node and kind == "local.reference" then
-					table.insert(references, { kind = kind, node = node, scope = scope })
-				end
-			end
-			return definitions, references, scopes
-		end
-		local function recurse_local_nodes(local_def, accumulator, full_match, last_match)
-			if type(local_def) ~= "table" then
-				return
-			end
-			if local_def.node then
-				accumulator(local_def, local_def.node, full_match, last_match)
-			else
-				for match_key, def in pairs(local_def) do
-					recurse_local_nodes(
-						def,
-						accumulator,
-						full_match and (full_match .. "." .. match_key) or match_key,
-						match_key
-					)
-				end
-			end
-		end
-		local get_local_nodes = function(local_def)
-			local result = {}
-			recurse_local_nodes(local_def, function(def, _, kind)
-				table.insert(result, vim.tbl_extend("keep", { kind = kind }, def))
-			end)
-			return result
-		end
-		local kind_map = {
+		local kind_aliases = {
 			var = "variable",
 			parameter = "constant",
 			associated = "object",
 		}
 		local entries = {}
-		for _, definition in ipairs(get(buf)) do
-			local nodes = get_local_nodes(definition)
-			for _, node in ipairs(nodes) do
-				-- Remove node prefix, e.g. `locals.definition.var`
-				node.kind = node.kind and node.kind:gsub(".*%.", "")
-				if node.node and node.kind and (not opts.node_filter or opts.node_filter(node, node.kind)) then
-					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node.node)
-					local node_text = vim.treesitter.get_node_text(node.node, buf)
-					local node_kind = kind_map[node.kind] or node.kind
-					local icon, hl = MiniIcons.get("lsp", node_kind)
+		for id, node in query:iter_captures(root, bufnr) do
+			local capture = query.captures[id]
+			if node and capture and vim.startswith(capture, "local.definition") then
+				local kind = capture:gsub(".*%.", "")
+				if not opts.node_filter or opts.node_filter({ kind = kind, node = node }, kind) then
+					local display_kind = kind_aliases[kind] or kind
+					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node)
+					local text = vim.treesitter.get_node_text(node, bufnr)
+					local icon, hl = MiniIcons.get("lsp", display_kind)
 					entries[#entries + 1] = {
-						text = string.format("[%s %s] %s", icon, node_kind, node_text),
+						text = string.format("[%s %s] %s", icon, display_kind, text),
 						hl = hl,
-						bufnr = buf,
+						bufnr = bufnr,
 						lnum = lnum + 1,
 						col = col + 1,
 						end_lnum = end_lnum + 1,
@@ -1781,18 +1668,18 @@ MiniMisc.safely("later", function()
 				end
 			end
 		end
-		local mini_extra_namespace = vim.api.nvim_get_namespaces()["MiniExtraPickers"]
+		local highlight_namespace = vim.api.nvim_get_namespaces()["MiniExtraPickers"]
 		MiniPick.start(vim.tbl_deep_extend("force", opts, {
 			source = {
 				items = entries,
 				name = "Tree-sitter symbols",
-				show = function(buf_id, items_to_show, query)
-					MiniPick.default_show(buf_id, items_to_show, query)
-					vim.api.nvim_buf_clear_namespace(buf_id, mini_extra_namespace, 0, -1)
+				show = function(buf_id, items_to_show, pick_query)
+					MiniPick.default_show(buf_id, items_to_show, pick_query)
+					vim.api.nvim_buf_clear_namespace(buf_id, highlight_namespace, 0, -1)
 					for i, item in ipairs(items_to_show) do
 						vim.api.nvim_buf_set_extmark(
 							buf_id,
-							mini_extra_namespace,
+							highlight_namespace,
 							i - 1,
 							0,
 							{ end_row = i, end_col = 0, hl_mode = "blend", hl_group = item.hl, priority = 100 }
@@ -1802,26 +1689,26 @@ MiniMisc.safely("later", function()
 			},
 		}))
 	end
-	vim.on_key(function(_, typed)
-		if typed ~= "" then
-			local typed_key = vim.fn.keytrans(typed)
-			if #G.keys == 0 then
-				table.insert(G.keys, typed_key)
-			else
-				local key_string = vim.split(G.keys[#G.keys], " ", { plain = true })
-				local last_key = #key_string == 2 and key_string[2] or key_string[1]
-				if last_key == typed_key then
-					G.keys[#G.keys] = #key_string == 2 and tostring(tonumber(key_string[1]) + 1) .. " " .. typed_key
-						or "2" .. " " .. typed_key
-				else
-					if #G.keys >= 5 then
-						table.remove(G.keys, 1)
-					end
-					table.insert(G.keys, typed_key)
-				end
-			end
-			vim.api.nvim__redraw({ statusline = true })
+	vim.on_key(function(_, key)
+		if key == "" then
+			return
 		end
+		local key_name = vim.fn.keytrans(key)
+		local count, previous = 0, nil
+		if #G.recent_keys > 0 then
+			local parts = vim.split(G.recent_keys[#G.recent_keys], " ", { plain = true })
+			count = #parts == 2 and tonumber(parts[1]) or 1
+			previous = #parts == 2 and parts[2] or parts[1]
+		end
+		if previous == key_name then
+			G.recent_keys[#G.recent_keys] = count + 1 .. " " .. key_name
+		else
+			if #G.recent_keys >= 5 then
+				table.remove(G.recent_keys, 1)
+			end
+			table.insert(G.recent_keys, key_name)
+		end
+		vim.api.nvim__redraw({ statusline = true })
 	end)
 	G.toggle_diff_highlight = function()
 		if vim.bo.filetype ~= "diff" and vim.bo.filetype ~= "patch" then
@@ -1832,121 +1719,84 @@ MiniMisc.safely("later", function()
 			vim.api.nvim_buf_clear_namespace(0, diff_highlight_namespace, 0, -1)
 			return
 		end
-		local function utf8_chars(str)
-			local n = vim.fn.strchars(str)
-			local i = 0
-			return function()
-				if i < n then
-					local ch = vim.fn.strcharpart(str, i, 1)
-					i = i + 1
-					return ch
-				end
+		local function highlight_range(change, start_byte, end_byte, highlight, priority)
+			vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, change.line - 1, start_byte + 1, {
+				end_row = change.line - 1,
+				end_col = end_byte + 1,
+				hl_mode = "blend",
+				hl_group = highlight,
+				priority = priority,
+			})
+		end
+		local function highlight_hunk(changes, diff_start, diff_lines, highlight, priority)
+			if diff_lines == 0 then
+				return
 			end
-		end
-		local function char_count(str)
-			return vim.fn.strchars(str)
-		end
-		local function apply_hunk_ext_marks(changes, diff_start, diff_lines, highlight, priority)
-			if diff_lines ~= 0 then
-				for i = 1, #changes do
-					if changes[i].char_count >= diff_start then
-						local cur_change_index = i
-						local prev_chars = changes[i].char_count - changes[i].content_chars
-						local char_offset = diff_start - prev_chars - 1
-						local remaining = diff_lines
-						while remaining > 0 and cur_change_index <= #changes do
-							local cur_line = changes[cur_change_index].line
-							local content = changes[cur_change_index].content
-							local content_chars = changes[cur_change_index].content_chars
-							local chars_available = content_chars - char_offset
-							if remaining >= chars_available then
-								local start_byte = vim.fn.byteidx(content, char_offset)
-								local end_byte = #content
-								vim.api.nvim_buf_set_extmark(
-									0,
-									diff_highlight_namespace,
-									cur_line - 1,
-									start_byte + 1,
-									{
-										end_row = cur_line - 1,
-										end_col = end_byte + 1,
-										hl_mode = "blend",
-										hl_group = highlight,
-										priority = priority,
-									}
-								)
-								remaining = remaining - chars_available
-								char_offset = 0
-								cur_change_index = cur_change_index + 1
-							else
-								local start_byte = vim.fn.byteidx(content, char_offset)
-								local end_byte = vim.fn.byteidx(content, char_offset + remaining)
-								vim.api.nvim_buf_set_extmark(
-									0,
-									diff_highlight_namespace,
-									cur_line - 1,
-									start_byte + 1,
-									{
-										end_row = cur_line - 1,
-										end_col = end_byte + 1,
-										hl_mode = "blend",
-										hl_group = highlight,
-										priority = priority,
-									}
-								)
-								remaining = 0
-							end
+			for index = 1, #changes do
+				local change = changes[index]
+				if change.char_count >= diff_start then
+					local offset = diff_start - (change.char_count - change.content_chars) - 1
+					local remaining = diff_lines
+					local cursor = index
+					while remaining > 0 and cursor <= #changes do
+						local current = changes[cursor]
+						local available = current.content_chars - offset
+						local start_byte = vim.fn.byteidx(current.content, offset)
+						if available <= remaining then
+							highlight_range(current, start_byte, #current.content, highlight, priority)
+							remaining = remaining - available
+							offset = 0
+							cursor = cursor + 1
+						else
+							local end_byte = vim.fn.byteidx(current.content, offset + remaining)
+							highlight_range(current, start_byte, end_byte, highlight, priority)
+							remaining = 0
 						end
-						break
 					end
+					break
 				end
 			end
+		end
+		local function joined_text(changes)
+			local chars = {}
+			for _, change in ipairs(changes) do
+				vim.list_extend(chars, vim.fn.split(change.content, "\\zs"))
+			end
+			return #chars > 0 and table.concat(chars, "\n") .. "\n" or ""
 		end
 		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
 		table.insert(lines, " ")
-		local minus = {}
-		local plus = {}
-		local i = 1
-		while i <= #lines do
-			if lines[i]:sub(1, 1) == "@" then
-				local minus_content_char_count = 0
-				local plus_content_char_count = 0
-				while i <= #lines and lines[i]:sub(1, 5) ~= "index" do
-					if lines[i]:sub(1, 1) == "-" then
-						local content = lines[i]:sub(2)
-						local cc = char_count(content)
-						minus_content_char_count = minus_content_char_count + cc
-						table.insert(minus, {
-							line = i,
+		local removed, added = {}, {}
+		local line_nr = 1
+		while line_nr <= #lines do
+			if lines[line_nr]:sub(1, 1) == "@" then
+				local removed_chars, added_chars = 0, 0
+				while line_nr <= #lines and lines[line_nr]:sub(1, 5) ~= "index" do
+					local line = lines[line_nr]
+					local marker = line:sub(1, 1)
+					if marker == "-" then
+						local content = line:sub(2)
+						local content_chars = vim.fn.strchars(content)
+						removed_chars = removed_chars + content_chars
+						table.insert(removed, {
+							line = line_nr,
 							content = content,
-							char_count = minus_content_char_count,
-							content_chars = cc,
+							char_count = removed_chars,
+							content_chars = content_chars,
 						})
-					elseif lines[i]:sub(1, 1) == "+" then
-						local content = lines[i]:sub(2)
-						local cc = char_count(content)
-						plus_content_char_count = plus_content_char_count + cc
-						table.insert(plus, {
-							line = i,
+					elseif marker == "+" then
+						local content = line:sub(2)
+						local content_chars = vim.fn.strchars(content)
+						added_chars = added_chars + content_chars
+						table.insert(added, {
+							line = line_nr,
 							content = content,
-							char_count = plus_content_char_count,
-							content_chars = cc,
+							char_count = added_chars,
+							content_chars = content_chars,
 						})
 					else
-						if #minus ~= 0 and #plus ~= 0 then
-							local minus_string = ""
-							local plus_string = ""
-							for _, minus_change in ipairs(minus) do
-								for char in utf8_chars(minus_change.content) do
-									minus_string = minus_string .. char .. "\n"
-								end
-							end
-							for _, plus_change in ipairs(plus) do
-								for char in utf8_chars(plus_change.content) do
-									plus_string = plus_string .. char .. "\n"
-								end
-							end
-							vim.text.diff(minus_string, plus_string, {
+						if #removed ~= 0 and #added ~= 0 then
+							vim.text.diff(joined_text(removed), joined_text(added), {
 								result_type = "indices",
 								algorithm = "minimal",
 								ignore_whitespace = true,
@@ -1955,22 +1805,20 @@ MiniMisc.safely("later", function()
 								ignore_cr_at_eol = true,
 								ignore_blank_lines = true,
 								indent_heuristic = true,
-								on_hunk = function(start_d, count_d, start_a, count_a)
-									apply_hunk_ext_marks(minus, start_d, count_d, "DiffDelete", 100)
-									apply_hunk_ext_marks(plus, start_a, count_a, "DiffAdd", 100)
+								on_hunk = function(start_removed, count_removed, start_added, count_added)
+									highlight_hunk(removed, start_removed, count_removed, "DiffDelete", 100)
+									highlight_hunk(added, start_added, count_added, "DiffAdd", 100)
 								end,
 							})
 						end
-						minus = {}
-						plus = {}
-						minus_content_char_count = 0
-						plus_content_char_count = 0
+						removed, added = {}, {}
+						removed_chars, added_chars = 0, 0
 					end
-					i = i + 1
+					line_nr = line_nr + 1
 				end
-				i = i + 2
+				line_nr = line_nr + 2
 			end
-			i = i + 1
+			line_nr = line_nr + 1
 		end
 	end
 end)

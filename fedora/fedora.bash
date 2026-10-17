@@ -48,7 +48,7 @@ sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls cl
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
 sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
-sudo dnf install -y htop inxi ncdu btop telnet bleachbit
+sudo dnf install -y htop inxi ncdu btop telnet bleachbit conky
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable brave-browser
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
 sudo dnf install -y ollama llama-cpp
@@ -131,6 +131,8 @@ mkdir -p "$HOME/.config/fish"
 mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
+mkdir -p "$HOME/.config/conky"
+mkdir -p "$HOME/.config/autostart"
 
 cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
 QT_QPA_PLATFORMTHEME=gtk3
@@ -146,6 +148,15 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 gtk-application-prefer-dark-theme=1
 EOF
 
+cat >"$HOME/.config/autostart/conky.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Conky
+Comment=Minimal Everforest system monitor
+Exec=conky --daemonize --pause=1
+X-GNOME-Autostart-enabled=true
+EOF
+
 nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 
 curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
@@ -157,6 +168,7 @@ curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_p
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish"
 curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/tui.json -o "$HOME/.config/opencode/cli.json"
+curl https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf"
 curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png"
 curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png"
 curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png"
