@@ -1315,11 +1315,11 @@ MiniMisc.safely("now", function()
 								vim.text.diff(joined_text(removed), joined_text(added), {
 									result_type = "indices",
 									algorithm = "minimal",
-									ignore_whitespace = true,
-									ignore_whitespace_change = true,
-									ignore_whitespace_change_at_eol = true,
-									ignore_cr_at_eol = true,
-									ignore_blank_lines = true,
+									-- ignore_whitespace = true,
+									-- ignore_whitespace_change = true,
+									-- ignore_whitespace_change_at_eol = true,
+									-- ignore_cr_at_eol = true,
+									-- ignore_blank_lines = true,
 									indent_heuristic = true,
 									on_hunk = function(start_removed, count_removed, start_added, count_added)
 										highlight_hunk(removed, start_removed, count_removed, "DiffDelete", 100)
