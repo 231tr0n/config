@@ -50,6 +50,7 @@ MiniMisc.safely("now", function()
 		terminal_win = nil,
 		float_terminal_win = nil,
 		offset_encoding = "utf-16",
+		case_style = "snake",
 		lsp_get_client = function(name, bufnr, all)
 			local clients = vim.lsp.get_clients({ name = name, bufnr = bufnr })
 			if #clients == 0 then
@@ -132,14 +133,11 @@ end)
 
 -- Default settings
 MiniMisc.safely("now", function()
-	local is_nvim_012 = vim.fn.has("nvim-0.12") == 1
-	if is_nvim_012 then
-		vim.cmd("packadd cfilter")
-		vim.cmd("packadd justify")
-		vim.cmd("packadd nohlsearch")
-		vim.cmd("packadd nvim.difftool")
-		vim.cmd("packadd nvim.undotree")
-	end
+	vim.cmd("packadd cfilter")
+	vim.cmd("packadd justify")
+	vim.cmd("packadd nohlsearch")
+	vim.cmd("packadd nvim.difftool")
+	vim.cmd("packadd nvim.undotree")
 	vim.g.loaded_gzip = 1
 	vim.g.loaded_netrw = 1
 	vim.g.loaded_netrwPlugin = 1
@@ -212,22 +210,28 @@ MiniMisc.safely("now", function()
 		underline = false,
 		severity_sort = true,
 	})
-	if is_nvim_012 then
-		vim.o.pumborder = "rounded"
-		require("vim._core.ui2").enable({
-			msg = {
-				targets = "cmd",
-			},
-		})
-	end
+	vim.o.pumborder = "rounded"
+	require("vim._core.ui2").enable({
+		msg = {
+			targets = "cmd",
+		},
+	})
 end)
 
 -- Mini plugins setup
 MiniMisc.safely("now", function()
+	local subword_patterns = {
+		"%f[%a]%l+%d*",
+		"%f[%w]%d+",
+		"%u%l+%d*",
+		"%f[%a]%u+%f[^%a]",
+		"%f[%u]()()%u+()()%u%l",
+	}
 	require("mini.ai").setup({
 		custom_textobjects = {
 			B = require("mini.extra").gen_ai_spec.buffer(),
 			D = require("mini.extra").gen_ai_spec.diagnostic(),
+			e = { subword_patterns },
 			I = require("mini.extra").gen_ai_spec.indent(),
 			L = require("mini.extra").gen_ai_spec.line(),
 			N = require("mini.extra").gen_ai_spec.number(),
@@ -341,8 +345,13 @@ MiniMisc.safely("now", function()
 		},
 	})
 	require("mini.jump").setup()
+	local jump2d = require("mini.jump2d")
+	local subword_spotters = vim.tbl_map(function(pattern)
+		return jump2d.gen_spotter.pattern(pattern, "start")
+	end, subword_patterns)
 	require("mini.jump2d").setup({
 		labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		spotter = jump2d.gen_spotter.union(table.unpack(subword_spotters)),
 		view = {
 			dim = true,
 			n_steps_ahead = 2,
@@ -385,7 +394,30 @@ MiniMisc.safely("now", function()
 			reindent_linewise = true,
 		},
 	})
+	local convert_case = function(token)
+		local words = vim.split(
+			token:gsub("([%l%d])(%u)", "%1 %2"):gsub("(%u)(%u%l)", "%1 %2"):gsub("[^%w]+", " "),
+			" ",
+			{ trimempty = true }
+		)
+		for index, word in ipairs(words) do
+			word = word:lower()
+			if G.case_style == "camel" and index > 1 then
+				word = word:sub(1, 1):upper() .. word:sub(2)
+			end
+			words[index] = word
+		end
+		return table.concat(words, ({ snake = "_", kebab = "-" })[G.case_style] or "")
+	end
 	require("mini.operators").setup({
+		evaluate = {
+			func = function(content)
+				for index, line in ipairs(content.lines) do
+					content.lines[index] = line:gsub("[%w_%-]+", convert_case)
+				end
+				return content.lines
+			end,
+		},
 		exchange = { prefix = "ge" },
 	})
 	require("mini.pairs").setup()
@@ -966,8 +998,41 @@ MiniMisc.safely("now", function()
 	local function toggle_loclist()
 		vim.cmd(window_type_open("loclist") and "lclose" or "lopen")
 	end
+	local make_ai_jump = function(search_method)
+		return function()
+			require("mini.ai").move_cursor("left", "a", "e", { n_times = vim.v.count1, search_method = search_method })
+		end
+	end
+	local make_case = function(style)
+		return function()
+			G.case_style = style
+			if vim.fn.mode():match("^[vV\22]") then
+				require("mini.operators").evaluate("visual")
+				return
+			end
+			local line, col = vim.fn.getline("."), vim.fn.col(".") - 1
+			if not line:sub(col + 1, col + 1):match("[%w_%-]") then
+				return
+			end
+			local from, to = col, col
+			while from > 0 and line:sub(from, from):match("[%w_%-]") do
+				from = from - 1
+			end
+			while to < #line and line:sub(to + 1, to + 1):match("[%w_%-]") do
+				to = to + 1
+			end
+			vim.fn.setpos("'[", { 0, vim.fn.line("."), from + 1, 0 })
+			vim.fn.setpos("']", { 0, vim.fn.line("."), to, 0 })
+			require("mini.operators").evaluate("char")
+		end
+	end
 	Imap("<C-\\>", "<cmd>lua vim.lsp.inline_completion.get()<CR>", "Accept inline completion")
 	Map({ "n", "x" }, "<leader>aa", require("agentic").add_selection_or_file_to_context, "Add selection or file")
+	Map({ "n", "x" }, "<leader>cc", make_case("camel"), "Convert to camelCase")
+	Map({ "n", "x" }, "<leader>ck", make_case("kebab"), "Convert to kebab-case")
+	Map({ "n", "x" }, "<leader>cn", make_ai_jump("next"), "Next case word")
+	Map({ "n", "x" }, "<leader>cp", make_ai_jump("cover_or_prev"), "Previous case word")
+	Map({ "n", "x" }, "<leader>cs", make_case("snake"), "Convert to snake_case")
 	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
 	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
 	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
