@@ -672,6 +672,7 @@ MiniMisc.safely("now", function()
 		"css",
 		"diff",
 		"dockerfile",
+		"fish",
 		"go",
 		"html",
 		"ini",
