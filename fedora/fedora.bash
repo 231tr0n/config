@@ -132,7 +132,6 @@ mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
 mkdir -p "$HOME/.config/conky"
-mkdir -p "$HOME/.config/autostart"
 
 cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
 QT_QPA_PLATFORMTHEME=gtk3
@@ -146,15 +145,6 @@ EOF
 cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 [Settings]
 gtk-application-prefer-dark-theme=1
-EOF
-
-cat >"$HOME/.config/autostart/conky.desktop" <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=Conky
-Comment=Minimal Everforest system monitor
-Exec=conky --daemonize --pause=1
-X-GNOME-Autostart-enabled=true
 EOF
 
 nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
