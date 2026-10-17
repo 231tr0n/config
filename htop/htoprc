@@ -3,6 +3,7 @@ config_reader_min_version=3
 fields=0 48 133 17 2 46 47 132 49 1
 highlight_megabytes=0
 strip_exe_from_cmdline=0
+screen_tabs=1
 cpu_count_from_one=1
 show_cpu_frequency=1
 update_process_names=1
