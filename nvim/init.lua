@@ -688,7 +688,7 @@ MiniMisc.safely("now", function()
 		},
 	}
 	vim.pack.add({
-		"https://github.com/romus204/tree-sitter-manager.nvim",
+		{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 		"https://codeberg.org/mfussenegger/nvim-dap",
 		"https://github.com/igorlfs/nvim-dap-view",
 		"https://codeberg.org/mfussenegger/nvim-jdtls",
@@ -707,81 +707,54 @@ MiniMisc.safely("now", function()
 		"https://gitlab.com/HiPhish/rainbow-delimiters.nvim",
 		"https://github.com/nvimdev/visualizer.nvim",
 	})
-	require("tree-sitter-manager").setup({
-		auto_install = true,
-		noauto_install = { "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" },
-		ensure_installed = {
-			"bash",
-			"cpp",
-			"css",
-			"diff",
-			"dockerfile",
-			"go",
-			"html",
-			"ini",
-			"java",
-			"javascript",
-			"json",
-			"latex",
-			"make",
-			"python",
-			"regex",
-			"ruby",
-			"rust",
-			"svelte",
-			"toml",
-			"tsx",
-			"typescript",
-			"xml",
-			"yaml",
-		},
-		languages = {
-			go = {
-				install_info = {
-					url = "https://github.com/alienvspredator/tree-sitter-go",
-				},
-			},
-		},
-	})
-	vim.treesitter.query.set(
-		"svelte",
-		"context",
-		[[
-[
-  (element)
-  (if_block)
-  (else_if_clause)
-  (else_clause)
-  (each_block)
-  (await_block)
-  (await_branch)
-  (key_block)
-  (snippet_block)
-] @context
-]]
-	)
-	vim.api.nvim_create_autocmd("WinEnter", {
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "TSUpdate",
 		callback = function()
-			local win = vim.api.nvim_get_current_win()
-			local cfg = vim.api.nvim_win_get_config(win)
-			if cfg.relative ~= "" and cfg.title then
-				for _, t in ipairs(cfg.title) do
-					if t[1] and t[1]:find("Tree%-sitter Parser Manager") then
-						local height = math.floor(0.6 * vim.o.lines)
-						local width = math.floor(0.6 * vim.o.columns)
-						local row = math.floor(0.5 * (vim.o.lines - height))
-						local col = math.floor(0.5 * (vim.o.columns - width))
-						vim.api.nvim_win_set_config(win, {
-							relative = "editor",
-							anchor = "NW",
-							height = height,
-							width = width,
-							row = row,
-							col = col,
-						})
-						return
-					end
-				end
+			local go = require("nvim-treesitter.parsers").go
+			go.install_info.url = "https://github.com/alienvspredator/tree-sitter-go"
+			go.install_info.revision = nil
+		end,
+	})
+	require("nvim-treesitter").install({
+		"bash",
+		"c",
+		"cpp",
+		"css",
+		"diff",
+		"dockerfile",
+		"go",
+		"html",
+		"ini",
+		"java",
+		"javascript",
+		"json",
+		"latex",
+		"lua",
+		"make",
+		"markdown",
+		"markdown_inline",
+		"python",
+		"query",
+		"regex",
+		"ruby",
+		"rust",
+		"svelte",
+		"toml",
+		"tsx",
+		"typescript",
+		"vim",
+		"vimdoc",
+		"xml",
+		"yaml",
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		callback = function(args)
+			local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+			if not lang then
+				return
+			end
+			if not pcall(vim.treesitter.start, args.buf, lang) and require("nvim-treesitter.parsers")[lang] then
+				require("nvim-treesitter").install(lang)
 			end
 		end,
 	})
@@ -1708,23 +1681,16 @@ MiniMisc.safely("later", function()
 		})
 	end
 	MiniPick.registry.treesitter_symbols = function(opts)
-		local has_ts, _ = pcall(require, "tree-sitter-manager")
-		if not has_ts then
-			vim.notify("Treesitter_symbols picker requires tree-sitter-manager.", vim.log.levels.ERROR)
+		opts = opts or {}
+		local buf = opts.bufnr or vim.api.nvim_get_current_buf()
+		local ft = vim.bo[buf].filetype
+		local lang = vim.treesitter.language.get_lang(ft) or ft
+		if not pcall(vim.treesitter.language.add, lang) or #vim.treesitter.query.get_files(lang, "locals") == 0 then
+			vim.notify(("No treesitter parser or no 'locals.scm' found for '%s'"):format(ft), vim.log.levels.WARN)
 			return
 		end
-		local buf = vim.api.nvim_get_current_buf()
-		if not vim.bo[buf].filetype then
-			vim.notify("Cannot determine filetype for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-		local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
-		if not lang then
-			vim.notify("Cannot determine treesitter language for current buffer.", vim.log.levels.ERROR)
-			return
-		end
-		local parser = vim.treesitter.get_parser(buf)
-		if not parser then
+		local ok, parser = pcall(vim.treesitter.get_parser, buf, lang)
+		if not ok or not parser then
 			vim.notify("Cannot get parser for current buffer.", vim.log.levels.ERROR)
 			return
 		end
@@ -1734,24 +1700,24 @@ MiniMisc.safely("later", function()
 			vim.notify("Cannot get tree root for current buffer.", vim.log.levels.ERROR)
 			return
 		end
-		local locals_query = (vim.treesitter.query.get(lang, "locals"))
-		if not locals_query then
-			vim.notify("Cannot get locals queries for current buffer.", vim.log.levels.ERROR)
+		local query = vim.treesitter.query.get(lang, "locals")
+		if not query then
+			vim.notify(("ts.query.get('%s', 'locals') returned nil"):format(lang), vim.log.levels.WARN)
 			return
 		end
 		local get = function(bufnr)
 			local definitions = {}
 			local scopes = {}
 			local references = {}
-			for id, node, metadata in locals_query:iter_captures(root, bufnr) do
-				local kind = locals_query.captures[id]
+			for id, node, metadata in query:iter_captures(root, bufnr) do
+				local kind = query.captures[id]
 				local scope = "local"
 				for k, v in pairs(metadata) do
-					if type(k) == "string" and vim.endswith(k, "local.scope") then
+					if k and vim.endswith(k, "local.scope") and type(v) == "string" then
 						scope = v
 					end
 				end
-				if node and vim.startswith(kind, "local.definition") then
+				if node and kind and vim.startswith(kind, "local.definition") then
 					table.insert(definitions, { kind = kind, node = node, scope = scope })
 				end
 				if node and kind == "local.scope" then
@@ -1796,13 +1762,13 @@ MiniMisc.safely("later", function()
 		for _, definition in ipairs(get(buf)) do
 			local nodes = get_local_nodes(definition)
 			for _, node in ipairs(nodes) do
-				if node.node then
-					node.kind = node.kind and node.kind:gsub(".*%.", "")
+				-- Remove node prefix, e.g. `locals.definition.var`
+				node.kind = node.kind and node.kind:gsub(".*%.", "")
+				if node.node and node.kind and (not opts.node_filter or opts.node_filter(node, node.kind)) then
 					local lnum, col, end_lnum, end_col = vim.treesitter.get_node_range(node.node)
 					local node_text = vim.treesitter.get_node_text(node.node, buf)
-					local node_kind = node.kind or ""
-					node_kind = kind_map[node_kind] or node_kind
-					local icon, hl, _ = MiniIcons.get("lsp", node_kind)
+					local node_kind = kind_map[node.kind] or node.kind
+					local icon, hl = MiniIcons.get("lsp", node_kind)
 					entries[#entries + 1] = {
 						text = string.format("[%s %s] %s", icon, node_kind, node_text),
 						hl = hl,
@@ -1816,7 +1782,7 @@ MiniMisc.safely("later", function()
 			end
 		end
 		local mini_extra_namespace = vim.api.nvim_get_namespaces()["MiniExtraPickers"]
-		MiniPick.start(vim.tbl_deep_extend("force", opts or {}, {
+		MiniPick.start(vim.tbl_deep_extend("force", opts, {
 			source = {
 				items = entries,
 				name = "Tree-sitter symbols",
