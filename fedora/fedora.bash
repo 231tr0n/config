@@ -71,7 +71,7 @@ flatpak uninstall --unused -y
 rustup-init --profile complete -y
 rustup update
 
-sudo npm install -g opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
+sudo npm install -g @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 
 luarocks install --local --force https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec
 
