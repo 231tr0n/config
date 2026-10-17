@@ -132,6 +132,7 @@ mkdir -p "$HOME/.config/fish/functions"
 mkdir -p "$HOME/.config/tmux"
 mkdir -p "$HOME/.config/opencode"
 mkdir -p "$HOME/.config/conky"
+mkdir -p "$HOME/.config/htop"
 
 cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
 QT_QPA_PLATFORMTHEME=gtk3
@@ -146,6 +147,8 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 [Settings]
 gtk-application-prefer-dark-theme=1
 EOF
+
+curl https://raw.githubusercontent.com/231tr0n/config/main/htop/htoprc -o "$HOME/.config/htop/htoprc"
 
 nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 
