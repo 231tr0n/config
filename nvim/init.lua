@@ -1066,7 +1066,6 @@ MiniMisc.safely("now", function()
 	Nmap("]a", ":norm gxiagxina<CR>", "Move arg right")
 	Nmap("]e", ":lua MiniBracketed.diagnostic('forward',{severity=vim.diagnostic.severity.ERROR})<CR>", "Error forward")
 	Nmap("gC", ":lua MiniGit.show_at_cursor()<CR>", "Git line history")
-	Nmap("gD", ":lua G.toggle_diff_highlight()<CR>", "Highlight word diff in diff files")
 	Nmap("gd", ":lua MiniDiff.toggle_overlay()<CR>", "Show diff")
 	Nmap("gxx", '"+dd', "Cut line to clipboard")
 	Tmap("<Esc><Esc>", "<C-\\><C-n>", "Exit terminal mode")
@@ -1161,6 +1160,119 @@ MiniMisc.safely("now", function()
 					"Start jump",
 					{ buffer = true }
 				)
+			end
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = { "diff", "patch" },
+		callback = function(args)
+			local bufnr = args.buf
+			if vim.b[bufnr].diff_highlight_applied then
+				return
+			end
+			vim.b[bufnr].diff_highlight_applied = true
+			local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
+			vim.api.nvim_buf_clear_namespace(bufnr, diff_highlight_namespace, 0, -1)
+			local function highlight_range(change, start_byte, end_byte, highlight, priority)
+				vim.api.nvim_buf_set_extmark(bufnr, diff_highlight_namespace, change.line - 1, start_byte + 1, {
+					end_row = change.line - 1,
+					end_col = end_byte + 1,
+					hl_mode = "blend",
+					hl_group = highlight,
+					priority = priority,
+				})
+			end
+			local function highlight_hunk(changes, diff_start, diff_lines, highlight, priority)
+				if diff_lines == 0 then
+					return
+				end
+				for index = 1, #changes do
+					local change = changes[index]
+					if change.char_count >= diff_start then
+						local offset = diff_start - (change.char_count - change.content_chars) - 1
+						local remaining = diff_lines
+						local cursor = index
+						while remaining > 0 and cursor <= #changes do
+							local current = changes[cursor]
+							local available = current.content_chars - offset
+							local start_byte = vim.fn.byteidx(current.content, offset)
+							if available <= remaining then
+								highlight_range(current, start_byte, #current.content, highlight, priority)
+								remaining = remaining - available
+								offset = 0
+								cursor = cursor + 1
+							else
+								local end_byte = vim.fn.byteidx(current.content, offset + remaining)
+								highlight_range(current, start_byte, end_byte, highlight, priority)
+								remaining = 0
+							end
+						end
+						break
+					end
+				end
+			end
+			local function joined_text(changes)
+				local chars = {}
+				for _, change in ipairs(changes) do
+					vim.list_extend(chars, vim.fn.split(change.content, "\\zs"))
+				end
+				return #chars > 0 and table.concat(chars, "\n") .. "\n" or ""
+			end
+			local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+			table.insert(lines, " ")
+			local removed, added = {}, {}
+			local line_nr = 1
+			while line_nr <= #lines do
+				if lines[line_nr]:sub(1, 1) == "@" then
+					local removed_chars, added_chars = 0, 0
+					while line_nr <= #lines and lines[line_nr]:sub(1, 5) ~= "index" do
+						local line = lines[line_nr]
+						local marker = line:sub(1, 1)
+						if marker == "-" then
+							local content = line:sub(2)
+							local content_chars = vim.fn.strchars(content)
+							removed_chars = removed_chars + content_chars
+							table.insert(removed, {
+								line = line_nr,
+								content = content,
+								char_count = removed_chars,
+								content_chars = content_chars,
+							})
+						elseif marker == "+" then
+							local content = line:sub(2)
+							local content_chars = vim.fn.strchars(content)
+							added_chars = added_chars + content_chars
+							table.insert(added, {
+								line = line_nr,
+								content = content,
+								char_count = added_chars,
+								content_chars = content_chars,
+							})
+						else
+							if #removed ~= 0 and #added ~= 0 then
+								vim.text.diff(joined_text(removed), joined_text(added), {
+									result_type = "indices",
+									algorithm = "minimal",
+									ignore_whitespace = true,
+									ignore_whitespace_change = true,
+									ignore_whitespace_change_at_eol = true,
+									ignore_cr_at_eol = true,
+									ignore_blank_lines = true,
+									indent_heuristic = true,
+									on_hunk = function(start_removed, count_removed, start_added, count_added)
+										highlight_hunk(removed, start_removed, count_removed, "DiffDelete", 100)
+										highlight_hunk(added, start_added, count_added, "DiffAdd", 100)
+									end,
+								})
+							end
+							removed, added = {}, {}
+							removed_chars, added_chars = 0, 0
+						end
+						line_nr = line_nr + 1
+					end
+					line_nr = line_nr + 2
+				end
+				line_nr = line_nr + 1
 			end
 		end,
 	})
@@ -1710,115 +1822,4 @@ MiniMisc.safely("later", function()
 		end
 		vim.api.nvim__redraw({ statusline = true })
 	end)
-	G.toggle_diff_highlight = function()
-		if vim.bo.filetype ~= "diff" and vim.bo.filetype ~= "patch" then
-			return
-		end
-		local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
-		if #vim.api.nvim_buf_get_extmarks(0, diff_highlight_namespace, 0, -1, {}) > 0 then
-			vim.api.nvim_buf_clear_namespace(0, diff_highlight_namespace, 0, -1)
-			return
-		end
-		local function highlight_range(change, start_byte, end_byte, highlight, priority)
-			vim.api.nvim_buf_set_extmark(0, diff_highlight_namespace, change.line - 1, start_byte + 1, {
-				end_row = change.line - 1,
-				end_col = end_byte + 1,
-				hl_mode = "blend",
-				hl_group = highlight,
-				priority = priority,
-			})
-		end
-		local function highlight_hunk(changes, diff_start, diff_lines, highlight, priority)
-			if diff_lines == 0 then
-				return
-			end
-			for index = 1, #changes do
-				local change = changes[index]
-				if change.char_count >= diff_start then
-					local offset = diff_start - (change.char_count - change.content_chars) - 1
-					local remaining = diff_lines
-					local cursor = index
-					while remaining > 0 and cursor <= #changes do
-						local current = changes[cursor]
-						local available = current.content_chars - offset
-						local start_byte = vim.fn.byteidx(current.content, offset)
-						if available <= remaining then
-							highlight_range(current, start_byte, #current.content, highlight, priority)
-							remaining = remaining - available
-							offset = 0
-							cursor = cursor + 1
-						else
-							local end_byte = vim.fn.byteidx(current.content, offset + remaining)
-							highlight_range(current, start_byte, end_byte, highlight, priority)
-							remaining = 0
-						end
-					end
-					break
-				end
-			end
-		end
-		local function joined_text(changes)
-			local chars = {}
-			for _, change in ipairs(changes) do
-				vim.list_extend(chars, vim.fn.split(change.content, "\\zs"))
-			end
-			return #chars > 0 and table.concat(chars, "\n") .. "\n" or ""
-		end
-		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
-		table.insert(lines, " ")
-		local removed, added = {}, {}
-		local line_nr = 1
-		while line_nr <= #lines do
-			if lines[line_nr]:sub(1, 1) == "@" then
-				local removed_chars, added_chars = 0, 0
-				while line_nr <= #lines and lines[line_nr]:sub(1, 5) ~= "index" do
-					local line = lines[line_nr]
-					local marker = line:sub(1, 1)
-					if marker == "-" then
-						local content = line:sub(2)
-						local content_chars = vim.fn.strchars(content)
-						removed_chars = removed_chars + content_chars
-						table.insert(removed, {
-							line = line_nr,
-							content = content,
-							char_count = removed_chars,
-							content_chars = content_chars,
-						})
-					elseif marker == "+" then
-						local content = line:sub(2)
-						local content_chars = vim.fn.strchars(content)
-						added_chars = added_chars + content_chars
-						table.insert(added, {
-							line = line_nr,
-							content = content,
-							char_count = added_chars,
-							content_chars = content_chars,
-						})
-					else
-						if #removed ~= 0 and #added ~= 0 then
-							vim.text.diff(joined_text(removed), joined_text(added), {
-								result_type = "indices",
-								algorithm = "minimal",
-								ignore_whitespace = true,
-								ignore_whitespace_change = true,
-								ignore_whitespace_change_at_eol = true,
-								ignore_cr_at_eol = true,
-								ignore_blank_lines = true,
-								indent_heuristic = true,
-								on_hunk = function(start_removed, count_removed, start_added, count_added)
-									highlight_hunk(removed, start_removed, count_removed, "DiffDelete", 100)
-									highlight_hunk(added, start_added, count_added, "DiffAdd", 100)
-								end,
-							})
-						end
-						removed, added = {}, {}
-						removed_chars, added_chars = 0, 0
-					end
-					line_nr = line_nr + 1
-				end
-				line_nr = line_nr + 2
-			end
-			line_nr = line_nr + 1
-		end
-	end
 end)
