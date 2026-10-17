@@ -1167,10 +1167,6 @@ MiniMisc.safely("now", function()
 		pattern = { "diff", "patch" },
 		callback = function(args)
 			local bufnr = args.buf
-			if vim.b[bufnr].diff_highlight_applied then
-				return
-			end
-			vim.b[bufnr].diff_highlight_applied = true
 			local diff_highlight_namespace = vim.api.nvim_create_namespace("DiffHighlight")
 			vim.api.nvim_buf_clear_namespace(bufnr, diff_highlight_namespace, 0, -1)
 			local function highlight_range(change, start_byte, end_byte, highlight, priority)
