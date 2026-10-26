@@ -51,7 +51,6 @@ sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit conky
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable brave-browser
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
-sudo dnf install -y ollama llama-cpp
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 sudo dnf install -y nginx haproxy
 
@@ -86,6 +85,13 @@ gup update
 
 pipx install mbake
 pipx upgrade-all
+
+curl -fsSL https://ollama.com/install.sh | sh
+
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+echo -e "[Service]\nEnvironment=\"OLLAMA_IGPU_ENABLE=1\"" | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
 
 mbake init --force
 sed -i 's/auto_insert_phony_declarations = false/auto_insert_phony_declarations = true/' "$HOME/.bake.toml"
