@@ -1,6 +1,16 @@
 #!/bin/bash
 
-set -xe
+set -e
+set -o pipefail
+
+if [ -t 2 ]; then
+	PS4=$'\e[1;36m[RUN]\e[0m '
+else
+	PS4='[RUN] '
+fi
+set -x
+
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.luarocks/bin:$PATH"
 
 DEFAULT_USERNAME=""
 SSH_PASSPHRASE=""
@@ -25,8 +35,10 @@ while getopts 'u:s:h' opt; do
 done
 
 function info_log {
+	{ set +x; } 2>/dev/null
 	echo -ne "[\e[1;36mINFO\e[1;0m] "
 	echo -e "$1"
+	set -x
 }
 
 if [ -z "$DEFAULT_USERNAME" ]; then
@@ -34,6 +46,7 @@ if [ -z "$DEFAULT_USERNAME" ]; then
 	exit 1
 fi
 
+mkdir -p "$HOME/.ssh"
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
@@ -41,15 +54,16 @@ fi
 sudo dnf install -y dnf-plugins-core
 
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo --overwrite
+sudo dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
 
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch unzip ctags
-sudo dnf install -y go luajit delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
+sudo dnf install -y go luajit luarocks delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
 sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop telnet bleachbit conky
-sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts google-chrome-stable brave-browser
+sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts brave-browser
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 sudo dnf install -y nginx haproxy
@@ -70,16 +84,19 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';
 FLUSH PRIVILEGES;
 EOF
 
-flatpak install -y flathub com.discordapp.Discord
-flatpak install -y flathub com.github.finefindus.eyedropper
-flatpak install -y flathub io.github.cmus.cmus
-flatpak install -y flathub io.github.swordpuffin.rewaita
-flatpak install -y flathub org.telegram.desktop
+if ! flatpak remotes --columns=name | grep -qxF flathub; then
+	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi
+sudo flatpak install -y flathub com.discordapp.Discord
+sudo flatpak install -y flathub com.github.finefindus.eyedropper
+sudo flatpak install -y flathub io.github.cmus.cmus
+sudo flatpak install -y flathub io.github.swordpuffin.rewaita
+sudo flatpak install -y flathub org.telegram.desktop
 
-flatpak update -y
+sudo flatpak update -y
 
 sudo dnf autoremove -y
-flatpak uninstall --unused -y
+sudo flatpak uninstall --unused -y
 
 rustup-init --profile complete -y
 rustup update
@@ -102,7 +119,11 @@ gup update
 pipx install mbake
 pipx upgrade-all
 
-curl -fsSL https://ollama.com/install.sh | sh
+# Ollama's installer uses curl --progress-bar, which spams captured logs.
+curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
+sed -i 's/--progress-bar/--silent/g' /tmp/ollama-install.sh
+sh /tmp/ollama-install.sh
+rm -f /tmp/ollama-install.sh
 
 sudo mkdir -p /etc/systemd/system/ollama.service.d
 echo -e "[Service]\nEnvironment=\"OLLAMA_IGPU_ENABLE=1\"" | sudo tee /etc/systemd/system/ollama.service.d/override.conf
@@ -110,56 +131,66 @@ sudo systemctl daemon-reload
 sudo systemctl restart ollama
 
 mbake init --force
-sed -i 's/auto_insert_phony_declarations = false/auto_insert_phony_declarations = true/' "$HOME/.bake.toml"
-sed -i 's/group_phony_declarations = false/group_phony_declarations = true/' "$HOME/.bake.toml"
-sed -i 's/phony_at_top = false/phony_at_top = true/' "$HOME/.bake.toml"
-sed -i 's/max_consecutive_empty_lines = 2/max_consecutive_empty_lines = 1/' "$HOME/.bake.toml"
-sed -i 's/indent_nested_conditionals = false/indent_nested_conditionals = true/' "$HOME/.bake.toml"
-sed -i 's/tab_width = 2/tab_width = 4/' "$HOME/.bake.toml"
-sed -i 's/align_variable_assignments = false/align_variable_assignments = true/' "$HOME/.bake.toml"
-sed -i 's/align_across_comments = false/align_across_comments = true/' "$HOME/.bake.toml"
+BAKE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/bake.toml"
+# mbake 1.5 prefers a legacy ~/.bake.toml over the XDG config; move it aside so
+# the config edited here is the one mbake actually reads.
+if [ -f "$HOME/.bake.toml" ]; then
+	mv "$HOME/.bake.toml" "$HOME/.bake.toml.bak"
+fi
+sed -i 's/auto_insert_phony_declarations = false/auto_insert_phony_declarations = true/' "$BAKE_CONFIG"
+sed -i 's/group_phony_declarations = false/group_phony_declarations = true/' "$BAKE_CONFIG"
+sed -i 's/phony_at_top = false/phony_at_top = true/' "$BAKE_CONFIG"
+sed -i 's/max_consecutive_empty_lines = 2/max_consecutive_empty_lines = 1/' "$BAKE_CONFIG"
+sed -i 's/indent_nested_conditionals = false/indent_nested_conditionals = true/' "$BAKE_CONFIG"
+sed -i 's/tab_width = 2/tab_width = 4/' "$BAKE_CONFIG"
+sed -i 's/align_variable_assignments = false/align_variable_assignments = true/' "$BAKE_CONFIG"
+sed -i 's/align_across_comments = false/align_across_comments = true/' "$BAKE_CONFIG"
 
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls}
 
-LUA_LS_VER=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')
+LUA_LS_VER=$(curl -fsSL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')
 rm -rf "$HOME/.local/share/lua-language-server"
 mkdir -p "$HOME/.local/share/lua-language-server"
-curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" | tar xz -C "$HOME/.local/share/lua-language-server"
+curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" | tar xz -C "$HOME/.local/share/lua-language-server"
 ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
 
-GJF_VER=$(curl -sL https://api.github.com/repos/google/google-java-format/releases/latest | jq -r '.tag_name' | cut -c2-)
+GJF_VER=$(curl -fsSL https://api.github.com/repos/google/google-java-format/releases/latest | jq -r '.tag_name' | cut -c2-)
 rm -f "$HOME/.local/share/google-java-format/"*.jar
-curl -sL "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" -o "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
-printf '#!/bin/bash\nexec java -jar %s "$@"' "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar" >"$HOME/.local/bin/google-java-format"
+curl -fsSL "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" -o "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
+printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar" >"$HOME/.local/bin/google-java-format"
 chmod +x "$HOME/.local/bin/google-java-format"
 
-CS_TAG=$(curl -sL https://api.github.com/repos/checkstyle/checkstyle/releases/latest | jq -r '.tag_name')
+CS_TAG=$(curl -fsSL https://api.github.com/repos/checkstyle/checkstyle/releases/latest | jq -r '.tag_name')
 CS_VER=${CS_TAG#checkstyle-}
 rm -f "$HOME/.local/share/checkstyle/"*.jar
-curl -sL "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" -o "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
-printf '#!/bin/bash\nexec java -jar %s "$@"' "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar" >"$HOME/.local/bin/checkstyle"
+curl -fsSL "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" -o "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
+printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar" >"$HOME/.local/bin/checkstyle"
 chmod +x "$HOME/.local/bin/checkstyle"
 
 rm -rf "$HOME/.local/share/jdtls"
 mkdir -p "$HOME/.local/share/jdtls"
-curl -sL "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" | tar xz -C "$HOME/.local/share/jdtls"
+curl -fsSL "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" | tar xz -C "$HOME/.local/share/jdtls"
 ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
 
 sudo mkdir -p /usr/share/java/lombok
-sudo curl -sL "https://projectlombok.org/downloads/lombok.jar" -o /usr/share/java/lombok/lombok.jar
+sudo curl -fsSL "https://projectlombok.org/downloads/lombok.jar" -o /usr/share/java/lombok/lombok.jar
 
-JDB_VSIX=$(curl -sL https://open-vsx.org/api/vscjava/vscode-java-debug | jq -r '.files.download')
+JDB_VSIX=$(curl -fsSL https://open-vsx.org/api/vscjava/vscode-java-debug | jq -r '.files.download')
 sudo mkdir -p /usr/share/java-debug
-sudo rm -f /usr/share/java-debug/*.jar
-curl -sL "$JDB_VSIX" -o /tmp/vscjava.vscode-java-debug.vsix
+sudo find /usr/share/java-debug -maxdepth 1 -name '*.jar' -delete
+curl -fsSL "$JDB_VSIX" -o /tmp/vscjava.vscode-java-debug.vsix
 sudo unzip -o -j /tmp/vscjava.vscode-java-debug.vsix "extension/server/*.jar" -d /usr/share/java-debug
 rm -f /tmp/vscjava.vscode-java-debug.vsix
 
-sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
+if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
+	grep -qxF /usr/bin/fish /etc/shells || echo /usr/bin/fish | sudo tee -a /etc/shells
+	sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
+fi
 
 sudo usermod -aG docker "$DEFAULT_USERNAME"
 
 mkdir -p "$HOME/.config"
+mkdir -p "$HOME/Pictures"
 mkdir -p "$HOME/.config/environment.d"
 mkdir -p "$HOME/.config/gtk-3.0"
 mkdir -p "$HOME/.config/gtk-4.0"
@@ -187,22 +218,22 @@ EOF
 
 nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 
-curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png"
-curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png"
-curl https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png"
-curl https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf"
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish"
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish"
-curl https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish"
-curl https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
-curl https://raw.githubusercontent.com/231tr0n/config/main/htop/htoprc -o "$HOME/.config/htop/htoprc"
-curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
-curl https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o "$HOME/.vimrc"
-curl https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json"
-curl https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/htop/htoprc -o "$HOME/.config/htop/htoprc"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o "$HOME/.vimrc"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf"
 
-PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2>/dev/null | tr -d "'" | tr -d ' ')
+PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2>/dev/null | tr -d "'" | tr -d ' ' || true)
 if [ -n "$PROFILE_UUID" ]; then
 	dconf write /org/gnome/Ptyxis/Profiles/"$PROFILE_UUID"/label "'default'"
 	dconf write /org/gnome/Ptyxis/Profiles/"$PROFILE_UUID"/limit-scrollback false
@@ -268,9 +299,9 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
-gnome-extensions disable background-logo@fedorahosted.org
-gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
-gnome-extensions enable just-perfection-desktop@just-perfection
+gnome-extensions disable background-logo@fedorahosted.org || true
+gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
+gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com || true
+gnome-extensions enable just-perfection-desktop@just-perfection || true
 
 info_log 'Setup finished. Log out or reboot to apply all changes.'
