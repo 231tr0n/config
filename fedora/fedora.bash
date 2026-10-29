@@ -272,3 +272,5 @@ gnome-extensions disable background-logo@fedorahosted.org
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
 gnome-extensions enable just-perfection-desktop@just-perfection
+
+info_log 'Setup finished. Log out or reboot to apply all changes.'
