@@ -53,8 +53,22 @@ sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 sudo dnf install -y nginx haproxy
+sudo dnf install -y mariadb mariadb-server
 
 sudo dnf update -y
+
+sudo systemctl enable --now mariadb
+# Fedora initializes root@localhost with unix_socket auth, so sudo mariadb -u root
+# works without a password. These mirror mariadb-secure-installation with no auth
+# or root password change, while removing anonymous users, remote root logins, and
+# the test database.
+sudo mariadb -u root <<'EOF'
+DELETE FROM mysql.global_priv WHERE User='';
+DELETE FROM mysql.global_priv WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';
+FLUSH PRIVILEGES;
+EOF
 
 flatpak install -y flathub com.discordapp.Discord
 flatpak install -y flathub com.github.finefindus.eyedropper
@@ -72,7 +86,9 @@ rustup update
 
 sudo npm install -g @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 
-luarocks install --local --force https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec
+curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
+luarocks install --local --force /tmp/luacheck-dev-1.rockspec
+rm -f /tmp/luacheck-dev-1.rockspec
 
 cargo install cargo-update
 cargo install stylua --features luajit
