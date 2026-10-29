@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Open the terminal (ncurses) version of the conky dashboard.
+# Press q (or Ctrl-C) to quit; resizing the terminal re-centres the box.
+#
+# conky's ncurses backend has no key handling of its own, so this wrapper
+# watches stdin for q. It also:
+#  - exports CONKY_COLS/CONKY_LINES so conky-ncurses.conf can centre its box,
+#  - restarts conky on SIGWINCH so the box re-centres after a resize,
+#  - builds a terminfo entry whose setab is "default background", so conky
+#    paints the terminal's own background instead of hard-coded black.
+
+conf="${HOME}/.config/conky/conky-ncurses.conf"
+
+# No terminal to watch (e.g. piped output): let conky run normally.
+if [ ! -t 0 ] || [ ! -t 1 ]; then
+    exec conky -c "$conf" "$@"
+fi
+
+# --- terminal background terminfo -------------------------------------------
+# conky ncurses initialises every colour pair with a COLOR_BLACK background.
+# A copy of the current terminfo with setab mapped to \E[49m (default
+# background) makes those cells use the terminal's configured background.
+bg_term="conky-$(basename "$TERM")-bgdef"
+ti_dir="${HOME}/.terminfo"
+if [ ! -f "${ti_dir}/${bg_term:0:1}/${bg_term}" ] && command -v infocmp >/dev/null 2>&1 && command -v tic >/dev/null 2>&1; then
+    tmp_ti=$(mktemp) || tmp_ti=
+    if [ -n "$tmp_ti" ]; then
+        infocmp -1 "$TERM" 2>/dev/null \
+            | sed -e '2s/[^|]*/'"$bg_term"'/' -e 's/^[[:space:]]*setab=.*/\tsetab=\\E[49m,/' \
+            > "$tmp_ti" && tic -x -o "$ti_dir" "$tmp_ti" 2>/dev/null
+        rm -f "$tmp_ti"
+    fi
+fi
+if [ -f "${ti_dir}/${bg_term:0:1}/${bg_term}" ]; then
+    TERM="$bg_term"
+fi
+export TERM
+
+# --- run conky ----------------------------------------------------------------
+conky_pid=
+resized=0
+
+cleanup() {
+    trap - EXIT INT TERM WINCH
+    [ -n "$conky_pid" ] && kill "$conky_pid" 2>/dev/null
+    wait "$conky_pid" 2>/dev/null
+    stty sane 2>/dev/null
+    exit "${1:-0}"
+}
+
+trap 'cleanup 130' INT TERM
+trap 'cleanup 0' EXIT
+trap 'resized=1' WINCH
+
+start_conky() {
+    CONKY_COLS=$(tput cols) CONKY_LINES=$(tput lines) \
+        conky -q -c "$conf" "$@" &
+    conky_pid=$!
+}
+
+start_conky
+
+while kill -0 "$conky_pid" 2>/dev/null; do
+    key=
+    # -n1 makes bash read a single key without waiting for Enter.
+    if IFS= read -r -s -n 1 -t 0.2 key 2>/dev/null; then
+        case "$key" in
+            q|Q) break ;;
+        esac
+    fi
+    if [ "$resized" = 1 ]; then
+        resized=0
+        kill "$conky_pid" 2>/dev/null
+        wait "$conky_pid" 2>/dev/null
+        start_conky
+    fi
+done

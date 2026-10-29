@@ -1,0 +1,439 @@
+#!/usr/bin/python3
+# Print CPU/RAM/SWAP/DISK/GPU/NPU utilization for conky.
+#
+# Usage:
+#   usage sample                    - sample everything, refresh caches, print nothing
+#   usage ensure                    - sample only if the cache is stale, print nothing
+#   usage gpu|npu                   - print the cached GPU/NPU percentage
+#   usage pct cpu|ram|swap|disk     - print a percentage
+#   usage bar cpu|ram|swap|disk|gpu|npu [n]
+#                                   - print an ASCII usage bar (ncurses mode)
+#
+# CPU: deltas of /proc/stat counters between samples.
+# RAM/SWAP: /proc/meminfo (MemAvailable / SwapFree).
+# DISK: statvfs on the mount point.
+# GPU: sums the per-client i915 engine busy times from /proc/*/fdinfo and
+#      reports the busiest engine (render/copy/video/compute). This is the
+#      same accounting intel_gpu_top uses, and needs no root privileges.
+# NPU: uses the intel_vpu driver's cumulative npu_busy_time_us counter.
+
+import glob
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import time
+
+CACHE_DIR = os.path.join(
+    os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"), "conky"
+)
+STATE_FILE = os.path.join(CACHE_DIR, "usage-state.json")
+GPU_CACHE = os.path.join(CACHE_DIR, "gpu")
+NPU_CACHE = os.path.join(CACHE_DIR, "npu")
+CPU_CACHE = os.path.join(CACHE_DIR, "cpu")
+
+
+def read_file(path):
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as handle:
+            return handle.read()
+    except OSError:
+        return None
+
+
+def write_file(path, data):
+    tmp = f"{path}.{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as handle:
+        handle.write(data)
+    os.replace(tmp, path)
+
+
+def load_state():
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except (OSError, ValueError):
+        return {}
+
+
+def read_gpu():
+    """Return {device:client -> {engine: cumulative busy ns}} for i915."""
+    clients = {}
+
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+
+        try:
+            fds = os.scandir(f"/proc/{pid}/fd")
+        except OSError:
+            continue
+
+        with fds:
+            for entry in fds:
+                try:
+                    target = os.readlink(entry.path)
+                except OSError:
+                    continue
+                # Only fdinfo files for DRM devices are worth opening.
+                if "/dev/dri/" not in target:
+                    continue
+
+                text = read_file(f"/proc/{pid}/fdinfo/{entry.name}")
+                if not text or "drm-engine-" not in text:
+                    continue
+
+                device = None
+                client = None
+                engines = {}
+
+                for line in text.splitlines():
+                    if line.startswith("drm-pdev:"):
+                        device = line.split(":", 1)[1].strip()
+                    elif line.startswith("drm-client-id:"):
+                        client = line.split(":", 1)[1].strip()
+                    elif line.startswith("drm-engine-"):
+                        name, value = line.split(":", 1)
+                        parts = value.split()
+                        if not parts:
+                            continue
+                        engine = name[len("drm-engine-"):]
+                        try:
+                            busy = int(parts[0])
+                        except ValueError:
+                            continue
+                        # Several fds can refer to the same DRM client.
+                        if busy > engines.get(engine, 0):
+                            engines[engine] = busy
+
+                if client is None or not engines:
+                    continue
+
+                key = f"{device or '?'}:{client}"
+                current = clients.setdefault(key, {})
+                for engine, busy in engines.items():
+                    if busy > current.get(engine, 0):
+                        current[engine] = busy
+
+    return clients
+
+
+def read_npu():
+    """Return {device: cumulative busy microseconds} for Intel NPUs."""
+    devices = {}
+    for path in glob.glob("/sys/bus/pci/devices/*/npu_busy_time_us"):
+        text = read_file(path)
+        if text is None:
+            continue
+        try:
+            devices[path] = int(text)
+        except ValueError:
+            continue
+    return devices
+
+
+def percentage(value):
+    return max(0, min(100, int(round(value))))
+
+
+def pci_name(pattern, default):
+    """First lspci line matching pattern, turned into a readable device name."""
+    line = ""
+    try:
+        line = subprocess.check_output(
+            ["sh", "-c", "lspci -nn | grep -iE " + shlex.quote(pattern) + " | head -1"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.SubprocessError):
+        return default
+    if not line:
+        return default
+
+    # Drop "00:02.0 VGA compatible controller [0300]: " and "(rev 03)".
+    desc = re.sub(r"^.*?\[[0-9a-fA-F:]+\]:\s*", "", line, count=1)
+    desc = re.sub(r"\s*\(rev[^)]*\)", "", desc)
+    # Drop the trailing [8086:7d51] vendor/device id.
+    desc = re.sub(r"\s*\[[0-9a-fA-F:]+\]", "", desc)
+
+    # Prefer a descriptive [model] bracket, e.g. [Arc Pro 130T/140T],
+    # prefixed with the vendor's first word ("Intel Arc Pro 130T/140T").
+    model = None
+    for match in re.finditer(r"\[([A-Za-z][^]]*)\]", desc):
+        model = match.group(1)
+    if model:
+        vendor = desc.split()[0] if desc.split() else ""
+        return shorten_name((vendor + " " + model).strip()) or default
+
+    # No model bracket: use the description, e.g. "Intel Core Ultra NPU".
+    return shorten_name(desc) or default
+
+
+# Boilerplate words that waste space in a device name.
+NAME_FILLER = {"series", "processors", "corporation", "inc", "inc.", "corp", "corp."}
+
+
+def shorten_name(name, max_len=26):
+    """Compact a device name so it fits in the conky window.
+
+    Drops filler words first ("Intel Core Ultra 200H/200V Series Processors
+    NPU" -> "Intel Core Ultra 200H/200V NPU"), then the trailing device-type
+    word ("Intel Core Ultra 200H/200V"), then SKU numbers, and only cuts the
+    tail as a last resort.
+    """
+    words = [w for w in name.split() if w.lower().strip(",.") not in NAME_FILLER]
+    name = " ".join(words)
+    if len(name) > max_len and len(words) > 2:
+        words = words[:-1]
+        name = " ".join(words)
+    if len(name) > max_len:
+        trimmed = [w for w in words if not any(c.isdigit() for c in w)]
+        if len(trimmed) >= 2:
+            name = " ".join(trimmed)
+    if len(name) > max_len:
+        name = name[: max_len - 1].rstrip() + "."
+    return name
+
+
+def cached_name(kind, pattern, default):
+    """pci_name(), cached for an hour so conky does not re-run lspci."""
+    cache = os.path.join(CACHE_DIR, kind + "-name")
+    try:
+        if time.time() - os.path.getmtime(cache) < 3600:
+            value = read_file(cache)
+            if value:
+                return value.strip()
+    except OSError:
+        pass
+    name = pci_name(pattern, default)
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        write_file(cache, name + "\n")
+    except OSError:
+        pass
+    return name
+
+
+def sample():
+    os.makedirs(CACHE_DIR, exist_ok=True)
+
+    state = load_state()
+    previous_time = state.get("time")
+    previous_gpu = state.get("gpu", {})
+    previous_npu = state.get("npu", {})
+    previous_cpu = state.get("cpu")
+
+    gpu_now = read_gpu()
+    npu_now = read_npu()
+    cpu_now = read_cpu()
+    now = time.monotonic()
+
+    gpu_usage = 0.0
+    npu_usage = 0.0
+    cpu_usage = 0.0
+
+    if previous_time is not None:
+        elapsed = now - previous_time
+        # Ignore stale state (conky restart, suspend, reboot, etc.).
+        if 0 < elapsed <= 5:
+            engine_busy = {}
+
+            for client, engines in gpu_now.items():
+                old_engines = previous_gpu.get(client)
+                if not old_engines:
+                    continue
+                for engine, busy in engines.items():
+                    old_busy = old_engines.get(engine)
+                    if old_busy is None or busy < old_busy:
+                        continue
+                    engine_busy[engine] = engine_busy.get(engine, 0) + (busy - old_busy)
+
+            if engine_busy:
+                gpu_usage = max(engine_busy.values()) / (elapsed * 1e9) * 100
+
+            for device, busy in npu_now.items():
+                old_busy = previous_npu.get(device)
+                if old_busy is None or busy < old_busy:
+                    continue
+                usage = (busy - old_busy) / (elapsed * 1e6) * 100
+                npu_usage = max(npu_usage, usage)
+
+            if previous_cpu and cpu_now[0] > previous_cpu[0]:
+                total_delta = cpu_now[0] - previous_cpu[0]
+                idle_delta = cpu_now[1] - previous_cpu[1]
+                cpu_usage = 100 * (1 - idle_delta / total_delta) if total_delta else 0
+
+    write_file(GPU_CACHE, f"{percentage(gpu_usage)}\n")
+    write_file(NPU_CACHE, f"{percentage(npu_usage)}\n")
+    write_file(CPU_CACHE, f"{percentage(cpu_usage)}\n")
+    write_file(
+        STATE_FILE,
+        json.dumps(
+            {"time": now, "gpu": gpu_now, "npu": npu_now, "cpu": list(cpu_now)},
+            separators=(",", ":"),
+        ),
+    )
+
+
+def cache_age():
+    """Age in seconds of the older of the two cache files, or None."""
+    try:
+        return time.time() - min(
+            os.path.getmtime(GPU_CACHE), os.path.getmtime(NPU_CACHE)
+        )
+    except OSError:
+        return None
+
+
+def ensure(max_age=0.9):
+    """Sample only when the cache is missing or stale.
+
+    The ncurses viewer calls this on every update (once per second), so it
+    keeps working on its own, but does not take a second sample while the
+    desktop conky has just refreshed the cache.
+    """
+    age = cache_age()
+    if age is None or age > max_age:
+        sample()
+
+
+def cached(path):
+    value = read_file(path)
+    if value is None:
+        sample()
+        value = read_file(path)
+    return (value or "0\n").strip()
+
+
+def ascii_bar(value, width):
+    width = max(1, min(width, 200))
+    filled = max(0, min(width, int(round(value * width / 100))))
+    return "#" * filled + "-" * (width - filled)
+
+
+def read_cpu():
+    """Return (total, idle) jiffies from /proc/stat."""
+    with open("/proc/stat", "r", encoding="utf-8") as handle:
+        parts = handle.readline().split()
+    values = [int(value) for value in parts[1:9]]
+    idle = values[3] + values[4]
+    return sum(values), idle
+
+
+def read_memory():
+    """Return (memory_percent, swap_percent, memory_used, memory_total, swap_used, swap_total)."""
+    info = {}
+    with open("/proc/meminfo", "r", encoding="utf-8") as handle:
+        for line in handle:
+            key, value = line.split(":", 1)
+            info[key] = int(value.split()[0])
+
+    total = info.get("MemTotal", 0)
+    available = info.get("MemAvailable", info.get("MemFree", 0))
+    used = total - available
+    memory = used / total * 100 if total else 0
+
+    swap_total = info.get("SwapTotal", 0)
+    swap_free = info.get("SwapFree", 0)
+    swap = (swap_total - swap_free) / swap_total * 100 if swap_total else 0
+
+    return memory, swap, used, total, swap_total - swap_free, swap_total
+
+
+def read_disk(path):
+    """Return (disk_percent, disk_used, disk_total) for the mount point."""
+    try:
+        stats = os.statvfs(path)
+    except OSError:
+        return 0, 0, 0
+
+    total = stats.f_blocks * stats.f_frsize
+    free = stats.f_bavail * stats.f_frsize
+    used = total - stats.f_bfree * stats.f_frsize
+    percent = used / (used + free) * 100 if used + free else 0
+    return percent, used, used + free
+
+
+def ascii_bar(value, width):
+    width = max(1, min(width, 200))
+    filled = max(0, min(width, int(round(value * width / 100))))
+    return "#" * filled + "-" * (width - filled)
+
+
+def main():
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+
+    if mode == "sample":
+        sample()
+    elif mode == "ensure":
+        ensure()
+    elif mode == "gpu":
+        print(cached(GPU_CACHE))
+    elif mode == "npu":
+        print(cached(NPU_CACHE))
+    elif mode == "name" and len(sys.argv) > 2 and sys.argv[2] in ("gpu", "npu"):
+        if sys.argv[2] == "gpu":
+            print(cached_name("gpu", "vga|3d|display", "GPU"))
+        else:
+            print(cached_name("npu", "npu", "NPU"))
+    elif mode == "pct" and len(sys.argv) > 2 and sys.argv[2] in (
+        "cpu", "ram", "swap", "disk", "gpu", "npu"
+    ):
+        ensure()
+        what = sys.argv[2]
+        if what == "cpu":
+            value = int(cached(CPU_CACHE) or 0)
+        elif what == "ram":
+            value = percentage(read_memory()[0])
+        elif what == "swap":
+            value = percentage(read_memory()[1])
+        elif what == "disk":
+            value = percentage(read_disk("/")[0])
+        elif what == "gpu":
+            value = int(cached(GPU_CACHE) or 0)
+        else:
+            value = int(cached(NPU_CACHE) or 0)
+        # Fixed width so the % column lines up in the ncurses box.
+        print(f"{value:3d}")
+    elif mode == "bar" and len(sys.argv) > 2 and sys.argv[2] in (
+        "cpu", "ram", "swap", "disk", "gpu", "npu"
+    ):
+        width = 24
+        if len(sys.argv) > 3:
+            try:
+                width = int(sys.argv[3])
+            except ValueError:
+                pass
+        ensure()
+        if sys.argv[2] == "cpu":
+            print(ascii_bar(int(cached(CPU_CACHE) or 0), width))
+        elif sys.argv[2] == "ram":
+            memory, _, _, _, _, _ = read_memory()
+            print(ascii_bar(memory, width))
+        elif sys.argv[2] == "swap":
+            _, swap, _, _, _, _ = read_memory()
+            print(ascii_bar(swap, width))
+        elif sys.argv[2] == "disk":
+            disk, _, _ = read_disk("/")
+            print(ascii_bar(disk, width))
+        elif sys.argv[2] == "gpu":
+            value = int(cached(GPU_CACHE) or 0)
+            print(ascii_bar(value, width))
+        elif sys.argv[2] == "npu":
+            value = int(cached(NPU_CACHE) or 0)
+            print(ascii_bar(value, width))
+    else:
+        print(
+            f"usage: {sys.argv[0]} sample|ensure|gpu|npu|name gpu|npu"
+            "|pct cpu|ram|swap|disk|bar cpu|ram|swap|disk|gpu|npu [width]",
+            file=sys.stderr,
+        )
+        return 2
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
