@@ -99,14 +99,46 @@ sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel ocl-icd-deve
 
 # llama.cpp - build latest from source with Vulkan + OpenVINO support
 LLAMA_DIR="$HOME/.local/share/llama.cpp"
+BUILT_TAG_FILE="$LLAMA_DIR/.last_built_release"
+NEED_BUILD=0
+
+info_log 'Checking llama.cpp for updates...'
+LLAMA_LATEST_TAG="$(curl -fsSL https://api.github.com/repos/ggml-org/llama.cpp/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | head -1)"
+if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
+	LLAMA_LATEST_TAG="$(curl -fsSL https://api.github.com/repos/ggml-org/llama.cpp/tags 2>/dev/null | jq -r '.[0].name' 2>/dev/null | head -1)"
+fi
+
 if [ ! -f "$LLAMA_DIR/build/bin/llama-server" ]; then
-	info_log 'Building llama.cpp from source...'
+	NEED_BUILD=1
+else
+	LLAMA_BUILT_TAG=""
+	if [ -f "$BUILT_TAG_FILE" ]; then
+		IFS= read -r LLAMA_BUILT_TAG <"$BUILT_TAG_FILE" 2>/dev/null || LLAMA_BUILT_TAG=""
+		LLAMA_BUILT_TAG="${LLAMA_BUILT_TAG#"${LLAMA_BUILT_TAG%%[![:space:]]*}"}"
+		LLAMA_BUILT_TAG="${LLAMA_BUILT_TAG%"${LLAMA_BUILT_TAG##*[![:space:]]}"}"
+	fi
+	if [ -n "$LLAMA_LATEST_TAG" ] && [ "$LLAMA_LATEST_TAG" != "null" ]; then
+		if [ -z "$LLAMA_BUILT_TAG" ] || [ "$LLAMA_BUILT_TAG" != "$LLAMA_LATEST_TAG" ]; then
+			NEED_BUILD=1
+		fi
+	fi
+fi
+
+if [ "$NEED_BUILD" -eq 1 ]; then
+	info_log "llama.cpp updating to ${LLAMA_LATEST_TAG:-latest}..."
 	if [ ! -d "$LLAMA_DIR/.git" ]; then
 		rm -rf "$LLAMA_DIR"
-		git clone --depth 1 https://github.com/ggml-org/llama.cpp.git "$LLAMA_DIR"
+		git clone https://github.com/ggml-org/llama.cpp.git "$LLAMA_DIR"
 	fi
 	cd "$LLAMA_DIR"
-	git pull --ff-only 2>/dev/null || true
+	git fetch --tags --force 2>/dev/null || true
+	if [ -n "$LLAMA_LATEST_TAG" ] && [ "$LLAMA_LATEST_TAG" != "null" ]; then
+		git checkout "tags/$LLAMA_LATEST_TAG" 2>/dev/null || git checkout "$LLAMA_LATEST_TAG" 2>/dev/null || git reset --hard "origin/$LLAMA_LATEST_TAG" 2>/dev/null || true
+	else
+		git fetch origin 2>/dev/null || true
+		git reset --hard origin/master 2>/dev/null || git reset --hard origin/main 2>/dev/null || true
+	fi
+	rm -rf build
 	cmake -B build \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DGGML_NATIVE=ON \
@@ -115,9 +147,14 @@ if [ ! -f "$LLAMA_DIR/build/bin/llama-server" ]; then
 		-DOpenCL_LIBRARY=/usr/lib64/libOpenCL.so.1 \
 		-DOpenCL_INCLUDE_DIR=/usr/include
 	cmake --build build --config Release -j"$(nproc)"
+	if [ -n "$LLAMA_LATEST_TAG" ] && [ "$LLAMA_LATEST_TAG" != "null" ]; then
+		echo "$LLAMA_LATEST_TAG" >"$BUILT_TAG_FILE"
+	else
+		git rev-parse HEAD >"$BUILT_TAG_FILE" 2>/dev/null || true
+	fi
 	cd - >/dev/null
 else
-	info_log 'llama.cpp already built, skipping.'
+	info_log "llama.cpp ${LLAMA_BUILT_TAG:-current} is up to date, skipping."
 fi
 mkdir -p "$HOME/.local/bin"
 for bin in llama-server llama-cli llama-bench llama-perplexity llama-mtmd-cli llama-gguf llama-imatrix; do
