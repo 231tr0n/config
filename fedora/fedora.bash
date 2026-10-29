@@ -42,7 +42,7 @@ sudo dnf install -y dnf-plugins-core
 
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo --overwrite
 
-sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch ctags
+sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch unzip ctags
 sudo dnf install -y go luajit delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
 sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
@@ -103,7 +103,7 @@ sed -i 's/tab_width = 2/tab_width = 4/' "$HOME/.bake.toml"
 sed -i 's/align_variable_assignments = false/align_variable_assignments = true/' "$HOME/.bake.toml"
 sed -i 's/align_across_comments = false/align_across_comments = true/' "$HOME/.bake.toml"
 
-mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle}
+mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls}
 
 LUA_LS_VER=$(curl -sL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest | jq -r '.tag_name')
 rm -rf "$HOME/.local/share/lua-language-server"
@@ -123,6 +123,21 @@ rm -f "$HOME/.local/share/checkstyle/"*.jar
 curl -sL "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" -o "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
 printf '#!/bin/bash\nexec java -jar %s "$@"' "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar" >"$HOME/.local/bin/checkstyle"
 chmod +x "$HOME/.local/bin/checkstyle"
+
+rm -rf "$HOME/.local/share/jdtls"
+mkdir -p "$HOME/.local/share/jdtls"
+curl -sL "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" | tar xz -C "$HOME/.local/share/jdtls"
+ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
+
+sudo mkdir -p /usr/share/java/lombok
+sudo curl -sL "https://projectlombok.org/downloads/lombok.jar" -o /usr/share/java/lombok/lombok.jar
+
+JDB_VSIX=$(curl -sL https://open-vsx.org/api/vscjava/vscode-java-debug | jq -r '.files.download')
+sudo mkdir -p /usr/share/java-debug
+sudo rm -f /usr/share/java-debug/*.jar
+curl -sL "$JDB_VSIX" -o /tmp/vscjava.vscode-java-debug.vsix
+sudo unzip -o -j /tmp/vscjava.vscode-java-debug.vsix "extension/server/*.jar" -d /usr/share/java-debug
+rm -f /tmp/vscjava.vscode-java-debug.vsix
 
 sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 
