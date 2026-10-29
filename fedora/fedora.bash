@@ -291,10 +291,10 @@ nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
 curl -fL --retry 3 --retry-delay 2 https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png" || true
 curl -fL --retry 3 --retry-delay 2 https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png" || true
 curl -fL --retry 3 --retry-delay 2 https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-ncurses.conf -o "$HOME/.config/conky/conky-ncurses.conf" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/usage -o "$HOME/.config/conky/usage" && chmod +x "$HOME/.config/conky/usage" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-tui -o "$HOME/.local/bin/conky-tui" && chmod +x "$HOME/.local/bin/conky-tui" || true
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-ncurses.conf -o "$HOME/.config/conky/conky-ncurses.conf"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/usage -o "$HOME/.config/conky/usage" && chmod +x "$HOME/.config/conky/usage"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-tui -o "$HOME/.local/bin/conky-tui" && chmod +x "$HOME/.local/bin/conky-tui"
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish"
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish"
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish"
