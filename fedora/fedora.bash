@@ -95,7 +95,7 @@ sudo dnf install -y intel-level-zero oneapi-level-zero oneapi-level-zero-devel i
 # OpenVINO for Intel GPU + NPU
 sudo dnf install -y openvino openvino-devel python3-openvino intel-npu-compiler
 # Build deps for llama.cpp
-sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel ocl-icd-devel
+sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel ocl-icd-devel tbb-devel
 
 # llama.cpp - build latest from source with Vulkan + OpenVINO support
 LLAMA_DIR="$HOME/.local/share/llama.cpp"
