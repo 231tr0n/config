@@ -8,6 +8,12 @@ if [ -t 2 ]; then
 else
 	PS4='[RUN] '
 fi
+
+if [ -t 1 ]; then
+	INFO_TAG=$'\e[1;36m[INFO]\e[0m '
+else
+	INFO_TAG='[INFO] '
+fi
 set -x
 
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.luarocks/bin:$PATH"
@@ -36,7 +42,7 @@ done
 
 function info_log {
 	{ set +x; } 2>/dev/null
-	echo -ne "[\e[1;36mINFO\e[1;0m] "
+	echo -ne "$INFO_TAG"
 	echo -e "$1"
 	set -x
 }
