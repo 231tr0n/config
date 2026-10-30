@@ -1316,7 +1316,6 @@ MiniMisc.safely("now", function()
 	local non_text_filetypes = {
 		netrw = true,
 		help = true,
-		nofile = true,
 		qf = true,
 		git = true,
 		diff = true,
@@ -1350,6 +1349,43 @@ MiniMisc.safely("now", function()
 		acwrite = true,
 		nowrite = true,
 	}
+	local file_winbar = "⠀⠀󰁔 %F"
+	local function sync_winbar(buf)
+		if not vim.api.nvim_buf_is_valid(buf) then
+			return
+		end
+		local buftype = vim.bo[buf].buftype
+		local filetype = vim.bo[buf].filetype
+		local show = (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype]
+		for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+			if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+				if show then
+					vim.wo[win].winbar = file_winbar
+				elseif vim.wo[win].winbar == file_winbar then
+					vim.wo[win].winbar = ""
+				end
+			end
+		end
+	end
+	local non_text_listchars = "leadmultispace:  ,tab:  "
+	local function sync_win_opts(buf)
+		if not vim.api.nvim_buf_is_valid(buf) then
+			return
+		end
+		local filetype = vim.bo[buf].filetype
+		if not non_text_filetypes[filetype] then
+			return
+		end
+		for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+			if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+				vim.wo[win].listchars = non_text_listchars
+				if filetype == "git" or filetype == "diff" then
+					vim.wo[win].foldmethod = "expr"
+					vim.wo[win].foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				end
+			end
+		end
+	end
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "*",
 		callback = function(args)
@@ -1373,26 +1409,28 @@ MiniMisc.safely("now", function()
 				vim.b[buf].minicursorword_disable = true
 				vim.b[buf].miniindentscope_disable = true
 				vim.b[buf].minitrailspace_disable = true
-				vim.wo.listchars = "leadmultispace:  ,tab:  "
+				sync_win_opts(buf)
 				MiniTrailspace.unhighlight()
 				if filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
 				end
-				if filetype == "git" or filetype == "diff" then
-					vim.wo.foldmethod = "expr"
-					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-				end
 			end
 			if (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype] then
-				vim.wo.winbar = "⠀⠀󰁔 %F"
+				sync_winbar(buf)
 				Map(
 					{ "n", "x", "o" },
 					"<CR>",
 					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
 					"Start jump",
-					{ buffer = true }
+					{ buffer = buf }
 				)
 			end
+		end,
+	})
+	vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType" }, {
+		callback = function(args)
+			sync_winbar(args.buf)
+			sync_win_opts(args.buf)
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
@@ -1584,7 +1622,7 @@ MiniMisc.safely("now", function()
 		return path ~= vim.fn.stdpath("config")
 	end, vim.api.nvim_get_runtime_file("", true))
 	table.insert(lua_runtime_files, "${3rd}/luv/library")
-	local jdtls_bundles = vim.split(vim.fn.glob("/usr/share/java-debug/*.jar", true), "\n")
+	local jdtls_bundles = vim.fn.glob("/usr/share/java-debug/*.jar", true, true)
 	local lsp_servers = {
 		lua_ls = {
 			---@type lspconfig.settings.lua_ls
