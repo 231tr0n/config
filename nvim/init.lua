@@ -639,6 +639,7 @@ MiniMisc.safely("now", function()
 	require("mini.tabline").setup({
 		tabpage_section = "right",
 	})
+	vim.o.showtabline = 1
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
 end)
@@ -1146,9 +1147,9 @@ MiniMisc.safely("now", function()
 			virtual_lines = not vim.diagnostic.config().virtual_lines,
 		})
 	end
-	local function window_type_open(field)
+	local function window_type_open(info_field)
 		for _, win in ipairs(vim.fn.getwininfo()) do
-			if win[field] == 1 then
+			if win[info_field] == 1 then
 				return true
 			end
 		end
@@ -1350,55 +1351,6 @@ MiniMisc.safely("now", function()
 		nowrite = true,
 	}
 	local augroup = vim.api.nvim_create_augroup("ConfigAutocmds", { clear = true })
-	local file_winbar = "⠀⠀󰁔 %F"
-	local function multiple_windows()
-		local count = 0
-		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-			if vim.api.nvim_win_get_config(win).relative == "" then
-				count = count + 1
-				if count > 1 then
-					return true
-				end
-			end
-		end
-		return false
-	end
-	local function sync_winbar(buf)
-		if not vim.api.nvim_buf_is_valid(buf) then
-			return
-		end
-		local buftype = vim.bo[buf].buftype
-		local filetype = vim.bo[buf].filetype
-		local show = multiple_windows() and (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype]
-		for _, win in ipairs(vim.fn.win_findbuf(buf)) do
-			if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
-				if show then
-					vim.wo[win].winbar = file_winbar
-				elseif vim.wo[win].winbar == file_winbar then
-					vim.wo[win].winbar = ""
-				end
-			end
-		end
-	end
-	local non_text_listchars = "leadmultispace:  ,tab:  "
-	local function sync_win_opts(buf)
-		if not vim.api.nvim_buf_is_valid(buf) then
-			return
-		end
-		local filetype = vim.bo[buf].filetype
-		if not non_text_filetypes[filetype] then
-			return
-		end
-		for _, win in ipairs(vim.fn.win_findbuf(buf)) do
-			if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
-				vim.wo[win].listchars = non_text_listchars
-				if filetype == "git" or filetype == "diff" then
-					vim.wo[win].foldmethod = "expr"
-					vim.wo[win].foldexpr = "v:lua.MiniGit.diff_foldexpr()"
-				end
-			end
-		end
-	end
 	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
 		pattern = "*",
@@ -1408,48 +1360,40 @@ MiniMisc.safely("now", function()
 			local buftype = vim.bo[buf].buftype
 			if html_like_filetypes[filetype] then
 				vim.bo[buf].omnifunc = "htmlcomplete#CompleteTags"
-				Imap("><Space>", ">", "Cancel html pairs", { buffer = buf })
+				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
 				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
-					buffer = buf,
+					buffer = true,
 				})
 				Imap(">", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Sameline html pairs", {
-					buffer = buf,
+					buffer = true,
 				})
 				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>", "Sameline cursor end html pairs", {
-					buffer = buf,
+					buffer = true,
 				})
 			end
 			if non_text_filetypes[filetype] then
 				vim.b[buf].minicursorword_disable = true
 				vim.b[buf].miniindentscope_disable = true
 				vim.b[buf].minitrailspace_disable = true
-				sync_win_opts(buf)
+				vim.wo.listchars = "leadmultispace:  ,tab:  "
 				MiniTrailspace.unhighlight()
 				if filetype == "dap-repl" then
 					require("dap.ext.autocompl").attach()
 				end
+				if filetype == "git" or filetype == "diff" then
+					vim.wo.foldmethod = "expr"
+					vim.wo.foldexpr = "v:lua.MiniGit.diff_foldexpr()"
+				end
 			end
 			if (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype] then
-				sync_winbar(buf)
+				vim.wo.winbar = "⠀⠀󰁔 %F"
 				Map(
 					{ "n", "x", "o" },
 					"<CR>",
 					":lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>",
 					"Start jump",
-					{ buffer = buf }
+					{ buffer = true }
 				)
-			end
-		end,
-	})
-	vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType", "WinEnter", "WinNew", "WinClosed", "TabEnter" }, {
-		group = augroup,
-		callback = function()
-			for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-				if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
-					local buf = vim.api.nvim_win_get_buf(win)
-					sync_winbar(buf)
-					sync_win_opts(buf)
-				end
 			end
 		end,
 	})
