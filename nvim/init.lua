@@ -48,7 +48,10 @@ MiniMisc.safely("now", function()
 	G = {
 		recent_keys = {},
 		terminal_win = nil,
+		terminal_buf = nil,
 		float_terminal_win = nil,
+		float_terminal_buf = nil,
+		previous_buf = nil,
 		float_border = "🭽,▔,🭾,▕,🭿,▁,🭼,▏",
 		offset_encoding = "utf-16",
 		case_style = "snake",
@@ -129,6 +132,9 @@ MiniMisc.safely("now", function()
 			})
 			return selected
 		end,
+		bottom_float_row = function()
+			return vim.o.lines - vim.o.cmdheight - (vim.o.laststatus > 0 and 1 or 0) - 1
+		end,
 	}
 end)
 
@@ -173,6 +179,7 @@ MiniMisc.safely("now", function()
 	vim.o.number = true
 	vim.o.path = "**"
 	vim.o.pumblend = 0
+	vim.o.pumborder = G.float_border
 	vim.o.scrolloff = 999
 	vim.o.shiftwidth = 2
 	vim.o.shortmess = "aoOtTcCF"
@@ -193,7 +200,6 @@ MiniMisc.safely("now", function()
 	vim.o.wildoptions = "pum,fuzzy"
 	vim.o.winblend = 0
 	vim.o.winborder = G.float_border
-	vim.o.pumborder = G.float_border
 	vim.o.wrap = false
 	vim.lsp.inline_completion.enable(true)
 	-- vim.lsp.codelens.enable(true)
@@ -302,7 +308,7 @@ MiniMisc.safely("now", function()
 		window = {
 			delay = 0,
 			config = function()
-				return { row = vim.o.lines - vim.o.cmdheight - (vim.o.laststatus > 0 and 1 or 0) - 1 }
+				return { row = G.bottom_float_row() }
 			end,
 		},
 	})
@@ -639,196 +645,163 @@ end)
 
 -- Plugins setup
 MiniMisc.safely("now", function()
-	-- Everforest colorscheme
 	local everforest = {
 		dark = {
 			bg = "#2d353b",
 			fg = "#d3c6aa",
-			bg_dim = "#232a2e",
-			bg1 = "#343f44",
-			bg2 = "#3d484d",
-			bg3 = "#475258",
-			bg4 = "#4f585e",
-			bg5 = "#56635f",
-			bg_visual = "#543a48",
-			bg_red = "#514045",
-			bg_yellow = "#4d4c43",
-			bg_green = "#425047",
-			bg_blue = "#3a515d",
-			bg_purple = "#4a444e",
+			bg_edge = "#232a2e",
+			bg_edge2 = "#232a2e",
+			bg_mid = "#343f44",
+			bg_mid2 = "#4f585e",
+			fg_mid = "#859289",
+			fg_mid2 = "#7a8478",
+			fg_edge = "#9da9a0",
+			accent = "#a7c080",
+			accent_bg = "#3d484d",
 			red = "#e67e80",
+			red_bg = "#514045",
 			orange = "#e69875",
+			orange_bg = "#4d4c43",
 			yellow = "#dbbc7f",
+			yellow_bg = "#4d4c43",
 			green = "#a7c080",
-			aqua = "#83c092",
+			green_bg = "#425047",
+			cyan = "#83c092",
+			cyan_bg = "#3a515d",
+			azure = "#7fbbb3",
+			azure_bg = "#3a515d",
 			blue = "#7fbbb3",
+			blue_bg = "#3a515d",
 			purple = "#d699b6",
-			grey0 = "#7a8478",
-			grey1 = "#859289",
-			grey2 = "#9da9a0",
+			purple_bg = "#4a444e",
 		},
 		light = {
 			bg = "#fdf6e3",
 			fg = "#5c6a72",
-			bg_dim = "#efebd4",
-			bg1 = "#f4f0d9",
-			bg2 = "#efebd4",
-			bg3 = "#e6e2cc",
-			bg4 = "#e0dcc7",
-			bg5 = "#bdc3af",
-			bg_visual = "#eaedc8",
-			bg_red = "#fde3da",
-			bg_yellow = "#faedcd",
-			bg_green = "#f0f1d2",
-			bg_blue = "#e9f0e9",
-			bg_purple = "#fae8e2",
+			bg_edge = "#efebd4",
+			bg_edge2 = "#efebd4",
+			bg_mid = "#f4f0d9",
+			bg_mid2 = "#e0dcc7",
+			fg_mid = "#939f91",
+			fg_mid2 = "#a6b0a0",
+			fg_edge = "#829181",
+			accent = "#8da101",
+			accent_bg = "#efebd4",
 			red = "#f85552",
+			red_bg = "#fde3da",
 			orange = "#f57d26",
+			orange_bg = "#faedcd",
 			yellow = "#dfa000",
+			yellow_bg = "#faedcd",
 			green = "#8da101",
-			aqua = "#35a77c",
+			green_bg = "#f0f1d2",
+			cyan = "#35a77c",
+			cyan_bg = "#e9f0e9",
+			azure = "#3a94c5",
+			azure_bg = "#e9f0e9",
 			blue = "#3a94c5",
+			blue_bg = "#e9f0e9",
 			purple = "#df69ba",
-			grey0 = "#a6b0a0",
-			grey1 = "#939f91",
-			grey2 = "#829181",
+			purple_bg = "#fae8e2",
 		},
 	}
-	-- Bold handling
 	local bold_allowed = { Bold = true, TSStrong = true, ["@markup.strong"] = true }
-	local bold_only = {}
-	local colorize_scheduled = false
-	local bold_distinctions = {
-		"reverse",
-		"standout",
-		"italic",
-		"underline",
-		"undercurl",
-		"underdouble",
-		"underdotted",
-		"underdashed",
-		"strikethrough",
-	}
+	local bold_distinctions =
+		" reverse standout italic underline undercurl underdouble underdotted underdashed strikethrough "
+	local bold_only, colorize_scheduled = {}, false
+	local function has_distinction(hl)
+		if hl.link then
+			return true
+		end
+		for attr in pairs(hl) do
+			if bold_distinctions:find(" " .. attr .. " ", 1, true) then
+				return true
+			end
+		end
+		return false
+	end
 	local function colorize_bold_only()
 		colorize_scheduled = false
-		local fallback = G.EverforestColors and G.EverforestColors.red
-		if not fallback then
+		local red = G.everforest_colors and G.everforest_colors.red
+		local fallback = red and vim.api.nvim_get_color_by_name(red)
+		if not fallback or fallback == -1 then
 			return
 		end
 		local normal = vim.api.nvim_get_hl(0, { name = "Normal" })
 		local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat" })
 		for name in pairs(bold_only) do
 			local hl = vim.api.nvim_get_hl(0, { name = name })
-			local distinguishable = hl.link ~= nil
-			for _, attr in ipairs(bold_distinctions) do
-				distinguishable = distinguishable or hl[attr] ~= nil
-			end
 			local plain_fg = hl.fg == nil or hl.fg == normal.fg
 			local plain_bg = hl.bg == nil or hl.bg == normal.bg or hl.bg == normal_float.bg
-			if not distinguishable and plain_fg and plain_bg then
+			if plain_fg and plain_bg then
 				hl.fg = fallback
 				Hi(name, hl)
 			end
 		end
+		bold_only = {}
 	end
-	local function schedule_colorize()
-		if colorize_scheduled then
-			return
+	local function strip_bold(name, hl)
+		if type(hl) ~= "table" or bold_allowed[name] then
+			return hl
 		end
-		colorize_scheduled = true
-		vim.schedule(colorize_bold_only)
-	end
-	local function strip_bold(name, val)
-		if type(val) ~= "table" or bold_allowed[name] then
-			return val
+		local cterm = type(hl.cterm) == "table" and hl.cterm or nil
+		if not (hl.bold or (cterm and cterm.bold)) then
+			return hl
 		end
-		local cterm_bold = type(val.cterm) == "table" and val.cterm.bold
-		if not (val.bold or cterm_bold) then
-			return val
-		end
-		val = vim.deepcopy(val)
-		val.bold = nil
-		if type(val.cterm) == "table" then
-			val.cterm.bold = nil
-			if vim.tbl_isempty(val.cterm) then
-				val.cterm = nil
+		hl = vim.deepcopy(hl)
+		hl.bold = nil
+		if cterm then
+			cterm.bold = nil
+			if vim.tbl_isempty(cterm) then
+				hl.cterm = nil
 			end
 		end
-		bold_only[name] = true
-		schedule_colorize()
-		return val
-	end
-	do
-		local set_hl = vim.api.nvim_set_hl
-		vim.api.nvim_set_hl = function(ns_id, name, val)
-			return set_hl(ns_id, name, strip_bold(name, val))
+		if not has_distinction(hl) then
+			bold_only[name] = true
+			if not colorize_scheduled then
+				colorize_scheduled = true
+				vim.schedule(colorize_bold_only)
+			end
 		end
+		return hl
 	end
+	local set_hl = vim.api.nvim_set_hl
+	rawset(vim.api, "nvim_set_hl", function(ns_id, name, hl)
+		return set_hl(ns_id, name, strip_bold(name, hl))
+	end)
 	vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 		callback = function()
 			for name, hl in pairs(vim.api.nvim_get_hl(0, {})) do
 				if not bold_allowed[name] and (hl.bold or (hl.cterm and hl.cterm.bold)) then
-					hl.bold = nil
-					if hl.cterm and hl.cterm.bold then
-						hl.cterm.bold = nil
-						if vim.tbl_isempty(hl.cterm) then
-							hl.cterm = nil
-						end
-					end
-					bold_only[name] = true
-					vim.api.nvim_set_hl(0, name, hl)
+					vim.api.nvim_set_hl(0, name, strip_bold(name, hl))
 				end
 			end
-			schedule_colorize()
 		end,
 	})
-	local applied_background = vim.o.background
 	local function apply_everforest_mini()
-		applied_background = vim.o.background
+		G.everforest_background = vim.o.background
 		local colors = everforest[vim.o.background] or everforest.dark
-		G.EverforestColors = colors
+		G.everforest_colors = colors
 		local hues = require("mini.hues")
-		local palette = hues.make_palette({
-			background = colors.bg,
-			foreground = colors.fg,
-			accent = "green",
-			saturation = "medium",
-		})
-		palette.bg_edge = colors.bg_dim
-		palette.bg_edge2 = colors.bg_dim
-		palette.bg_mid = colors.bg1
-		palette.bg_mid2 = colors.bg4
-		palette.fg_mid = colors.grey1
-		palette.fg_mid2 = colors.grey0
-		palette.fg_edge = colors.grey2
-		-- Everforest accent colors.
-		palette.red = colors.red
-		palette.red_bg = colors.bg_red
-		palette.orange = colors.orange
-		palette.orange_bg = colors.bg_yellow
-		palette.yellow = colors.yellow
-		palette.yellow_bg = colors.bg_yellow
-		palette.green = colors.green
-		palette.green_bg = colors.bg_green
-		palette.cyan = colors.aqua
-		palette.cyan_bg = colors.bg_blue
-		palette.azure = colors.blue
-		palette.azure_bg = colors.bg_blue
-		palette.blue = colors.blue
-		palette.blue_bg = colors.bg_blue
-		palette.purple = colors.purple
-		palette.purple_bg = colors.bg_purple
-		palette.accent = colors.green
-		palette.accent_bg = colors.bg2
+		local palette = vim.tbl_extend(
+			"force",
+			hues.make_palette({
+				background = colors.bg,
+				foreground = colors.fg,
+				accent = "green",
+				saturation = "medium",
+			}),
+			colors
+		)
 		vim.g.colors_name = nil
 		hues.apply_palette(palette, { default = true })
-		vim.api.nvim_set_hl(0, "PmenuBorder", { link = "FloatBorder" })
+		Hi("PmenuBorder", { link = "FloatBorder" })
 		vim.g.colors_name = "everforest-mini"
 	end
 	apply_everforest_mini()
 	local augroup = vim.api.nvim_create_augroup("EverforestMini", { clear = true })
 	local function reapply_if_needed()
-		if applied_background ~= vim.o.background then
+		if G.everforest_background ~= vim.o.background then
 			apply_everforest_mini()
 		end
 	end
@@ -1096,14 +1069,13 @@ end)
 MiniMisc.safely("now", function()
 	local map_multistep = require("mini.keymap").map_multistep
 	local map_combo = require("mini.keymap").map_combo
-	local terminal_buf = nil
 	local function open_terminal()
-		if vim.fn.bufexists(terminal_buf) ~= 1 then
+		if vim.fn.bufexists(G.terminal_buf) ~= 1 then
 			vim.cmd("split | wincmd J | resize 10 | terminal")
 			G.terminal_win = vim.fn.win_getid()
-			terminal_buf = vim.fn.bufnr("%")
+			G.terminal_buf = vim.fn.bufnr("%")
 		elseif vim.fn.win_gotoid(G.terminal_win) ~= 1 then
-			vim.cmd("sbuffer " .. terminal_buf .. "| wincmd J | resize 10")
+			vim.cmd("sbuffer " .. G.terminal_buf .. "| wincmd J | resize 10")
 			G.terminal_win = vim.fn.win_getid()
 		end
 		vim.cmd("startinsert")
@@ -1120,10 +1092,8 @@ MiniMisc.safely("now", function()
 			open_terminal()
 		end
 	end
-	local float_terminal_buf = nil
-	local previous_buf = nil
 	local function open_float_terminal()
-		previous_buf = vim.api.nvim_get_current_buf()
+		G.previous_buf = vim.api.nvim_get_current_buf()
 		local height = math.floor(0.6 * vim.o.lines)
 		local width = math.floor(0.6 * vim.o.columns)
 		G.float_terminal_win = vim.api.nvim_open_win(vim.api.nvim_get_current_buf(), true, {
@@ -1138,11 +1108,11 @@ MiniMisc.safely("now", function()
 			footer_pos = "right",
 		})
 		vim.api.nvim_set_current_win(G.float_terminal_win)
-		if vim.fn.bufexists(float_terminal_buf) ~= 1 then
+		if vim.fn.bufexists(G.float_terminal_buf) ~= 1 then
 			vim.cmd("terminal")
-			float_terminal_buf = vim.api.nvim_get_current_buf()
+			G.float_terminal_buf = vim.api.nvim_get_current_buf()
 		else
-			vim.cmd("buffer " .. float_terminal_buf)
+			vim.cmd("buffer " .. G.float_terminal_buf)
 		end
 		vim.cmd("startinsert")
 	end
@@ -1150,9 +1120,9 @@ MiniMisc.safely("now", function()
 		if vim.fn.win_gotoid(G.float_terminal_win) == 1 then
 			vim.cmd("hide")
 		end
-		if previous_buf then
-			vim.cmd("buffer " .. previous_buf)
-			previous_buf = nil
+		if G.previous_buf then
+			vim.cmd("buffer " .. G.previous_buf)
+			G.previous_buf = nil
 		end
 	end
 	local function toggle_float_terminal()
@@ -1541,7 +1511,7 @@ MiniMisc.safely("now", function()
 				local win_id = args.data.win_id
 				local win_config = vim.api.nvim_win_get_config(win_id)
 				win_config.anchor = "SW"
-				win_config.row = vim.o.lines - vim.o.cmdheight - (vim.o.laststatus > 0 and 1 or 0) - 1
+				win_config.row = G.bottom_float_row()
 				local height = math.floor(0.6 * vim.o.lines)
 				win_config.height = win_config.height < height and win_config.height or height
 				vim.api.nvim_win_set_config(win_id, win_config)
