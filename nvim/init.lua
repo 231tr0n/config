@@ -814,7 +814,7 @@ MiniMisc.safely("now", function()
 	vim.api.nvim_create_user_command("EverforestToggle", function()
 		vim.o.background = vim.o.background == "dark" and "light" or "dark"
 		reapply_if_needed()
-	end, { desc = "Toggle Everforest medium dark/light" })
+	end, { desc = "Toggle Everforest medium dark/light", force = true })
 	vim.g.rainbow_delimiters = {
 		strategy = {
 			[""] = "rainbow-delimiters.strategy.global",
@@ -1132,12 +1132,8 @@ MiniMisc.safely("now", function()
 			open_float_terminal()
 		end
 	end
-	local function toggle_tabs()
-		vim.o.expandtab = false
-		vim.cmd("retab!")
-	end
-	local function toggle_spaces()
-		vim.o.expandtab = true
+	local function set_expandtab(expandtab)
+		vim.o.expandtab = expandtab
 		vim.cmd("retab!")
 	end
 	local function diagnostic_virtual_text_toggle()
@@ -1199,10 +1195,14 @@ MiniMisc.safely("now", function()
 	Map({ "n", "x" }, "<leader>cn", make_ai_jump("next"), "Next case word")
 	Map({ "n", "x" }, "<leader>cp", make_ai_jump("cover_or_prev"), "Previous case word")
 	Map({ "n", "x" }, "<leader>cs", make_case("snake"), "Convert to snake_case")
-	Map({ "x", "v" }, "gx", '"+d', "Cut selection to clipboard")
-	Map({ "x", "v", "n" }, "<leader>lf", require("conform").format, "Format code")
-	Nmap("<C-Space><Space>", toggle_spaces, "Expand tabs")
-	Nmap("<C-Space><Tab>", toggle_tabs, "Contract tabs")
+	Map({ "v" }, "gx", '"+d', "Cut selection to clipboard")
+	Map({ "v", "n" }, "<leader>lf", require("conform").format, "Format code")
+	Nmap("<C-Space><Space>", function()
+		set_expandtab(true)
+	end, "Expand tabs")
+	Nmap("<C-Space><Tab>", function()
+		set_expandtab(false)
+	end, "Contract tabs")
 	Nmap("<F2>", ":lua require('treesitter-context').go_to_context()<CR>", "Go to context")
 	Nmap("<F3>", vim.pack.update, "Update vim plugins")
 	Nmap("<F4>", require("symbol-usage").toggle, "Toggle symbol usage")
@@ -1221,7 +1221,7 @@ MiniMisc.safely("now", function()
 	Nmap("<leader>bW", ":lua MiniBufremove.wipeout(0, true)<CR>", "Wipeout!")
 	Nmap("<leader>ba", ":b#<CR>", "Alternate")
 	Nmap("<leader>bd", ":lua MiniBufremove.delete()<CR>", "Delete")
-	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in full screen")
+	Nmap("<leader>bn", ":tabnew %<CR>", "Open current buffer in new tab")
 	Nmap("<leader>bw", ":lua MiniBufremove.wipeout()<CR>", "Wipeout")
 	Nmap("<leader>bz", MiniMisc.zoom, "Open current buffer in zoomed manner")
 	Nmap("<leader>dB", ":lua require('dap').list_breakpoints()<CR>", "List breakpoints")
@@ -1349,14 +1349,27 @@ MiniMisc.safely("now", function()
 		acwrite = true,
 		nowrite = true,
 	}
+	local augroup = vim.api.nvim_create_augroup("ConfigAutocmds", { clear = true })
 	local file_winbar = "⠀⠀󰁔 %F"
+	local function multiple_windows()
+		local count = 0
+		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+			if vim.api.nvim_win_get_config(win).relative == "" then
+				count = count + 1
+				if count > 1 then
+					return true
+				end
+			end
+		end
+		return false
+	end
 	local function sync_winbar(buf)
 		if not vim.api.nvim_buf_is_valid(buf) then
 			return
 		end
 		local buftype = vim.bo[buf].buftype
 		local filetype = vim.bo[buf].filetype
-		local show = (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype]
+		local show = multiple_windows() and (buftype ~= "" or filetype ~= "") and not non_file_buftypes[buftype]
 		for _, win in ipairs(vim.fn.win_findbuf(buf)) do
 			if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
 				if show then
@@ -1387,6 +1400,7 @@ MiniMisc.safely("now", function()
 		end
 	end
 	vim.api.nvim_create_autocmd("FileType", {
+		group = augroup,
 		pattern = "*",
 		callback = function(args)
 			local buf = args.buf
@@ -1394,15 +1408,15 @@ MiniMisc.safely("now", function()
 			local buftype = vim.bo[buf].buftype
 			if html_like_filetypes[filetype] then
 				vim.bo[buf].omnifunc = "htmlcomplete#CompleteTags"
-				Imap("><Space>", ">", "Cancel html pairs", { buffer = true })
+				Imap("><Space>", ">", "Cancel html pairs", { buffer = buf })
 				Imap("><CR>", "><Esc>yyppk^Dj^Da</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>ka<Tab>", "Newline html pairs", {
-					buffer = true,
+					buffer = buf,
 				})
 				Imap(">", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Esc>vit<Esc>i", "Sameline html pairs", {
-					buffer = true,
+					buffer = buf,
 				})
 				Imap(">>", "><Esc>F<f>a</<C-x><C-o><C-x><C-o><C-p><C-p><Space><BS>", "Sameline cursor end html pairs", {
-					buffer = true,
+					buffer = buf,
 				})
 			end
 			if non_text_filetypes[filetype] then
@@ -1427,13 +1441,20 @@ MiniMisc.safely("now", function()
 			end
 		end,
 	})
-	vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType" }, {
-		callback = function(args)
-			sync_winbar(args.buf)
-			sync_win_opts(args.buf)
+	vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType", "WinEnter", "WinNew", "WinClosed", "TabEnter" }, {
+		group = augroup,
+		callback = function()
+			for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+				if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+					local buf = vim.api.nvim_win_get_buf(win)
+					sync_winbar(buf)
+					sync_win_opts(buf)
+				end
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("FileType", {
+		group = augroup,
 		pattern = { "diff", "patch" },
 		callback = function(args)
 			local bufnr = args.buf
@@ -1543,6 +1564,7 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("User", {
+		group = augroup,
 		pattern = "MiniFilesBufferCreate,MiniFilesWindowOpen,MiniFilesWindowUpdate",
 		callback = function(args)
 			if args.match == "MiniFilesWindowOpen" or args.match == "MiniFilesWindowUpdate" then
@@ -1556,26 +1578,30 @@ MiniMisc.safely("now", function()
 				return
 			end
 			local bufnr = args.data.buf_id
-			Nmap("~", function()
+			local function selected_path()
 				local path = (MiniFiles.get_fs_entry() or {}).path
 				if path == nil then
-					return vim.notify("Cursor is not on valid entry")
+					vim.notify("Cursor is not on valid entry")
 				end
-				vim.fn.chdir(vim.fs.dirname(path))
+				return path
+			end
+			Nmap("~", function()
+				local path = selected_path()
+				if path then
+					vim.fn.chdir(vim.fs.dirname(path))
+				end
 			end, "Set cwd", { buffer = bufnr })
 			Nmap("yy", function()
-				local path = (MiniFiles.get_fs_entry() or {}).path
-				if path == nil then
-					return vim.notify("Cursor is not on valid entry")
+				local path = selected_path()
+				if path then
+					vim.fn.setreg("", path)
 				end
-				vim.fn.setreg("", path)
 			end, "Yank path", { buffer = bufnr })
 			Nmap("gy", function()
-				local path = (MiniFiles.get_fs_entry() or {}).path
-				if path == nil then
-					return vim.notify("Cursor is not on valid entry")
+				local path = selected_path()
+				if path then
+					vim.fn.setreg("+", path)
 				end
-				vim.fn.setreg("+", path)
 			end, "Yank path to clipboard", { buffer = bufnr })
 			local show_dotfiles = true
 			Nmap(".", function()
@@ -1588,6 +1614,7 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("LspAttach", {
+		group = augroup,
 		callback = function(args)
 			local client = vim.lsp.get_client_by_id(args.data.client_id)
 			if client then
@@ -1597,6 +1624,7 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWrite", {
+		group = augroup,
 		pattern = "*",
 		callback = function()
 			MiniTrailspace.trim()
@@ -1604,6 +1632,7 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	vim.api.nvim_create_autocmd("BufWritePost", {
+		group = augroup,
 		callback = function()
 			local ok, err = pcall(require("lint").try_lint)
 			if not ok then
@@ -1623,6 +1652,14 @@ MiniMisc.safely("now", function()
 	end, vim.api.nvim_get_runtime_file("", true))
 	table.insert(lua_runtime_files, "${3rd}/luv/library")
 	local jdtls_bundles = vim.fn.glob("/usr/share/java-debug/*.jar", true, true)
+	local inlay_hints = {
+		parameterNames = { enabled = "all" },
+		parameterTypes = { enabled = true },
+		variableTypes = { enabled = true },
+		propertyDeclarationTypes = { enabled = true },
+		functionLikeReturnTypes = { enabled = true },
+		enumMemberValues = { enabled = true },
+	}
 	local lsp_servers = {
 		lua_ls = {
 			---@type lspconfig.settings.lua_ls
@@ -1698,14 +1735,7 @@ MiniMisc.safely("now", function()
 			---@type lspconfig.settings.vtsls
 			settings = {
 				typescript = {
-					inlayHints = {
-						parameterNames = { enabled = "all" },
-						parameterTypes = { enabled = true },
-						variableTypes = { enabled = true },
-						propertyDeclarationTypes = { enabled = true },
-						functionLikeReturnTypes = { enabled = true },
-						enumMemberValues = { enabled = true },
-					},
+					inlayHints = vim.deepcopy(inlay_hints),
 				},
 			},
 		},
@@ -1742,14 +1772,7 @@ MiniMisc.safely("now", function()
 			---@type lspconfig.settings.svelte
 			settings = {
 				typescript = {
-					inlayHints = {
-						parameterNames = { enabled = "all" },
-						parameterTypes = { enabled = true },
-						variableTypes = { enabled = true },
-						propertyDeclarationTypes = { enabled = true },
-						functionLikeReturnTypes = { enabled = true },
-						enumMemberValues = { enabled = true },
-					},
+					inlayHints = vim.deepcopy(inlay_hints),
 				},
 			},
 		},
@@ -1903,69 +1926,31 @@ MiniMisc.safely("later", function()
 		})
 	end
 	-- Debug configurations
+	local function remote_config(adapter, port, extra)
+		local config = {
+			type = adapter,
+			name = "Attach remote",
+			mode = "remote",
+			request = "attach",
+			hostName = function()
+				return vim.fn.input("Enter host: ", "127.0.0.1")
+			end,
+			port = function()
+				return vim.fn.input("Enter port: ", tostring(port))
+			end,
+		}
+		return { vim.tbl_extend("force", config, extra or {}) }
+	end
 	-- debugpy --listen 127.0.0.1:5678 --wait-for-client main.py
-	dap.configurations.python = {
-		{
-			type = "debugpy",
-			name = "Attach remote",
-			mode = "remote",
-			request = "attach",
-			hostName = function()
-				return vim.fn.input("Enter host: ", "127.0.0.1")
-			end,
-			port = function()
-				return vim.fn.input("Enter port: ", tostring(5678))
-			end,
-		},
-	}
+	dap.configurations.python = remote_config("debugpy", 5678)
 	-- dlv debug --headless -l 127.0.0.1:38697 main.go
-	dap.configurations.go = {
-		{
-			type = "delve",
-			name = "Attach remote",
-			mode = "remote",
-			request = "attach",
-			outputMode = "remote",
-			hostName = function()
-				return vim.fn.input("Enter host: ", "127.0.0.1")
-			end,
-			port = function()
-				return vim.fn.input("Enter port: ", tostring(38697))
-			end,
-		},
-	}
+	dap.configurations.go = remote_config("delve", 38697, { outputMode = "remote" })
 	-- java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 Main.java
 	-- mvnDebug exec:java -Dexec.mainClass="com.mycompany.app.App"
-	dap.configurations.java = {
-		{
-			type = "java",
-			name = "Attach remote",
-			mode = "remote",
-			request = "attach",
-			hostName = function()
-				return vim.fn.input("Enter host: ", "127.0.0.1")
-			end,
-			port = function()
-				return vim.fn.input("Enter port: ", tostring(8000))
-			end,
-		},
-	}
+	dap.configurations.java = remote_config("java", 8000)
 	-- node --inspect-brk=127.0.0.1:9229 main.js
 	for _, filetype in ipairs({ "typescript", "javascript" }) do
-		dap.configurations[filetype] = {
-			{
-				type = "pwa-node",
-				name = "Attach remote",
-				mode = "remote",
-				request = "attach",
-				hostName = function()
-					return vim.fn.input("Enter host: ", "127.0.0.1")
-				end,
-				port = function()
-					return vim.fn.input("Enter port: ", tostring(9229))
-				end,
-			},
-		}
+		dap.configurations[filetype] = remote_config("pwa-node", 9229)
 	end
 end)
 
