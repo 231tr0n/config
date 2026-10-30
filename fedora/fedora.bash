@@ -172,6 +172,7 @@ else
 fi
 
 sudo npm install -g @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
+sudo npm install -g @zed-industries/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
@@ -186,7 +187,7 @@ go install github.com/reteps/dockerfmt@latest || true
 go install sigs.k8s.io/yaml/yamlfmt@latest || true
 gup update || true
 
-pipx install --force mbake || true
+pipx install --force mbake sqlfluff debugpy || true
 pipx upgrade-all || true
 
 install_ollama() {
@@ -232,7 +233,7 @@ if [ -f "$BAKE_CONFIG" ]; then
 	sed -i 's/align_across_comments = false/align_across_comments = true/' "$BAKE_CONFIG" || true
 fi
 
-mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls}
+mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls,texlab,lemminx}
 
 LUA_LS_VER=$(curl -fsSL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
 rm -rf "$HOME/.local/share/lua-language-server"
@@ -257,6 +258,34 @@ rm -rf "$HOME/.local/share/jdtls"
 mkdir -p "$HOME/.local/share/jdtls"
 curl -fsSL "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" | tar xz -C "$HOME/.local/share/jdtls"
 ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
+
+MARKSMAN_URL=$(curl -fsSL https://api.github.com/repos/artempyanykh/marksman/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
+if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
+	curl -fL "$MARKSMAN_URL" -o "$HOME/.local/bin/marksman"
+	chmod +x "$HOME/.local/bin/marksman"
+fi
+
+TEXLAB_URL=$(curl -fsSL https://api.github.com/repos/latex-lsp/texlab/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "texlab-x86_64-linux.tar.gz") | .browser_download_url' | head -1)
+if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ]; then
+	rm -rf "$HOME/.local/share/texlab"
+	mkdir -p "$HOME/.local/share/texlab"
+	curl -fsSL "$TEXLAB_URL" | tar xz -C "$HOME/.local/share/texlab"
+	ln -sf "$HOME/.local/share/texlab/texlab" "$HOME/.local/bin/texlab"
+fi
+
+LEMMINX_VER=$(curl -fsSL https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+if [ -n "$LEMMINX_VER" ]; then
+	rm -f "$HOME/.local/share/lemminx/"*.jar
+	curl -fsSL "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/$LEMMINX_VER/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" -o "$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar"
+	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" >"$HOME/.local/bin/lemminx"
+	chmod +x "$HOME/.local/bin/lemminx"
+fi
+
+JS_DEBUG_URL=$(curl -fsSL https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
+if [ -n "$JS_DEBUG_URL" ] && [ "$JS_DEBUG_URL" != "null" ]; then
+	sudo rm -rf /usr/share/js-debug
+	curl -fsSL "$JS_DEBUG_URL" | sudo tar xz -C /usr/share
+fi
 
 sudo mkdir -p /usr/share/java/lombok
 sudo curl -fsSL "https://projectlombok.org/downloads/lombok.jar" -o /usr/share/java/lombok/lombok.jar
@@ -383,5 +412,10 @@ gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.githu
 gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com || true
 gnome-extensions enable just-perfection-desktop@just-perfection || true
 set -e
+
+for bin in marksman texlab lemminx vscode-html-language-server vscode-css-language-server vscode-json-language-server vscode-eslint-language-server bash-language-server pyright-langserver vtsls yaml-language-server ngserver npm-groovy-lint sqlfluff debugpy; do
+	command -v "$bin" >/dev/null 2>&1 || info_log "WARNING: $bin is still missing"
+done
+[ -f /usr/share/js-debug/src/dapDebugServer.js ] || info_log 'WARNING: js-debug DAP server is missing'
 
 info_log 'Setup finished. Log out or reboot to apply all changes.'
