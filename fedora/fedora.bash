@@ -172,7 +172,7 @@ else
 fi
 
 sudo npm install -g @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
-sudo npm install -g @zed-industries/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
+sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
