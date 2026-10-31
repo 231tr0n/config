@@ -796,7 +796,6 @@ MiniMisc.safely("now", function()
 		)
 		vim.g.colors_name = nil
 		hues.apply_palette(palette, { default = true })
-		Hi("PmenuBorder", { link = "FloatBorder" })
 		vim.g.colors_name = "everforest-mini"
 	end
 	apply_everforest_mini()
