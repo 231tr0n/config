@@ -80,7 +80,7 @@ sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop igt-gpu-tools telnet bleachbit conky
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts brave-browser
-sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-just-perfection
+sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-appindicator gnome-shell-extension-drive-menu
 sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 sudo dnf install -y nginx haproxy
 sudo dnf install -y mariadb mariadb-server
@@ -157,7 +157,6 @@ fi
 sudo flatpak install -y flathub com.discordapp.Discord
 sudo flatpak install -y flathub com.github.finefindus.eyedropper
 sudo flatpak install -y flathub io.github.cmus.cmus
-sudo flatpak install -y flathub io.github.swordpuffin.rewaita
 sudo flatpak install -y flathub org.telegram.desktop
 
 sudo flatpak update -y
@@ -193,7 +192,7 @@ pipx upgrade-all || true
 
 install_ollama() {
 	curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
-	sed -i 's/--progress-bar/--silent/g' /tmp/ollama-install.sh
+	sed -i 's/--progress-bar//g' /tmp/ollama-install.sh
 	sh /tmp/ollama-install.sh
 	rm -f /tmp/ollama-install.sh
 }
@@ -321,8 +320,6 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 gtk-application-prefer-dark-theme=1
 EOF
 
-nohup flatpak run io.github.swordpuffin.rewaita >/dev/null 2>&1 &
-
 curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/background.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png" || true
 curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/grub.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png" || true
 curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/profile.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png" || true
@@ -399,9 +396,6 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 45
 gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
 gsettings set org.gnome.shell always-show-log-out true
 gsettings set org.gnome.shell favorite-apps "@as []"
-gsettings set org.gnome.shell.extensions.just-perfection panel false
-gsettings set org.gnome.shell.extensions.just-perfection panel-in-overview true
-gsettings set org.gnome.shell.extensions.user-theme name 'rewaita'
 gsettings set org.gnome.system.location enabled true
 
 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DEFAULT_USERNAME")" org.freedesktop.Accounts.User SetIconFile s "$HOME/Pictures/profile.png"
@@ -410,8 +404,6 @@ gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary
 
 gnome-extensions disable background-logo@fedorahosted.org || true
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
-gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com || true
-gnome-extensions enable just-perfection-desktop@just-perfection || true
 set -e
 
 for bin in marksman texlab lemminx vscode-html-language-server vscode-css-language-server vscode-json-language-server vscode-eslint-language-server bash-language-server pyright-langserver vtsls yaml-language-server ngserver npm-groovy-lint sqlfluff debugpy; do
