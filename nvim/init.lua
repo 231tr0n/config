@@ -287,6 +287,7 @@ MiniMisc.safely("now", function()
 		},
 		clues = {
 			{
+				{ mode = "n", keys = "<leader>L", desc = "+LeetCode" },
 				{ mode = "n", keys = "<leader>a", desc = "+Ai" },
 				{ mode = "n", keys = "<leader>b", desc = "+Buffer" },
 				{ mode = "n", keys = "<leader>d", desc = "+Debug" },
@@ -959,6 +960,13 @@ MiniMisc.safely("now", function()
 		end,
 	})
 	require("go-tagger").setup()
+	require("leetcode-ui").setup({
+		lang = "java",
+		picker = "mini",
+		browser = "auto",
+		notifications = true,
+		show_hints = false,
+	})
 	require("html-css").setup({
 		enable_on = {
 			"html",
@@ -1286,6 +1294,16 @@ MiniMisc.safely("now", function()
 	Nmap("<leader>lo", ":lua vim.lsp.buf.outgoing_calls()<CR>", "Lsp outgoing calls")
 	Nmap("<leader>lr", ":lua vim.lsp.buf.rename()<CR>", "Rename")
 	Nmap("<leader>ls", ":lua vim.lsp.buf.signature_help()<CR>", "Signature help")
+	Nmap("<leader>Ll", "<cmd>LeetCode list<CR>", "LeetCode list")
+	Nmap("<leader>Ld", "<cmd>LeetCode daily<CR>", "LeetCode daily")
+	Nmap("<leader>Lr", "<cmd>LeetCode random<CR>", "LeetCode random")
+	Nmap("<leader>Lo", ":lua vim.api.nvim_input(':LeetCode open <Tab>')<CR>", "LeetCode open")
+	Nmap("<leader>Ls", "<cmd>LeetCode stats<CR>", "LeetCode stats")
+	Nmap("<leader>LS", "<cmd>LeetCode session<CR>", "LeetCode session")
+	Nmap("<leader>Lt", "<cmd>LeetCode question run<CR>", "LeetCode run tests")
+	Nmap("<leader>Lu", "<cmd>LeetCode question submit<CR>", "LeetCode submit")
+	Nmap("<leader>Lf", "<cmd>LeetCode question format<CR>", "LeetCode format")
+	Nmap("<leader>Lc", "<cmd>LeetCode question close<CR>", "LeetCode close")
 	Nmap("<leader>mT", ":lua MiniMap.toggle_focus(true)<CR>", "Toggle map focus")
 	Nmap("<leader>mt", ":lua MiniMap.toggle()<CR>", "Toggle map")
 	Nmap("<leader>ql", toggle_loclist, "Toggle loclist")
