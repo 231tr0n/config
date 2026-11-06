@@ -74,7 +74,7 @@ sudo dnf install -y google-chrome-stable
 
 sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch unzip ctags
 sudo dnf install -y go luajit luarocks delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
-sudo dnf install -y shfmt shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
+sudo dnf install -y shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
 sudo dnf install -y pkg-config openssl-devel
 sudo dnf install -y yt-dlp ffmpeg ImageMagick
@@ -185,6 +185,7 @@ cargo install-update -a || true
 go install github.com/nao1215/gup@latest || true
 go install github.com/reteps/dockerfmt@latest || true
 go install sigs.k8s.io/yaml/yamlfmt@latest || true
+go install mvdan.cc/sh/v3/cmd/shfmt@latest || true
 gup update || true
 
 pipx install --force mbake sqlfluff debugpy || true
