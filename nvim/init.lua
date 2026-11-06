@@ -857,6 +857,7 @@ MiniMisc.safely("now", function()
 		"https://github.com/stevearc/quicker.nvim",
 		"https://gitlab.com/HiPhish/rainbow-delimiters.nvim",
 		"https://github.com/nvimdev/visualizer.nvim",
+		"https://github.com/231tr0n/leetcode-ui.nvim",
 	})
 	vim.api.nvim_create_autocmd("User", {
 		pattern = "TSUpdate",
