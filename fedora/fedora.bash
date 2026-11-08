@@ -48,9 +48,14 @@ function info_log {
 }
 
 FAILED_FETCHES=()
+FAILED_STEPS=()
 
 record_fetch_failure() {
 	FAILED_FETCHES+=("$1")
+}
+
+record_step_failure() {
+	FAILED_STEPS+=("$1")
 }
 
 download_file() {
@@ -218,6 +223,19 @@ sudo npm install -g npm@latest
 sudo npm install -g --allow-scripts=@opencode/cli @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
 sudo npm install -g diff-so-fancy@latest
+sudo npm install -g @microsoft/inshellisense@latest
+
+if command -v is >/dev/null 2>&1; then
+	is init fish >/dev/null || record_step_failure "init: inshellisense fish integration"
+	IS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/inshellisense"
+	mkdir -p "$IS_CONFIG_DIR"
+	cat >"$IS_CONFIG_DIR/rc.toml" <<'EOF'
+useNerdFont = true
+boxBorderStyle = "rounded"
+EOF
+else
+	record_step_failure "install: inshellisense"
+fi
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
@@ -242,7 +260,7 @@ go install github.com/junegunn/fzf@latest || true
 go install github.com/mikefarah/yq/v4@latest || true
 go install golang.org/x/tools/gopls@latest || true
 go install mvdan.cc/gofumpt@latest || true
-go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest || record_fetch_failure "fetch: golangci-lint go install"
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest || record_step_failure "install: golangci-lint"
 gup update || true
 
 download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
@@ -257,7 +275,7 @@ install_ollama() {
 	fi
 	sed -i 's/--progress-bar//g' /tmp/ollama-install.sh
 	if ! sh /tmp/ollama-install.sh; then
-		record_fetch_failure "fetch: ollama installer"
+		record_step_failure "install: ollama"
 	fi
 	rm -f /tmp/ollama-install.sh
 }
@@ -316,35 +334,17 @@ if [ -n "$GJF_VER" ] && download_file "https://repo1.maven.org/maven2/com/google
 	chmod +x "$HOME/.local/bin/google-java-format"
 fi
 
-CS_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/puppycrawl/tools/checkstyle/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
-[ -n "$CS_VER" ] || record_fetch_failure "fetch: checkstyle version metadata"
-if [ -n "$CS_VER" ]; then
-	CS_TMP="$(mktemp -d)"
-	cat >"$CS_TMP/pom.xml" <<EOF
-<project xmlns="http://maven.apache.org/POM/4.0.0">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>local</groupId>
-  <artifactId>checkstyle-install</artifactId>
-  <version>1</version>
-  <dependencies>
-    <dependency>
-      <groupId>com.puppycrawl.tools</groupId>
-      <artifactId>checkstyle</artifactId>
-      <version>$CS_VER</version>
-    </dependency>
-  </dependencies>
-</project>
-EOF
-	if mvn -q -f "$CS_TMP/pom.xml" dependency:copy-dependencies -DoutputDirectory="$CS_TMP/lib" -DincludeScope=runtime; then
-		rm -f "$HOME/.local/share/checkstyle/"*.jar
-		cp "$CS_TMP/lib/"*.jar "$HOME/.local/share/checkstyle/"
-		printf '#!/bin/bash\nexec java -cp "%s/*" com.puppycrawl.tools.checkstyle.Main "$@"\n' "$HOME/.local/share/checkstyle" >"$HOME/.local/bin/checkstyle"
+CS_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^checkstyle-.*-all\\.jar$")) | .browser_download_url' | head -1)
+if [ -n "$CS_URL" ] && [ "$CS_URL" != "null" ]; then
+	CS_JAR_NAME="$(basename "$CS_URL")"
+	CS_JAR="$HOME/.local/share/checkstyle/$CS_JAR_NAME"
+	if download_file "$CS_URL" "$CS_JAR"; then
+		find "$HOME/.local/share/checkstyle" -maxdepth 1 -name '*.jar' ! -name "$CS_JAR_NAME" -delete
+		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$CS_JAR" >"$HOME/.local/bin/checkstyle"
 		chmod +x "$HOME/.local/bin/checkstyle"
-	else
-		info_log "WARNING: failed to fetch checkstyle Maven dependencies"
-		record_fetch_failure "fetch: checkstyle Maven dependencies"
 	fi
-	rm -rf "$CS_TMP"
+else
+	record_fetch_failure "fetch: checkstyle release metadata"
 fi
 
 if install_tar_gz "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" "$HOME/.local/share/jdtls"; then
@@ -527,7 +527,7 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
 # just-perfection is the only extension installed from extensions.gnome.org.
-gext --filesystem install just-perfection-desktop@just-perfection || record_fetch_failure "fetch: just-perfection extension"
+gext --filesystem install just-perfection-desktop@just-perfection || record_step_failure "install: just-perfection extension"
 dconf write /org/gnome/shell/extensions/just-perfection/panel false
 dconf write /org/gnome/shell/extensions/just-perfection/panel-in-overview true
 
@@ -536,11 +536,17 @@ gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.githu
 gnome-extensions enable just-perfection-desktop@just-perfection || true
 set -e
 
-if [ ${#FAILED_FETCHES[@]} -eq 0 ]; then
-	info_log 'All web fetches completed successfully.'
+if [ ${#FAILED_FETCHES[@]} -eq 0 ] && [ ${#FAILED_STEPS[@]} -eq 0 ]; then
+	info_log 'All setup steps completed successfully.'
 else
-	info_log 'The following web fetches failed:'
-	printf '  - %s\n' "${FAILED_FETCHES[@]}"
+	if [ ${#FAILED_FETCHES[@]} -gt 0 ]; then
+		info_log 'The following fetches failed:'
+		printf '  - %s\n' "${FAILED_FETCHES[@]}"
+	fi
+	if [ ${#FAILED_STEPS[@]} -gt 0 ]; then
+		info_log 'The following setup steps failed:'
+		printf '  - %s\n' "${FAILED_STEPS[@]}"
+	fi
 fi
 
 info_log 'Setup finished. Log out or reboot to apply all changes.'
