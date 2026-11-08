@@ -513,7 +513,6 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
-# just-perfection is the only extension installed from extensions.gnome.org.
 gext --filesystem install just-perfection-desktop@just-perfection || record_step_failure "install: just-perfection extension"
 dconf write /org/gnome/shell/extensions/just-perfection/panel false
 dconf write /org/gnome/shell/extensions/just-perfection/panel-in-overview true
