@@ -140,8 +140,6 @@ if [ -n "$LLAMA_BIN_DIR" ] && [ -d "$LLAMA_BIN_DIR" ]; then
 	done
 fi
 
-curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
-
 sudo dnf update -y
 
 sudo systemctl enable --now mariadb
@@ -173,9 +171,9 @@ else
 fi
 
 sudo npm install -g npm@latest
-sudo npm install -g prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
+sudo npm install -g --allow-scripts=@opencode/cli @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
-sudo npm install -g diff-so-fancy@latest tree-sitter-cli@latest
+sudo npm install -g --allow-scripts=tree-sitter-cli diff-so-fancy@latest tree-sitter-cli@latest
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec

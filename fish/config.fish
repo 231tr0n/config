@@ -40,7 +40,7 @@ if status is-interactive
 end
 
 # User-installed binaries
-fish_add_path $HOME/go/bin $HOME/.local/bin $HOME/.luarocks/bin $HOME/.opencode/bin
+fish_add_path $HOME/go/bin $HOME/.local/bin $HOME/.luarocks/bin
 
 # fish_config theme choose Nord
 # set -g fish_term24bit 0
