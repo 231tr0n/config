@@ -67,9 +67,8 @@ export default class PanelAutoHide extends Extension {
   }
 
   _setPanelStruts(affectsStruts) {
-    const panelBox = Main.layoutManager.panelBox;
-    Main.layoutManager.removeChrome(panelBox);
-    Main.layoutManager.addChrome(panelBox, {
+    Main.layoutManager.removeChrome(this._panelBox);
+    Main.layoutManager.addChrome(this._panelBox, {
       affectsStruts,
       trackFullscreen: true,
     });
