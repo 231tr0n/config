@@ -316,14 +316,35 @@ if [ -n "$GJF_VER" ] && download_file "https://repo1.maven.org/maven2/com/google
 	chmod +x "$HOME/.local/bin/google-java-format"
 fi
 
-CS_TAG=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
-[ -n "$CS_TAG" ] || record_fetch_failure "fetch: checkstyle version metadata"
-CS_VER=${CS_TAG#checkstyle-}
-CS_JAR="$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
-if [ -n "$CS_TAG" ] && download_file "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" "$CS_JAR"; then
-	find "$HOME/.local/share/checkstyle" -maxdepth 1 -name '*.jar' ! -name "$(basename "$CS_JAR")" -delete
-	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$CS_JAR" >"$HOME/.local/bin/checkstyle"
-	chmod +x "$HOME/.local/bin/checkstyle"
+CS_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/puppycrawl/tools/checkstyle/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+[ -n "$CS_VER" ] || record_fetch_failure "fetch: checkstyle version metadata"
+if [ -n "$CS_VER" ]; then
+	CS_TMP="$(mktemp -d)"
+	cat >"$CS_TMP/pom.xml" <<EOF
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>local</groupId>
+  <artifactId>checkstyle-install</artifactId>
+  <version>1</version>
+  <dependencies>
+    <dependency>
+      <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId>
+      <version>$CS_VER</version>
+    </dependency>
+  </dependencies>
+</project>
+EOF
+	if mvn -q -f "$CS_TMP/pom.xml" dependency:copy-dependencies -DoutputDirectory="$CS_TMP/lib" -DincludeScope=runtime; then
+		rm -f "$HOME/.local/share/checkstyle/"*.jar
+		cp "$CS_TMP/lib/"*.jar "$HOME/.local/share/checkstyle/"
+		printf '#!/bin/bash\nexec java -cp "%s/*" com.puppycrawl.tools.checkstyle.Main "$@"\n' "$HOME/.local/share/checkstyle" >"$HOME/.local/bin/checkstyle"
+		chmod +x "$HOME/.local/bin/checkstyle"
+	else
+		info_log "WARNING: failed to fetch checkstyle Maven dependencies"
+		record_fetch_failure "fetch: checkstyle Maven dependencies"
+	fi
+	rm -rf "$CS_TMP"
 fi
 
 if install_tar_gz "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" "$HOME/.local/share/jdtls"; then
