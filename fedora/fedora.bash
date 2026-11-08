@@ -173,7 +173,8 @@ fi
 sudo npm install -g npm@latest
 sudo npm install -g --allow-scripts=@opencode/cli @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
-sudo npm install -g --allow-scripts=tree-sitter-cli diff-so-fancy@latest tree-sitter-cli@latest
+sudo npm install -g diff-so-fancy@latest
+sudo npm uninstall -g tree-sitter-cli >/dev/null 2>&1 || true
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
@@ -185,6 +186,7 @@ cargo install ripgrep || true
 cargo install fd-find || true
 cargo install bat || true
 cargo install zoxide || true
+cargo install tree-sitter-cli || true
 cargo install-update -a || true
 
 go install github.com/nao1215/gup@latest || true
