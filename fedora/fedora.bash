@@ -463,7 +463,7 @@ curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json" || record_fetch_failure "fetch: opencode/cli.json"
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf" || record_fetch_failure "fetch: tmux/tmux.conf"
 
-GNOME_EXTENSION_NAME="panel-dim@oled-protect"
+GNOME_EXTENSION_NAME="panel-autohide@oled-protect"
 GNOME_EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$GNOME_EXTENSION_NAME"
 GNOME_EXTENSION_URL="https://raw.githubusercontent.com/231tr0n/config/main/gnome/$GNOME_EXTENSION_NAME"
 mkdir -p "$GNOME_EXTENSION_DIR"
@@ -539,7 +539,7 @@ gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary
 
 gnome-extensions disable background-logo@fedorahosted.org || true
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
-enable_shell_extension "panel-dim@oled-protect"
+enable_shell_extension "panel-autohide@oled-protect"
 set -e
 
 if [ ${#FAILED_FETCHES[@]} -eq 0 ] && [ ${#FAILED_STEPS[@]} -eq 0 ]; then

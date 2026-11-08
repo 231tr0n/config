@@ -1,0 +1,7 @@
+{
+  "uuid": "panel-autohide@oled-protect",
+  "name": "Top Bar Auto Hide",
+  "description": "Hides the top bar except in the overview.",
+  "url": "https://github.com/231tr0n/config",
+  "shell-version": ["45", "46", "47", "48", "49", "50", "51"]
+}
