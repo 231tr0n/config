@@ -58,6 +58,23 @@ record_step_failure() {
 	FAILED_STEPS+=("$1")
 }
 
+enable_shell_extension() {
+	local uuid="$1" enabled
+	enabled="$(gsettings get org.gnome.shell enabled-extensions)"
+	case "$enabled" in
+	*"'$uuid'"*)
+		return 0
+		;;
+	esac
+
+	enabled="${enabled%]}"
+	if [ "$enabled" = "@as [" ] || [ "$enabled" = "[" ]; then
+		gsettings set org.gnome.shell enabled-extensions "['$uuid']"
+	else
+		gsettings set org.gnome.shell enabled-extensions "$enabled, '$uuid']"
+	fi
+}
+
 download_file() {
 	local url="$1" dest="$2" tmp
 	mkdir -p "$(dirname "$dest")"
@@ -252,7 +269,7 @@ gup update || true
 
 download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
 
-pipx install --force black debugpy gnome-extensions-cli mbake pylint sqlfluff yt-dlp || true
+pipx install --force black debugpy mbake pylint sqlfluff yt-dlp || true
 pipx upgrade-all || true
 
 install_ollama() {
@@ -446,6 +463,13 @@ curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json" || record_fetch_failure "fetch: opencode/cli.json"
 curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf" || record_fetch_failure "fetch: tmux/tmux.conf"
 
+GNOME_EXTENSION_NAME="panel-dim@oled-protect"
+GNOME_EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$GNOME_EXTENSION_NAME"
+GNOME_EXTENSION_URL="https://raw.githubusercontent.com/231tr0n/config/main/gnome/$GNOME_EXTENSION_NAME"
+mkdir -p "$GNOME_EXTENSION_DIR"
+download_file "$GNOME_EXTENSION_URL/extension.js" "$GNOME_EXTENSION_DIR/extension.js" || true
+download_file "$GNOME_EXTENSION_URL/metadata.json" "$GNOME_EXTENSION_DIR/metadata.json" || true
+
 PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2>/dev/null | tr -d "'" | tr -d ' ' || true)
 set +e
 if [ -n "$PROFILE_UUID" ]; then
@@ -513,13 +537,9 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
-gext --filesystem install just-perfection-desktop@just-perfection || record_step_failure "install: just-perfection extension"
-dconf write /org/gnome/shell/extensions/just-perfection/panel false
-dconf write /org/gnome/shell/extensions/just-perfection/panel-in-overview true
-
 gnome-extensions disable background-logo@fedorahosted.org || true
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
-gnome-extensions enable just-perfection-desktop@just-perfection || true
+enable_shell_extension "panel-dim@oled-protect"
 set -e
 
 if [ ${#FAILED_FETCHES[@]} -eq 0 ] && [ ${#FAILED_STEPS[@]} -eq 0 ]; then

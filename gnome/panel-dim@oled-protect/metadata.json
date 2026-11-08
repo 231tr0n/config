@@ -1,0 +1,7 @@
+{
+  "uuid": "panel-dim@oled-protect",
+  "name": "OLED Panel Protect",
+  "description": "Cycles top bar text brightness to prevent OLED burn-in.",
+  "url": "https://github.com/231tr0n/config",
+  "shell-version": ["45", "46", "47", "48", "49", "50", "51"]
+}
