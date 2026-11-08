@@ -54,19 +54,10 @@ set -gx BAT_THEME ansi
 set -gx INCEPTION_API_KEY ""
 
 if status is-interactive
-    and not set -q ISTERM
-    if not set -q TMUX
-        if type -q wslinfo
-            tmux -2u
-        else
-            exec tmux -2u
-        end
+    and not set -q TMUX
+    if type -q wslinfo
+        tmux -2u
+    else
+        exec tmux -2u
     end
-    set -l inshellisense_init "$HOME/.local/share/inshellisense/init/fish/init.fish"
-    if test -d "$HOME/.inshellisense"
-        set inshellisense_init "$HOME/.inshellisense/init/fish/init.fish"
-    else if set -q XDG_DATA_HOME; and string match -q '/*' "$XDG_DATA_HOME"
-        set inshellisense_init "$XDG_DATA_HOME/inshellisense/init/fish/init.fish"
-    end
-    test -f "$inshellisense_init"; and source "$inshellisense_init"
 end

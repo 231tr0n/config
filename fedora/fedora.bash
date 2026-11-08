@@ -223,19 +223,6 @@ sudo npm install -g npm@latest
 sudo npm install -g --allow-scripts=@opencode/cli @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
 sudo npm install -g diff-so-fancy@latest
-sudo npm install -g @microsoft/inshellisense@latest
-
-if command -v is >/dev/null 2>&1; then
-	is init fish >/dev/null || record_step_failure "init: inshellisense fish integration"
-	IS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/inshellisense"
-	mkdir -p "$IS_CONFIG_DIR"
-	cat >"$IS_CONFIG_DIR/rc.toml" <<'EOF'
-useNerdFont = true
-boxBorderStyle = "rounded"
-EOF
-else
-	record_step_failure "install: inshellisense"
-fi
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
