@@ -47,6 +47,12 @@ function info_log {
 	set -x
 }
 
+FAILED_FETCHES=()
+
+record_fetch_failure() {
+	FAILED_FETCHES+=("$1")
+}
+
 download_file() {
 	local url="$1" dest="$2" tmp
 	mkdir -p "$(dirname "$dest")"
@@ -56,6 +62,7 @@ download_file() {
 	else
 		rm -f "$tmp"
 		info_log "WARNING: failed to download $url"
+		record_fetch_failure "download: $url"
 		return 1
 	fi
 }
@@ -73,6 +80,7 @@ install_tar_gz() {
 	else
 		rm -rf "$tmp"
 		info_log "WARNING: failed to install $url"
+		record_fetch_failure "download: $url"
 		return 1
 	fi
 }
@@ -128,6 +136,9 @@ LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/
 if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
 	LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 https://api.github.com/repos/ggml-org/llama.cpp/tags 2>/dev/null | jq -r '.[0].name' 2>/dev/null | head -1 || true)"
 fi
+if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
+	record_fetch_failure "fetch: llama.cpp release metadata"
+fi
 
 LLAMA_BIN="$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2>/dev/null | head -1 || true)"
 if [ -z "$LLAMA_BIN" ]; then
@@ -151,6 +162,7 @@ if [ "$NEED_INSTALL" -eq 1 ]; then
 	LLAMA_ASSET_URL="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$LLAMA_LATEST_TAG" 2>/dev/null | jq -r '.assets[] | select(.name | test("bin-ubuntu-openvino-.*-x64\\.tar\\.gz$")) | .browser_download_url' 2>/dev/null | head -1 || true)"
 	if [ -z "$LLAMA_ASSET_URL" ]; then
 		info_log 'No prebuilt ubuntu-openvino asset found, skipping.'
+		record_fetch_failure "fetch: llama.cpp asset URL"
 	else
 		if install_tar_gz "$LLAMA_ASSET_URL" "$LLAMA_DIR"; then
 			echo "$LLAMA_LATEST_TAG" >"$BUILT_TAG_FILE"
@@ -201,7 +213,6 @@ sudo npm install -g npm@latest
 sudo npm install -g --allow-scripts=@opencode/cli @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
 sudo npm install -g diff-so-fancy@latest
-sudo npm uninstall -g tree-sitter-cli >/dev/null 2>&1 || true
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
@@ -227,7 +238,9 @@ go install golang.org/x/tools/gopls@latest || true
 go install mvdan.cc/gofumpt@latest || true
 gup update || true
 
-curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$HOME/.local/bin" latest || true
+if ! curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$HOME/.local/bin" latest; then
+	record_fetch_failure "fetch: golangci-lint install script"
+fi
 
 download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
 
@@ -235,9 +248,14 @@ pipx install --force black debugpy gnome-extensions-cli mbake pylint sqlfluff yt
 pipx upgrade-all || true
 
 install_ollama() {
-	curl -fsSL --retry 5 --retry-delay 2 https://ollama.com/install.sh -o /tmp/ollama-install.sh
+	if ! curl -fsSL --retry 5 --retry-delay 2 https://ollama.com/install.sh -o /tmp/ollama-install.sh; then
+		record_fetch_failure "fetch: ollama install script"
+		return 0
+	fi
 	sed -i 's/--progress-bar//g' /tmp/ollama-install.sh
-	sh /tmp/ollama-install.sh
+	if ! sh /tmp/ollama-install.sh; then
+		record_fetch_failure "fetch: ollama installer"
+	fi
 	rm -f /tmp/ollama-install.sh
 }
 if command -v ollama >/dev/null 2>&1; then
@@ -247,6 +265,7 @@ if command -v ollama >/dev/null 2>&1; then
 		info_log "ollama $OLLAMA_CUR is already the latest, skipping install/update."
 	elif [ -z "$OLLAMA_LATEST" ] || [ "$OLLAMA_LATEST" = "null" ]; then
 		info_log "ollama $OLLAMA_CUR present, could not check latest, skipping."
+		record_fetch_failure "fetch: ollama release metadata"
 	else
 		info_log "ollama $OLLAMA_CUR -> ${OLLAMA_LATEST:-unknown}, updating..."
 		install_ollama
@@ -280,11 +299,13 @@ fi
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls,texlab,lemminx}
 
 LUA_LS_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
+[ -n "$LUA_LS_VER" ] || record_fetch_failure "fetch: lua-language-server version metadata"
 if [ -n "$LUA_LS_VER" ] && install_tar_gz "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" "$HOME/.local/share/lua-language-server"; then
 	ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
 fi
 
 GJF_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/google/google-java-format/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | cut -c2- || true)
+[ -n "$GJF_VER" ] || record_fetch_failure "fetch: google-java-format version metadata"
 GJF_JAR="$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
 if [ -n "$GJF_VER" ] && download_file "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" "$GJF_JAR"; then
 	find "$HOME/.local/share/google-java-format" -maxdepth 1 -name '*.jar' ! -name "$(basename "$GJF_JAR")" -delete
@@ -293,6 +314,7 @@ if [ -n "$GJF_VER" ] && download_file "https://github.com/google/google-java-for
 fi
 
 CS_TAG=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
+[ -n "$CS_TAG" ] || record_fetch_failure "fetch: checkstyle version metadata"
 CS_VER=${CS_TAG#checkstyle-}
 CS_JAR="$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
 if [ -n "$CS_TAG" ] && download_file "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" "$CS_JAR"; then
@@ -308,11 +330,17 @@ fi
 MARKSMAN_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/artempyanykh/marksman/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
 if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
 	download_file "$MARKSMAN_URL" "$HOME/.local/bin/marksman" && chmod +x "$HOME/.local/bin/marksman"
+else
+	record_fetch_failure "fetch: marksman release metadata"
 fi
 
 TEXLAB_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/latex-lsp/texlab/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "texlab-x86_64-linux.tar.gz") | .browser_download_url' | head -1)
-if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ] && install_tar_gz "$TEXLAB_URL" "$HOME/.local/share/texlab"; then
-	ln -sf "$HOME/.local/share/texlab/texlab" "$HOME/.local/bin/texlab"
+if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ]; then
+	if install_tar_gz "$TEXLAB_URL" "$HOME/.local/share/texlab"; then
+		ln -sf "$HOME/.local/share/texlab/texlab" "$HOME/.local/bin/texlab"
+	fi
+else
+	record_fetch_failure "fetch: texlab release metadata"
 fi
 
 LEMMINX_VER=$(curl -fsSL --retry 3 https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
@@ -323,6 +351,8 @@ if [ -n "$LEMMINX_VER" ]; then
 		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$LEMMINX_JAR" >"$HOME/.local/bin/lemminx"
 		chmod +x "$HOME/.local/bin/lemminx"
 	fi
+else
+	record_fetch_failure "fetch: lemminx version metadata"
 fi
 
 JS_DEBUG_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
@@ -334,8 +364,11 @@ if [ -n "$JS_DEBUG_URL" ] && [ "$JS_DEBUG_URL" != "null" ]; then
 		sudo mv "$JS_DEBUG_TMP/js-debug" /usr/share/js-debug
 	else
 		info_log "WARNING: failed to install js-debug"
+		record_fetch_failure "download: js-debug"
 	fi
 	rm -rf "$JS_DEBUG_TMP"
+else
+	record_fetch_failure "fetch: js-debug release metadata"
 fi
 
 sudo mkdir -p /usr/share/java/lombok
@@ -345,6 +378,7 @@ if curl -fL --retry 5 --retry-delay 2 "https://projectlombok.org/downloads/lombo
 else
 	rm -f "$LOMBOK_TMP"
 	info_log "WARNING: failed to download lombok"
+	record_fetch_failure "download: lombok"
 fi
 
 JDB_VSIX=$(curl -fsSL --retry 3 https://open-vsx.org/api/vscjava/vscode-java-debug 2>/dev/null | jq -r '.files.download' 2>/dev/null || true)
@@ -356,8 +390,11 @@ if [ -n "$JDB_VSIX" ] && [ "$JDB_VSIX" != "null" ]; then
 		sudo mv "$JDB_TMP/jars" /usr/share/java-debug
 	else
 		info_log "WARNING: failed to install java-debug"
+		record_fetch_failure "download: java-debug"
 	fi
 	rm -rf "$JDB_TMP"
+else
+	record_fetch_failure "fetch: java-debug release metadata"
 fi
 
 if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
@@ -383,23 +420,31 @@ cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 gtk-application-prefer-dark-theme=1
 EOF
 
-curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/background.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png" || true
-curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/grub.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png" || true
-curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/profile.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-ncurses.conf -o "$HOME/.config/conky/conky-ncurses.conf" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/usage -o "$HOME/.config/conky/usage" && chmod +x "$HOME/.config/conky/usage" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-tui -o "$HOME/.local/bin/conky-tui" && chmod +x "$HOME/.local/bin/conky-tui" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/htop/htoprc -o "$HOME/.config/htop/htoprc" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o "$HOME/.vimrc" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json" || true
-curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf" || true
+curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/background.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/background.png -o "$HOME/Pictures/background.png" || record_fetch_failure "fetch: backgrounds/background.png"
+curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/grub.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/grub.png -o "$HOME/Pictures/grub.png" || record_fetch_failure "fetch: backgrounds/grub.png"
+curl -fL --retry 3 --retry-delay 2 -z "$HOME/Pictures/profile.png" https://raw.githubusercontent.com/231tr0n/config/main/backgrounds/profile.png -o "$HOME/Pictures/profile.png" || record_fetch_failure "fetch: backgrounds/profile.png"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky.conf -o "$HOME/.config/conky/conky.conf" || record_fetch_failure "fetch: conky/conky.conf"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-ncurses.conf -o "$HOME/.config/conky/conky-ncurses.conf" || record_fetch_failure "fetch: conky/conky-ncurses.conf"
+if curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/usage -o "$HOME/.config/conky/usage"; then
+	chmod +x "$HOME/.config/conky/usage"
+else
+	record_fetch_failure "fetch: conky/usage"
+fi
+if curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/conky/conky-tui -o "$HOME/.local/bin/conky-tui"; then
+	chmod +x "$HOME/.local/bin/conky-tui"
+else
+	record_fetch_failure "fetch: conky/conky-tui"
+fi
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/config.fish -o "$HOME/.config/fish/config.fish" || record_fetch_failure "fetch: fish/config.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_mode_prompt.fish -o "$HOME/.config/fish/functions/fish_mode_prompt.fish" || record_fetch_failure "fetch: fish/functions/fish_mode_prompt.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_prompt.fish -o "$HOME/.config/fish/functions/fish_prompt.fish" || record_fetch_failure "fetch: fish/functions/fish_prompt.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/fish/functions/fish_user_key_bindings.fish -o "$HOME/.config/fish/functions/fish_user_key_bindings.fish" || record_fetch_failure "fetch: fish/functions/fish_user_key_bindings.fish"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/git/.gitconfig -o "$HOME/.gitconfig" || record_fetch_failure "fetch: git/.gitconfig"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/htop/htoprc -o "$HOME/.config/htop/htoprc" || record_fetch_failure "fetch: htop/htoprc"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.lua -o "$HOME/.config/nvim/init.lua" || record_fetch_failure "fetch: nvim/init.lua"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/nvim/init.vim -o "$HOME/.vimrc" || record_fetch_failure "fetch: nvim/init.vim"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/opencode/cli.json -o "$HOME/.config/opencode/cli.json" || record_fetch_failure "fetch: opencode/cli.json"
+curl -fsSL https://raw.githubusercontent.com/231tr0n/config/main/tmux/tmux.conf -o "$HOME/.config/tmux/tmux.conf" || record_fetch_failure "fetch: tmux/tmux.conf"
 
 PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2>/dev/null | tr -d "'" | tr -d ' ' || true)
 set +e
@@ -469,7 +514,7 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
 # just-perfection is the only extension installed from extensions.gnome.org.
-gext --filesystem install just-perfection-desktop@just-perfection || true
+gext --filesystem install just-perfection-desktop@just-perfection || record_fetch_failure "fetch: just-perfection extension"
 dconf write /org/gnome/shell/extensions/just-perfection/panel false
 dconf write /org/gnome/shell/extensions/just-perfection/panel-in-overview true
 
@@ -477,5 +522,12 @@ gnome-extensions disable background-logo@fedorahosted.org || true
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
 gnome-extensions enable just-perfection-desktop@just-perfection || true
 set -e
+
+if [ ${#FAILED_FETCHES[@]} -eq 0 ]; then
+	info_log 'All web fetches completed successfully.'
+else
+	info_log 'The following web fetches failed:'
+	printf '  - %s\n' "${FAILED_FETCHES[@]}"
+fi
 
 info_log 'Setup finished. Log out or reboot to apply all changes.'
