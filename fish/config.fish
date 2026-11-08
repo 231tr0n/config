@@ -39,14 +39,8 @@ if status is-interactive
     fish_vi_key_bindings
 end
 
-# Go path variables
-set -gx PATH $PATH $HOME/go/bin
-
-# Additional user bin path variables
-set -gx PATH $PATH $HOME/.local/bin
-
-# Additional luarocks bin path variables
-set -gx PATH $PATH $HOME/.luarocks/bin
+# User-installed binaries
+fish_add_path $HOME/go/bin $HOME/.local/bin $HOME/.luarocks/bin $HOME/.opencode/bin
 
 # fish_config theme choose Nord
 # set -g fish_term24bit 0
@@ -57,7 +51,7 @@ bat --completion fish | source
 
 set -gx FZF_DEFAULT_OPTS "--style full --color 16 --reverse"
 set -gx BAT_THEME ansi
-set -x INCEPTION_API_KEY ""
+set -gx INCEPTION_API_KEY ""
 
 if status is-interactive
     and not set -q TMUX

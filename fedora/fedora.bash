@@ -16,7 +16,7 @@ else
 fi
 set -x
 
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.luarocks/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$HOME/go/bin:$PATH"
 
 DEFAULT_USERNAME=""
 SSH_PASSPHRASE=""
@@ -140,7 +140,7 @@ if [ -n "$LLAMA_BIN_DIR" ] && [ -d "$LLAMA_BIN_DIR" ]; then
 	done
 fi
 
-curl -fsSL https://opencode.ai/v2/install | bash
+curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
 
 sudo dnf update -y
 

@@ -1,5 +1,5 @@
 [core]
-	pager = diff-so-fancy | less --tabs=4 -RF
+	pager = "if command -v nvim >/dev/null 2>&1; then nvim -R -c 'set ft=diff' -; elif command -v diff-so-fancy >/dev/null 2>&1; then diff-so-fancy | less --tabs=4 -RF; else less --tabs=4 -RF; fi"
 	editor = nvim
 [interactive]
 	diffFilter = diff-so-fancy --patch
