@@ -72,12 +72,12 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-google
 EOF
 sudo dnf install -y google-chrome-stable
 
-sudo dnf install -y tree-sitter-cli diff-so-fancy vim neovim tmux fish fzf ripgrep fd-find git jq yq zoxide bat patch unzip ctags
-sudo dnf install -y go luajit luarocks delve nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
-sudo dnf install -y shellcheck gofumpt black pylint golangci-lint gopls clang-format texlive-latexindent clang-tools-extra clangd
+sudo dnf install -y vim neovim tmux fish git jq patch unzip ctags
+sudo dnf install -y go luajit luarocks nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
+sudo dnf install -y shellcheck clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
 sudo dnf install -y pkg-config openssl-devel
-sudo dnf install -y yt-dlp ffmpeg ImageMagick
+sudo dnf install -y ffmpeg ImageMagick
 sudo dnf install -y htop inxi ncdu btop igt-gpu-tools telnet bleachbit conky
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts brave-browser
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-appindicator gnome-shell-extension-drive-menu
@@ -170,8 +170,10 @@ else
 	rustup update || true
 fi
 
+sudo npm install -g npm@latest
 sudo npm install -g @opencode/cli@latest prettier@latest eslint@latest typescript-language-server@latest typescript@latest svelte-language-server@latest
 sudo npm install -g @t1ckbase/vscode-langservers-extracted@latest bash-language-server@latest pyright@latest @vtsls/language-server@latest yaml-language-server@latest @angular/language-server@latest npm-groovy-lint@latest
+sudo npm install -g diff-so-fancy@latest tree-sitter-cli@latest
 
 curl -fsSL https://raw.githubusercontent.com/lunarmodules/luacheck/master/luacheck-dev-1.rockspec -o /tmp/luacheck-dev-1.rockspec
 luarocks install --local --force /tmp/luacheck-dev-1.rockspec
@@ -179,15 +181,28 @@ rm -f /tmp/luacheck-dev-1.rockspec
 
 cargo install cargo-update || true
 cargo install stylua --features luajit || true
+cargo install ripgrep || true
+cargo install fd-find || true
+cargo install bat || true
+cargo install zoxide || true
 cargo install-update -a || true
 
 go install github.com/nao1215/gup@latest || true
 go install github.com/reteps/dockerfmt@latest || true
 go install sigs.k8s.io/yaml/yamlfmt@latest || true
 go install mvdan.cc/sh/v3/cmd/shfmt@latest || true
+go install github.com/go-delve/delve/cmd/dlv@latest || true
+go install github.com/junegunn/fzf@latest || true
+go install github.com/mikefarah/yq/v4@latest || true
+go install golang.org/x/tools/gopls@latest || true
+go install mvdan.cc/gofumpt@latest || true
 gup update || true
 
-pipx install --force mbake sqlfluff debugpy || true
+curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$HOME/.local/bin" latest || true
+
+curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux -o "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
+
+pipx install --force black debugpy gnome-extensions-cli mbake pylint sqlfluff yt-dlp || true
 pipx upgrade-all || true
 
 install_ollama() {
@@ -350,6 +365,7 @@ fi
 gsettings set org.gnome.Ptyxis enable-a11y true
 gsettings set org.gnome.Ptyxis inhibit-logout false
 gsettings set org.gnome.desktop.a11y always-show-universal-access-status true
+gsettings set org.gnome.desktop.a11y.interface keyboard-focus-visible-timeout 0
 gsettings set org.gnome.desktop.a11y.interface show-status-shapes true
 gsettings set org.gnome.desktop.a11y.keyboard togglekeys-enable true
 gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Pictures/background.png"
@@ -394,7 +410,9 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from 
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to 0.0
 gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 4500
 gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 5
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 gsettings set org.gnome.shell always-show-log-out true
+gsettings set org.gnome.shell disable-user-extensions false
 gsettings set org.gnome.shell favorite-apps "@as []"
 gsettings set org.gnome.system.location enabled true
 
@@ -402,13 +420,14 @@ busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$(id -u "$DE
 
 gdctl set -P -L --monitor "$(gdctl show | grep -oP 'Monitor\s+\K\S+')" --primary --scale 2
 
+# just-perfection is the only extension installed from extensions.gnome.org.
+gext --filesystem install just-perfection-desktop@just-perfection || true
+dconf write /org/gnome/shell/extensions/just-perfection/panel false
+dconf write /org/gnome/shell/extensions/just-perfection/panel-in-overview true
+
 gnome-extensions disable background-logo@fedorahosted.org || true
 gnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com || true
+gnome-extensions enable just-perfection-desktop@just-perfection || true
 set -e
-
-for bin in marksman texlab lemminx vscode-html-language-server vscode-css-language-server vscode-json-language-server vscode-eslint-language-server bash-language-server pyright-langserver vtsls yaml-language-server ngserver npm-groovy-lint sqlfluff debugpy; do
-	command -v "$bin" >/dev/null 2>&1 || info_log "WARNING: $bin is still missing"
-done
-[ -f /usr/share/js-debug/src/dapDebugServer.js ] || info_log 'WARNING: js-debug DAP server is missing'
 
 info_log 'Setup finished. Log out or reboot to apply all changes.'
