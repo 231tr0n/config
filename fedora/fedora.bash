@@ -127,6 +127,11 @@ sudo dnf install -y ocl-icd intel-compute-runtime intel-opencl
 sudo dnf install -y intel-level-zero oneapi-level-zero
 sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel
 
+if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
+	grep -qxF /usr/bin/fish /etc/shells || echo /usr/bin/fish | sudo tee -a /etc/shells
+	sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
+fi
+
 LLAMA_DIR="$HOME/.local/share/llama.cpp"
 BUILT_TAG_FILE="$LLAMA_DIR/.last_built_release"
 NEED_INSTALL=0
@@ -225,6 +230,7 @@ cargo install fd-find || true
 cargo install bat || true
 cargo install zoxide || true
 cargo install tree-sitter-cli || true
+cargo install --git https://github.com/latex-lsp/texlab || true
 cargo install-update -a || true
 
 go install github.com/nao1215/gup@latest || true
@@ -236,11 +242,8 @@ go install github.com/junegunn/fzf@latest || true
 go install github.com/mikefarah/yq/v4@latest || true
 go install golang.org/x/tools/gopls@latest || true
 go install mvdan.cc/gofumpt@latest || true
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest || record_fetch_failure "fetch: golangci-lint go install"
 gup update || true
-
-if ! curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$HOME/.local/bin" latest; then
-	record_fetch_failure "fetch: golangci-lint install script"
-fi
 
 download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
 
@@ -304,10 +307,10 @@ if [ -n "$LUA_LS_VER" ] && install_tar_gz "https://github.com/LuaLS/lua-language
 	ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
 fi
 
-GJF_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/google/google-java-format/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | cut -c2- || true)
+GJF_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 [ -n "$GJF_VER" ] || record_fetch_failure "fetch: google-java-format version metadata"
 GJF_JAR="$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
-if [ -n "$GJF_VER" ] && download_file "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" "$GJF_JAR"; then
+if [ -n "$GJF_VER" ] && download_file "https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" "$GJF_JAR"; then
 	find "$HOME/.local/share/google-java-format" -maxdepth 1 -name '*.jar' ! -name "$(basename "$GJF_JAR")" -delete
 	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$GJF_JAR" >"$HOME/.local/bin/google-java-format"
 	chmod +x "$HOME/.local/bin/google-java-format"
@@ -332,15 +335,6 @@ if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
 	download_file "$MARKSMAN_URL" "$HOME/.local/bin/marksman" && chmod +x "$HOME/.local/bin/marksman"
 else
 	record_fetch_failure "fetch: marksman release metadata"
-fi
-
-TEXLAB_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/latex-lsp/texlab/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "texlab-x86_64-linux.tar.gz") | .browser_download_url' | head -1)
-if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ]; then
-	if install_tar_gz "$TEXLAB_URL" "$HOME/.local/share/texlab"; then
-		ln -sf "$HOME/.local/share/texlab/texlab" "$HOME/.local/bin/texlab"
-	fi
-else
-	record_fetch_failure "fetch: texlab release metadata"
 fi
 
 LEMMINX_VER=$(curl -fsSL --retry 3 https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
@@ -372,34 +366,32 @@ else
 fi
 
 sudo mkdir -p /usr/share/java/lombok
-LOMBOK_TMP="$(mktemp)"
-if curl -fL --retry 5 --retry-delay 2 "https://projectlombok.org/downloads/lombok.jar" -o "$LOMBOK_TMP"; then
-	sudo mv "$LOMBOK_TMP" /usr/share/java/lombok/lombok.jar
-else
-	rm -f "$LOMBOK_TMP"
-	info_log "WARNING: failed to download lombok"
-	record_fetch_failure "download: lombok"
+LOMBOK_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/org/projectlombok/lombok/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+[ -n "$LOMBOK_VER" ] || record_fetch_failure "fetch: lombok version metadata"
+if [ -n "$LOMBOK_VER" ]; then
+	LOMBOK_TMP="$(mktemp)"
+	if curl -fL --retry 5 --retry-delay 2 "https://repo1.maven.org/maven2/org/projectlombok/lombok/$LOMBOK_VER/lombok-$LOMBOK_VER.jar" -o "$LOMBOK_TMP"; then
+		sudo mv "$LOMBOK_TMP" /usr/share/java/lombok/lombok.jar
+	else
+		rm -f "$LOMBOK_TMP"
+		info_log "WARNING: failed to download lombok"
+		record_fetch_failure "download: lombok"
+	fi
 fi
 
-JDB_VSIX=$(curl -fsSL --retry 3 https://open-vsx.org/api/vscjava/vscode-java-debug 2>/dev/null | jq -r '.files.download' 2>/dev/null || true)
-if [ -n "$JDB_VSIX" ] && [ "$JDB_VSIX" != "null" ]; then
+JDB_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+[ -n "$JDB_VER" ] || record_fetch_failure "fetch: java-debug version metadata"
+if [ -n "$JDB_VER" ]; then
 	JDB_TMP="$(mktemp -d)"
-	if curl -fL --retry 5 --retry-delay 2 "$JDB_VSIX" -o "$JDB_TMP/java-debug.vsix" &&
-		unzip -q -o -j "$JDB_TMP/java-debug.vsix" "extension/server/*.jar" -d "$JDB_TMP/jars"; then
+	if curl -fL --retry 5 --retry-delay 2 "https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/$JDB_VER/com.microsoft.java.debug.plugin-$JDB_VER.jar" -o "$JDB_TMP/java-debug.jar"; then
 		sudo rm -rf /usr/share/java-debug
-		sudo mv "$JDB_TMP/jars" /usr/share/java-debug
+		sudo mkdir -p /usr/share/java-debug
+		sudo mv "$JDB_TMP/java-debug.jar" /usr/share/java-debug/
 	else
-		info_log "WARNING: failed to install java-debug"
+		info_log "WARNING: failed to download java-debug"
 		record_fetch_failure "download: java-debug"
 	fi
 	rm -rf "$JDB_TMP"
-else
-	record_fetch_failure "fetch: java-debug release metadata"
-fi
-
-if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
-	grep -qxF /usr/bin/fish /etc/shells || echo /usr/bin/fish | sudo tee -a /etc/shells
-	sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
 fi
 
 sudo usermod -aG docker "$DEFAULT_USERNAME"
