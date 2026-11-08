@@ -47,6 +47,36 @@ function info_log {
 	set -x
 }
 
+download_file() {
+	local url="$1" dest="$2" tmp
+	mkdir -p "$(dirname "$dest")"
+	tmp="$(mktemp "${dest}.XXXXXX")"
+	if curl -fL --retry 5 --retry-delay 2 "$url" -o "$tmp"; then
+		mv -f "$tmp" "$dest"
+	else
+		rm -f "$tmp"
+		info_log "WARNING: failed to download $url"
+		return 1
+	fi
+}
+
+install_tar_gz() {
+	local url="$1" dest="$2" tmp
+	mkdir -p "$(dirname "$dest")"
+	tmp="$(mktemp -d "${dest}.XXXXXX")"
+	if curl -fL --retry 5 --retry-delay 2 "$url" -o "$tmp/archive.tar.gz" &&
+		mkdir -p "$tmp/extract" &&
+		tar xz -C "$tmp/extract" -f "$tmp/archive.tar.gz"; then
+		rm -rf "$dest"
+		mv "$tmp/extract" "$dest"
+		rm -rf "$tmp"
+	else
+		rm -rf "$tmp"
+		info_log "WARNING: failed to install $url"
+		return 1
+	fi
+}
+
 if [ -z "$DEFAULT_USERNAME" ]; then
 	info_log 'Default username is not set.'
 	exit 1
@@ -94,9 +124,9 @@ BUILT_TAG_FILE="$LLAMA_DIR/.last_built_release"
 NEED_INSTALL=0
 
 info_log 'Checking llama.cpp for updates...'
-LLAMA_LATEST_TAG="$(curl -fsSL "https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=20" 2>/dev/null | jq -r '[.[].tag_name | select(test("^b[0-9]+$"))][0] // empty' || true)"
+LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=20" 2>/dev/null | jq -r '[.[].tag_name | select(test("^b[0-9]+$"))][0] // empty' || true)"
 if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
-	LLAMA_LATEST_TAG="$(curl -fsSL https://api.github.com/repos/ggml-org/llama.cpp/tags 2>/dev/null | jq -r '.[0].name' 2>/dev/null | head -1 || true)"
+	LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 https://api.github.com/repos/ggml-org/llama.cpp/tags 2>/dev/null | jq -r '.[0].name' 2>/dev/null | head -1 || true)"
 fi
 
 LLAMA_BIN="$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2>/dev/null | head -1 || true)"
@@ -118,16 +148,13 @@ fi
 
 if [ "$NEED_INSTALL" -eq 1 ]; then
 	info_log "llama.cpp updating to ${LLAMA_LATEST_TAG:-latest} prebuilt (openvino)..."
-	LLAMA_ASSET_URL="$(curl -fsSL "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$LLAMA_LATEST_TAG" 2>/dev/null | jq -r '.assets[] | select(.name | test("bin-ubuntu-openvino-.*-x64\\.tar\\.gz$")) | .browser_download_url' 2>/dev/null | head -1 || true)"
+	LLAMA_ASSET_URL="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$LLAMA_LATEST_TAG" 2>/dev/null | jq -r '.assets[] | select(.name | test("bin-ubuntu-openvino-.*-x64\\.tar\\.gz$")) | .browser_download_url' 2>/dev/null | head -1 || true)"
 	if [ -z "$LLAMA_ASSET_URL" ]; then
 		info_log 'No prebuilt ubuntu-openvino asset found, skipping.'
 	else
-		rm -rf "$LLAMA_DIR"
-		mkdir -p "$LLAMA_DIR"
-		curl -fL --retry 3 --retry-delay 2 "$LLAMA_ASSET_URL" -o /tmp/llama-openvino.tar.gz
-		tar xz -C "$LLAMA_DIR" -f /tmp/llama-openvino.tar.gz
-		rm -f /tmp/llama-openvino.tar.gz
-		echo "$LLAMA_LATEST_TAG" >"$BUILT_TAG_FILE"
+		if install_tar_gz "$LLAMA_ASSET_URL" "$LLAMA_DIR"; then
+			echo "$LLAMA_LATEST_TAG" >"$BUILT_TAG_FILE"
+		fi
 	fi
 else
 	info_log "llama.cpp ${LLAMA_BUILT_TAG:-current} is up to date, skipping."
@@ -202,20 +229,20 @@ gup update || true
 
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$HOME/.local/bin" latest || true
 
-curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux -o "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
+download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux "$HOME/.local/bin/fzf-tmux" && chmod +x "$HOME/.local/bin/fzf-tmux" || true
 
 pipx install --force black debugpy gnome-extensions-cli mbake pylint sqlfluff yt-dlp || true
 pipx upgrade-all || true
 
 install_ollama() {
-	curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
+	curl -fsSL --retry 5 --retry-delay 2 https://ollama.com/install.sh -o /tmp/ollama-install.sh
 	sed -i 's/--progress-bar//g' /tmp/ollama-install.sh
 	sh /tmp/ollama-install.sh
 	rm -f /tmp/ollama-install.sh
 }
 if command -v ollama >/dev/null 2>&1; then
 	OLLAMA_CUR="$(ollama --version 2>/dev/null | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
-	OLLAMA_LATEST="$(curl -fsSL https://api.github.com/repos/ollama/ollama/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | sed 's/^v//' | head -1 || true)"
+	OLLAMA_LATEST="$(curl -fsSL --retry 3 https://api.github.com/repos/ollama/ollama/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | sed 's/^v//' | head -1 || true)"
 	if [ -n "$OLLAMA_CUR" ] && [ -n "$OLLAMA_LATEST" ] && [ "$OLLAMA_CUR" = "$OLLAMA_LATEST" ]; then
 		info_log "ollama $OLLAMA_CUR is already the latest, skipping install/update."
 	elif [ -z "$OLLAMA_LATEST" ] || [ "$OLLAMA_LATEST" = "null" ]; then
@@ -252,67 +279,86 @@ fi
 
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls,texlab,lemminx}
 
-LUA_LS_VER=$(curl -fsSL https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
-rm -rf "$HOME/.local/share/lua-language-server"
-mkdir -p "$HOME/.local/share/lua-language-server"
-curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" | tar xz -C "$HOME/.local/share/lua-language-server"
-ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
-
-GJF_VER=$(curl -fsSL https://api.github.com/repos/google/google-java-format/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | cut -c2- || true)
-rm -f "$HOME/.local/share/google-java-format/"*.jar
-curl -fsSL "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" -o "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
-printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar" >"$HOME/.local/bin/google-java-format"
-chmod +x "$HOME/.local/bin/google-java-format"
-
-CS_TAG=$(curl -fsSL https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
-CS_VER=${CS_TAG#checkstyle-}
-rm -f "$HOME/.local/share/checkstyle/"*.jar
-curl -fsSL "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" -o "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
-printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar" >"$HOME/.local/bin/checkstyle"
-chmod +x "$HOME/.local/bin/checkstyle"
-
-rm -rf "$HOME/.local/share/jdtls"
-mkdir -p "$HOME/.local/share/jdtls"
-curl -fsSL "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" | tar xz -C "$HOME/.local/share/jdtls"
-ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
-
-MARKSMAN_URL=$(curl -fsSL https://api.github.com/repos/artempyanykh/marksman/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
-if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
-	curl -fL "$MARKSMAN_URL" -o "$HOME/.local/bin/marksman"
-	chmod +x "$HOME/.local/bin/marksman"
+LUA_LS_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
+if [ -n "$LUA_LS_VER" ] && install_tar_gz "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" "$HOME/.local/share/lua-language-server"; then
+	ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
 fi
 
-TEXLAB_URL=$(curl -fsSL https://api.github.com/repos/latex-lsp/texlab/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "texlab-x86_64-linux.tar.gz") | .browser_download_url' | head -1)
-if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ]; then
-	rm -rf "$HOME/.local/share/texlab"
-	mkdir -p "$HOME/.local/share/texlab"
-	curl -fsSL "$TEXLAB_URL" | tar xz -C "$HOME/.local/share/texlab"
+GJF_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/google/google-java-format/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | cut -c2- || true)
+GJF_JAR="$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
+if [ -n "$GJF_VER" ] && download_file "https://github.com/google/google-java-format/releases/download/v$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" "$GJF_JAR"; then
+	find "$HOME/.local/share/google-java-format" -maxdepth 1 -name '*.jar' ! -name "$(basename "$GJF_JAR")" -delete
+	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$GJF_JAR" >"$HOME/.local/bin/google-java-format"
+	chmod +x "$HOME/.local/bin/google-java-format"
+fi
+
+CS_TAG=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
+CS_VER=${CS_TAG#checkstyle-}
+CS_JAR="$HOME/.local/share/checkstyle/checkstyle-$CS_VER-all.jar"
+if [ -n "$CS_TAG" ] && download_file "https://github.com/checkstyle/checkstyle/releases/download/$CS_TAG/checkstyle-$CS_VER-all.jar" "$CS_JAR"; then
+	find "$HOME/.local/share/checkstyle" -maxdepth 1 -name '*.jar' ! -name "$(basename "$CS_JAR")" -delete
+	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$CS_JAR" >"$HOME/.local/bin/checkstyle"
+	chmod +x "$HOME/.local/bin/checkstyle"
+fi
+
+if install_tar_gz "https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz" "$HOME/.local/share/jdtls"; then
+	ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
+fi
+
+MARKSMAN_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/artempyanykh/marksman/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
+if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
+	download_file "$MARKSMAN_URL" "$HOME/.local/bin/marksman" && chmod +x "$HOME/.local/bin/marksman"
+fi
+
+TEXLAB_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/latex-lsp/texlab/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "texlab-x86_64-linux.tar.gz") | .browser_download_url' | head -1)
+if [ -n "$TEXLAB_URL" ] && [ "$TEXLAB_URL" != "null" ] && install_tar_gz "$TEXLAB_URL" "$HOME/.local/share/texlab"; then
 	ln -sf "$HOME/.local/share/texlab/texlab" "$HOME/.local/bin/texlab"
 fi
 
-LEMMINX_VER=$(curl -fsSL https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+LEMMINX_VER=$(curl -fsSL --retry 3 https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 if [ -n "$LEMMINX_VER" ]; then
-	rm -f "$HOME/.local/share/lemminx/"*.jar
-	curl -fsSL "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/$LEMMINX_VER/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" -o "$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar"
-	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" >"$HOME/.local/bin/lemminx"
-	chmod +x "$HOME/.local/bin/lemminx"
+	LEMMINX_JAR="$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar"
+	if download_file "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/$LEMMINX_VER/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" "$LEMMINX_JAR"; then
+		find "$HOME/.local/share/lemminx" -maxdepth 1 -name '*.jar' ! -name "$(basename "$LEMMINX_JAR")" -delete
+		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$LEMMINX_JAR" >"$HOME/.local/bin/lemminx"
+		chmod +x "$HOME/.local/bin/lemminx"
+	fi
 fi
 
-JS_DEBUG_URL=$(curl -fsSL https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
+JS_DEBUG_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
 if [ -n "$JS_DEBUG_URL" ] && [ "$JS_DEBUG_URL" != "null" ]; then
-	sudo rm -rf /usr/share/js-debug
-	curl -fsSL "$JS_DEBUG_URL" | sudo tar xz -C /usr/share
+	JS_DEBUG_TMP="$(mktemp -d)"
+	if curl -fL --retry 5 --retry-delay 2 "$JS_DEBUG_URL" -o "$JS_DEBUG_TMP/js-debug.tar.gz" &&
+		tar xz -C "$JS_DEBUG_TMP" -f "$JS_DEBUG_TMP/js-debug.tar.gz"; then
+		sudo rm -rf /usr/share/js-debug
+		sudo mv "$JS_DEBUG_TMP/js-debug" /usr/share/js-debug
+	else
+		info_log "WARNING: failed to install js-debug"
+	fi
+	rm -rf "$JS_DEBUG_TMP"
 fi
 
 sudo mkdir -p /usr/share/java/lombok
-sudo curl -fsSL "https://projectlombok.org/downloads/lombok.jar" -o /usr/share/java/lombok/lombok.jar
+LOMBOK_TMP="$(mktemp)"
+if curl -fL --retry 5 --retry-delay 2 "https://projectlombok.org/downloads/lombok.jar" -o "$LOMBOK_TMP"; then
+	sudo mv "$LOMBOK_TMP" /usr/share/java/lombok/lombok.jar
+else
+	rm -f "$LOMBOK_TMP"
+	info_log "WARNING: failed to download lombok"
+fi
 
-JDB_VSIX=$(curl -fsSL https://open-vsx.org/api/vscjava/vscode-java-debug 2>/dev/null | jq -r '.files.download' 2>/dev/null || true)
-sudo mkdir -p /usr/share/java-debug
-sudo find /usr/share/java-debug -maxdepth 1 -name '*.jar' -delete
-curl -fsSL "$JDB_VSIX" -o /tmp/vscjava.vscode-java-debug.vsix
-sudo unzip -o -j /tmp/vscjava.vscode-java-debug.vsix "extension/server/*.jar" -d /usr/share/java-debug
-rm -f /tmp/vscjava.vscode-java-debug.vsix
+JDB_VSIX=$(curl -fsSL --retry 3 https://open-vsx.org/api/vscjava/vscode-java-debug 2>/dev/null | jq -r '.files.download' 2>/dev/null || true)
+if [ -n "$JDB_VSIX" ] && [ "$JDB_VSIX" != "null" ]; then
+	JDB_TMP="$(mktemp -d)"
+	if curl -fL --retry 5 --retry-delay 2 "$JDB_VSIX" -o "$JDB_TMP/java-debug.vsix" &&
+		unzip -q -o -j "$JDB_TMP/java-debug.vsix" "extension/server/*.jar" -d "$JDB_TMP/jars"; then
+		sudo rm -rf /usr/share/java-debug
+		sudo mv "$JDB_TMP/jars" /usr/share/java-debug
+	else
+		info_log "WARNING: failed to install java-debug"
+	fi
+	rm -rf "$JDB_TMP"
+fi
 
 if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
 	grep -qxF /usr/bin/fish /etc/shells || echo /usr/bin/fish | sudo tee -a /etc/shells
