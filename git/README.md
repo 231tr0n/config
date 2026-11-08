@@ -1,6 +1,6 @@
 # Git config
 
-Config uses delta as the pager to view diffs.
+Config uses diff-so-fancy, paged through less, to view diffs with character-level highlighting.
 
 To setup pre-commit hooks and commit-msg hooks to check for commiting style run the below command.
 ```bash

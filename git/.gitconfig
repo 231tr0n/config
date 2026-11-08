@@ -1,5 +1,5 @@
 [core]
-	pager = "if command -v nvim >/dev/null 2>&1 && command -v perl >/dev/null 2>&1; then if IFS= read -r line || [ -n \"$line\" ]; then { printf '%s\\n' \"$line\"; cat; } | perl -pe 's/\\033\\[[0-9;]*[mK]//g' | nvim -R -c 'set ft=diff' -; fi; elif command -v diff-so-fancy >/dev/null 2>&1; then if command -v less >/dev/null 2>&1; then diff-so-fancy | less --tabs=4 -RF; else diff-so-fancy; fi; elif command -v less >/dev/null 2>&1; then less --tabs=4 -RF; else cat; fi"
+	pager = "if command -v diff-so-fancy >/dev/null 2>&1; then if command -v less >/dev/null 2>&1; then diff-so-fancy | less --tabs=4 -RFX; else diff-so-fancy; fi; elif command -v less >/dev/null 2>&1; then less --tabs=4 -RFX; else cat; fi"
 	editor = nvim
 [interactive]
 	diffFilter = diff-so-fancy --patch
