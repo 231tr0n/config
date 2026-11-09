@@ -23,28 +23,27 @@ SSH_PASSPHRASE=""
 
 while getopts 'u:s:h' opt; do
 	case "$opt" in
-		u)
-			DEFAULT_USERNAME="$OPTARG"
-			;;
-		s)
-			SSH_PASSPHRASE="$OPTARG"
-			;;
-		h | ?)
-			printf "Help\n
+	u)
+		DEFAULT_USERNAME="$OPTARG"
+		;;
+	s)
+		SSH_PASSPHRASE="$OPTARG"
+		;;
+	h | ?)
+		printf "Help\n
     -u: system username
     -s: SSH key passphrase
     -h: print help
     \n"
-			exit
-			;;
+		exit
+		;;
 	esac
 done
 
-function info_log
-{
+function info_log {
 	{
 		set +x
-	} 2> /dev/null
+	} 2>/dev/null
 	echo -ne "$INFO_TAG"
 	echo -e "$1"
 	set -x
@@ -53,18 +52,15 @@ function info_log
 FAILED_FETCHES=()
 FAILED_STEPS=()
 
-record_fetch_failure()
-{
+record_fetch_failure() {
 	FAILED_FETCHES+=("$1")
 }
 
-record_step_failure()
-{
+record_step_failure() {
 	FAILED_STEPS+=("$1")
 }
 
-enable_shell_extension()
-{
+enable_shell_extension() {
 	local uuid="${1}" enabled
 	enabled="$(gsettings get org.gnome.shell enabled-extensions)"
 	if [[ ${enabled} == *"'${uuid}'"* ]]; then
@@ -79,8 +75,7 @@ enable_shell_extension()
 	gsettings set org.gnome.shell enabled-extensions "[${enabled}'${uuid}']"
 }
 
-download_file()
-{
+download_file() {
 	local url="$1" dest="$2" tmp
 	mkdir -p "$(dirname "$dest")"
 	tmp="$(mktemp "${dest}.XXXXXX")"
@@ -94,14 +89,13 @@ download_file()
 	fi
 }
 
-install_tar_gz()
-{
+install_tar_gz() {
 	local url="$1" dest="$2" tmp
 	mkdir -p "$(dirname "$dest")"
 	tmp="$(mktemp -d "${dest}.XXXXXX")"
-	if curl -fL --retry 5 --retry-delay 2 "$url" -o "$tmp/archive.tar.gz" \
-		&& mkdir -p "$tmp/extract" \
-		&& tar xz -C "$tmp/extract" -f "$tmp/archive.tar.gz"; then
+	if curl -fL --retry 5 --retry-delay 2 "$url" -o "$tmp/archive.tar.gz" &&
+		mkdir -p "$tmp/extract" &&
+		tar xz -C "$tmp/extract" -f "$tmp/archive.tar.gz"; then
 		rm -rf "$dest"
 		mv "$tmp/extract" "$dest"
 		rm -rf "$tmp"
@@ -123,12 +117,13 @@ if [ ! -f "$HOME/.ssh/id_rsa" ]; then
 	ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa" -N "$SSH_PASSPHRASE"
 fi
 
-sudo dnf install -y dnf-plugins-core
+sudo dnf install -y dnf5-plugins dnf5-plugin-diff
 
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo --overwrite
+sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo --overwrite
 sudo install -d -m 755 /etc/pki/rpm-gpg
 curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor --batch --yes -o /etc/pki/rpm-gpg/RPM-GPG-KEY-google
-sudo tee /etc/yum.repos.d/google-chrome.repo > /dev/null << 'EOF'
+sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
 [google-chrome]
 name=google-chrome
 baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
@@ -138,7 +133,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-google
 EOF
 sudo dnf install -y google-chrome-stable
 
-sudo dnf install -y vim neovim tmux fish git jq patch unzip ctags
+sudo dnf install -y vim neovim tmux fish git jq patch unzip ctags gh
 sudo dnf install -y go luajit luarocks nodejs npm gcc python3 python3-pip pipx texlive-scheme-basic make gdb meson java maven rustup
 sudo dnf install -y shellcheck clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
@@ -165,21 +160,21 @@ BUILT_TAG_FILE="$LLAMA_DIR/.last_built_release"
 NEED_INSTALL=0
 
 info_log 'Checking llama.cpp for updates...'
-LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=20" 2> /dev/null | jq -r '[.[].tag_name | select(test("^b[0-9]+$"))][0] // empty' || true)"
+LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=20" 2>/dev/null | jq -r '[.[].tag_name | select(test("^b[0-9]+$"))][0] // empty' || true)"
 if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
-	LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 https://api.github.com/repos/ggml-org/llama.cpp/tags 2> /dev/null | jq -r '.[0].name' 2> /dev/null | head -1 || true)"
+	LLAMA_LATEST_TAG="$(curl -fsSL --retry 3 https://api.github.com/repos/ggml-org/llama.cpp/tags 2>/dev/null | jq -r '.[0].name' 2>/dev/null | head -1 || true)"
 fi
 if [ -z "$LLAMA_LATEST_TAG" ] || [ "$LLAMA_LATEST_TAG" = "null" ]; then
 	record_fetch_failure "fetch: llama.cpp release metadata"
 fi
 
-LLAMA_BIN="$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2> /dev/null | head -1 || true)"
+LLAMA_BIN="$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2>/dev/null | head -1 || true)"
 if [ -z "$LLAMA_BIN" ]; then
 	NEED_INSTALL=1
 else
 	LLAMA_BUILT_TAG=""
 	if [ -f "$BUILT_TAG_FILE" ]; then
-		IFS= read -r LLAMA_BUILT_TAG < "$BUILT_TAG_FILE" 2> /dev/null || LLAMA_BUILT_TAG=""
+		IFS= read -r LLAMA_BUILT_TAG <"$BUILT_TAG_FILE" 2>/dev/null || LLAMA_BUILT_TAG=""
 		LLAMA_BUILT_TAG="${LLAMA_BUILT_TAG#"${LLAMA_BUILT_TAG%%[![:space:]]*}"}"
 		LLAMA_BUILT_TAG="${LLAMA_BUILT_TAG%"${LLAMA_BUILT_TAG##*[![:space:]]}"}"
 	fi
@@ -192,20 +187,20 @@ fi
 
 if [ "$NEED_INSTALL" -eq 1 ]; then
 	info_log "llama.cpp updating to ${LLAMA_LATEST_TAG:-latest} prebuilt (openvino)..."
-	LLAMA_ASSET_URL="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$LLAMA_LATEST_TAG" 2> /dev/null | jq -r '.assets[] | select(.name | test("bin-ubuntu-openvino-.*-x64\\.tar\\.gz$")) | .browser_download_url' 2> /dev/null | head -1 || true)"
+	LLAMA_ASSET_URL="$(curl -fsSL --retry 3 "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$LLAMA_LATEST_TAG" 2>/dev/null | jq -r '.assets[] | select(.name | test("bin-ubuntu-openvino-.*-x64\\.tar\\.gz$")) | .browser_download_url' 2>/dev/null | head -1 || true)"
 	if [ -z "$LLAMA_ASSET_URL" ]; then
 		info_log 'No prebuilt ubuntu-openvino asset found, skipping.'
 		record_fetch_failure "fetch: llama.cpp asset URL"
 	else
 		if install_tar_gz "$LLAMA_ASSET_URL" "$LLAMA_DIR"; then
-			echo "$LLAMA_LATEST_TAG" > "$BUILT_TAG_FILE"
+			echo "$LLAMA_LATEST_TAG" >"$BUILT_TAG_FILE"
 		fi
 	fi
 else
 	info_log "llama.cpp ${LLAMA_BUILT_TAG:-current} is up to date, skipping."
 fi
 mkdir -p "$HOME/.local/bin"
-LLAMA_BIN_DIR="$(dirname "$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2> /dev/null | head -1 || true)" 2> /dev/null || true)"
+LLAMA_BIN_DIR="$(dirname "$(find "$LLAMA_DIR" -maxdepth 2 -name llama-server -type f 2>/dev/null | head -1 || true)" 2>/dev/null || true)"
 if [ -n "$LLAMA_BIN_DIR" ] && [ -d "$LLAMA_BIN_DIR" ]; then
 	for bin in llama-server llama-cli llama-bench llama-perplexity llama-mtmd-cli llama-gguf llama-imatrix llama-quantize; do
 		[ -f "$LLAMA_BIN_DIR/$bin" ] && ln -sf "$LLAMA_BIN_DIR/$bin" "$HOME/.local/bin/$bin"
@@ -215,7 +210,7 @@ fi
 sudo dnf update -y
 
 sudo systemctl enable --now mariadb
-sudo mariadb -u root << 'EOF'
+sudo mariadb -u root <<'EOF'
 DELETE FROM mysql.global_priv WHERE User='';
 DELETE FROM mysql.global_priv WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
 DROP DATABASE IF EXISTS test;
@@ -236,7 +231,7 @@ sudo flatpak update -y
 sudo dnf autoremove -y
 sudo flatpak uninstall --unused -y
 
-if ! command -v rustup > /dev/null 2>&1; then
+if ! command -v rustup >/dev/null 2>&1; then
 	rustup-init --profile complete -y
 else
 	rustup update || true
@@ -278,8 +273,7 @@ download_file https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux
 pipx install --force black debugpy mbake pylint sqlfluff yt-dlp || true
 pipx upgrade-all || true
 
-install_ollama()
-{
+install_ollama() {
 	if ! curl -fsSL --retry 5 --retry-delay 2 https://ollama.com/install.sh -o /tmp/ollama-install.sh; then
 		record_fetch_failure "fetch: ollama install script"
 		return 0
@@ -290,9 +284,9 @@ install_ollama()
 	fi
 	rm -f /tmp/ollama-install.sh
 }
-if command -v ollama > /dev/null 2>&1; then
-	OLLAMA_CUR="$(ollama --version 2> /dev/null | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
-	OLLAMA_LATEST="$(curl -fsSL --retry 3 https://api.github.com/repos/ollama/ollama/releases/latest 2> /dev/null | jq -r '.tag_name' 2> /dev/null | sed 's/^v//' | head -1 || true)"
+if command -v ollama >/dev/null 2>&1; then
+	OLLAMA_CUR="$(ollama --version 2>/dev/null | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+	OLLAMA_LATEST="$(curl -fsSL --retry 3 https://api.github.com/repos/ollama/ollama/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null | sed 's/^v//' | head -1 || true)"
 	if [ -n "$OLLAMA_CUR" ] && [ -n "$OLLAMA_LATEST" ] && [ "$OLLAMA_CUR" = "$OLLAMA_LATEST" ]; then
 		info_log "ollama $OLLAMA_CUR is already the latest, skipping install/update."
 	elif [ -z "$OLLAMA_LATEST" ] || [ "$OLLAMA_LATEST" = "null" ]; then
@@ -308,11 +302,11 @@ else
 fi
 
 sudo mkdir -p /etc/systemd/system/ollama.service.d
-echo -e "[Service]\nEnvironment=\"OLLAMA_IGPU_ENABLE=1\"" | sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null
+echo -e "[Service]\nEnvironment=\"OLLAMA_IGPU_ENABLE=1\"" | sudo tee /etc/systemd/system/ollama.service.d/override.conf >/dev/null
 sudo systemctl daemon-reload
-sudo systemctl enable --now ollama 2> /dev/null || sudo systemctl restart ollama 2> /dev/null || true
+sudo systemctl enable --now ollama 2>/dev/null || sudo systemctl restart ollama 2>/dev/null || true
 
-mbake init --force 2> /dev/null || true
+mbake init --force 2>/dev/null || true
 BAKE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/bake.toml"
 if [ -f "$HOME/.bake.toml" ]; then
 	mv "$HOME/.bake.toml" "$HOME/.bake.toml.bak"
@@ -330,28 +324,28 @@ fi
 
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/"{lua-language-server,google-java-format,checkstyle,jdtls,texlab,lemminx}
 
-LUA_LS_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2> /dev/null | jq -r '.tag_name' 2> /dev/null || true)
+LUA_LS_VER=$(curl -fsSL --retry 3 https://api.github.com/repos/LuaLS/lua-language-server/releases/latest 2>/dev/null | jq -r '.tag_name' 2>/dev/null || true)
 [ -n "$LUA_LS_VER" ] || record_fetch_failure "fetch: lua-language-server version metadata"
 if [ -n "$LUA_LS_VER" ] && install_tar_gz "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VER/lua-language-server-$LUA_LS_VER-linux-x64.tar.gz" "$HOME/.local/share/lua-language-server"; then
 	ln -sf "$HOME/.local/share/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
 fi
 
-GJF_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/maven-metadata.xml 2> /dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+GJF_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 [ -n "$GJF_VER" ] || record_fetch_failure "fetch: google-java-format version metadata"
 GJF_JAR="$HOME/.local/share/google-java-format/google-java-format-$GJF_VER-all-deps.jar"
 if [ -n "$GJF_VER" ] && download_file "https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/$GJF_VER/google-java-format-$GJF_VER-all-deps.jar" "$GJF_JAR"; then
 	find "$HOME/.local/share/google-java-format" -maxdepth 1 -name '*.jar' ! -name "$(basename "$GJF_JAR")" -delete
-	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$GJF_JAR" > "$HOME/.local/bin/google-java-format"
+	printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$GJF_JAR" >"$HOME/.local/bin/google-java-format"
 	chmod +x "$HOME/.local/bin/google-java-format"
 fi
 
-CS_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2> /dev/null | jq -r '.assets[] | select(.name | test("^checkstyle-.*-all\\.jar$")) | .browser_download_url' | head -1)
+CS_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/checkstyle/checkstyle/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^checkstyle-.*-all\\.jar$")) | .browser_download_url' | head -1)
 if [ -n "$CS_URL" ] && [ "$CS_URL" != "null" ]; then
 	CS_JAR_NAME="$(basename "$CS_URL")"
 	CS_JAR="$HOME/.local/share/checkstyle/$CS_JAR_NAME"
 	if download_file "$CS_URL" "$CS_JAR"; then
 		find "$HOME/.local/share/checkstyle" -maxdepth 1 -name '*.jar' ! -name "$CS_JAR_NAME" -delete
-		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$CS_JAR" > "$HOME/.local/bin/checkstyle"
+		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$CS_JAR" >"$HOME/.local/bin/checkstyle"
 		chmod +x "$HOME/.local/bin/checkstyle"
 	fi
 else
@@ -362,30 +356,30 @@ if install_tar_gz "https://download.eclipse.org/jdtls/snapshots/jdt-language-ser
 	ln -sf "$HOME/.local/share/jdtls/bin/jdtls" "$HOME/.local/bin/jdtls"
 fi
 
-MARKSMAN_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/artempyanykh/marksman/releases/latest 2> /dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
+MARKSMAN_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/artempyanykh/marksman/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name == "marksman-linux-x64") | .browser_download_url' | head -1)
 if [ -n "$MARKSMAN_URL" ] && [ "$MARKSMAN_URL" != "null" ]; then
 	download_file "$MARKSMAN_URL" "$HOME/.local/bin/marksman" && chmod +x "$HOME/.local/bin/marksman"
 else
 	record_fetch_failure "fetch: marksman release metadata"
 fi
 
-LEMMINX_VER=$(curl -fsSL --retry 3 https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2> /dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+LEMMINX_VER=$(curl -fsSL --retry 3 https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 if [ -n "$LEMMINX_VER" ]; then
 	LEMMINX_JAR="$HOME/.local/share/lemminx/org.eclipse.lemminx-$LEMMINX_VER-uber.jar"
 	if download_file "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/$LEMMINX_VER/org.eclipse.lemminx-$LEMMINX_VER-uber.jar" "$LEMMINX_JAR"; then
 		find "$HOME/.local/share/lemminx" -maxdepth 1 -name '*.jar' ! -name "$(basename "$LEMMINX_JAR")" -delete
-		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$LEMMINX_JAR" > "$HOME/.local/bin/lemminx"
+		printf '#!/bin/bash\nexec java -jar "%s" "$@"\n' "$LEMMINX_JAR" >"$HOME/.local/bin/lemminx"
 		chmod +x "$HOME/.local/bin/lemminx"
 	fi
 else
 	record_fetch_failure "fetch: lemminx version metadata"
 fi
 
-JS_DEBUG_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2> /dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
+JS_DEBUG_URL=$(curl -fsSL --retry 3 https://api.github.com/repos/microsoft/vscode-js-debug/releases/latest 2>/dev/null | jq -r '.assets[] | select(.name | test("^js-debug-dap-v.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
 if [ -n "$JS_DEBUG_URL" ] && [ "$JS_DEBUG_URL" != "null" ]; then
 	JS_DEBUG_TMP="$(mktemp -d)"
-	if curl -fL --retry 5 --retry-delay 2 "$JS_DEBUG_URL" -o "$JS_DEBUG_TMP/js-debug.tar.gz" \
-		&& tar xz -C "$JS_DEBUG_TMP" -f "$JS_DEBUG_TMP/js-debug.tar.gz"; then
+	if curl -fL --retry 5 --retry-delay 2 "$JS_DEBUG_URL" -o "$JS_DEBUG_TMP/js-debug.tar.gz" &&
+		tar xz -C "$JS_DEBUG_TMP" -f "$JS_DEBUG_TMP/js-debug.tar.gz"; then
 		sudo rm -rf /usr/share/js-debug
 		sudo mv "$JS_DEBUG_TMP/js-debug" /usr/share/js-debug
 	else
@@ -398,7 +392,7 @@ else
 fi
 
 sudo mkdir -p /usr/share/java/lombok
-LOMBOK_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/org/projectlombok/lombok/maven-metadata.xml 2> /dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+LOMBOK_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/org/projectlombok/lombok/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 [ -n "$LOMBOK_VER" ] || record_fetch_failure "fetch: lombok version metadata"
 if [ -n "$LOMBOK_VER" ]; then
 	LOMBOK_TMP="$(mktemp)"
@@ -411,7 +405,7 @@ if [ -n "$LOMBOK_VER" ]; then
 	fi
 fi
 
-JDB_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/maven-metadata.xml 2> /dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
+JDB_VER=$(curl -fsSL --retry 3 https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/maven-metadata.xml 2>/dev/null | sed -n 's:.*<release>\(.*\)</release>.*:\1:p' | head -1)
 [ -n "$JDB_VER" ] || record_fetch_failure "fetch: java-debug version metadata"
 if [ -n "$JDB_VER" ]; then
 	JDB_TMP="$(mktemp -d)"
@@ -430,16 +424,16 @@ sudo usermod -aG docker "$DEFAULT_USERNAME"
 
 mkdir -p "$HOME/.config" "$HOME/Pictures" "$HOME/.config/environment.d" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/nvim" "$HOME/.config/fish/functions" "$HOME/.config/tmux" "$HOME/.config/opencode" "$HOME/.config/conky" "$HOME/.config/htop"
 
-cat > "$HOME/.config/environment.d/qt-gtk.conf" << 'EOF'
+cat >"$HOME/.config/environment.d/qt-gtk.conf" <<'EOF'
 QT_QPA_PLATFORMTHEME=gtk3
 EOF
 
-cat > "$HOME/.config/gtk-3.0/settings.ini" << 'EOF'
+cat >"$HOME/.config/gtk-3.0/settings.ini" <<'EOF'
 [Settings]
 gtk-application-prefer-dark-theme=1
 EOF
 
-cat > "$HOME/.config/gtk-4.0/settings.ini" << 'EOF'
+cat >"$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
 [Settings]
 gtk-application-prefer-dark-theme=1
 EOF
@@ -477,7 +471,7 @@ mkdir -p "$GNOME_EXTENSION_DIR"
 download_file "$GNOME_EXTENSION_URL/extension.js" "$GNOME_EXTENSION_DIR/extension.js" || true
 download_file "$GNOME_EXTENSION_URL/metadata.json" "$GNOME_EXTENSION_DIR/metadata.json" || true
 
-PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2> /dev/null | tr -d "'" | tr -d ' ' || true)
+PROFILE_UUID=$(gsettings get org.gnome.Ptyxis default-profile-uuid 2>/dev/null | tr -d "'" | tr -d ' ' || true)
 set +e
 if [ -n "$PROFILE_UUID" ]; then
 	dconf write /org/gnome/Ptyxis/Profiles/"$PROFILE_UUID"/label "'default'"
