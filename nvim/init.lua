@@ -640,7 +640,6 @@ MiniMisc.safely("now", function()
 	require("mini.tabline").setup({
 		tabpage_section = "right",
 	})
-	vim.o.showtabline = 1
 	require("mini.trailspace").setup()
 	require("mini.visits").setup()
 end)
