@@ -658,7 +658,8 @@ MiniMisc.safely("now", function()
 			fg_mid = "#859289",
 			fg_mid2 = "#7a8478",
 			fg_edge = "#9da9a0",
-			accent = "#a7c080",
+			fg_edge2 = "#d3c6aa",
+			accent = "#859289",
 			accent_bg = "#3d484d",
 			red = "#e67e80",
 			red_bg = "#514045",
@@ -687,7 +688,8 @@ MiniMisc.safely("now", function()
 			fg_mid = "#939f91",
 			fg_mid2 = "#a6b0a0",
 			fg_edge = "#829181",
-			accent = "#8da101",
+			fg_edge2 = "#5c6a72",
+			accent = "#939f91",
 			accent_bg = "#efebd4",
 			red = "#f85552",
 			red_bg = "#fde3da",
@@ -790,7 +792,7 @@ MiniMisc.safely("now", function()
 			hues.make_palette({
 				background = colors.bg,
 				foreground = colors.fg,
-				accent = "green",
+				accent = "fg",
 				saturation = "medium",
 			}),
 			colors
@@ -976,6 +978,25 @@ MiniMisc.safely("now", function()
 		browser = "auto",
 		notifications = true,
 		show_hints = false,
+		formatter = function(text, filetype)
+			if filetype ~= "markdown" and filetype ~= "html" then
+				return nil
+			end
+			local file = filetype == "html" and "x.html" or "x.md"
+			local command
+			if vim.fn.executable("prettier") == 1 then
+				command = { "prettier", "--stdin-filepath", file }
+			elseif vim.fn.executable("npx") == 1 then
+				command = { "npx", "--yes", "prettier", "--stdin-filepath", file }
+			else
+				return nil
+			end
+			local output = vim.fn.system(command, text)
+			if vim.v.shell_error ~= 0 then
+				return nil
+			end
+			return output
+		end,
 	})
 	require("html-css").setup({
 		enable_on = {
