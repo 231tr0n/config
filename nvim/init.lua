@@ -787,18 +787,8 @@ MiniMisc.safely("now", function()
 		local colors = everforest[vim.o.background] or everforest.dark
 		G.everforest_colors = colors
 		local hues = require("mini.hues")
-		local palette = vim.tbl_extend(
-			"force",
-			hues.make_palette({
-				background = colors.bg,
-				foreground = colors.fg,
-				accent = "fg",
-				saturation = "medium",
-			}),
-			colors
-		)
 		vim.g.colors_name = nil
-		hues.apply_palette(palette, { default = true })
+		hues.apply_palette(colors, { default = true })
 		vim.g.colors_name = "everforest-mini"
 	end
 	apply_everforest_mini()
