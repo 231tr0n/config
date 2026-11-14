@@ -150,6 +150,12 @@ sudo dnf install -y ocl-icd intel-compute-runtime intel-opencl
 sudo dnf install -y intel-level-zero oneapi-level-zero
 sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel
 
+info_log 'Installing Steam and performance tooling...'
+sudo dnf config-manager setopt rpmfusion-nonfree-steam.enabled=1 || record_step_failure "repo: rpmfusion-nonfree-steam"
+sudo dnf install -y steam || record_step_failure "install: steam"
+sudo dnf install -y gamemode mangohud gamescope || record_step_failure "install: gaming performance tools"
+systemctl --user is-enabled gamemoded >/dev/null 2>&1 || systemctl --user enable --now gamemoded 2>/dev/null || record_step_failure "service: gamemoded"
+
 if [ "$(getent passwd "$DEFAULT_USERNAME" | cut -d: -f7)" != "/usr/bin/fish" ]; then
 	grep -qxF /usr/bin/fish /etc/shells || echo /usr/bin/fish | sudo tee -a /etc/shells
 	sudo chsh -s /usr/bin/fish "$DEFAULT_USERNAME"
