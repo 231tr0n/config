@@ -254,6 +254,7 @@ MiniMisc.safely("now", function()
 		mappings = {
 			windows = true,
 			move_with_alt = true,
+			search = true,
 		},
 		autocommands = {
 			relnum_in_visual_mode = true,
