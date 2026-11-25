@@ -121,6 +121,8 @@ sudo dnf install -y dnf5-plugins dnf5-plugin-diff
 
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo --overwrite
 sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo --overwrite
+sudo dnf install -y "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+sudo dnf install -y "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
 sudo install -d -m 755 /etc/pki/rpm-gpg
 curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor --batch --yes -o /etc/pki/rpm-gpg/RPM-GPG-KEY-google
 sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
@@ -138,7 +140,8 @@ sudo dnf install -y go luajit luarocks nodejs npm gcc python3 python3-pip pipx t
 sudo dnf install -y shellcheck clang-format texlive-latexindent clang-tools-extra clangd
 sudo dnf install -y texlive-roboto texlive-enumitem texlive-titlesec texlive-wrapfig texlive-xstring texlive-chktex
 sudo dnf install -y pkg-config openssl-devel
-sudo dnf install -y ffmpeg ImageMagick
+sudo dnf install -y ffmpeg ImageMagick --allowerasing
+sudo dnf install -y gstreamer1-plugins-bad-freeworld gstreamer1-plugins-bad-free-extras gstreamer1-plugins-ugly libheif-freeworld
 sudo dnf install -y htop inxi ncdu btop igt-gpu-tools telnet bleachbit conky
 sudo dnf install -y wl-clipboard gnome-tweaks gnome-extensions-app cascadia-code-nf-fonts cascadia-mono-nf-fonts brave-browser
 sudo dnf install -y gnome-shell-extension-common gnome-shell-extension-launch-new-instance gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-appindicator gnome-shell-extension-drive-menu
@@ -146,6 +149,7 @@ sudo dnf install -y docker-cli runc toolbox distrobox kubectl
 sudo dnf install -y nginx haproxy
 sudo dnf install -y mariadb mariadb-server
 sudo dnf install -y libva-intel-media-driver libva-utils vulkan-loader vulkan-tools mesa-vulkan-drivers
+sudo dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
 sudo dnf install -y ocl-icd intel-compute-runtime intel-opencl
 sudo dnf install -y intel-level-zero oneapi-level-zero
 sudo dnf install -y cmake make gcc-c++ git pkg-config libusb1-devel
